@@ -1,0 +1,350 @@
+@prefix crm: <http://www.cidoc-crm.org/cidoc-crm/> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix lado: <http://archaeology.link/ontology#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix time: <http://www.w3.org/2006/time#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+lado:DiscoverySite a owl:Class ;
+    rdfs:label "Discovery site"@en ;
+    rdfs:comment "Bestehende LADO-Klasse aus loc_discoverysite_1.ttl."@de ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:subClassOf lado:Location .
+
+lado:Findspot a owl:Class ;
+    rdfs:label "Findspot"@en ;
+    rdfs:comment "Benannte Fundstelle innerhalb eines Fundplatzes. Faellt ueber crm:P89_falls_within in die DiscoverySite. Ein Fundplatz kann mehrere Fundstellen tragen (Bregenz: sechs)."@de ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:subClassOf lado:Location .
+
+lado:FindspotDating a owl:Class ;
+    rdfs:label "Findspot dating"@en ;
+    rdfs:comment "Datierung einer Fundstelle aus Toepferstempeln. Das Intervall ist ein 'virtual fuzzy year' m +/- k*sigma, KEIN Konfidenzintervall."@de ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:subClassOf lado:DatedTimeSpan .
+
+lado:avgDatemax a owl:DatatypeProperty ;
+    rdfs:label "average datemax"@en ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:integer .
+
+lado:avgDatemin a owl:DatatypeProperty ;
+    rdfs:label "average datemin"@en ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:integer .
+
+lado:bandPadding a owl:DatatypeProperty ;
+    rdfs:label "band padding"@en ;
+    rdfs:domain lado:Figure ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:decimal .
+
+lado:colourRamp a owl:DatatypeProperty ;
+    rdfs:label "colour ramp"@en ;
+    rdfs:domain lado:Figure ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:string .
+
+lado:dieRepetition a owl:DatatypeProperty ;
+    rdfs:label "die repetition"@en ;
+    rdfs:comment "nStampsWithDie / nDies. Depot-Indikator."@de ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:decimal .
+
+lado:eraConvention a owl:DatatypeProperty ;
+    rdfs:label "era convention"@en ;
+    rdfs:comment "Wie negative Jahreszahlen der Quelle zu lesen sind."@de ;
+    rdfs:domain lado:DatingModel ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:string .
+
+lado:excludedDatemax a owl:DatatypeProperty ;
+    rdfs:label "excluded datemax value"@en ;
+    rdfs:comment "Filter p.datemax NOT IN (...) aus der Quell-Query. Bedeutung ungeklaert. Der Filter ist nicht neutral: er entfernt die betroffenen Toepfer an ALLEN Fundplaetzen."@de ;
+    rdfs:domain lado:DatingModel ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:integer .
+
+lado:extremeStubYears a owl:DatatypeProperty ;
+    rdfs:label "extreme stub years"@en ;
+    rdfs:domain lado:Figure ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:integer .
+
+lado:fuzzinessDivisor a owl:DatatypeProperty ;
+    rdfs:label "fuzziness divisor"@en ;
+    rdfs:comment "12 = Varianz der Gleichverteilung. Die Verteilungsannahme pro Stempel steckt hier."@de ;
+    rdfs:domain lado:DatingModel ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:integer .
+
+lado:hasRow a owl:ObjectProperty ;
+    rdfs:label "has row"@en ;
+    rdfs:domain lado:Figure ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range lado:PlotRow .
+
+lado:identifierScheme a owl:DatatypeProperty ;
+    rdfs:label "identifier scheme"@en ;
+    rdfs:comment "Rezept, nach dem die Fundstellen-Fragmente gebildet werden. Muss von jeder weiteren Implementierung zeichengenau reproduziert werden, sonst entstehen abweichende URIs."@de ;
+    rdfs:domain dcat:Dataset ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:string .
+
+lado:intervalLabel a owl:DatatypeProperty ;
+    rdfs:label "interval label"@en ;
+    rdfs:comment "Textform aus der Query (avg_interval)."@de ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:string .
+
+lado:kFactor a owl:DatatypeProperty ;
+    rdfs:label "k factor"@en ;
+    rdfs:comment "k = k_max - (k_max-k_min)*(1-exp(-n/tau)), rein volumenbasiert."@de ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:decimal .
+
+lado:kIsFallback a owl:DatatypeProperty ;
+    rdfs:label "k is fallback"@en ;
+    rdfs:comment "true = keine Die-Angabe, k wurde auf k_max gesetzt. Modellverhalten, kein Messwert."@de ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:boolean .
+
+lado:kMax a owl:DatatypeProperty ;
+    rdfs:label "k max"@en ;
+    rdfs:domain lado:DatingModel ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:decimal .
+
+lado:kMin a owl:DatatypeProperty ;
+    rdfs:label "k min"@en ;
+    rdfs:domain lado:DatingModel ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:decimal .
+
+lado:marginBottom a owl:DatatypeProperty ;
+    rdfs:label "margin bottom"@en ;
+    rdfs:domain lado:Figure ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:integer .
+
+lado:marginLeft a owl:DatatypeProperty ;
+    rdfs:label "margin left"@en ;
+    rdfs:domain lado:Figure ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:integer .
+
+lado:marginRight a owl:DatatypeProperty ;
+    rdfs:label "margin right"@en ;
+    rdfs:domain lado:Figure ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:integer .
+
+lado:marginTop a owl:DatatypeProperty ;
+    rdfs:label "margin top"@en ;
+    rdfs:domain lado:Figure ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:integer .
+
+lado:maxDatemax a owl:DatatypeProperty ;
+    rdfs:label "maximum datemax"@en ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:integer .
+
+lado:maxDatemin a owl:DatatypeProperty ;
+    rdfs:label "maximum datemin"@en ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:integer .
+
+lado:midpointYear a owl:DatatypeProperty ;
+    rdfs:label "midpoint year"@en ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:decimal .
+
+lado:minDatemax a owl:DatatypeProperty ;
+    rdfs:label "minimum datemax"@en ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:integer .
+
+lado:minDatemin a owl:DatatypeProperty ;
+    rdfs:label "minimum datemin"@en ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:integer .
+
+lado:nDies a owl:DatatypeProperty ;
+    rdfs:label "number of dies"@en ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:integer .
+
+lado:nStamps a owl:DatatypeProperty ;
+    rdfs:label "number of stamps"@en ;
+    rdfs:comment "Anzahl Stempel an der Fundstelle (count_stamps)."@de ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:integer .
+
+lado:nStampsWithDie a owl:DatatypeProperty ;
+    rdfs:label "number of stamps with a die"@en ;
+    rdfs:comment "ACHTUNG: das n der k-Formel. Zaehlt nur Stempel mit Die-Angabe und ist NICHT nStamps."@de ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:integer .
+
+lado:padYears a owl:DatatypeProperty ;
+    rdfs:label "pad years"@en ;
+    rdfs:domain lado:Figure ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:integer .
+
+lado:qEnd a owl:DatatypeProperty ;
+    rdfs:label "q end"@en ;
+    rdfs:comment "Siehe qStart."@de ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:decimal .
+
+lado:qInterval a owl:DatatypeProperty ;
+    rdfs:label "q interval"@en ;
+    rdfs:comment "Datierungsschaerfe (= q_spread). Erste Qualitaetsachse."@de ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:decimal .
+
+lado:qRepetition a owl:DatatypeProperty ;
+    rdfs:label "q repetition"@en ;
+    rdfs:comment "1 - 1/rep. Zweite Qualitaetsachse. Bewusst NICHT mit qInterval verrechnet: 'kein Depot' ist nicht 'schlecht datiert'."@de ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:decimal .
+
+lado:qStart a owl:DatatypeProperty ;
+    rdfs:label "q start"@en ;
+    rdfs:comment "Haengt am Kalender-Nullpunkt und benachteiligt augusteisches Material systematisch. Mit Vorsicht verwenden."@de ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:decimal .
+
+lado:renders a owl:ObjectProperty ;
+    rdfs:label "renders"@en ;
+    rdfs:comment "Verbindet eine Plotzeile mit der Datierung, die sie darstellt."@de ;
+    rdfs:domain lado:PlotRow ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range lado:DatedTimeSpan .
+
+lado:rowHeight a owl:DatatypeProperty ;
+    rdfs:label "row height"@en ;
+    rdfs:domain lado:Figure ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:integer .
+
+lado:rowOrder a owl:DatatypeProperty ;
+    rdfs:label "row order"@en ;
+    rdfs:comment "Sortierregel der Zeilen. Erlaubt es, die Reihenfolge der Abbildung aus dem Graphen zu reproduzieren."@de ;
+    rdfs:domain lado:Figure ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:string .
+
+lado:sigmaYears a owl:DatatypeProperty ;
+    rdfs:label "sigma (years)"@en ;
+    rdfs:comment "sqrt( AVG(Breite^2/12) + VAR_SAMP(Mitten) ). Varianzzerlegung: innere Fuzziness plus Streuung der Intervallmitten."@de ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:decimal .
+
+lado:svgWidth a owl:DatatypeProperty ;
+    rdfs:label "svg width"@en ;
+    rdfs:domain lado:Figure ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:integer .
+
+lado:tau a owl:DatatypeProperty ;
+    rdfs:label "tau"@en ;
+    rdfs:comment "Saettigungskonstante. Bei n = tau sind rund 63 % der moeglichen Verschmaelerung erreicht."@de ;
+    rdfs:domain lado:DatingModel ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:decimal .
+
+lado:uncEndYears a owl:DatatypeProperty ;
+    rdfs:label "uncertainty end (years)"@en ;
+    rdfs:comment "VISUAL ONLY. Siehe uncStartYears."@de ;
+    rdfs:domain lado:PlotRow ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:integer .
+
+lado:uncIntervalYears a owl:DatatypeProperty ;
+    rdfs:label "uncertainty interval (years)"@en ;
+    rdfs:comment "VISUAL ONLY."@de ;
+    rdfs:domain lado:PlotRow ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:integer .
+
+lado:uncStartYears a owl:DatatypeProperty ;
+    rdfs:label "uncertainty start (years)"@en ;
+    rdfs:comment "VISUAL ONLY. STDDEV_SAMP(datemin). Laut Methodendoku die Streuung von nichts im Modell; deshalb an der Plotzeile, nicht an der Zeitspanne."@de ;
+    rdfs:domain lado:PlotRow ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:integer .
+
+lado:undefinedMeasure a owl:ObjectProperty ;
+    rdfs:label "undefined measure"@en ;
+    rdfs:comment "Benennt eine Groesse, die fuer diese Zeitspanne nicht berechenbar war. Macht Abwesenheit explizit, statt sie der Open-World-Annahme zu ueberlassen."@de ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range rdf:Property .
+
+lado:volumeWeight a owl:DatatypeProperty ;
+    rdfs:label "volume weight"@en ;
+    rdfs:comment "w = 1.0: k haengt rein am Volumen."@de ;
+    rdfs:domain lado:DatingModel ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:decimal .
+
+lado:Location a owl:Class ;
+    rdfs:label "Location"@en ;
+    rdfs:comment "Bestehende LADO-Klasse, hier in CIDOC CRM verankert."@de ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:subClassOf crm:E53_Place .
+
+lado:PlotRow a owl:Class ;
+    rdfs:label "Plot row"@en ;
+    rdfs:comment "Darstellungsschicht einer Datierung. Traegt ausdruecklich die Groessen, die laut Methodendoku 'visual only' sind."@de ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:subClassOf crm:E36_Visual_Item .
+
+lado:DatingModel a owl:Class ;
+    rdfs:label "Dating model"@en ;
+    rdfs:comment "Parametrisierung, aus der die Intervalle berechnet wurden."@de ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:subClassOf prov:Plan .
+
+lado:Figure a owl:Class ;
+    rdfs:label "Figure"@en ;
+    rdfs:comment "Abbildung. Traegt die Konstanten, die nicht zu den Fundplaetzen gehoeren, sondern zur Grafik."@de ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:subClassOf crm:E36_Visual_Item .
+
+lado:DatedTimeSpan a owl:Class ;
+    rdfs:label "Dated time-span"@en ;
+    rdfs:comment "Zeitspanne, die aus datiertem Material erschlossen wurde."@de ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:subClassOf crm:E52_Time-Span,
+        time:ProperInterval .
+
+<http://archaeology.link/ontology> a owl:Ontology ;
+    rdfs:label "LADO — Erweiterung fuer Fundstellen-Datierung"@de ;
+    rdfs:comment "Erweitert LADO um Fundstellen, Datierungs-Zeitspannen und eine getrennte Darstellungsschicht. Alle Klassen haengen ueber rdfs:subClassOf unter CIDOC CRM."@de .
+

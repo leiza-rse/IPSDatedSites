@@ -1,0 +1,13 @@
+PREFIX lado: <http://archaeology.link/ontology#>
+SELECT ?padYears ?extremeStubYears ?rowHeight ?svgWidth
+       ?marginLeft ?marginRight ?marginTop ?marginBottom
+       ?bandPadding ?colourRamp ?rowOrder
+WHERE {
+  ?fig a lado:Figure ;
+       lado:padYears ?padYears ; lado:extremeStubYears ?extremeStubYears ;
+       lado:rowHeight ?rowHeight ; lado:svgWidth ?svgWidth ;
+       lado:marginLeft ?marginLeft ; lado:marginRight ?marginRight ;
+       lado:marginTop ?marginTop ; lado:marginBottom ?marginBottom ;
+       lado:bandPadding ?bandPadding ; lado:colourRamp ?colourRamp ;
+       lado:rowOrder ?rowOrder .
+}

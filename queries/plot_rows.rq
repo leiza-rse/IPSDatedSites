@@ -1,0 +1,32 @@
+PREFIX lado: <http://archaeology.link/ontology#>
+PREFIX crm:  <http://www.cidoc-crm.org/cidoc-crm/>
+PREFIX time: <http://www.w3.org/2006/time#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT ?site ?findspot ?effStart ?effEnd
+       ?qInterval ?qStart ?qEnd ?qRepetition
+       ?uncStart ?uncEnd ?uncInterval
+       ?minDatemin ?maxDatemax ?nStamps ?nDies
+       ?avgDatemin ?avgDatemax ?sigma ?k
+WHERE {
+  ?row  a lado:PlotRow ; lado:renders ?ts .
+  ?fs   crm:P4_has_time-span ?ts ; rdfs:label ?findspot ;
+        crm:P89_falls_within ?place .
+  ?place rdfs:label ?site .
+
+  ?ts time:hasBeginning/time:inTimePosition/time:numericPosition ?effStart .
+  ?ts time:hasEnd/time:inTimePosition/time:numericPosition       ?effEnd .
+
+  ?ts lado:minDatemin ?minDatemin ; lado:maxDatemax ?maxDatemax ;
+      lado:nStamps ?nStamps ; lado:nDies ?nDies ;
+      lado:avgDatemin ?avgDatemin ; lado:avgDatemax ?avgDatemax ;
+      lado:sigmaYears ?sigma ; lado:kFactor ?k .
+
+  OPTIONAL { ?ts  lado:qInterval        ?qInterval }
+  OPTIONAL { ?ts  lado:qStart           ?qStart }
+  OPTIONAL { ?ts  lado:qEnd             ?qEnd }
+  OPTIONAL { ?ts  lado:qRepetition      ?qRepetition }
+  OPTIONAL { ?row lado:uncStartYears    ?uncStart }
+  OPTIONAL { ?row lado:uncEndYears      ?uncEnd }
+  OPTIONAL { ?row lado:uncIntervalYears ?uncInterval }
+}
+ORDER BY ?avgDatemin

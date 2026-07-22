@@ -1,0 +1,2 @@
+PREFIX lado: <http://archaeology.link/ontology#>
+SELECT ?era WHERE { ?m a lado:DatingModel ; lado:eraConvention ?era }

@@ -1,0 +1,5 @@
+# IPS Dated Sites — RDF-Export, SPARQL-Rueckweg und Abbildungen
+rdflib>=7.0           # ab 7.5 ohne die gYear-Warnungen, siehe py/ips_compat.py
+pandas>=2.0
+matplotlib>=3.8
+pillow>=10.0          # von matplotlib fuer die JPG-Ausgabe gebraucht

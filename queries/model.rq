@@ -1,0 +1,5 @@
+PREFIX lado: <http://archaeology.link/ontology#>
+SELECT ?kMin ?kMax ?tau ?w
+WHERE { ?m a lado:DatingModel ;
+          lado:kMin ?kMin ; lado:kMax ?kMax ;
+          lado:tau ?tau ; lado:volumeWeight ?w . }
