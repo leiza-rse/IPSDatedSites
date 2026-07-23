@@ -1,0 +1,100 @@
+name: build
+
+# Enforces the guarantee the repository is built on: the generated
+# documentation, diagrams and figures are derived from the code, so they
+# cannot be allowed to fall behind it. Every push re-runs the pipeline and
+# fails if the committed artefacts differ from what the code produces.
+#
+# Without this the sync mechanism is only a convention, and a convention
+# that is never checked is one somebody will eventually forget.
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"      # matches the local Windows install
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run the pipeline
+        # Steps 1-6: export, SPARQL read-back, figures, round trip,
+        # standalone bundle, documentation and diagrams. The round-trip
+        # check is inside main.py and exits non-zero on any mismatch, so
+        # a broken export fails here without extra assertions.
+        run: python py/main.py
+
+      - name: Check the generated artefacts are up to date
+        # Byte comparison only where the pipeline guarantees determinism:
+        # docs/, docs/diagrams/ and img/ were verified to be identical
+        # across consecutive runs. rdf/ is deliberately excluded — it
+        # carries dcterms:created and prov:endedAtTime, which are meant to
+        # differ from run to run. Its correctness is checked semantically
+        # in the next step instead.
+        run: |
+          if ! git diff --quiet -- docs img; then
+            echo "::error::Generated files are stale. Run 'python py/main.py' and commit the result."
+            git diff --stat -- docs img
+            git diff -- docs img | head -200
+            exit 1
+          fi
+          echo "docs/, docs/diagrams/ and img/ match the code."
+
+      - name: Validate the RDF
+        # Semantic checks rather than byte comparison: the graphs must
+        # parse, and the bundle must answer CIDOC CRM queries without a
+        # reasoner. That last point is the whole reason the crosswalk is
+        # materialised, so it is worth asserting rather than assuming.
+        run: |
+          python - <<'PY'
+          import sys
+          sys.path.insert(0, "py")
+          from pathlib import Path
+          from rdflib import Graph
+          import make_bundle
+
+          for f in sorted(Path("rdf").glob("*.ttl")):
+              g = Graph(); g.parse(f, format="turtle")
+              print(f"  {f}  {len(g)} triples")
+
+          checks = make_bundle.verify(Path("rdf/IPSDatedSites-bundle.ttl"))
+          for name, n in checks.items():
+              print(f"  {name:<22} {n}")
+          empty = [k for k, v in checks.items() if v == 0]
+          if empty:
+              sys.exit(f"Bundle answers nothing for: {', '.join(empty)}")
+          print("Bundle resolves CIDOC CRM queries with no reasoner.")
+          PY
+
+      - name: Validate the Mermaid sources
+        # The .mmd files are generated, but a change to the generator can
+        # still emit syntax Mermaid rejects — and a diagram that fails to
+        # parse renders as nothing on GitHub, silently.
+        run: |
+          npm install --no-save @mermaid-js/mermaid-cli
+          mkdir -p /tmp/mmd-out
+          for f in docs/diagrams/*.mmd; do
+            npx --no-install mmdc -i "$f" -o "/tmp/mmd-out/$(basename "${f%.mmd}").svg" \
+              --puppeteerConfigFile <(echo '{"args":["--no-sandbox"]}') \
+              && echo "  OK  $f" || { echo "::error::Mermaid rejected $f"; exit 1; }
+          done
+
+      - name: Upload the rendered diagrams
+        # Not committed to the repository: on GitHub and on Pages the
+        # diagrams render from source. These SVGs are here for anyone who
+        # needs them for print or for an appendix.
+        uses: actions/upload-artifact@v4
+        with:
+          name: diagrams-svg
+          path: /tmp/mmd-out/*.svg
+          if-no-files-found: error

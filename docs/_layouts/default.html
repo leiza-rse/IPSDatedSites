@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% if page.title %}{{ page.title }} · {% endif %}{{ site.title }}</title>
+<style>
+  :root { --ink:#12181f; --muted:#5d6a78; --hair:#e3e7ea; --band:#f7f8f8; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+         Helvetica, Arial, sans-serif; line-height: 1.65; color: var(--ink);
+         max-width: 52rem; margin: 0 auto; padding: 2rem 1.25rem 6rem; }
+  a { color:#1f5fa8; } a:hover { color:#12181f; }
+  h1,h2,h3 { line-height:1.25; margin-top:2.2rem; font-weight:600; }
+  h1 { font-size:1.8rem; } h2 { font-size:1.3rem; } h3 { font-size:1.05rem; }
+  code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas,
+              monospace; font-size:.88em; }
+  pre { background:var(--band); border:1px solid var(--hair); border-radius:6px;
+        padding:.9rem 1rem; overflow-x:auto; }
+  :not(pre) > code { background:var(--band); padding:.12em .35em;
+                     border-radius:4px; }
+  table { border-collapse:collapse; width:100%; margin:1.2rem 0; }
+  th,td { border:1px solid var(--hair); padding:.45rem .6rem; text-align:left;
+          vertical-align:top; font-size:.94rem; }
+  th { background:var(--band); font-weight:600; }
+  blockquote { border-left:3px solid var(--hair); margin:1.2rem 0;
+               padding:.2rem 0 .2rem 1rem; color:var(--muted); }
+  sub { color:var(--muted); }
+  nav.top { border-bottom:1px solid var(--hair); padding-bottom:.8rem;
+            margin-bottom:1.5rem; font-size:.9rem; }
+  nav.top a { margin-right:1rem; }
+  /* Rendered diagrams: no code-block chrome, centred, scalable. */
+  pre.mermaid { background:none; border:none; padding:0; text-align:center; }
+  pre.mermaid svg { max-width:100%; height:auto; }
+</style>
+</head>
+<body>
+
+<nav class="top">
+  <a href="{{ '/' | relative_url }}">Overview</a>
+  <a href="{{ '/model.html' | relative_url }}">Model</a>
+  <a href="{{ '/vocabulary.html' | relative_url }}">Vocabulary</a>
+  <a href="{{ '/crosswalk.html' | relative_url }}">Crosswalk</a>
+  <a href="{{ '/statistics.html' | relative_url }}">Statistics</a>
+  <a href="{{ '/queries.html' | relative_url }}">Queries</a>
+  <a href="{{ '/bundle.html' | relative_url }}">Bundle</a>
+  <a href="{{ '/open-questions.html' | relative_url }}">Open questions</a>
+</nav>
+
+{{ content }}
+
+<!--
+  GitHub renders ```mermaid blocks natively on github.com, but Jekyll does
+  not, so on Pages the same block arrives as a highlighted code element.
+  The script below converts those elements into diagrams, which means the
+  Markdown source stays identical for both targets — one source, two
+  renderers, no duplicated diagram definitions.
+
+  Kramdown with Rouge wraps the source in nested spans, so the text is
+  taken from textContent rather than innerHTML; otherwise the markup would
+  be fed to Mermaid as if it were diagram syntax.
+-->
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+
+  const blocks = document.querySelectorAll(
+    'div.language-mermaid, pre > code.language-mermaid, code.language-mermaid');
+
+  for (const el of blocks) {
+    const holder = el.closest('div.language-mermaid') || el.closest('pre') || el;
+    const pre = document.createElement('pre');
+    pre.className = 'mermaid';
+    pre.textContent = el.textContent;
+    holder.replaceWith(pre);
+  }
+
+  mermaid.initialize({
+    startOnLoad: false,
+    securityLevel: 'strict',
+    theme: 'neutral',
+    flowchart: { htmlLabels: true, useMaxWidth: true },
+    fontFamily: 'inherit'
+  });
+  await mermaid.run({ querySelector: 'pre.mermaid' });
+</script>
+
+</body>
+</html>

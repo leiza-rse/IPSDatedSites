@@ -20,7 +20,11 @@ IPSDatedSites/
 ├── data/                    Eingabe: CSV aus IPSDatedSites25_final.sql
 ├── py/                      der gesamte Code
 ├── queries/                 die SPARQL-Abfragen als .rq für einen Endpoint
+├── .github/workflows/       CI: Pipeline, Drift-Prüfung, Validierung
 ├── docs/          erzeugt   Dokumentation der Modellierung (British English)
+│   ├── _config.yml          Jekyll, damit GitHub Pages die Diagramme rendert
+│   ├── _layouts/            Layout mit mermaid.js
+│   └── diagrams/  erzeugt   die fünf .mmd-Dateien
 ├── rdf/           erzeugt   Turtle, JSON-LD, LADO-Erweiterung, Bundle
 ├── img/           erzeugt   beide Abbildungen, je SVG + JPG 300 dpi
 ├── .gitignore
@@ -236,6 +240,44 @@ und der Text erscheint danach in `docs/vocabulary.md` **und** als
 | [`statistics.md`](docs/statistics.md) | die Formeln aus dem SQL |
 | [`queries.md`](docs/queries.md) | die SPARQL-Abfragen und der Rundlauf |
 | [`open-questions.md`](docs/open-questions.md) | was offen ist, inklusive des Filters |
+
+## GitHub Pages und die Diagramme
+
+github.com rendert ` ```mermaid `-Blöcke nativ, **GitHub Pages nicht** —
+dort läuft Jekyll, und der Block kommt als Code-Element an. Deshalb
+liegen unter `docs/` ein `_config.yml` und ein `_layouts/default.html`
+mit `mermaid.js`; das Layout wandelt die Code-Elemente beim Laden in
+Diagramme um.
+
+Der Markdown-Quelltext bleibt dabei für beide Ziele identisch — eine
+Quelle, zwei Renderer. Das `_config.yml` setzt das Layout per `defaults`
+für alle Seiten, damit `make_docs.py` nichts über Jekyll wissen muss.
+
+## Die GitHub Action
+
+`.github/workflows/build.yml` erzwingt bei jedem Push die Zusage, auf der
+das Repo aufbaut: **die erzeugten Dateien dürfen dem Code nicht
+hinterherhinken.** Ohne die Prüfung ist der Sync-Mechanismus nur eine
+Konvention, und eine ungeprüfte Konvention vergisst irgendwann jemand.
+
+Vier Schritte:
+
+1. Pipeline laufen lassen — der Rundlauf steckt darin und beendet sich
+   bei jeder Abweichung mit Fehlercode
+2. `git diff` auf `docs/` und `img/` — schlägt an, wenn jemand Code
+   geändert und nicht neu erzeugt hat
+3. RDF semantisch prüfen: parst alles, und beantwortet das Bundle
+   CIDOC-CRM-Abfragen ohne Reasoner?
+4. Mermaid-Quellen durch `mmdc` schicken; die SVGs landen als Artefakt
+
+`rdf/` ist von der Byte-Prüfung **ausgenommen**, und das mit Absicht: die
+Dateien tragen `dcterms:created` und `prov:endedAtTime`, die sich von Lauf
+zu Lauf ändern sollen. Nachgemessen sind `docs/`, `docs/diagrams/` und
+`img/` byte-identisch über aufeinanderfolgende Läufe — dort ist die
+Prüfung also aussagekräftig.
+
+Getestet: Code geändert ohne neu zu erzeugen → Action schlägt an;
+undokumentierte Property → Pipeline endet mit Exitcode 1.
 
 ## rdflib und vorchristliche Jahre
 
