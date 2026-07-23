@@ -30,21 +30,25 @@ than in local properties.
 
 ## Subclass chain into CIDOC CRM
 
-| Local class | Direct superclasses |
+| Local class | Full chain to an external vocabulary |
 |---|---|
-| `lado:Location` | `crm:E53_Place` |
-| `lado:DiscoverySite` | `lado:Location` |
-| `lado:Findspot` | `lado:Location` |
-| `lado:DatedTimeSpan` | `crm:E52_Time-Span`, `time:ProperInterval` |
-| `lado:FindspotDating` | `lado:DatedTimeSpan` |
-| `lado:DatingModel` | `prov:Plan` |
-| `lado:Figure` | `crm:E36_Visual_Item` |
-| `lado:PlotRow` | `crm:E36_Visual_Item` |
+| `lado:Location` | `lado:Location` → `crm:E53_Place` |
+| `lado:DiscoverySite` | `lado:DiscoverySite` → `lado:Location` → `crm:E53_Place` |
+| `lado:Findspot` | `lado:Findspot` → `lado:Location` → `crm:E53_Place` |
+| `lado:DatedTimeSpan` | `lado:DatedTimeSpan` → `crm:E52_Time-Span`<br>`lado:DatedTimeSpan` → `time:ProperInterval` |
+| `lado:FindspotDating` | `lado:FindspotDating` → `lado:DatedTimeSpan` → `crm:E52_Time-Span`<br>`lado:FindspotDating` → `lado:DatedTimeSpan` → `time:ProperInterval` |
+| `lado:DatingModel` | `lado:DatingModel` → `prov:Plan` |
+| `lado:Figure` | `lado:Figure` → `crm:E36_Visual_Item` |
+| `lado:PlotRow` | `lado:PlotRow` → `crm:E36_Visual_Item` |
 
-Reading the chain: `lado:FindspotDating` → `lado:DatedTimeSpan` →
-`crm:E52_Time-Span` and `time:ProperInterval`. A CRM-only consumer sees a
-time-span; an OWL-Time consumer sees a proper interval; both are true
-simultaneously, and neither needs LADO to recognise the node.
+Each row gives the complete path, not just the immediate parent, because
+the immediate parent is often another local class and hides where the
+chain actually terminates. Where a class has two superclasses the chain
+branches and both paths are listed: `lado:FindspotDating` reaches
+`crm:E52_Time-Span` on one and `time:ProperInterval` on the other. A
+CRM-only consumer sees a time-span, an OWL-Time consumer sees a proper
+interval, both are true at once, and neither needs LADO to recognise the
+node.
 
 Relations between the entities use CRM properties directly in their
 intended sense, rather than local equivalents:

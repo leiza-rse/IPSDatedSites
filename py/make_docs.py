@@ -59,6 +59,27 @@ def doc(term) -> str:
     return T.TERM_DOCS.get(local(term), "")
 
 
+def subclass_paths(cls, direct: dict, seen: tuple = ()) -> list[list]:
+    """
+    Every path from a class up to one that has no superclass of its own.
+
+    Branches where a class has more than one superclass, so
+    lado:FindspotDating yields two paths — one ending in CIDOC CRM, one in
+    OWL-Time. Both are true at once, and showing only the direct parent
+    hides exactly the fact the crosswalk is meant to demonstrate.
+    """
+    sups = direct.get(cls)
+    if not sups:
+        return [[cls]]
+    out = []
+    for sup in sorted(sups, key=lambda t: str(t)):
+        if sup in seen:            # guard against a cyclic hierarchy
+            continue
+        for tail in subclass_paths(sup, direct, seen + (cls,)):
+            out.append([cls] + tail)
+    return out or [[cls]]
+
+
 def check_coverage() -> list[str]:
     """Every term in the code must be documented."""
     missing = []
@@ -371,9 +392,14 @@ def page_crosswalk(out: Path) -> Path:
             notes.append(f"### `{pfx}` — `{X.PREFIXES[pfx]}`\n\n"
                          f"{T.CROSSWALK_NOTES[pfx]}\n")
 
-    hierarchy = "\n".join(
-        f"| `{qname(c)}` | {', '.join(f'`{qname(s)}`' for s in sup)} |"
-        for c, sup, _l, _d in X.CLASSES)
+    direct = {c: list(sup) for c, sup, _l, _d in X.CLASSES}
+    rows = []
+    for c, _sup, _l, _d in X.CLASSES:
+        paths = subclass_paths(c, direct)
+        chains = "<br>".join(
+            " → ".join(f"`{qname(t)}`" for t in path) for path in paths)
+        rows.append(f"| `{qname(c)}` | {chains} |")
+    hierarchy = "\n".join(rows)
 
     body = f"""# Crosswalk to community standards
 
@@ -392,14 +418,18 @@ than in local properties.
 
 ## Subclass chain into CIDOC CRM
 
-| Local class | Direct superclasses |
+| Local class | Full chain to an external vocabulary |
 |---|---|
 {hierarchy}
 
-Reading the chain: `lado:FindspotDating` → `lado:DatedTimeSpan` →
-`crm:E52_Time-Span` and `time:ProperInterval`. A CRM-only consumer sees a
-time-span; an OWL-Time consumer sees a proper interval; both are true
-simultaneously, and neither needs LADO to recognise the node.
+Each row gives the complete path, not just the immediate parent, because
+the immediate parent is often another local class and hides where the
+chain actually terminates. Where a class has two superclasses the chain
+branches and both paths are listed: `lado:FindspotDating` reaches
+`crm:E52_Time-Span` on one and `time:ProperInterval` on the other. A
+CRM-only consumer sees a time-span, an OWL-Time consumer sees a proper
+interval, both are true at once, and neither needs LADO to recognise the
+node.
 
 Relations between the entities use CRM properties directly in their
 intended sense, rather than local equivalents:

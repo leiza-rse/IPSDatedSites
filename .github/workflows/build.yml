@@ -162,14 +162,21 @@ jobs:
         # Committed so that the links under each diagram in docs/ resolve
         # to a real file. A commit made with GITHUB_TOKEN does not trigger
         # another workflow run, so this cannot loop.
+        #
+        # Note the order: git add BEFORE the comparison. "git diff" only
+        # looks at tracked files, so on the first run — when every
+        # rendering is new and therefore untracked — it reports no change
+        # and the step would exit without committing. Staging first and
+        # comparing the index catches new files as well as modified ones.
         run: |
-          if git diff --quiet -- img/diagrams; then
-            echo "Rendered diagrams unchanged."
-            exit 0
-          fi
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add img/diagrams
+          if git diff --cached --quiet -- img/diagrams; then
+            echo "Rendered diagrams unchanged."
+            exit 0
+          fi
+          git diff --cached --stat -- img/diagrams
           git commit -m "Render diagrams from docs/diagrams/*.mmd [skip ci]"
           git push
         if: github.event_name == 'push'
