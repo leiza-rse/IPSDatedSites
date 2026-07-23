@@ -40,9 +40,10 @@ XSD 1.1 but not under XSD 1.0. A validator working to the older
 specification will object, and the affected literal is the rounded
 calendar label rather than the authoritative numeric position.
 
-## Defects in the published discovery-site data
+## Defects in the published discovery-site data (2019 release)
 
-Three, none introduced here, all worth correcting at source:
+The published file dates from 2019 and is due for regeneration. Three
+defects should be addressed when that happens; none was introduced here.
 
 - `prov:` is bound to `http://www.w3.org/ns/prov-o/`, so all six
   provenance predicates in that file denote nothing.

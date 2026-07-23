@@ -75,10 +75,13 @@ together with the published data.
 
 One exception surfaced during that check and is worth recording: of the 32
 sites referenced here, `samian:loc_ds_1004709` (Pecio del Guadiaro, a
-shipwreck) has **no triples at all** in `loc_discoverysite_1.ttl`. The
-`v_discoverysite` view knows the identifier but the published linked-data
-file does not contain the node. In a merged graph that would be a
-reference into nothing; in the bundle it is at least typed and labelled.
+shipwreck) has **no triples at all** in the 2019 release of
+`loc_discoverysite_1.ttl`. The `v_discoverysite` view knows the identifier
+but that file does not contain the node — the site postdates the release.
+In a merged graph it would be a reference into nothing; in the bundle it
+is at least typed and labelled. A regenerated discovery-site export would
+close the gap, and nothing here would need to change, because the export
+only ever references those nodes.
 
 ## Loading it
 

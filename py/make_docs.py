@@ -396,7 +396,7 @@ nothing, and — more importantly — will not mistake a drawing convention
 for a dating claim.
 
 One caveat inherited from the published data rather than introduced here:
-`loc_discoverysite_1.ttl` binds `prov:` to `http://www.w3.org/ns/prov-o/`,
+`loc_discoverysite_1.ttl` (2019 release) binds `prov:` to `http://www.w3.org/ns/prov-o/`,
 which is not the PROV-O namespace. All six of its provenance predicates
 consequently denote nothing. This export uses the correct namespace and
 does not reproduce the error, which means the two files disagree about
@@ -614,10 +614,13 @@ together with the published data.
 
 One exception surfaced during that check and is worth recording: of the 32
 sites referenced here, `samian:loc_ds_1004709` (Pecio del Guadiaro, a
-shipwreck) has **no triples at all** in `loc_discoverysite_1.ttl`. The
-`v_discoverysite` view knows the identifier but the published linked-data
-file does not contain the node. In a merged graph that would be a
-reference into nothing; in the bundle it is at least typed and labelled.
+shipwreck) has **no triples at all** in the 2019 release of
+`loc_discoverysite_1.ttl`. The `v_discoverysite` view knows the identifier
+but that file does not contain the node — the site postdates the release.
+In a merged graph it would be a reference into nothing; in the bundle it
+is at least typed and labelled. A regenerated discovery-site export would
+close the gap, and nothing here would need to change, because the export
+only ever references those nodes.
 
 ## Loading it
 
@@ -673,9 +676,10 @@ XSD 1.1 but not under XSD 1.0. A validator working to the older
 specification will object, and the affected literal is the rounded
 calendar label rather than the authoritative numeric position.
 
-## Defects in the published discovery-site data
+## Defects in the published discovery-site data (2019 release)
 
-Three, none introduced here, all worth correcting at source:
+The published file dates from 2019 and is due for regeneration. Three
+defects should be addressed when that happens; none was introduced here.
 
 - `prov:` is bound to `http://www.w3.org/ns/prov-o/`, so all six
   provenance predicates in that file denote nothing.
