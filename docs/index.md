@@ -24,6 +24,7 @@ substituting a default.
 | [Crosswalk](crosswalk.md) | Mapping to CIDOC CRM, OWL-Time, GeoSPARQL, PROV-O, DCAT and SKOS |
 | [Statistics](statistics.md) | The formulas behind the intervals, as implemented in SQL |
 | [Queries](queries.md) | The SPARQL used to rebuild the figure, and the round-trip check |
+| [Bundle](bundle.md) | The standalone file for a triplestore, and why the crosswalk is materialised |
 | [Open questions](open-questions.md) | What remains unresolved and why it matters |
 
 ## The shape of it in one paragraph

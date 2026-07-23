@@ -21,7 +21,7 @@ IPSDatedSites/
 ├── py/                      der gesamte Code
 ├── queries/                 die SPARQL-Abfragen als .rq für einen Endpoint
 ├── docs/          erzeugt   Dokumentation der Modellierung (British English)
-├── rdf/           erzeugt   Turtle, JSON-LD, LADO-Erweiterung
+├── rdf/           erzeugt   Turtle, JSON-LD, LADO-Erweiterung, Bundle
 ├── img/           erzeugt   beide Abbildungen, je SVG + JPG 300 dpi
 ├── .gitignore
 ├── CITATION.cff
@@ -37,6 +37,7 @@ IPSDatedSites/
 | `ips_sparql.py` | Abfragen, Graphzugriff, Rundlaufprüfung |
 | `ips_render.py` | die beiden Abbildungen |
 | `ips_docs_text.py` | englische Textquelle für Ontologie **und** Doku |
+| `make_bundle.py` | baut das Standalone-Bundle für einen Triplestore |
 | `make_docs.py` | erzeugt `docs/*.md` aus dem Code |
 | `ips_compat.py` | unterdrückt eine rdflib-Warnung, siehe unten |
 
@@ -60,6 +61,7 @@ python py/main.py --findspot-uri slug     # lesbare statt gehashte URIs
 python py/main.py --emit-geometry         # IPS-Koordinaten mit ausgeben
 python py/main.py --csv data\andere.csv   # andere Eingabedatei
 python py/main.py --skip-plots            # ohne Abbildungen
+python py/main.py --skip-bundle           # ohne Standalone-Bundle
 python py/main.py --skip-docs             # ohne Dokumentation
 ```
 
@@ -67,16 +69,48 @@ Die Zielordner lassen sich mit `--rdf-out`, `--img-out` und `--docs-out`
 umlenken, der Name des Figur-Knotens mit `--figure-name`. Vollständige
 Liste: `python py/main.py --help`.
 
-Fünf Schritte laufen durch:
+Sechs Schritte laufen durch:
 
 1. CSV → RDF nach `rdf/`
 2. Graph laden, alles per SPARQL zurücklesen
 3. beide Abbildungen nach `img/`
 4. Rundlaufprüfung CSV → RDF → SPARQL, Feld für Feld
-5. Dokumentation nach `docs/` neu erzeugen
+5. Standalone-Bundle nach `rdf/IPSDatedSites-bundle.ttl`
+6. Dokumentation nach `docs/` neu erzeugen
 
 Aktueller Stand: 41 Zeilen, 2442 Tripel, Rundlauf über 17 Felder mit
 größter Abweichung `0.00e+00`.
+
+## Das Standalone-Bundle
+
+`rdf/IPSDatedSites-bundle.ttl` enthält Daten, das komplette Vokabular und
+einen **materialisierten** CIDOC-CRM-Crosswalk in einer Datei — gedacht
+für einen Triplestore, insbesondere den NFDI4Objects-KG.
+
+Materialisiert, weil Triplestores in der Regel nicht über
+`rdfs:subClassOf` schließen. Mit den Axiomen allein liefert
+
+```sparql
+SELECT (COUNT(DISTINCT ?x) AS ?n) WHERE { ?x a crm:E53_Place }
+```
+
+genau `0`, obwohl jede Fundstelle laut Axiomen ein Place ist. Der Builder
+schreibt deshalb die transitive Hülle über `rdfs:subClassOf` als
+`rdf:type`-Tripel aus. Die Axiome bleiben daneben stehen, ein
+schließender Store leitet also nichts Neues ab und nichts widerspricht
+sich.
+
+Gegenprobe nach jedem Lauf, reine CRM/OWL-Time-Abfragen ohne Reasoner:
+
+```
+crm:E53_Place          73     (41 Fundstellen + 32 Fundplätze)
+crm:E52_Time-Span      41
+crm:E36_Visual_Item    42
+time:ProperInterval    41
+CRM-only path          41     Ort -> Time-Span -> numerisches Jahr
+```
+
+Details in [`docs/bundle.md`](docs/bundle.md).
 
 ## Der Rundlauf ist der eigentliche Test
 

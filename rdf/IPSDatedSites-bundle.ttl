@@ -5,13 +5,363 @@
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix pleiades: <https://pleiades.stoa.org/places/> .
 @prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix samian: <http://data.archaeology.link/data/samian/> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix time: <http://www.w3.org/2006/time#> .
+@prefix void: <http://rdfs.org/ns/void#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-samian:fig_sites_dating_v1 a lado:Figure ;
+lado:avgDatemax a owl:DatatypeProperty ;
+    rdfs:label "average datemax"@en ;
+    rdfs:comment "Mean of the contributing potters' end dates."@en ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:integer .
+
+lado:avgDatemin a owl:DatatypeProperty ;
+    rdfs:label "average datemin"@en ;
+    rdfs:comment "Mean of the contributing potters' start dates."@en ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:integer .
+
+lado:bandPadding a owl:DatatypeProperty ;
+    rdfs:label "band padding"@en ;
+    rdfs:comment "Fraction of each row left empty between bars, following the d3.scaleBand convention."@en ;
+    rdfs:domain lado:Figure ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:decimal .
+
+lado:colourRamp a owl:DatatypeProperty ;
+    rdfs:label "colour ramp"@en ;
+    rdfs:comment "Name of the colour ramp mapping quality to colour, recorded so that a reader can reproduce the fill colours rather than eyeballing them."@en ;
+    rdfs:domain lado:Figure ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:string .
+
+lado:dieRepetition a owl:DatatypeProperty ;
+    rdfs:label "die repetition"@en ;
+    rdfs:comment "nStampsWithDie / nDies. Depot-Indikator."@de,
+        "nStampsWithDie divided by nDies. High values indicate that the same dies recur, which is characteristic of a hoard or a closed deposit rather than of accumulated site refuse."@en ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:decimal .
+
+lado:eraConvention a owl:DatatypeProperty ;
+    rdfs:label "era convention"@en ;
+    rdfs:comment "Wie negative Jahreszahlen der Quelle zu lesen sind."@de,
+        "How negative years in the source are to be read. Under 'historical', −40 means 40 BC, and the derived xsd:gYear label is shifted by one because XSD counts astronomically. Only the calendar label is shifted; the numeric position is left untouched."@en ;
+    rdfs:domain lado:DatingModel ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:string .
+
+lado:excludedDatemax a owl:DatatypeProperty ;
+    rdfs:label "excluded datemax value"@en ;
+    rdfs:comment "Filter p.datemax NOT IN (...) aus der Quell-Query. Bedeutung ungeklaert. Der Filter ist nicht neutral: er entfernt die betroffenen Toepfer an ALLEN Fundplaetzen."@de,
+        "A datemax value removed by the source query's filter. The reason for the exclusion is not currently documented. The filter is not neutral: it removes the affected potters at every findspot, so it is recorded here rather than left silent."@en ;
+    rdfs:domain lado:DatingModel ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:integer .
+
+lado:extremeStubYears a owl:DatatypeProperty ;
+    rdfs:label "extreme stub years"@en ;
+    rdfs:comment "Length of the stub drawn at each extreme value. The full range line was replaced by these stubs in the web application, and both figures follow that decision."@en ;
+    rdfs:domain lado:Figure ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:integer .
+
+lado:fuzzinessDivisor a owl:DatatypeProperty ;
+    rdfs:label "fuzziness divisor"@en ;
+    rdfs:comment "12 = Varianz der Gleichverteilung. Die Verteilungsannahme pro Stempel steckt hier."@de,
+        "The value 12, being the variance of a uniform distribution over a unit range. This is where the per-stamp distributional assumption enters the model, and stating it makes that assumption inspectable rather than implicit."@en ;
+    rdfs:domain lado:DatingModel ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:integer .
+
+lado:hasRow a owl:ObjectProperty ;
+    rdfs:label "has row"@en ;
+    rdfs:comment "Links a figure to the plot rows it contains."@en ;
+    rdfs:domain lado:Figure ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range lado:PlotRow .
+
+lado:identifierScheme a owl:DatatypeProperty ;
+    rdfs:label "identifier scheme"@en ;
+    rdfs:comment "Rezept, nach dem die Fundstellen-Fragmente gebildet werden. Muss von jeder weiteren Implementierung zeichengenau reproduziert werden, sonst entstehen abweichende URIs."@de,
+        "The recipe by which findspot URI fragments are built. Any further implementation must reproduce it character for character, including the Unicode normalisation step, or it will mint different URIs for the same findspot."@en ;
+    rdfs:domain dcat:Dataset ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:string .
+
+lado:intervalLabel a owl:DatatypeProperty ;
+    rdfs:label "interval label"@en ;
+    rdfs:comment "Textform aus der Query (avg_interval)."@de,
+        "The interval rendered as text by the source query, retained for display and for comparison against the published web output."@en ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:string .
+
+lado:kFactor a owl:DatatypeProperty ;
+    rdfs:label "k factor"@en ;
+    rdfs:comment "k = k_max - (k_max-k_min)*(1-exp(-n/tau)), rein volumenbasiert."@de,
+        "The volume-based multiplier applied to sigmaYears. It falls from k_max towards k_min as evidence accumulates, so a findspot with many stamps receives a narrower interval than one with few."@en ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:decimal .
+
+lado:kIsFallback a owl:DatatypeProperty ;
+    rdfs:label "k is fallback"@en ;
+    rdfs:comment "true = keine Die-Angabe, k wurde auf k_max gesetzt. Modellverhalten, kein Messwert."@de,
+        "True where no die attribution exists at all and k was therefore set to k_max. This is model behaviour rather than a measurement, and it widens the interval for a reason unconnected with the material."@en ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:boolean .
+
+lado:kMax a owl:DatatypeProperty ;
+    rdfs:label "k max"@en ;
+    rdfs:comment "Upper bound of the k factor, applied when evidence is thin or absent."@en ;
+    rdfs:domain lado:DatingModel ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:decimal .
+
+lado:kMin a owl:DatatypeProperty ;
+    rdfs:label "k min"@en ;
+    rdfs:comment "Lower bound of the k factor, approached as evidence accumulates."@en ;
+    rdfs:domain lado:DatingModel ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:decimal .
+
+lado:marginBottom a owl:DatatypeProperty ;
+    rdfs:label "margin bottom"@en ;
+    rdfs:comment "Bottom margin, in pixels."@en ;
+    rdfs:domain lado:Figure ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:integer .
+
+lado:marginLeft a owl:DatatypeProperty ;
+    rdfs:label "margin left"@en ;
+    rdfs:comment "Left margin, in pixels; it accommodates the site and findspot labels."@en ;
+    rdfs:domain lado:Figure ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:integer .
+
+lado:marginRight a owl:DatatypeProperty ;
+    rdfs:label "margin right"@en ;
+    rdfs:comment "Right margin, in pixels."@en ;
+    rdfs:domain lado:Figure ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:integer .
+
+lado:marginTop a owl:DatatypeProperty ;
+    rdfs:label "margin top"@en ;
+    rdfs:comment "Top margin, in pixels."@en ;
+    rdfs:domain lado:Figure ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:integer .
+
+lado:maxDatemax a owl:DatatypeProperty ;
+    rdfs:label "maximum datemax"@en ;
+    rdfs:comment "Latest end date among the contributing potters. Drawn as the right extreme stub in both figures."@en ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:integer .
+
+lado:maxDatemin a owl:DatatypeProperty ;
+    rdfs:label "maximum datemin"@en ;
+    rdfs:comment "Latest start date among the contributing potters."@en ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:integer .
+
+lado:midpointYear a owl:DatatypeProperty ;
+    rdfs:label "midpoint year"@en ;
+    rdfs:comment "The centre of the averaged interval, the m in m ± k·σ."@en ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:decimal .
+
+lado:minDatemax a owl:DatatypeProperty ;
+    rdfs:label "minimum datemax"@en ;
+    rdfs:comment "Earliest end date among the contributing potters."@en ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:integer .
+
+lado:minDatemin a owl:DatatypeProperty ;
+    rdfs:label "minimum datemin"@en ;
+    rdfs:comment "Earliest start date among the contributing potters. Drawn as the left extreme stub in both figures."@en ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:integer .
+
+lado:nDies a owl:DatatypeProperty ;
+    rdfs:label "number of dies"@en ;
+    rdfs:comment "The number of distinct dies attested at the findspot, counted over the pair (potter, die)."@en ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:integer .
+
+lado:nStamps a owl:DatatypeProperty ;
+    rdfs:label "number of stamps"@en ;
+    rdfs:comment "Anzahl Stempel an der Fundstelle (count_stamps)."@de,
+        "The number of stamps recorded at the findspot. Note that this is not the n used by the k formula — see nStampsWithDie."@en ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:integer .
+
+lado:nStampsWithDie a owl:DatatypeProperty ;
+    rdfs:label "number of stamps with a die"@en ;
+    rdfs:comment "ACHTUNG: das n der k-Formel. Zaehlt nur Stempel mit Die-Angabe und ist NICHT nStamps."@de,
+        "The number of stamps that carry a die attribution. This is the n in the k formula. It is smaller than nStamps because the underlying query counts only rows where a die is recorded. Substituting nStamps here yields a different k from the one actually used, which is why both are exported."@en ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:integer .
+
+lado:padYears a owl:DatatypeProperty ;
+    rdfs:label "pad years"@en ;
+    rdfs:comment "Years of empty space added at each end of the time axis."@en ;
+    rdfs:domain lado:Figure ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:integer .
+
+lado:qEnd a owl:DatatypeProperty ;
+    rdfs:label "q end"@en ;
+    rdfs:comment "Siehe qStart."@de,
+        "Sharpness of the end date. Subject to the same era-boundary distortion as qStart."@en ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:decimal .
+
+lado:qInterval a owl:DatatypeProperty ;
+    rdfs:label "q interval"@en ;
+    rdfs:comment "Datierungsschaerfe (= q_spread). Erste Qualitaetsachse."@de,
+        "The first quality axis, describing how tightly the contributing potter datings agree. Unlike qStart and qEnd it divides by the interval width rather than by a calendar value, so it is not distorted near the era boundary."@en ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:decimal .
+
+lado:qRepetition a owl:DatatypeProperty ;
+    rdfs:label "q repetition"@en ;
+    rdfs:comment "1 - 1/rep. Zweite Qualitaetsachse. Bewusst NICHT mit qInterval verrechnet: 'kein Depot' ist nicht 'schlecht datiert'."@de,
+        "1 − 1/repetition, the second quality axis. Deliberately not combined with qInterval: a findspot that is not a deposit is not thereby badly dated, and averaging the two would assert exactly that."@en ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:decimal .
+
+lado:qStart a owl:DatatypeProperty ;
+    rdfs:label "q start"@en ;
+    rdfs:comment "Haengt am Kalender-Nullpunkt und benachteiligt augusteisches Material systematisch. Mit Vorsicht verwenden."@de,
+        "Sharpness of the start date. Use with care: the denominator is the mean calendar value, so material dated close to the era boundary is penalised for its position in the calendar rather than for any property of the evidence."@en ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:decimal .
+
+lado:renders a owl:ObjectProperty ;
+    rdfs:label "renders"@en ;
+    rdfs:comment "Verbindet eine Plotzeile mit der Datierung, die sie darstellt."@de,
+        "Links a plot row to the dating it depicts. Following this property in reverse tells you whether a given dating appears in any published figure."@en ;
+    rdfs:domain lado:PlotRow ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range lado:DatedTimeSpan .
+
+lado:rowHeight a owl:DatatypeProperty ;
+    rdfs:label "row height"@en ;
+    rdfs:comment "Height of one row, in pixels."@en ;
+    rdfs:domain lado:Figure ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:integer .
+
+lado:rowOrder a owl:DatatypeProperty ;
+    rdfs:label "row order"@en ;
+    rdfs:comment "Sortierregel der Zeilen. Erlaubt es, die Reihenfolge der Abbildung aus dem Graphen zu reproduzieren."@de,
+        "The rule by which rows are sorted, allowing the order of the published figure to be reproduced from the graph alone."@en ;
+    rdfs:domain lado:Figure ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:string .
+
+lado:sigmaYears a owl:DatatypeProperty ;
+    rdfs:label "sigma (years)"@en ;
+    rdfs:comment "sqrt( AVG(Breite^2/12) + VAR_SAMP(Mitten) ). Varianzzerlegung: innere Fuzziness plus Streuung der Intervallmitten."@de,
+        "The dispersion entering the interval width, obtained by variance decomposition: the internal fuzziness of each potter's range plus the scatter of the range midpoints. Together with kFactor it determines the width of the box, which is 2·k·σ."@en ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:decimal .
+
+lado:svgWidth a owl:DatatypeProperty ;
+    rdfs:label "svg width"@en ;
+    rdfs:comment "Width of the figure canvas, in pixels."@en ;
+    rdfs:domain lado:Figure ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:integer .
+
+lado:tau a owl:DatatypeProperty ;
+    rdfs:label "tau"@en ;
+    rdfs:comment "Saettigungskonstante. Bei n = tau sind rund 63 % der moeglichen Verschmaelerung erreicht."@de,
+        "The saturation constant of the k curve. At n = τ roughly 63 per cent of the available narrowing has been achieved."@en ;
+    rdfs:domain lado:DatingModel ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:decimal .
+
+lado:uncEndYears a owl:DatatypeProperty ;
+    rdfs:label "uncertainty end (years)"@en ;
+    rdfs:comment "VISUAL ONLY. Siehe uncStartYears."@de,
+        "Sample standard deviation of the contributing end dates. Presentation only, as for uncStartYears."@en ;
+    rdfs:domain lado:PlotRow ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:integer .
+
+lado:uncIntervalYears a owl:DatatypeProperty ;
+    rdfs:label "uncertainty interval (years)"@en ;
+    rdfs:comment "VISUAL ONLY."@de,
+        "Combined edge dispersion, sqrt(var(datemin) + var(datemax)). Presentation only."@en ;
+    rdfs:domain lado:PlotRow ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:integer .
+
+lado:uncStartYears a owl:DatatypeProperty ;
+    rdfs:label "uncertainty start (years)"@en ;
+    rdfs:comment "VISUAL ONLY. STDDEV_SAMP(datemin). Laut Methodendoku die Streuung von nichts im Modell; deshalb an der Plotzeile, nicht an der Zeitspanne."@de,
+        "Sample standard deviation of the contributing start dates. Presentation only: it measures the scatter of the interval edges, whereas the box is built from the scatter of the midpoints, so the whisker does not continue the box in any statistical sense."@en ;
+    rdfs:domain lado:PlotRow ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:integer .
+
+lado:undefinedMeasure a owl:ObjectProperty ;
+    rdfs:label "undefined measure"@en ;
+    rdfs:comment "Benennt eine Groesse, die fuer diese Zeitspanne nicht berechenbar war. Macht Abwesenheit explizit, statt sie der Open-World-Annahme zu ueberlassen."@de,
+        "Names a measure that could not be computed for this subject. Under the open-world assumption a missing triple is merely unknown; this property distinguishes 'we computed it and it does not exist' from 'nobody has looked yet'."@en ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range rdf:Property .
+
+lado:volumeWeight a owl:DatatypeProperty ;
+    rdfs:label "volume weight"@en ;
+    rdfs:comment "w = 1.0: k haengt rein am Volumen."@de,
+        "Set to 1.0, recording that k depends on volume of evidence alone and on no other weighting."@en ;
+    rdfs:domain lado:DatingModel ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:decimal .
+
+samian:bundle_IPSDatedSites a void:Dataset,
+        dcat:Dataset ;
+    dcterms:description "Self-contained bundle: the findspot datings, the full LADO vocabulary, and rdf:type triples materialised over rdfs:subClassOf so that CIDOC CRM and OWL-Time queries resolve without a reasoner. Loadable into a triplestore on its own."@en ;
+    dcterms:issued "2026-07-23"^^xsd:date ;
+    dcterms:license <https://spdx.org/licenses/MIT.html> ;
+    dcterms:source "Samian Research / IPS. Rights in the source data are held by the database publishers and are independent of the MIT licence covering the software that produced this file."@en ;
+    dcterms:title "IPS dated sites — data, vocabulary and materialised CRM crosswalk"@en ;
+    void:classPartition <http://data.archaeology.link/data/samian/bundle_IPSDatedSites/stat_cidoc>,
+        <http://data.archaeology.link/data/samian/bundle_IPSDatedSites/stat_datings>,
+        <http://data.archaeology.link/data/samian/bundle_IPSDatedSites/stat_findspots>,
+        <http://data.archaeology.link/data/samian/bundle_IPSDatedSites/stat_owl-time>,
+        <http://data.archaeology.link/data/samian/bundle_IPSDatedSites/stat_plot>,
+        <http://data.archaeology.link/data/samian/bundle_IPSDatedSites/stat_sites> ;
+    rdfs:comment "312 rdf:type triples in this file are inferred rather than asserted: they are the transitive closure over rdfs:subClassOf, written out explicitly. The axioms they follow from are included, so a reasoning store derives nothing new."@en ;
+    owl:versionInfo "2026-07-23" .
+
+samian:fig_sites_dating_v1 a lado:Figure,
+        crm:E36_Visual_Item ;
     rdfs:label "Archaeological sites dated by potters — box plot"@en ;
     lado:bandPadding 0.4 ;
     lado:colourRamp "interpolateRdYlGn"^^xsd:string ;
@@ -67,247 +417,329 @@ samian:fig_sites_dating_v1 a lado:Figure ;
     lado:svgWidth 1200 ;
     dcterms:isPartOf samian:dataset_sites_dating_v1_2026-07-23 .
 
-samian:fs_1000080_4e9d57 a lado:Findspot ;
+samian:fs_1000080_4e9d57 a lado:Findspot,
+        lado:Location,
+        crm:E53_Place ;
     rdfs:label "Pottery Shop II" ;
     crm:P4_has_time-span samian:ts_1000080_4e9d57 ;
     crm:P89_falls_within samian:loc_ds_1000080 ;
     skos:notation "pottery_shop_ii" .
 
-samian:fs_1000080_e4a7d3 a lado:Findspot ;
+samian:fs_1000080_e4a7d3 a lado:Findspot,
+        lado:Location,
+        crm:E53_Place ;
     rdfs:label "Pottery Shop I" ;
     crm:P4_has_time-span samian:ts_1000080_e4a7d3 ;
     crm:P89_falls_within samian:loc_ds_1000080 ;
     skos:notation "pottery_shop_i" .
 
-samian:fs_1000136_32f514 a lado:Findspot ;
+samian:fs_1000136_32f514 a lado:Findspot,
+        lado:Location,
+        crm:E53_Place ;
     rdfs:label "Second Fire" ;
     crm:P4_has_time-span samian:ts_1000136_32f514 ;
     crm:P89_falls_within samian:loc_ds_1000136 ;
     skos:notation "second_fire" .
 
-samian:fs_1000136_83ac45 a lado:Findspot ;
+samian:fs_1000136_83ac45 a lado:Findspot,
+        lado:Location,
+        crm:E53_Place ;
     rdfs:label "New Fresh Wharf: quay" ;
     crm:P4_has_time-span samian:ts_1000136_83ac45 ;
     crm:P89_falls_within samian:loc_ds_1000136 ;
     skos:notation "new_fresh_wharf_quay" .
 
-samian:fs_1000442_d9517d a lado:Findspot ;
+samian:fs_1000442_d9517d a lado:Findspot,
+        lado:Location,
+        crm:E53_Place ;
     rdfs:label "tumulus" ;
     crm:P4_has_time-span samian:ts_1000442_d9517d ;
     crm:P89_falls_within samian:loc_ds_1000442 ;
     skos:notation "tumulus" .
 
-samian:fs_1000535_d9517d a lado:Findspot ;
+samian:fs_1000535_d9517d a lado:Findspot,
+        lado:Location,
+        crm:E53_Place ;
     rdfs:label "tumulus" ;
     crm:P4_has_time-span samian:ts_1000535_d9517d ;
     crm:P89_falls_within samian:loc_ds_1000535 ;
     skos:notation "tumulus" .
 
-samian:fs_1000593_5ced78 a lado:Findspot ;
+samian:fs_1000593_5ced78 a lado:Findspot,
+        lado:Location,
+        crm:E53_Place ;
     rdfs:label "wreck 6" ;
     crm:P4_has_time-span samian:ts_1000593_5ced78 ;
     crm:P89_falls_within samian:loc_ds_1000593 ;
     skos:notation "wreck_6" .
 
-samian:fs_1000737_a532a0 a lado:Findspot ;
+samian:fs_1000737_a532a0 a lado:Findspot,
+        lado:Location,
+        crm:E53_Place ;
     rdfs:label "Erdkastell" ;
     crm:P4_has_time-span samian:ts_1000737_a532a0 ;
     crm:P89_falls_within samian:loc_ds_1000737 ;
     skos:notation "erdkastell" .
 
-samian:fs_1000853_e9031f a lado:Findspot ;
+samian:fs_1000853_e9031f a lado:Findspot,
+        lado:Location,
+        crm:E53_Place ;
     rdfs:label "gutter" ;
     crm:P4_has_time-span samian:ts_1000853_e9031f ;
     crm:P89_falls_within samian:loc_ds_1000853 ;
     skos:notation "gutter" .
 
-samian:fs_1001033_079251 a lado:Findspot ;
+samian:fs_1001033_079251 a lado:Findspot,
+        lado:Location,
+        crm:E53_Place ;
     rdfs:label "Hafen" ;
     crm:P4_has_time-span samian:ts_1001033_079251 ;
     crm:P89_falls_within samian:loc_ds_1001033 ;
     skos:notation "hafen" .
 
-samian:fs_1001099_8d9001 a lado:Findspot ;
+samian:fs_1001099_8d9001 a lado:Findspot,
+        lado:Location,
+        crm:E53_Place ;
     rdfs:label "shop" ;
     crm:P4_has_time-span samian:ts_1001099_8d9001 ;
     crm:P89_falls_within samian:loc_ds_1001099 ;
     skos:notation "shop" .
 
-samian:fs_1001244_54bf01 a lado:Findspot ;
+samian:fs_1001244_54bf01 a lado:Findspot,
+        lado:Location,
+        crm:E53_Place ;
     rdfs:label "Münster, Sch. 3 o" ;
     crm:P4_has_time-span samian:ts_1001244_54bf01 ;
     crm:P89_falls_within samian:loc_ds_1001244 ;
     skos:notation "muenster_sch_3_o" .
 
-samian:fs_1001320_520e5d a lado:Findspot ;
+samian:fs_1001320_520e5d a lado:Findspot,
+        lado:Location,
+        crm:E53_Place ;
     rdfs:label "Fosse Cirratus" ;
     crm:P4_has_time-span samian:ts_1001320_520e5d ;
     crm:P89_falls_within samian:loc_ds_1001320 ;
     skos:notation "fosse_cirratus" .
 
-samian:fs_1001320_f64b28 a lado:Findspot ;
+samian:fs_1001320_f64b28 a lado:Findspot,
+        lado:Location,
+        crm:E53_Place ;
     rdfs:label "Fosse Malaval" ;
     crm:P4_has_time-span samian:ts_1001320_f64b28 ;
     crm:P89_falls_within samian:loc_ds_1001320 ;
     skos:notation "fosse_malaval" .
 
-samian:fs_1001764_d7e65e a lado:Findspot ;
+samian:fs_1001764_d7e65e a lado:Findspot,
+        lado:Location,
+        crm:E53_Place ;
     rdfs:label "fort ditch" ;
     crm:P4_has_time-span samian:ts_1001764_d7e65e ;
     crm:P89_falls_within samian:loc_ds_1001764 ;
     skos:notation "fort_ditch" .
 
-samian:fs_1002124_2c219b a lado:Findspot ;
+samian:fs_1002124_2c219b a lado:Findspot,
+        lado:Location,
+        crm:E53_Place ;
     rdfs:label "Keltengraben" ;
     crm:P4_has_time-span samian:ts_1002124_2c219b ;
     crm:P89_falls_within samian:loc_ds_1002124 ;
     skos:notation "keltengraben" .
 
-samian:fs_1002124_bd7039 a lado:Findspot ;
+samian:fs_1002124_bd7039 a lado:Findspot,
+        lado:Location,
+        crm:E53_Place ;
     rdfs:label "Depotfund" ;
     crm:P4_has_time-span samian:ts_1002124_bd7039 ;
     crm:P89_falls_within samian:loc_ds_1002124 ;
     skos:notation "depotfund" .
 
-samian:fs_1002381_297861 a lado:Findspot ;
+samian:fs_1002381_297861 a lado:Findspot,
+        lado:Location,
+        crm:E53_Place ;
     rdfs:label "Geschirrdepot" ;
     crm:P4_has_time-span samian:ts_1002381_297861 ;
     crm:P89_falls_within samian:loc_ds_1002381 ;
     skos:notation "geschirrdepot" .
 
-samian:fs_1002387_d9517d a lado:Findspot ;
+samian:fs_1002387_d9517d a lado:Findspot,
+        lado:Location,
+        crm:E53_Place ;
     rdfs:label "tumulus" ;
     crm:P4_has_time-span samian:ts_1002387_d9517d ;
     crm:P89_falls_within samian:loc_ds_1002387 ;
     skos:notation "tumulus" .
 
-samian:fs_1002513_2a2274 a lado:Findspot ;
+samian:fs_1002513_2a2274 a lado:Findspot,
+        lado:Location,
+        crm:E53_Place ;
     rdfs:label "Pottery Shop" ;
     crm:P4_has_time-span samian:ts_1002513_2a2274 ;
     crm:P89_falls_within samian:loc_ds_1002513 ;
     skos:notation "pottery_shop" .
 
-samian:fs_1002611_c2e54a a lado:Findspot ;
+samian:fs_1002611_c2e54a a lado:Findspot,
+        lado:Location,
+        crm:E53_Place ;
     rdfs:label "Military camp" ;
     crm:P4_has_time-span samian:ts_1002611_c2e54a ;
     crm:P89_falls_within samian:loc_ds_1002611 ;
     skos:notation "military_camp" .
 
-samian:fs_1003076_824d80 a lado:Findspot ;
+samian:fs_1003076_824d80 a lado:Findspot,
+        lado:Location,
+        crm:E53_Place ;
     rdfs:label "store" ;
     crm:P4_has_time-span samian:ts_1003076_824d80 ;
     crm:P89_falls_within samian:loc_ds_1003076 ;
     skos:notation "store" .
 
-samian:fs_1003365_0ca5ad a lado:Findspot ;
+samian:fs_1003365_0ca5ad a lado:Findspot,
+        lado:Location,
+        crm:E53_Place ;
     rdfs:label "Aquincum, Hoard" ;
     crm:P4_has_time-span samian:ts_1003365_0ca5ad ;
     crm:P89_falls_within samian:loc_ds_1003365 ;
     skos:notation "aquincum_hoard" .
 
-samian:fs_1003421_a3fecc a lado:Findspot ;
+samian:fs_1003421_a3fecc a lado:Findspot,
+        lado:Location,
+        crm:E53_Place ;
     rdfs:label "Velsen I" ;
     crm:P4_has_time-span samian:ts_1003421_a3fecc ;
     crm:P89_falls_within samian:loc_ds_1003421 ;
     skos:notation "velsen_i" .
 
-samian:fs_1003470_accf90 a lado:Findspot ;
+samian:fs_1003470_accf90 a lado:Findspot,
+        lado:Location,
+        crm:E53_Place ;
     rdfs:label "Per.1 Ditch" ;
     crm:P4_has_time-span samian:ts_1003470_accf90 ;
     crm:P89_falls_within samian:loc_ds_1003470 ;
     skos:notation "per_1_ditch" .
 
-samian:fs_1003524_dd3cae a lado:Findspot ;
+samian:fs_1003524_dd3cae a lado:Findspot,
+        lado:Location,
+        crm:E53_Place ;
     rdfs:label "Gutter" ;
     crm:P4_has_time-span samian:ts_1003524_dd3cae ;
     crm:P89_falls_within samian:loc_ds_1003524 ;
     skos:notation "gutter" .
 
-samian:fs_1003531_5b6bc5 a lado:Findspot ;
+samian:fs_1003531_5b6bc5 a lado:Findspot,
+        lado:Location,
+        crm:E53_Place ;
     rdfs:label "Barbarossastraat" ;
     crm:P4_has_time-span samian:ts_1003531_5b6bc5 ;
     crm:P89_falls_within samian:loc_ds_1003531 ;
     skos:notation "barbarossastraat" .
 
-samian:fs_1003761_063e8c a lado:Findspot ;
+samian:fs_1003761_063e8c a lado:Findspot,
+        lado:Location,
+        crm:E53_Place ;
     rdfs:label "Emmeranstraße" ;
     crm:P4_has_time-span samian:ts_1003761_063e8c ;
     crm:P89_falls_within samian:loc_ds_1003761 ;
     skos:notation "emmeranstrasse" .
 
-samian:fs_1003782_0b86e2 a lado:Findspot ;
+samian:fs_1003782_0b86e2 a lado:Findspot,
+        lado:Location,
+        crm:E53_Place ;
     rdfs:label "Samian Hoard 1913" ;
     crm:P4_has_time-span samian:ts_1003782_0b86e2 ;
     crm:P89_falls_within samian:loc_ds_1003782 ;
     skos:notation "samian_hoard_1913" .
 
-samian:fs_1003782_78e3f7 a lado:Findspot ;
+samian:fs_1003782_78e3f7 a lado:Findspot,
+        lado:Location,
+        crm:E53_Place ;
     rdfs:label "Böckleareal (period II)" ;
     crm:P4_has_time-span samian:ts_1003782_78e3f7 ;
     crm:P89_falls_within samian:loc_ds_1003782 ;
     skos:notation "boeckleareal_period_ii" .
 
-samian:fs_1003782_8d9001 a lado:Findspot ;
+samian:fs_1003782_8d9001 a lado:Findspot,
+        lado:Location,
+        crm:E53_Place ;
     rdfs:label "shop" ;
     crm:P4_has_time-span samian:ts_1003782_8d9001 ;
     crm:P89_falls_within samian:loc_ds_1003782 ;
     skos:notation "shop" .
 
-samian:fs_1003782_9cdfb1 a lado:Findspot ;
+samian:fs_1003782_9cdfb1 a lado:Findspot,
+        lado:Location,
+        crm:E53_Place ;
     rdfs:label "Böckleareal (descruction layer period II)" ;
     crm:P4_has_time-span samian:ts_1003782_9cdfb1 ;
     crm:P89_falls_within samian:loc_ds_1003782 ;
     skos:notation "boeckleareal_descruction_layer_period_ii" .
 
-samian:fs_1003782_c9c8eb a lado:Findspot ;
+samian:fs_1003782_c9c8eb a lado:Findspot,
+        lado:Location,
+        crm:E53_Place ;
     rdfs:label "cellar" ;
     crm:P4_has_time-span samian:ts_1003782_c9c8eb ;
     crm:P89_falls_within samian:loc_ds_1003782 ;
     skos:notation "cellar" .
 
-samian:fs_1003782_d60cc2 a lado:Findspot ;
+samian:fs_1003782_d60cc2 a lado:Findspot,
+        lado:Location,
+        crm:E53_Place ;
     rdfs:label "Böckleareal (period I)" ;
     crm:P4_has_time-span samian:ts_1003782_d60cc2 ;
     crm:P89_falls_within samian:loc_ds_1003782 ;
     skos:notation "boeckleareal_period_i" .
 
-samian:fs_1003870_32f514 a lado:Findspot ;
+samian:fs_1003870_32f514 a lado:Findspot,
+        lado:Location,
+        crm:E53_Place ;
     rdfs:label "Second Fire" ;
     crm:P4_has_time-span samian:ts_1003870_32f514 ;
     crm:P89_falls_within samian:loc_ds_1003870 ;
     skos:notation "second_fire" .
 
-samian:fs_1003896_fd8115 a lado:Findspot ;
+samian:fs_1003896_fd8115 a lado:Findspot,
+        lado:Location,
+        crm:E53_Place ;
     rdfs:label "Pit" ;
     crm:P4_has_time-span samian:ts_1003896_fd8115 ;
     crm:P89_falls_within samian:loc_ds_1003896 ;
     skos:notation "pit" .
 
-samian:fs_1003977_c4e861 a lado:Findspot ;
+samian:fs_1003977_c4e861 a lado:Findspot,
+        lado:Location,
+        crm:E53_Place ;
     rdfs:label "Hoard" ;
     crm:P4_has_time-span samian:ts_1003977_c4e861 ;
     crm:P89_falls_within samian:loc_ds_1003977 ;
     skos:notation "hoard" .
 
-samian:fs_1003978_969c47 a lado:Findspot ;
+samian:fs_1003978_969c47 a lado:Findspot,
+        lado:Location,
+        crm:E53_Place ;
     rdfs:label "Sq. Bocquet pit 1973" ;
     crm:P4_has_time-span samian:ts_1003978_969c47 ;
     crm:P89_falls_within samian:loc_ds_1003978 ;
     skos:notation "sq_bocquet_pit_1973" .
 
-samian:fs_1004149_402b80 a lado:Findspot ;
+samian:fs_1004149_402b80 a lado:Findspot,
+        lado:Location,
+        crm:E53_Place ;
     rdfs:label "les ports (La Nautique)" ;
     crm:P4_has_time-span samian:ts_1004149_402b80 ;
     crm:P89_falls_within samian:loc_ds_1004149 ;
     skos:notation "les_ports_la_nautique" .
 
-samian:fs_1004241_cc131f a lado:Findspot ;
+samian:fs_1004241_cc131f a lado:Findspot,
+        lado:Location,
+        crm:E53_Place ;
     rdfs:label "Cala Culip IV" ;
     crm:P4_has_time-span samian:ts_1004241_cc131f ;
     crm:P89_falls_within samian:loc_ds_1004241 ;
     skos:notation "cala_culip_iv" .
 
-samian:fs_1004709_ed615d a lado:Findspot ;
+samian:fs_1004709_ed615d a lado:Findspot,
+        lado:Location,
+        crm:E53_Place ;
     rdfs:label "Shipwreck" ;
     crm:P4_has_time-span samian:ts_1004709_ed615d ;
     crm:P89_falls_within samian:loc_ds_1004709 ;
@@ -682,325 +1114,467 @@ samian:act_dating_1004709_ed615d a prov:Activity ;
     prov:used samian:dataset_sites_dating_v1_2026-07-23 ;
     prov:wasAssociatedWith samian:IPSDatedSitesExporter .
 
-samian:loc_ds_1000442 rdfs:label "Berlingen"@en .
+<http://data.archaeology.link/data/samian/bundle_IPSDatedSites/stat_cidoc> void:class crm:E52_Time-Span,
+        crm:E53_Place ;
+    void:entities 41,
+        73 .
 
-samian:loc_ds_1000535 rdfs:label "Rougham"@en .
+<http://data.archaeology.link/data/samian/bundle_IPSDatedSites/stat_datings> void:class lado:FindspotDating ;
+    void:entities 41 .
 
-samian:loc_ds_1000593 rdfs:label "Cap Drammont"@en .
+<http://data.archaeology.link/data/samian/bundle_IPSDatedSites/stat_findspots> void:class lado:Findspot ;
+    void:entities 41 .
 
-samian:loc_ds_1000737 rdfs:label "Saalburg"@en ;
+<http://data.archaeology.link/data/samian/bundle_IPSDatedSites/stat_owl-time> void:class time:ProperInterval ;
+    void:entities 41 .
+
+<http://data.archaeology.link/data/samian/bundle_IPSDatedSites/stat_plot> void:class lado:PlotRow ;
+    void:entities 41 .
+
+<http://data.archaeology.link/data/samian/bundle_IPSDatedSites/stat_sites> void:class lado:DiscoverySite ;
+    void:entities 32 .
+
+samian:loc_ds_1000442 a lado:DiscoverySite,
+        lado:Location,
+        crm:E53_Place ;
+    rdfs:label "Berlingen"@en .
+
+samian:loc_ds_1000535 a lado:DiscoverySite,
+        lado:Location,
+        crm:E53_Place ;
+    rdfs:label "Rougham"@en .
+
+samian:loc_ds_1000593 a lado:DiscoverySite,
+        lado:Location,
+        crm:E53_Place ;
+    rdfs:label "Cap Drammont"@en .
+
+samian:loc_ds_1000737 a lado:DiscoverySite,
+        lado:Location,
+        crm:E53_Place ;
+    rdfs:label "Saalburg"@en ;
     lado:pleiadesID pleiades:109297 .
 
-samian:loc_ds_1000853 rdfs:label "Wroxeter"@en .
+samian:loc_ds_1000853 a lado:DiscoverySite,
+        lado:Location,
+        crm:E53_Place ;
+    rdfs:label "Wroxeter"@en .
 
-samian:loc_ds_1001033 rdfs:label "Köln"@en ;
+samian:loc_ds_1001033 a lado:DiscoverySite,
+        lado:Location,
+        crm:E53_Place ;
+    rdfs:label "Köln"@en ;
     lado:ancientName "Colonia Claudia Ara Agrippinensium" ;
     lado:pleiadesID pleiades:108751 .
 
-samian:loc_ds_1001099 rdfs:label "Eschenz"@en .
+samian:loc_ds_1001099 a lado:DiscoverySite,
+        lado:Location,
+        crm:E53_Place ;
+    rdfs:label "Eschenz"@en .
 
-samian:loc_ds_1001244 rdfs:label "Basel"@en .
+samian:loc_ds_1001244 a lado:DiscoverySite,
+        lado:Location,
+        crm:E53_Place ;
+    rdfs:label "Basel"@en .
 
-samian:loc_ds_1001764 rdfs:label "Cirencester"@en ;
+samian:loc_ds_1001764 a lado:DiscoverySite,
+        lado:Location,
+        crm:E53_Place ;
+    rdfs:label "Cirencester"@en ;
     lado:ancientName "Korinion/Cironium" ;
     lado:pleiadesID pleiades:79549 .
 
-samian:loc_ds_1002381 rdfs:label "Burghöfe"@en ;
+samian:loc_ds_1002381 a lado:DiscoverySite,
+        lado:Location,
+        crm:E53_Place ;
+    rdfs:label "Burghöfe"@en ;
     lado:ancientName "Summuntorium" ;
     lado:pleiadesID pleiades:118986 .
 
-samian:loc_ds_1002387 rdfs:label "Helsoven"@en .
+samian:loc_ds_1002387 a lado:DiscoverySite,
+        lado:Location,
+        crm:E53_Place ;
+    rdfs:label "Helsoven"@en .
 
-samian:loc_ds_1002513 rdfs:label "Castleford"@en ;
+samian:loc_ds_1002513 a lado:DiscoverySite,
+        lado:Location,
+        crm:E53_Place ;
+    rdfs:label "Castleford"@en ;
     lado:pleiadesID pleiades:79553 .
 
-samian:loc_ds_1002611 rdfs:label "Oberaden"@en .
+samian:loc_ds_1002611 a lado:DiscoverySite,
+        lado:Location,
+        crm:E53_Place ;
+    rdfs:label "Oberaden"@en .
 
-samian:loc_ds_1003076 rdfs:label "Langenhain"@en ;
+samian:loc_ds_1003076 a lado:DiscoverySite,
+        lado:Location,
+        crm:E53_Place ;
+    rdfs:label "Langenhain"@en ;
     lado:pleiadesID pleiades:109100 .
 
-samian:loc_ds_1003365 rdfs:label "Budapest"@en ;
+samian:loc_ds_1003365 a lado:DiscoverySite,
+        lado:Location,
+        crm:E53_Place ;
+    rdfs:label "Budapest"@en ;
     lado:pleiadesID pleiades:197130 .
 
-samian:loc_ds_1003421 rdfs:label "Velsen"@en ;
+samian:loc_ds_1003421 a lado:DiscoverySite,
+        lado:Location,
+        crm:E53_Place ;
+    rdfs:label "Velsen"@en ;
     lado:ancientName "Flevum" ;
     lado:pleiadesID pleiades:99058 .
 
-samian:loc_ds_1003470 rdfs:label "Chesterholm-Vindolanda"@en ;
+samian:loc_ds_1003470 a lado:DiscoverySite,
+        lado:Location,
+        crm:E53_Place ;
+    rdfs:label "Chesterholm-Vindolanda"@en ;
     lado:pleiadesID pleiades:89313 .
 
-samian:loc_ds_1003524 rdfs:label "Inchtuthil"@en ;
+samian:loc_ds_1003524 a lado:DiscoverySite,
+        lado:Location,
+        crm:E53_Place ;
+    rdfs:label "Inchtuthil"@en ;
     lado:pleiadesID pleiades:89206 .
 
-samian:loc_ds_1003531 rdfs:label "Nijmegen"@en ;
+samian:loc_ds_1003531 a lado:DiscoverySite,
+        lado:Location,
+        crm:E53_Place ;
+    rdfs:label "Nijmegen"@en ;
     lado:ancientName "Ulpia Noviomagus" ;
     lado:pleiadesID pleiades:98921 .
 
-samian:loc_ds_1003761 rdfs:label "Mainz"@en ;
+samian:loc_ds_1003761 a lado:DiscoverySite,
+        lado:Location,
+        crm:E53_Place ;
+    rdfs:label "Mainz"@en ;
     lado:ancientName "Mogontiacum" ;
     lado:pleiadesID pleiades:109169 .
 
-samian:loc_ds_1003870 rdfs:label "Verulamium"@en ;
+samian:loc_ds_1003870 a lado:DiscoverySite,
+        lado:Location,
+        crm:E53_Place ;
+    rdfs:label "Verulamium"@en ;
     lado:pleiadesID pleiades:79739 .
 
-samian:loc_ds_1003896 rdfs:label "Alcester"@en .
+samian:loc_ds_1003896 a lado:DiscoverySite,
+        lado:Location,
+        crm:E53_Place ;
+    rdfs:label "Alcester"@en .
 
-samian:loc_ds_1003977 rdfs:label "Pompeii"@en ;
+samian:loc_ds_1003977 a lado:DiscoverySite,
+        lado:Location,
+        crm:E53_Place ;
+    rdfs:label "Pompeii"@en ;
     lado:pleiadesID pleiades:433032 .
 
-samian:loc_ds_1003978 rdfs:label "Amiens"@en ;
+samian:loc_ds_1003978 a lado:DiscoverySite,
+        lado:Location,
+        crm:E53_Place ;
+    rdfs:label "Amiens"@en ;
     lado:ancientName "Samarobriva Ambianorum" ;
     lado:pleiadesID pleiades:109321 .
 
-samian:loc_ds_1004149 rdfs:label "Narbonne"@en ;
+samian:loc_ds_1004149 a lado:DiscoverySite,
+        lado:Location,
+        crm:E53_Place ;
+    rdfs:label "Narbonne"@en ;
     lado:ancientName "Colonia Narbo Martius" ;
     lado:pleiadesID pleiades:246347 .
 
-samian:loc_ds_1004241 rdfs:label "Cap de Creus"@en .
+samian:loc_ds_1004241 a lado:DiscoverySite,
+        lado:Location,
+        crm:E53_Place ;
+    rdfs:label "Cap de Creus"@en .
 
-samian:loc_ds_1004709 rdfs:label "Pecio del Guadiaro"@en .
+samian:loc_ds_1004709 a lado:DiscoverySite,
+        lado:Location,
+        crm:E53_Place ;
+    rdfs:label "Pecio del Guadiaro"@en .
 
-samian:plotrow_1000080_4e9d57 a lado:PlotRow ;
+samian:plotrow_1000080_4e9d57 a lado:PlotRow,
+        crm:E36_Visual_Item ;
     lado:renders samian:ts_1000080_4e9d57 ;
     lado:uncEndYears 9 ;
     lado:uncIntervalYears 12 ;
     lado:uncStartYears 9 .
 
-samian:plotrow_1000080_e4a7d3 a lado:PlotRow ;
+samian:plotrow_1000080_e4a7d3 a lado:PlotRow,
+        crm:E36_Visual_Item ;
     lado:renders samian:ts_1000080_e4a7d3 ;
     lado:uncEndYears 10 ;
     lado:uncIntervalYears 13 ;
     lado:uncStartYears 8 .
 
-samian:plotrow_1000136_32f514 a lado:PlotRow ;
+samian:plotrow_1000136_32f514 a lado:PlotRow,
+        crm:E36_Visual_Item ;
     lado:renders samian:ts_1000136_32f514 ;
     lado:uncEndYears 7 ;
     lado:uncIntervalYears 8 ;
     lado:uncStartYears 4 .
 
-samian:plotrow_1000136_83ac45 a lado:PlotRow ;
+samian:plotrow_1000136_83ac45 a lado:PlotRow,
+        crm:E36_Visual_Item ;
     lado:renders samian:ts_1000136_83ac45 ;
     lado:uncEndYears 25 ;
     lado:uncIntervalYears 34 ;
     lado:uncStartYears 23 .
 
-samian:plotrow_1000442_d9517d a lado:PlotRow ;
+samian:plotrow_1000442_d9517d a lado:PlotRow,
+        crm:E36_Visual_Item ;
     lado:renders samian:ts_1000442_d9517d ;
     lado:uncEndYears 11 ;
     lado:uncIntervalYears 16 ;
     lado:uncStartYears 12 .
 
-samian:plotrow_1000535_d9517d a lado:PlotRow ;
+samian:plotrow_1000535_d9517d a lado:PlotRow,
+        crm:E36_Visual_Item ;
     lado:renders samian:ts_1000535_d9517d ;
     lado:uncEndYears 7 ;
     lado:uncIntervalYears 11 ;
     lado:uncStartYears 9 .
 
-samian:plotrow_1000593_5ced78 a lado:PlotRow ;
+samian:plotrow_1000593_5ced78 a lado:PlotRow,
+        crm:E36_Visual_Item ;
     lado:renders samian:ts_1000593_5ced78 ;
     lado:uncEndYears 7 ;
     lado:uncIntervalYears 16 ;
     lado:uncStartYears 14 .
 
-samian:plotrow_1000737_a532a0 a lado:PlotRow ;
+samian:plotrow_1000737_a532a0 a lado:PlotRow,
+        crm:E36_Visual_Item ;
     lado:renders samian:ts_1000737_a532a0 ;
     lado:uncEndYears 13 ;
     lado:uncIntervalYears 22 ;
     lado:uncStartYears 18 .
 
-samian:plotrow_1000853_e9031f a lado:PlotRow ;
+samian:plotrow_1000853_e9031f a lado:PlotRow,
+        crm:E36_Visual_Item ;
     lado:renders samian:ts_1000853_e9031f ;
     lado:uncEndYears 11 ;
     lado:uncIntervalYears 14 ;
     lado:uncStartYears 9 .
 
-samian:plotrow_1001033_079251 a lado:PlotRow ;
+samian:plotrow_1001033_079251 a lado:PlotRow,
+        crm:E36_Visual_Item ;
     lado:renders samian:ts_1001033_079251 ;
     lado:uncEndYears 2 ;
     lado:uncIntervalYears 3 ;
     lado:uncStartYears 2 .
 
-samian:plotrow_1001099_8d9001 a lado:PlotRow ;
+samian:plotrow_1001099_8d9001 a lado:PlotRow,
+        crm:E36_Visual_Item ;
     lado:renders samian:ts_1001099_8d9001 ;
     lado:uncEndYears 21 ;
     lado:uncIntervalYears 23 ;
     lado:uncStartYears 10 .
 
-samian:plotrow_1001244_54bf01 a lado:PlotRow ;
+samian:plotrow_1001244_54bf01 a lado:PlotRow,
+        crm:E36_Visual_Item ;
     lado:renders samian:ts_1001244_54bf01 ;
     lado:uncEndYears 15 ;
     lado:uncIntervalYears 15 ;
     lado:uncStartYears 2 .
 
-samian:plotrow_1001320_520e5d a lado:PlotRow ;
+samian:plotrow_1001320_520e5d a lado:PlotRow,
+        crm:E36_Visual_Item ;
     lado:renders samian:ts_1001320_520e5d ;
     lado:uncEndYears 6 ;
     lado:uncIntervalYears 8 ;
     lado:uncStartYears 5 .
 
-samian:plotrow_1001320_f64b28 a lado:PlotRow ;
+samian:plotrow_1001320_f64b28 a lado:PlotRow,
+        crm:E36_Visual_Item ;
     lado:renders samian:ts_1001320_f64b28 ;
     lado:uncEndYears 7 ;
     lado:uncIntervalYears 13 ;
     lado:uncStartYears 11 .
 
-samian:plotrow_1001764_d7e65e a lado:PlotRow ;
+samian:plotrow_1001764_d7e65e a lado:PlotRow,
+        crm:E36_Visual_Item ;
     lado:renders samian:ts_1001764_d7e65e ;
     lado:uncEndYears 8 ;
     lado:uncIntervalYears 12 ;
     lado:uncStartYears 8 .
 
-samian:plotrow_1002124_2c219b a lado:PlotRow ;
+samian:plotrow_1002124_2c219b a lado:PlotRow,
+        crm:E36_Visual_Item ;
     lado:renders samian:ts_1002124_2c219b ;
     lado:uncEndYears 11 ;
     lado:uncIntervalYears 12 ;
     lado:uncStartYears 4 .
 
-samian:plotrow_1002124_bd7039 a lado:PlotRow ;
+samian:plotrow_1002124_bd7039 a lado:PlotRow,
+        crm:E36_Visual_Item ;
     lado:renders samian:ts_1002124_bd7039 ;
     lado:uncEndYears 22 ;
     lado:uncIntervalYears 22 ;
     lado:uncStartYears 2 .
 
-samian:plotrow_1002381_297861 a lado:PlotRow ;
+samian:plotrow_1002381_297861 a lado:PlotRow,
+        crm:E36_Visual_Item ;
     lado:renders samian:ts_1002381_297861 ;
     lado:uncEndYears 10 ;
     lado:uncIntervalYears 14 ;
     lado:uncStartYears 10 .
 
-samian:plotrow_1002387_d9517d a lado:PlotRow ;
+samian:plotrow_1002387_d9517d a lado:PlotRow,
+        crm:E36_Visual_Item ;
     lado:renders samian:ts_1002387_d9517d ;
     lado:uncEndYears 11 ;
     lado:uncIntervalYears 17 ;
     lado:uncStartYears 13 .
 
-samian:plotrow_1002513_2a2274 a lado:PlotRow ;
+samian:plotrow_1002513_2a2274 a lado:PlotRow,
+        crm:E36_Visual_Item ;
     lado:renders samian:ts_1002513_2a2274 ;
     lado:uncEndYears 8 ;
     lado:uncIntervalYears 12 ;
     lado:uncStartYears 8 .
 
-samian:plotrow_1002611_c2e54a a lado:PlotRow ;
+samian:plotrow_1002611_c2e54a a lado:PlotRow,
+        crm:E36_Visual_Item ;
     lado:renders samian:ts_1002611_c2e54a ;
     lado:uncEndYears 10 ;
     lado:uncIntervalYears 10 ;
     lado:uncStartYears 4 .
 
-samian:plotrow_1003076_824d80 a lado:PlotRow ;
+samian:plotrow_1003076_824d80 a lado:PlotRow,
+        crm:E36_Visual_Item ;
     lado:renders samian:ts_1003076_824d80 ;
     lado:uncEndYears 3 ;
     lado:uncIntervalYears 37 ;
     lado:uncStartYears 37 .
 
-samian:plotrow_1003365_0ca5ad a lado:PlotRow ;
+samian:plotrow_1003365_0ca5ad a lado:PlotRow,
+        crm:E36_Visual_Item ;
     lado:renders samian:ts_1003365_0ca5ad ;
     lado:uncEndYears 9 ;
     lado:uncIntervalYears 13 ;
     lado:uncStartYears 10 .
 
-samian:plotrow_1003421_a3fecc a lado:PlotRow ;
+samian:plotrow_1003421_a3fecc a lado:PlotRow,
+        crm:E36_Visual_Item ;
     lado:renders samian:ts_1003421_a3fecc ;
     lado:uncEndYears 20 ;
     lado:uncIntervalYears 27 ;
     lado:uncStartYears 17 .
 
-samian:plotrow_1003470_accf90 a lado:PlotRow ;
+samian:plotrow_1003470_accf90 a lado:PlotRow,
+        crm:E36_Visual_Item ;
     lado:renders samian:ts_1003470_accf90 ;
     lado:uncEndYears 7 ;
     lado:uncIntervalYears 9 ;
     lado:uncStartYears 7 .
 
-samian:plotrow_1003524_dd3cae a lado:PlotRow ;
+samian:plotrow_1003524_dd3cae a lado:PlotRow,
+        crm:E36_Visual_Item ;
     lado:renders samian:ts_1003524_dd3cae ;
     lado:uncEndYears 12 ;
     lado:uncIntervalYears 12 ;
     lado:uncStartYears 3 .
 
-samian:plotrow_1003531_5b6bc5 a lado:PlotRow ;
+samian:plotrow_1003531_5b6bc5 a lado:PlotRow,
+        crm:E36_Visual_Item ;
     lado:renders samian:ts_1003531_5b6bc5 ;
     lado:uncEndYears 0 ;
     lado:uncIntervalYears 0 ;
     lado:uncStartYears 0 .
 
-samian:plotrow_1003761_063e8c a lado:PlotRow ;
+samian:plotrow_1003761_063e8c a lado:PlotRow,
+        crm:E36_Visual_Item ;
     lado:renders samian:ts_1003761_063e8c ;
     lado:uncEndYears 15 ;
     lado:uncIntervalYears 16 ;
     lado:uncStartYears 6 .
 
-samian:plotrow_1003782_0b86e2 a lado:PlotRow ;
+samian:plotrow_1003782_0b86e2 a lado:PlotRow,
+        crm:E36_Visual_Item ;
     lado:renders samian:ts_1003782_0b86e2 ;
     lado:uncEndYears 7 ;
     lado:uncIntervalYears 10 ;
     lado:uncStartYears 6 .
 
-samian:plotrow_1003782_78e3f7 a lado:PlotRow ;
+samian:plotrow_1003782_78e3f7 a lado:PlotRow,
+        crm:E36_Visual_Item ;
     lado:renders samian:ts_1003782_78e3f7 ;
     lado:uncEndYears 12 ;
     lado:uncIntervalYears 17 ;
     lado:uncStartYears 12 .
 
-samian:plotrow_1003782_8d9001 a lado:PlotRow ;
+samian:plotrow_1003782_8d9001 a lado:PlotRow,
+        crm:E36_Visual_Item ;
     lado:renders samian:ts_1003782_8d9001 ;
     lado:uncEndYears 12 ;
     lado:uncIntervalYears 16 ;
     lado:uncStartYears 11 .
 
-samian:plotrow_1003782_9cdfb1 a lado:PlotRow ;
+samian:plotrow_1003782_9cdfb1 a lado:PlotRow,
+        crm:E36_Visual_Item ;
     lado:renders samian:ts_1003782_9cdfb1 ;
     lado:uncEndYears 9 ;
     lado:uncIntervalYears 12 ;
     lado:uncStartYears 9 .
 
-samian:plotrow_1003782_c9c8eb a lado:PlotRow ;
+samian:plotrow_1003782_c9c8eb a lado:PlotRow,
+        crm:E36_Visual_Item ;
     lado:renders samian:ts_1003782_c9c8eb ;
     lado:uncEndYears 29 ;
     lado:uncIntervalYears 39 ;
     lado:uncStartYears 25 .
 
-samian:plotrow_1003782_d60cc2 a lado:PlotRow ;
+samian:plotrow_1003782_d60cc2 a lado:PlotRow,
+        crm:E36_Visual_Item ;
     lado:renders samian:ts_1003782_d60cc2 ;
     lado:uncEndYears 15 ;
     lado:uncIntervalYears 18 ;
     lado:uncStartYears 11 .
 
-samian:plotrow_1003870_32f514 a lado:PlotRow ;
+samian:plotrow_1003870_32f514 a lado:PlotRow,
+        crm:E36_Visual_Item ;
     lado:renders samian:ts_1003870_32f514 ;
     lado:uncEndYears 10 ;
     lado:uncIntervalYears 15 ;
     lado:uncStartYears 12 .
 
-samian:plotrow_1003896_fd8115 a lado:PlotRow ;
+samian:plotrow_1003896_fd8115 a lado:PlotRow,
+        crm:E36_Visual_Item ;
     lado:renders samian:ts_1003896_fd8115 ;
     lado:uncEndYears 4 ;
     lado:uncIntervalYears 6 ;
     lado:uncStartYears 4 .
 
-samian:plotrow_1003977_c4e861 a lado:PlotRow ;
+samian:plotrow_1003977_c4e861 a lado:PlotRow,
+        crm:E36_Visual_Item ;
     lado:renders samian:ts_1003977_c4e861 ;
     lado:uncEndYears 5 ;
     lado:uncIntervalYears 6 ;
     lado:uncStartYears 3 .
 
-samian:plotrow_1003978_969c47 a lado:PlotRow ;
+samian:plotrow_1003978_969c47 a lado:PlotRow,
+        crm:E36_Visual_Item ;
     lado:renders samian:ts_1003978_969c47 ;
     lado:uncEndYears 15 ;
     lado:uncIntervalYears 16 ;
     lado:uncStartYears 7 .
 
-samian:plotrow_1004149_402b80 a lado:PlotRow ;
+samian:plotrow_1004149_402b80 a lado:PlotRow,
+        crm:E36_Visual_Item ;
     lado:renders samian:ts_1004149_402b80 ;
     lado:uncEndYears 8 ;
     lado:uncIntervalYears 12 ;
     lado:uncStartYears 8 .
 
-samian:plotrow_1004241_cc131f a lado:PlotRow ;
+samian:plotrow_1004241_cc131f a lado:PlotRow,
+        crm:E36_Visual_Item ;
     lado:renders samian:ts_1004241_cc131f ;
     lado:uncEndYears 6 ;
     lado:uncIntervalYears 12 ;
     lado:uncStartYears 11 .
 
-samian:plotrow_1004709_ed615d a lado:PlotRow ;
+samian:plotrow_1004709_ed615d a lado:PlotRow,
+        crm:E36_Visual_Item ;
     lado:renders samian:ts_1004709_ed615d ;
     lado:uncEndYears 12 ;
     lado:uncIntervalYears 17 ;
@@ -1662,20 +2236,35 @@ samian:ts_1004709_ed615d_end_pos a time:TimePosition ;
     time:hasTRS samian:trs_ips_year ;
     time:numericPosition 90.7 .
 
-samian:loc_ds_1000080 rdfs:label "Colchester"@en ;
+samian:loc_ds_1000080 a lado:DiscoverySite,
+        lado:Location,
+        crm:E53_Place ;
+    rdfs:label "Colchester"@en ;
     lado:pleiadesID pleiades:79393 .
 
-samian:loc_ds_1000136 rdfs:label "London"@en ;
+samian:loc_ds_1000136 a lado:DiscoverySite,
+        lado:Location,
+        crm:E53_Place ;
+    rdfs:label "London"@en ;
     lado:ancientName "Londinium" ;
     lado:pleiadesID pleiades:79574 .
 
-samian:loc_ds_1001320 rdfs:label "La Graufesenque"@en ;
+samian:loc_ds_1001320 a lado:DiscoverySite,
+        lado:Location,
+        crm:E53_Place ;
+    rdfs:label "La Graufesenque"@en ;
     lado:ancientName "Condatomagus" ;
     lado:pleiadesID pleiades:246410 .
 
-samian:loc_ds_1002124 rdfs:label "Vindonissa"@en .
+samian:loc_ds_1002124 a lado:DiscoverySite,
+        lado:Location,
+        crm:E53_Place ;
+    rdfs:label "Vindonissa"@en .
 
-samian:ts_1000080_4e9d57 a lado:FindspotDating ;
+samian:ts_1000080_4e9d57 a lado:DatedTimeSpan,
+        lado:FindspotDating,
+        crm:E52_Time-Span,
+        time:ProperInterval ;
     rdfs:label "Colchester — Pottery Shop II: 53 to 70"@en ;
     lado:avgDatemax 76 ;
     lado:avgDatemin 47 ;
@@ -1701,7 +2290,10 @@ samian:ts_1000080_4e9d57 a lado:FindspotDating ;
     prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-23 ;
     prov:wasGeneratedBy samian:act_dating_1000080_4e9d57 .
 
-samian:ts_1000080_e4a7d3 a lado:FindspotDating ;
+samian:ts_1000080_e4a7d3 a lado:DatedTimeSpan,
+        lado:FindspotDating,
+        crm:E52_Time-Span,
+        time:ProperInterval ;
     rdfs:label "Colchester — Pottery Shop I: 50 to 69"@en ;
     lado:avgDatemax 74 ;
     lado:avgDatemin 44 ;
@@ -1727,7 +2319,10 @@ samian:ts_1000080_e4a7d3 a lado:FindspotDating ;
     prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-23 ;
     prov:wasGeneratedBy samian:act_dating_1000080_e4a7d3 .
 
-samian:ts_1000136_32f514 a lado:FindspotDating ;
+samian:ts_1000136_32f514 a lado:DatedTimeSpan,
+        lado:FindspotDating,
+        crm:E52_Time-Span,
+        time:ProperInterval ;
     rdfs:label "London — Second Fire: 108 to 124"@en ;
     lado:avgDatemax 130 ;
     lado:avgDatemin 102 ;
@@ -1753,7 +2348,10 @@ samian:ts_1000136_32f514 a lado:FindspotDating ;
     prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-23 ;
     prov:wasGeneratedBy samian:act_dating_1000136_32f514 .
 
-samian:ts_1000136_83ac45 a lado:FindspotDating ;
+samian:ts_1000136_83ac45 a lado:DatedTimeSpan,
+        lado:FindspotDating,
+        crm:E52_Time-Span,
+        time:ProperInterval ;
     rdfs:label "London — New Fresh Wharf: quay: 166 to 192"@en ;
     lado:avgDatemax 197 ;
     lado:avgDatemin 161 ;
@@ -1779,7 +2377,10 @@ samian:ts_1000136_83ac45 a lado:FindspotDating ;
     prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-23 ;
     prov:wasGeneratedBy samian:act_dating_1000136_83ac45 .
 
-samian:ts_1000442_d9517d a lado:FindspotDating ;
+samian:ts_1000442_d9517d a lado:DatedTimeSpan,
+        lado:FindspotDating,
+        crm:E52_Time-Span,
+        time:ProperInterval ;
     rdfs:label "Berlingen — tumulus: 49 to 81"@en ;
     lado:avgDatemax 78 ;
     lado:avgDatemin 51 ;
@@ -1805,7 +2406,10 @@ samian:ts_1000442_d9517d a lado:FindspotDating ;
     prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-23 ;
     prov:wasGeneratedBy samian:act_dating_1000442_d9517d .
 
-samian:ts_1000535_d9517d a lado:FindspotDating ;
+samian:ts_1000535_d9517d a lado:DatedTimeSpan,
+        lado:FindspotDating,
+        crm:E52_Time-Span,
+        time:ProperInterval ;
     rdfs:label "Rougham — tumulus: 143 to 175"@en ;
     lado:avgDatemax 175 ;
     lado:avgDatemin 143 ;
@@ -1831,7 +2435,10 @@ samian:ts_1000535_d9517d a lado:FindspotDating ;
     prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-23 ;
     prov:wasGeneratedBy samian:act_dating_1000535_d9517d .
 
-samian:ts_1000593_5ced78 a lado:FindspotDating ;
+samian:ts_1000593_5ced78 a lado:DatedTimeSpan,
+        lado:FindspotDating,
+        crm:E52_Time-Span,
+        time:ProperInterval ;
     rdfs:label "Cap Drammont — wreck 6: 41 to 74"@en ;
     lado:avgDatemax 75 ;
     lado:avgDatemin 40 ;
@@ -1857,7 +2464,10 @@ samian:ts_1000593_5ced78 a lado:FindspotDating ;
     prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-23 ;
     prov:wasGeneratedBy samian:act_dating_1000593_5ced78 .
 
-samian:ts_1000737_a532a0 a lado:FindspotDating ;
+samian:ts_1000737_a532a0 a lado:DatedTimeSpan,
+        lado:FindspotDating,
+        crm:E52_Time-Span,
+        time:ProperInterval ;
     rdfs:label "Saalburg — Erdkastell: 100 to 147"@en ;
     lado:avgDatemax 144 ;
     lado:avgDatemin 104 ;
@@ -1883,7 +2493,10 @@ samian:ts_1000737_a532a0 a lado:FindspotDating ;
     prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-23 ;
     prov:wasGeneratedBy samian:act_dating_1000737_a532a0 .
 
-samian:ts_1000853_e9031f a lado:FindspotDating ;
+samian:ts_1000853_e9031f a lado:DatedTimeSpan,
+        lado:FindspotDating,
+        crm:E52_Time-Span,
+        time:ProperInterval ;
     rdfs:label "Wroxeter — gutter: 161 to 187"@en ;
     lado:avgDatemax 191 ;
     lado:avgDatemin 158 ;
@@ -1909,7 +2522,10 @@ samian:ts_1000853_e9031f a lado:FindspotDating ;
     prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-23 ;
     prov:wasGeneratedBy samian:act_dating_1000853_e9031f .
 
-samian:ts_1001033_079251 a lado:FindspotDating ;
+samian:ts_1001033_079251 a lado:DatedTimeSpan,
+        lado:FindspotDating,
+        crm:E52_Time-Span,
+        time:ProperInterval ;
     rdfs:label "Köln — Hafen: 74 to 85"@en ;
     lado:avgDatemax 90 ;
     lado:avgDatemin 69 ;
@@ -1935,7 +2551,10 @@ samian:ts_1001033_079251 a lado:FindspotDating ;
     prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-23 ;
     prov:wasGeneratedBy samian:act_dating_1001033_079251 .
 
-samian:ts_1001099_8d9001 a lado:FindspotDating ;
+samian:ts_1001099_8d9001 a lado:DatedTimeSpan,
+        lado:FindspotDating,
+        crm:E52_Time-Span,
+        time:ProperInterval ;
     rdfs:label "Eschenz — shop: 159 to 186"@en ;
     lado:avgDatemax 191 ;
     lado:avgDatemin 153 ;
@@ -1961,7 +2580,10 @@ samian:ts_1001099_8d9001 a lado:FindspotDating ;
     prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-23 ;
     prov:wasGeneratedBy samian:act_dating_1001099_8d9001 .
 
-samian:ts_1001244_54bf01 a lado:FindspotDating ;
+samian:ts_1001244_54bf01 a lado:DatedTimeSpan,
+        lado:FindspotDating,
+        crm:E52_Time-Span,
+        time:ProperInterval ;
     rdfs:label "Basel — Münster, Sch. 3 o: -18 to 7"@en ;
     lado:avgDatemax 3 ;
     lado:avgDatemin -14 ;
@@ -1987,7 +2609,10 @@ samian:ts_1001244_54bf01 a lado:FindspotDating ;
     prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-23 ;
     prov:wasGeneratedBy samian:act_dating_1001244_54bf01 .
 
-samian:ts_1001320_520e5d a lado:FindspotDating ;
+samian:ts_1001320_520e5d a lado:DatedTimeSpan,
+        lado:FindspotDating,
+        crm:E52_Time-Span,
+        time:ProperInterval ;
     rdfs:label "La Graufesenque — Fosse Cirratus: 30 to 40"@en ;
     lado:avgDatemax 49 ;
     lado:avgDatemin 21 ;
@@ -2013,7 +2638,10 @@ samian:ts_1001320_520e5d a lado:FindspotDating ;
     prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-23 ;
     prov:wasGeneratedBy samian:act_dating_1001320_520e5d .
 
-samian:ts_1001320_f64b28 a lado:FindspotDating ;
+samian:ts_1001320_f64b28 a lado:DatedTimeSpan,
+        lado:FindspotDating,
+        crm:E52_Time-Span,
+        time:ProperInterval ;
     rdfs:label "La Graufesenque — Fosse Malaval: 43 to 55"@en ;
     lado:avgDatemax 63 ;
     lado:avgDatemin 34 ;
@@ -2039,7 +2667,10 @@ samian:ts_1001320_f64b28 a lado:FindspotDating ;
     prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-23 ;
     prov:wasGeneratedBy samian:act_dating_1001320_f64b28 .
 
-samian:ts_1001764_d7e65e a lado:FindspotDating ;
+samian:ts_1001764_d7e65e a lado:DatedTimeSpan,
+        lado:FindspotDating,
+        crm:E52_Time-Span,
+        time:ProperInterval ;
     rdfs:label "Cirencester — fort ditch: 46 to 63"@en ;
     lado:avgDatemax 68 ;
     lado:avgDatemin 41 ;
@@ -2065,7 +2696,10 @@ samian:ts_1001764_d7e65e a lado:FindspotDating ;
     prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-23 ;
     prov:wasGeneratedBy samian:act_dating_1001764_d7e65e .
 
-samian:ts_1002124_2c219b a lado:FindspotDating ;
+samian:ts_1002124_2c219b a lado:DatedTimeSpan,
+        lado:FindspotDating,
+        crm:E52_Time-Span,
+        time:ProperInterval ;
     rdfs:label "Vindonissa — Keltengraben: -14 to 16"@en ;
     lado:avgDatemax 18 ;
     lado:avgDatemin -16 ;
@@ -2091,7 +2725,10 @@ samian:ts_1002124_2c219b a lado:FindspotDating ;
     prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-23 ;
     prov:wasGeneratedBy samian:act_dating_1002124_2c219b .
 
-samian:ts_1002124_bd7039 a lado:FindspotDating ;
+samian:ts_1002124_bd7039 a lado:DatedTimeSpan,
+        lado:FindspotDating,
+        crm:E52_Time-Span,
+        time:ProperInterval ;
     rdfs:label "Vindonissa — Depotfund: -2 to 40"@en ;
     lado:avgDatemax 43 ;
     lado:avgDatemin -6 ;
@@ -2117,7 +2754,10 @@ samian:ts_1002124_bd7039 a lado:FindspotDating ;
     prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-23 ;
     prov:wasGeneratedBy samian:act_dating_1002124_bd7039 .
 
-samian:ts_1002381_297861 a lado:FindspotDating ;
+samian:ts_1002381_297861 a lado:DatedTimeSpan,
+        lado:FindspotDating,
+        crm:E52_Time-Span,
+        time:ProperInterval ;
     rdfs:label "Burghöfe — Geschirrdepot: 55 to 86"@en ;
     lado:avgDatemax 84 ;
     lado:avgDatemin 57 ;
@@ -2143,7 +2783,10 @@ samian:ts_1002381_297861 a lado:FindspotDating ;
     prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-23 ;
     prov:wasGeneratedBy samian:act_dating_1002381_297861 .
 
-samian:ts_1002387_d9517d a lado:FindspotDating ;
+samian:ts_1002387_d9517d a lado:DatedTimeSpan,
+        lado:FindspotDating,
+        crm:E52_Time-Span,
+        time:ProperInterval ;
     rdfs:label "Helsoven — tumulus: 126 to 164"@en ;
     lado:avgDatemax 160 ;
     lado:avgDatemin 130 ;
@@ -2169,7 +2812,10 @@ samian:ts_1002387_d9517d a lado:FindspotDating ;
     prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-23 ;
     prov:wasGeneratedBy samian:act_dating_1002387_d9517d .
 
-samian:ts_1002513_2a2274 a lado:FindspotDating ;
+samian:ts_1002513_2a2274 a lado:DatedTimeSpan,
+        lado:FindspotDating,
+        crm:E52_Time-Span,
+        time:ProperInterval ;
     rdfs:label "Castleford — Pottery Shop: 139 to 151"@en ;
     lado:avgDatemax 160 ;
     lado:avgDatemin 130 ;
@@ -2195,7 +2841,10 @@ samian:ts_1002513_2a2274 a lado:FindspotDating ;
     prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-23 ;
     prov:wasGeneratedBy samian:act_dating_1002513_2a2274 .
 
-samian:ts_1002611_c2e54a a lado:FindspotDating ;
+samian:ts_1002611_c2e54a a lado:DatedTimeSpan,
+        lado:FindspotDating,
+        crm:E52_Time-Span,
+        time:ProperInterval ;
     rdfs:label "Oberaden — Military camp: -11 to -1"@en ;
     lado:avgDatemax 4 ;
     lado:avgDatemin -16 ;
@@ -2221,7 +2870,10 @@ samian:ts_1002611_c2e54a a lado:FindspotDating ;
     prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-23 ;
     prov:wasGeneratedBy samian:act_dating_1002611_c2e54a .
 
-samian:ts_1003076_824d80 a lado:FindspotDating ;
+samian:ts_1003076_824d80 a lado:DatedTimeSpan,
+        lado:FindspotDating,
+        crm:E52_Time-Span,
+        time:ProperInterval ;
     rdfs:label "Langenhain — store: 175 to 235"@en ;
     lado:avgDatemax 242 ;
     lado:avgDatemin 168 ;
@@ -2247,7 +2899,10 @@ samian:ts_1003076_824d80 a lado:FindspotDating ;
     prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-23 ;
     prov:wasGeneratedBy samian:act_dating_1003076_824d80 .
 
-samian:ts_1003365_0ca5ad a lado:FindspotDating ;
+samian:ts_1003365_0ca5ad a lado:DatedTimeSpan,
+        lado:FindspotDating,
+        crm:E52_Time-Span,
+        time:ProperInterval ;
     rdfs:label "Budapest — Aquincum, Hoard: 142 to 175"@en ;
     lado:avgDatemax 173 ;
     lado:avgDatemin 144 ;
@@ -2273,7 +2928,10 @@ samian:ts_1003365_0ca5ad a lado:FindspotDating ;
     prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-23 ;
     prov:wasGeneratedBy samian:act_dating_1003365_0ca5ad .
 
-samian:ts_1003421_a3fecc a lado:FindspotDating ;
+samian:ts_1003421_a3fecc a lado:DatedTimeSpan,
+        lado:FindspotDating,
+        crm:E52_Time-Span,
+        time:ProperInterval ;
     rdfs:label "Velsen — Velsen I: 10 to 34"@en ;
     lado:avgDatemax 42 ;
     lado:avgDatemin 2 ;
@@ -2299,7 +2957,10 @@ samian:ts_1003421_a3fecc a lado:FindspotDating ;
     prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-23 ;
     prov:wasGeneratedBy samian:act_dating_1003421_a3fecc .
 
-samian:ts_1003470_accf90 a lado:FindspotDating ;
+samian:ts_1003470_accf90 a lado:DatedTimeSpan,
+        lado:FindspotDating,
+        crm:E52_Time-Span,
+        time:ProperInterval ;
     rdfs:label "Chesterholm-Vindolanda — Per.1 Ditch: 76 to 99"@en ;
     lado:avgDatemax 102 ;
     lado:avgDatemin 73 ;
@@ -2325,7 +2986,10 @@ samian:ts_1003470_accf90 a lado:FindspotDating ;
     prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-23 ;
     prov:wasGeneratedBy samian:act_dating_1003470_accf90 .
 
-samian:ts_1003524_dd3cae a lado:FindspotDating ;
+samian:ts_1003524_dd3cae a lado:DatedTimeSpan,
+        lado:FindspotDating,
+        crm:E52_Time-Span,
+        time:ProperInterval ;
     rdfs:label "Inchtuthil — Gutter: 64 to 96"@en ;
     lado:avgDatemax 97 ;
     lado:avgDatemin 63 ;
@@ -2351,7 +3015,10 @@ samian:ts_1003524_dd3cae a lado:FindspotDating ;
     prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-23 ;
     prov:wasGeneratedBy samian:act_dating_1003524_dd3cae .
 
-samian:ts_1003531_5b6bc5 a lado:FindspotDating ;
+samian:ts_1003531_5b6bc5 a lado:DatedTimeSpan,
+        lado:FindspotDating,
+        crm:E52_Time-Span,
+        time:ProperInterval ;
     rdfs:label "Nijmegen — Barbarossastraat: 68 to 82"@en ;
     lado:avgDatemax 85 ;
     lado:avgDatemin 65 ;
@@ -2377,7 +3044,10 @@ samian:ts_1003531_5b6bc5 a lado:FindspotDating ;
     prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-23 ;
     prov:wasGeneratedBy samian:act_dating_1003531_5b6bc5 .
 
-samian:ts_1003761_063e8c a lado:FindspotDating ;
+samian:ts_1003761_063e8c a lado:DatedTimeSpan,
+        lado:FindspotDating,
+        crm:E52_Time-Span,
+        time:ProperInterval ;
     rdfs:label "Mainz — Emmeranstraße: -9 to 9"@en ;
     lado:avgDatemax 12 ;
     lado:avgDatemin -13 ;
@@ -2403,7 +3073,10 @@ samian:ts_1003761_063e8c a lado:FindspotDating ;
     prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-23 ;
     prov:wasGeneratedBy samian:act_dating_1003761_063e8c .
 
-samian:ts_1003782_0b86e2 a lado:FindspotDating ;
+samian:ts_1003782_0b86e2 a lado:DatedTimeSpan,
+        lado:FindspotDating,
+        crm:E52_Time-Span,
+        time:ProperInterval ;
     rdfs:label "Bregenz — Samian Hoard 1913: 33 to 44"@en ;
     lado:avgDatemax 52 ;
     lado:avgDatemin 25 ;
@@ -2429,7 +3102,10 @@ samian:ts_1003782_0b86e2 a lado:FindspotDating ;
     prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-23 ;
     prov:wasGeneratedBy samian:act_dating_1003782_0b86e2 .
 
-samian:ts_1003782_78e3f7 a lado:FindspotDating ;
+samian:ts_1003782_78e3f7 a lado:DatedTimeSpan,
+        lado:FindspotDating,
+        crm:E52_Time-Span,
+        time:ProperInterval ;
     rdfs:label "Bregenz — Böckleareal (period II): 40 to 75"@en ;
     lado:avgDatemax 70 ;
     lado:avgDatemin 45 ;
@@ -2455,7 +3131,10 @@ samian:ts_1003782_78e3f7 a lado:FindspotDating ;
     prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-23 ;
     prov:wasGeneratedBy samian:act_dating_1003782_78e3f7 .
 
-samian:ts_1003782_8d9001 a lado:FindspotDating ;
+samian:ts_1003782_8d9001 a lado:DatedTimeSpan,
+        lado:FindspotDating,
+        crm:E52_Time-Span,
+        time:ProperInterval ;
     rdfs:label "Bregenz — shop: 126 to 159"@en ;
     lado:avgDatemax 155 ;
     lado:avgDatemin 130 ;
@@ -2481,7 +3160,10 @@ samian:ts_1003782_8d9001 a lado:FindspotDating ;
     prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-23 ;
     prov:wasGeneratedBy samian:act_dating_1003782_8d9001 .
 
-samian:ts_1003782_9cdfb1 a lado:FindspotDating ;
+samian:ts_1003782_9cdfb1 a lado:DatedTimeSpan,
+        lado:FindspotDating,
+        crm:E52_Time-Span,
+        time:ProperInterval ;
     rdfs:label "Bregenz — Böckleareal (descruction layer period II): 46 to 70"@en ;
     lado:avgDatemax 70 ;
     lado:avgDatemin 46 ;
@@ -2507,7 +3189,10 @@ samian:ts_1003782_9cdfb1 a lado:FindspotDating ;
     prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-23 ;
     prov:wasGeneratedBy samian:act_dating_1003782_9cdfb1 .
 
-samian:ts_1003782_c9c8eb a lado:FindspotDating ;
+samian:ts_1003782_c9c8eb a lado:DatedTimeSpan,
+        lado:FindspotDating,
+        crm:E52_Time-Span,
+        time:ProperInterval ;
     rdfs:label "Bregenz — cellar: 78 to 113"@en ;
     lado:avgDatemax 110 ;
     lado:avgDatemin 81 ;
@@ -2533,7 +3218,10 @@ samian:ts_1003782_c9c8eb a lado:FindspotDating ;
     prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-23 ;
     prov:wasGeneratedBy samian:act_dating_1003782_c9c8eb .
 
-samian:ts_1003782_d60cc2 a lado:FindspotDating ;
+samian:ts_1003782_d60cc2 a lado:DatedTimeSpan,
+        lado:FindspotDating,
+        crm:E52_Time-Span,
+        time:ProperInterval ;
     rdfs:label "Bregenz — Böckleareal (period I): 29 to 58"@en ;
     lado:avgDatemax 58 ;
     lado:avgDatemin 29 ;
@@ -2559,7 +3247,10 @@ samian:ts_1003782_d60cc2 a lado:FindspotDating ;
     prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-23 ;
     prov:wasGeneratedBy samian:act_dating_1003782_d60cc2 .
 
-samian:ts_1003870_32f514 a lado:FindspotDating ;
+samian:ts_1003870_32f514 a lado:DatedTimeSpan,
+        lado:FindspotDating,
+        crm:E52_Time-Span,
+        time:ProperInterval ;
     rdfs:label "Verulamium — Second Fire: 129 to 163"@en ;
     lado:avgDatemax 161 ;
     lado:avgDatemin 131 ;
@@ -2585,7 +3276,10 @@ samian:ts_1003870_32f514 a lado:FindspotDating ;
     prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-23 ;
     prov:wasGeneratedBy samian:act_dating_1003870_32f514 .
 
-samian:ts_1003896_fd8115 a lado:FindspotDating ;
+samian:ts_1003896_fd8115 a lado:DatedTimeSpan,
+        lado:FindspotDating,
+        crm:E52_Time-Span,
+        time:ProperInterval ;
     rdfs:label "Alcester — Pit: 145 to 170"@en ;
     lado:avgDatemax 177 ;
     lado:avgDatemin 139 ;
@@ -2611,7 +3305,10 @@ samian:ts_1003896_fd8115 a lado:FindspotDating ;
     prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-23 ;
     prov:wasGeneratedBy samian:act_dating_1003896_fd8115 .
 
-samian:ts_1003977_c4e861 a lado:FindspotDating ;
+samian:ts_1003977_c4e861 a lado:DatedTimeSpan,
+        lado:FindspotDating,
+        crm:E52_Time-Span,
+        time:ProperInterval ;
     rdfs:label "Pompeii — Hoard: 67 to 82"@en ;
     lado:avgDatemax 87 ;
     lado:avgDatemin 62 ;
@@ -2637,7 +3334,10 @@ samian:ts_1003977_c4e861 a lado:FindspotDating ;
     prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-23 ;
     prov:wasGeneratedBy samian:act_dating_1003977_c4e861 .
 
-samian:ts_1003978_969c47 a lado:FindspotDating ;
+samian:ts_1003978_969c47 a lado:DatedTimeSpan,
+        lado:FindspotDating,
+        crm:E52_Time-Span,
+        time:ProperInterval ;
     rdfs:label "Amiens — Sq. Bocquet pit 1973: -17 to -1"@en ;
     lado:avgDatemax 3 ;
     lado:avgDatemin -20 ;
@@ -2663,7 +3363,10 @@ samian:ts_1003978_969c47 a lado:FindspotDating ;
     prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-23 ;
     prov:wasGeneratedBy samian:act_dating_1003978_969c47 .
 
-samian:ts_1004149_402b80 a lado:FindspotDating ;
+samian:ts_1004149_402b80 a lado:DatedTimeSpan,
+        lado:FindspotDating,
+        crm:E52_Time-Span,
+        time:ProperInterval ;
     rdfs:label "Narbonne — les ports (La Nautique): 49 to 60"@en ;
     lado:avgDatemax 70 ;
     lado:avgDatemin 40 ;
@@ -2689,7 +3392,10 @@ samian:ts_1004149_402b80 a lado:FindspotDating ;
     prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-23 ;
     prov:wasGeneratedBy samian:act_dating_1004149_402b80 .
 
-samian:ts_1004241_cc131f a lado:FindspotDating ;
+samian:ts_1004241_cc131f a lado:DatedTimeSpan,
+        lado:FindspotDating,
+        crm:E52_Time-Span,
+        time:ProperInterval ;
     rdfs:label "Cap de Creus — Cala Culip IV: 63 to 76"@en ;
     lado:avgDatemax 87 ;
     lado:avgDatemin 52 ;
@@ -2715,7 +3421,10 @@ samian:ts_1004241_cc131f a lado:FindspotDating ;
     prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-23 ;
     prov:wasGeneratedBy samian:act_dating_1004241_cc131f .
 
-samian:ts_1004709_ed615d a lado:FindspotDating ;
+samian:ts_1004709_ed615d a lado:DatedTimeSpan,
+        lado:FindspotDating,
+        crm:E52_Time-Span,
+        time:ProperInterval ;
     rdfs:label "Pecio del Guadiaro — Shipwreck: 70 to 91"@en ;
     lado:avgDatemax 94 ;
     lado:avgDatemin 66 ;
@@ -2741,11 +3450,36 @@ samian:ts_1004709_ed615d a lado:FindspotDating ;
     prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-23 ;
     prov:wasGeneratedBy samian:act_dating_1004709_ed615d .
 
-samian:loc_ds_1003782 rdfs:label "Bregenz"@en ;
+samian:loc_ds_1003782 a lado:DiscoverySite,
+        lado:Location,
+        crm:E53_Place ;
+    rdfs:label "Bregenz"@en ;
     lado:ancientName "Brigantium" ;
     lado:pleiadesID pleiades:187325 .
 
-samian:DatingModel_v1 a lado:DatingModel ;
+lado:DatingModel a owl:Class ;
+    rdfs:label "Dating model"@en ;
+    rdfs:comment "Parametrisierung, aus der die Intervalle berechnet wurden."@de,
+        "The parameterisation from which the intervals were computed, expressed as a prov:Plan. Holds k_min, k_max, τ, w and the fuzziness divisor, so a reader can recompute any interval from the exported figures alone."@en ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:subClassOf prov:Plan .
+
+lado:Figure a owl:Class ;
+    rdfs:label "Figure"@en ;
+    rdfs:comment "Abbildung. Traegt die Konstanten, die nicht zu den Fundplaetzen gehoeren, sondern zur Grafik."@de,
+        "A published figure. Carries the constants that belong to the drawing rather than to the archaeology — padding, row height, colour ramp, sort order — so that they are stated once instead of being repeated on every row."@en ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:subClassOf crm:E36_Visual_Item .
+
+lado:DiscoverySite a owl:Class ;
+    rdfs:label "Discovery site"@en ;
+    rdfs:comment "Bestehende LADO-Klasse aus loc_discoverysite_1.ttl."@de,
+        "An existing LADO class from the published loc_discoverysite dataset. This export references such nodes; it never re-types or redefines them."@en ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:subClassOf lado:Location .
+
+samian:DatingModel_v1 a lado:DatingModel,
+        prov:Plan ;
     rdfs:label "Virtual fuzzy year, volume-based k (v1)"@en ;
     lado:eraConvention "historical" ;
     lado:excludedDatemax 120,
@@ -2757,6 +3491,46 @@ samian:DatingModel_v1 a lado:DatingModel ;
     lado:tau 20.0 ;
     lado:volumeWeight 1.0 ;
     rdfs:comment "eff = m +/- k*sigma. sigma aus Varianzzerlegung sqrt(AVG(w^2/12) + VAR(Mitten)). k rein volumenbasiert. Das Intervall ist ein archaeologisch motiviertes 'virtual fuzzy year', ausdruecklich KEIN Konfidenzintervall."@de .
+
+lado:Findspot a owl:Class ;
+    rdfs:label "Findspot"@en ;
+    rdfs:comment "Benannte Fundstelle innerhalb eines Fundplatzes. Faellt ueber crm:P89_falls_within in die DiscoverySite. Ein Fundplatz kann mehrere Fundstellen tragen (Bregenz: sechs)."@de,
+        "A named context within a discovery site, such as a pit, a ditch or a destruction layer. It falls within its site via crm:P89_falls_within. A site may carry several findspots — Bregenz has six — which is why the dating hangs on the findspot and not on the site."@en ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:subClassOf lado:Location .
+
+lado:FindspotDating a owl:Class ;
+    rdfs:label "Findspot dating"@en ;
+    rdfs:comment "Datierung einer Fundstelle aus Toepferstempeln. Das Intervall ist ein 'virtual fuzzy year' m +/- k*sigma, KEIN Konfidenzintervall."@de,
+        "The dating of one findspot derived from samian potters' stamps. The interval is a 'virtual fuzzy year' of the form m ± k·σ and is explicitly NOT a confidence interval: it carries no probabilistic claim about where the true date lies."@en ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:subClassOf lado:DatedTimeSpan .
+
+lado:PlotRow a owl:Class ;
+    rdfs:label "Plot row"@en ;
+    rdfs:comment "Darstellungsschicht einer Datierung. Traegt ausdruecklich die Groessen, die laut Methodendoku 'visual only' sind."@de,
+        "The presentation layer of a single dating. It deliberately carries the uncertainty whiskers, which the method documentation describes as visual only, keeping them off the time-span where they would read as an archaeological claim."@en ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:subClassOf crm:E36_Visual_Item .
+
+<http://archaeology.link/ontology> a owl:Ontology ;
+    rdfs:label "LADO — Erweiterung fuer Fundstellen-Datierung"@de ;
+    rdfs:comment "Erweitert LADO um Fundstellen, Datierungs-Zeitspannen und eine getrennte Darstellungsschicht. Alle Klassen haengen ueber rdfs:subClassOf unter CIDOC CRM."@de .
+
+lado:DatedTimeSpan a owl:Class ;
+    rdfs:label "Dated time-span"@en ;
+    rdfs:comment "Zeitspanne, die aus datiertem Material erschlossen wurde."@de,
+        "A time-span inferred from dated material rather than recorded directly. Sits beneath both crm:E52_Time-Span and time:ProperInterval so that CIDOC-based and OWL-Time-based queries each find it by their own route."@en ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:subClassOf crm:E52_Time-Span,
+        time:ProperInterval .
+
+lado:Location a owl:Class ;
+    rdfs:label "Location"@en ;
+    rdfs:comment "Bestehende LADO-Klasse, hier in CIDOC CRM verankert."@de,
+        "An existing LADO class, anchored here beneath crm:E53_Place so that consumers who reason over CIDOC CRM can reach it without knowing LADO."@en ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:subClassOf crm:E53_Place .
 
 samian:trs_ips_year a time:TRS ;
     rdfs:label "IPS signed year scale"@en ;

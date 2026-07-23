@@ -8,7 +8,8 @@ Ein Aufruf, vier Schritte:
     2. Graph laden, alles per SPARQL abfragen
     3. Zwei Abbildungen nach img/, je SVG + JPG 300 dpi
     4. Rundlaufpruefung CSV -> RDF -> SPARQL, Feld fuer Feld
-    5. Dokumentation nach docs/ neu erzeugen
+    5. Standalone-Bundle nach rdf/IPSDatedSites-bundle.ttl
+    6. Dokumentation nach docs/ neu erzeugen
 
 Aufruf aus der REPO-WURZEL (Windows / VS Code):
 
@@ -24,6 +25,7 @@ import sys
 from pathlib import Path
 
 import ips_compat
+import make_bundle
 import make_docs
 import ips_render
 import ips_sparql
@@ -68,6 +70,7 @@ def main() -> int:
     ap.add_argument("--emit-geometry", action="store_true")
     ap.add_argument("--skip-plots", action="store_true")
     ap.add_argument("--skip-docs", action="store_true")
+    ap.add_argument("--skip-bundle", action="store_true")
     ap.add_argument("--docs-out", type=Path, default=ROOT / "docs")
     args = ap.parse_args()
 
@@ -136,11 +139,28 @@ def main() -> int:
     rule("4 · Rundlauf  CSV -> RDF -> SPARQL")
     ok = ips_sparql.roundtrip(rows, csv)
 
-    # ---- 5. Dokumentation ------------------------------------------------
+    # ---- 5. Standalone-Bundle -------------------------------------------
+    # Daten + Vokabular + materialisierter CIDOC-CRM-Crosswalk in einer
+    # Datei. Materialisiert, weil Triplestores in der Regel nicht ueber
+    # rdfs:subClassOf schliessen — ohne das liefert eine CRM-Abfrage im
+    # N4O-KG null Treffer.
+    if not args.skip_bundle:
+        rule("5 · Standalone-Bundle")
+        bpath, bstats = make_bundle.build(
+            g, onto, out / "IPSDatedSites-bundle.ttl")
+        print(f"  {bpath.name}  ({bstats['total']} Tripel)")
+        print(f"    Vokabular {bstats['ontology']}, Daten {bstats['data']}, "
+              f"Fundplatz-Typen {bstats['sites_typed']}, "
+              f"materialisiert {bstats['inferred']}")
+        print("  Gegenprobe, reine CRM/OWL-Time-Abfragen ohne Reasoner:")
+        for k, v in make_bundle.verify(bpath).items():
+            print(f"    {k:<22} {v}")
+
+    # ---- 6. Dokumentation ------------------------------------------------
     # Wird bei jedem Lauf neu erzeugt, damit sie nicht vom Code wegdriften
     # kann. Struktur kommt aus dem Code, Prosa aus py/ips_docs_text.py.
     if not args.skip_docs:
-        rule("5 · Dokumentation")
+        rule("6 · Dokumentation")
         for pth in make_docs.build(args.docs_out):
             print(f"  {pth.relative_to(ROOT)}")
 
