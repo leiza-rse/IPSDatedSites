@@ -39,6 +39,32 @@ The closure is computed from the axioms found in the graph rather than
 from a hard-coded table, so adding a superclass in the export propagates
 into the bundle without a second edit.
 
+
+```mermaid
+flowchart LR
+    I["samian:fs_1003978_969c47<br/>one findspot"]
+    A["lado:Findspot"]
+    I -->|rdf:type, asserted| A
+    crm_E53_Place["crm:E53_Place"]
+    I -.->|rdf:type, materialised| crm_E53_Place
+    lado_Location["lado:Location"]
+    I -.->|rdf:type, materialised| lado_Location
+    class I io
+    class A local
+    class crm_E53_Place crm
+    class lado_Location local
+
+    classDef local fill:#e8eef7,stroke:#4a6b96,stroke-width:1px,color:#12181f
+    classDef crm fill:#efe7f5,stroke:#7a5a96,stroke-width:1px,color:#12181f
+    classDef time fill:#e3f2ec,stroke:#3f8a70,stroke-width:1px,color:#12181f
+    classDef ext fill:#f3f1ec,stroke:#8a857a,stroke-width:1px,color:#12181f
+    classDef io fill:#faf3e3,stroke:#a8872e,stroke-width:1px,color:#12181f
+```
+
+*Solid edge asserted, dashed edges written out by the builder. Without them a CIDOC CRM query returns nothing.*
+
+<sub>Source: [`diagrams/materialisation.mmd`](diagrams/materialisation.mmd) — generated, do not edit.</sub>
+
 ## What the bundle counts
 
 Each of these is reported as a `void:classPartition` in the file's own

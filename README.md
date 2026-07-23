@@ -38,6 +38,7 @@ IPSDatedSites/
 | `ips_render.py` | die beiden Abbildungen |
 | `ips_docs_text.py` | englische Textquelle für Ontologie **und** Doku |
 | `make_bundle.py` | baut das Standalone-Bundle für einen Triplestore |
+| `make_diagrams.py` | erzeugt die Mermaid-Diagramme aus Code und Graph |
 | `make_docs.py` | erzeugt `docs/*.md` aus dem Code |
 | `ips_compat.py` | unterdrückt eine rdflib-Warnung, siehe unten |
 
@@ -76,7 +77,7 @@ Sechs Schritte laufen durch:
 3. beide Abbildungen nach `img/`
 4. Rundlaufprüfung CSV → RDF → SPARQL, Feld für Feld
 5. Standalone-Bundle nach `rdf/IPSDatedSites-bundle.ttl`
-6. Dokumentation nach `docs/` neu erzeugen
+6. Dokumentation und Mermaid-Diagramme nach `docs/`
 
 Aktueller Stand: 41 Zeilen, 2442 Tripel, Rundlauf über 17 Felder mit
 größter Abweichung `0.00e+00`.
@@ -195,6 +196,24 @@ SPARQL-Abfragen kommen aus `ips_rdf_export.py`, `ips_render.py` und
 diese Datei speist zugleich die englischen `rdfs:comment` der Ontologie.
 Eine Definition kann also nicht in der Doku stimmen und im RDF veraltet
 sein; es ist derselbe String.
+
+Dasselbe gilt für die **fünf Mermaid-Diagramme** unter `docs/diagrams/`:
+Architektur, Klassenhierarchie, Beziehungen nach Schichten, eine echte
+Instanz und die Materialisierung im Bundle. Keines ist gezeichnet — die
+Hierarchie kommt aus `CLASSES`, die Beziehungen aus `RELATIONS` und
+`LAYERS`, die Instanz per SPARQL aus dem gerade erzeugten Graphen, die
+Materialisierung aus derselben Closure-Funktion, die das Bundle benutzt.
+
+Jedes Diagramm wird zweimal aus **einem** String geschrieben: als
+`.mmd`-Datei und als ` ```mermaid `-Block in der `.md`. github.com rendert
+den Block direkt; GitHub Pages braucht dafür `mermaid.js` im Layout, bis
+dahin ist die `.mmd` der Ausweg.
+
+Nebenbei hat das den Exportcode verbessert: `crm:P89_falls_within` und
+`crm:P4_has_time-span` standen vorher nur inline in `build_graph`. Jetzt
+sind sie in `RELATIONS` deklariert, und `build_graph` benutzt dieselben
+Konstanten — sonst wäre das Diagramm eine Abschrift gewesen, die beim
+ersten Umbau falsch wird.
 
 Der Generator **bricht ab**, wenn eine Klasse oder Property im Code keinen
 Eintrag hat:

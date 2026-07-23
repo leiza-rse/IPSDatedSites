@@ -54,6 +54,47 @@ intended sense, rather than local equivalents:
 | Findspot within its site | `crm:P89_falls_within` |
 | Findspot to its dating | `crm:P4_has_time-span` |
 
+
+```mermaid
+flowchart BT
+    lado_Location["lado:Location"]
+    crm_E53_Place["crm:E53_Place"]
+    lado_Location -->|subClassOf| crm_E53_Place
+    lado_DiscoverySite["lado:DiscoverySite"]
+    lado_DiscoverySite -->|subClassOf| lado_Location
+    lado_Findspot["lado:Findspot"]
+    lado_Findspot -->|subClassOf| lado_Location
+    lado_DatedTimeSpan["lado:DatedTimeSpan"]
+    crm_E52_Time_Span["crm:E52_Time-Span"]
+    lado_DatedTimeSpan -->|subClassOf| crm_E52_Time_Span
+    time_ProperInterval["time:ProperInterval"]
+    lado_DatedTimeSpan -->|subClassOf| time_ProperInterval
+    lado_FindspotDating["lado:FindspotDating"]
+    lado_FindspotDating -->|subClassOf| lado_DatedTimeSpan
+    lado_DatingModel["lado:DatingModel"]
+    prov_Plan["prov:Plan"]
+    lado_DatingModel -->|subClassOf| prov_Plan
+    lado_Figure["lado:Figure"]
+    crm_E36_Visual_Item["crm:E36_Visual_Item"]
+    lado_Figure -->|subClassOf| crm_E36_Visual_Item
+    lado_PlotRow["lado:PlotRow"]
+    lado_PlotRow -->|subClassOf| crm_E36_Visual_Item
+    class lado_DatedTimeSpan,lado_DatingModel,lado_DiscoverySite,lado_Figure,lado_Findspot,lado_FindspotDating,lado_Location,lado_PlotRow local
+    class crm_E36_Visual_Item,crm_E52_Time_Span,crm_E53_Place crm
+    class time_ProperInterval time
+    class prov_Plan ext
+
+    classDef local fill:#e8eef7,stroke:#4a6b96,stroke-width:1px,color:#12181f
+    classDef crm fill:#efe7f5,stroke:#7a5a96,stroke-width:1px,color:#12181f
+    classDef time fill:#e3f2ec,stroke:#3f8a70,stroke-width:1px,color:#12181f
+    classDef ext fill:#f3f1ec,stroke:#8a857a,stroke-width:1px,color:#12181f
+    classDef io fill:#faf3e3,stroke:#a8872e,stroke-width:1px,color:#12181f
+```
+
+*Every path ends in an external vocabulary. That is the whole claim of the crosswalk.*
+
+<sub>Source: [`diagrams/hierarchy.mmd`](diagrams/hierarchy.mmd) — generated, do not edit.</sub>
+
 ## Per-vocabulary notes
 
 ### `crm` — `http://www.cidoc-crm.org/cidoc-crm/`

@@ -315,7 +315,7 @@ samian:fs_1004709_ed615d a lado:Findspot ;
 
 samian:act_dating_1000080_4e9d57 a prov:Activity ;
     rdfs:label "Dating of Colchester — Pottery Shop II"@en ;
-    prov:endedAtTime "2026-07-23T10:33:48+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-07-23T10:44:41+00:00"^^xsd:dateTime ;
     prov:qualifiedAssociation [ a prov:Association ;
             prov:agent samian:IPSDatedSitesExporter ;
             prov:hadPlan samian:DatingModel_v1 ] ;
@@ -324,7 +324,7 @@ samian:act_dating_1000080_4e9d57 a prov:Activity ;
 
 samian:act_dating_1000080_e4a7d3 a prov:Activity ;
     rdfs:label "Dating of Colchester — Pottery Shop I"@en ;
-    prov:endedAtTime "2026-07-23T10:33:48+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-07-23T10:44:41+00:00"^^xsd:dateTime ;
     prov:qualifiedAssociation [ a prov:Association ;
             prov:agent samian:IPSDatedSitesExporter ;
             prov:hadPlan samian:DatingModel_v1 ] ;
@@ -333,7 +333,7 @@ samian:act_dating_1000080_e4a7d3 a prov:Activity ;
 
 samian:act_dating_1000136_32f514 a prov:Activity ;
     rdfs:label "Dating of London — Second Fire"@en ;
-    prov:endedAtTime "2026-07-23T10:33:48+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-07-23T10:44:41+00:00"^^xsd:dateTime ;
     prov:qualifiedAssociation [ a prov:Association ;
             prov:agent samian:IPSDatedSitesExporter ;
             prov:hadPlan samian:DatingModel_v1 ] ;
@@ -342,7 +342,7 @@ samian:act_dating_1000136_32f514 a prov:Activity ;
 
 samian:act_dating_1000136_83ac45 a prov:Activity ;
     rdfs:label "Dating of London — New Fresh Wharf: quay"@en ;
-    prov:endedAtTime "2026-07-23T10:33:48+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-07-23T10:44:41+00:00"^^xsd:dateTime ;
     prov:qualifiedAssociation [ a prov:Association ;
             prov:agent samian:IPSDatedSitesExporter ;
             prov:hadPlan samian:DatingModel_v1 ] ;
@@ -351,7 +351,7 @@ samian:act_dating_1000136_83ac45 a prov:Activity ;
 
 samian:act_dating_1000442_d9517d a prov:Activity ;
     rdfs:label "Dating of Berlingen — tumulus"@en ;
-    prov:endedAtTime "2026-07-23T10:33:48+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-07-23T10:44:41+00:00"^^xsd:dateTime ;
     prov:qualifiedAssociation [ a prov:Association ;
             prov:agent samian:IPSDatedSitesExporter ;
             prov:hadPlan samian:DatingModel_v1 ] ;
@@ -360,7 +360,7 @@ samian:act_dating_1000442_d9517d a prov:Activity ;
 
 samian:act_dating_1000535_d9517d a prov:Activity ;
     rdfs:label "Dating of Rougham — tumulus"@en ;
-    prov:endedAtTime "2026-07-23T10:33:48+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-07-23T10:44:41+00:00"^^xsd:dateTime ;
     prov:qualifiedAssociation [ a prov:Association ;
             prov:agent samian:IPSDatedSitesExporter ;
             prov:hadPlan samian:DatingModel_v1 ] ;
@@ -369,7 +369,7 @@ samian:act_dating_1000535_d9517d a prov:Activity ;
 
 samian:act_dating_1000593_5ced78 a prov:Activity ;
     rdfs:label "Dating of Cap Drammont — wreck 6"@en ;
-    prov:endedAtTime "2026-07-23T10:33:48+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-07-23T10:44:41+00:00"^^xsd:dateTime ;
     prov:qualifiedAssociation [ a prov:Association ;
             prov:agent samian:IPSDatedSitesExporter ;
             prov:hadPlan samian:DatingModel_v1 ] ;
@@ -378,7 +378,7 @@ samian:act_dating_1000593_5ced78 a prov:Activity ;
 
 samian:act_dating_1000737_a532a0 a prov:Activity ;
     rdfs:label "Dating of Saalburg — Erdkastell"@en ;
-    prov:endedAtTime "2026-07-23T10:33:48+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-07-23T10:44:41+00:00"^^xsd:dateTime ;
     prov:qualifiedAssociation [ a prov:Association ;
             prov:agent samian:IPSDatedSitesExporter ;
             prov:hadPlan samian:DatingModel_v1 ] ;
@@ -387,7 +387,7 @@ samian:act_dating_1000737_a532a0 a prov:Activity ;
 
 samian:act_dating_1000853_e9031f a prov:Activity ;
     rdfs:label "Dating of Wroxeter — gutter"@en ;
-    prov:endedAtTime "2026-07-23T10:33:48+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-07-23T10:44:41+00:00"^^xsd:dateTime ;
     prov:qualifiedAssociation [ a prov:Association ;
             prov:agent samian:IPSDatedSitesExporter ;
             prov:hadPlan samian:DatingModel_v1 ] ;
@@ -396,7 +396,7 @@ samian:act_dating_1000853_e9031f a prov:Activity ;
 
 samian:act_dating_1001033_079251 a prov:Activity ;
     rdfs:label "Dating of Köln — Hafen"@en ;
-    prov:endedAtTime "2026-07-23T10:33:48+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-07-23T10:44:41+00:00"^^xsd:dateTime ;
     prov:qualifiedAssociation [ a prov:Association ;
             prov:agent samian:IPSDatedSitesExporter ;
             prov:hadPlan samian:DatingModel_v1 ] ;
@@ -405,7 +405,7 @@ samian:act_dating_1001033_079251 a prov:Activity ;
 
 samian:act_dating_1001099_8d9001 a prov:Activity ;
     rdfs:label "Dating of Eschenz — shop"@en ;
-    prov:endedAtTime "2026-07-23T10:33:48+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-07-23T10:44:41+00:00"^^xsd:dateTime ;
     prov:qualifiedAssociation [ a prov:Association ;
             prov:agent samian:IPSDatedSitesExporter ;
             prov:hadPlan samian:DatingModel_v1 ] ;
@@ -414,7 +414,7 @@ samian:act_dating_1001099_8d9001 a prov:Activity ;
 
 samian:act_dating_1001244_54bf01 a prov:Activity ;
     rdfs:label "Dating of Basel — Münster, Sch. 3 o"@en ;
-    prov:endedAtTime "2026-07-23T10:33:48+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-07-23T10:44:41+00:00"^^xsd:dateTime ;
     prov:qualifiedAssociation [ a prov:Association ;
             prov:agent samian:IPSDatedSitesExporter ;
             prov:hadPlan samian:DatingModel_v1 ] ;
@@ -423,7 +423,7 @@ samian:act_dating_1001244_54bf01 a prov:Activity ;
 
 samian:act_dating_1001320_520e5d a prov:Activity ;
     rdfs:label "Dating of La Graufesenque — Fosse Cirratus"@en ;
-    prov:endedAtTime "2026-07-23T10:33:48+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-07-23T10:44:41+00:00"^^xsd:dateTime ;
     prov:qualifiedAssociation [ a prov:Association ;
             prov:agent samian:IPSDatedSitesExporter ;
             prov:hadPlan samian:DatingModel_v1 ] ;
@@ -432,7 +432,7 @@ samian:act_dating_1001320_520e5d a prov:Activity ;
 
 samian:act_dating_1001320_f64b28 a prov:Activity ;
     rdfs:label "Dating of La Graufesenque — Fosse Malaval"@en ;
-    prov:endedAtTime "2026-07-23T10:33:48+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-07-23T10:44:41+00:00"^^xsd:dateTime ;
     prov:qualifiedAssociation [ a prov:Association ;
             prov:agent samian:IPSDatedSitesExporter ;
             prov:hadPlan samian:DatingModel_v1 ] ;
@@ -441,7 +441,7 @@ samian:act_dating_1001320_f64b28 a prov:Activity ;
 
 samian:act_dating_1001764_d7e65e a prov:Activity ;
     rdfs:label "Dating of Cirencester — fort ditch"@en ;
-    prov:endedAtTime "2026-07-23T10:33:48+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-07-23T10:44:41+00:00"^^xsd:dateTime ;
     prov:qualifiedAssociation [ a prov:Association ;
             prov:agent samian:IPSDatedSitesExporter ;
             prov:hadPlan samian:DatingModel_v1 ] ;
@@ -450,7 +450,7 @@ samian:act_dating_1001764_d7e65e a prov:Activity ;
 
 samian:act_dating_1002124_2c219b a prov:Activity ;
     rdfs:label "Dating of Vindonissa — Keltengraben"@en ;
-    prov:endedAtTime "2026-07-23T10:33:48+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-07-23T10:44:41+00:00"^^xsd:dateTime ;
     prov:qualifiedAssociation [ a prov:Association ;
             prov:agent samian:IPSDatedSitesExporter ;
             prov:hadPlan samian:DatingModel_v1 ] ;
@@ -459,7 +459,7 @@ samian:act_dating_1002124_2c219b a prov:Activity ;
 
 samian:act_dating_1002124_bd7039 a prov:Activity ;
     rdfs:label "Dating of Vindonissa — Depotfund"@en ;
-    prov:endedAtTime "2026-07-23T10:33:48+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-07-23T10:44:41+00:00"^^xsd:dateTime ;
     prov:qualifiedAssociation [ a prov:Association ;
             prov:agent samian:IPSDatedSitesExporter ;
             prov:hadPlan samian:DatingModel_v1 ] ;
@@ -468,7 +468,7 @@ samian:act_dating_1002124_bd7039 a prov:Activity ;
 
 samian:act_dating_1002381_297861 a prov:Activity ;
     rdfs:label "Dating of Burghöfe — Geschirrdepot"@en ;
-    prov:endedAtTime "2026-07-23T10:33:48+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-07-23T10:44:41+00:00"^^xsd:dateTime ;
     prov:qualifiedAssociation [ a prov:Association ;
             prov:agent samian:IPSDatedSitesExporter ;
             prov:hadPlan samian:DatingModel_v1 ] ;
@@ -477,7 +477,7 @@ samian:act_dating_1002381_297861 a prov:Activity ;
 
 samian:act_dating_1002387_d9517d a prov:Activity ;
     rdfs:label "Dating of Helsoven — tumulus"@en ;
-    prov:endedAtTime "2026-07-23T10:33:48+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-07-23T10:44:41+00:00"^^xsd:dateTime ;
     prov:qualifiedAssociation [ a prov:Association ;
             prov:agent samian:IPSDatedSitesExporter ;
             prov:hadPlan samian:DatingModel_v1 ] ;
@@ -486,7 +486,7 @@ samian:act_dating_1002387_d9517d a prov:Activity ;
 
 samian:act_dating_1002513_2a2274 a prov:Activity ;
     rdfs:label "Dating of Castleford — Pottery Shop"@en ;
-    prov:endedAtTime "2026-07-23T10:33:48+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-07-23T10:44:41+00:00"^^xsd:dateTime ;
     prov:qualifiedAssociation [ a prov:Association ;
             prov:agent samian:IPSDatedSitesExporter ;
             prov:hadPlan samian:DatingModel_v1 ] ;
@@ -495,7 +495,7 @@ samian:act_dating_1002513_2a2274 a prov:Activity ;
 
 samian:act_dating_1002611_c2e54a a prov:Activity ;
     rdfs:label "Dating of Oberaden — Military camp"@en ;
-    prov:endedAtTime "2026-07-23T10:33:48+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-07-23T10:44:41+00:00"^^xsd:dateTime ;
     prov:qualifiedAssociation [ a prov:Association ;
             prov:agent samian:IPSDatedSitesExporter ;
             prov:hadPlan samian:DatingModel_v1 ] ;
@@ -504,7 +504,7 @@ samian:act_dating_1002611_c2e54a a prov:Activity ;
 
 samian:act_dating_1003076_824d80 a prov:Activity ;
     rdfs:label "Dating of Langenhain — store"@en ;
-    prov:endedAtTime "2026-07-23T10:33:48+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-07-23T10:44:41+00:00"^^xsd:dateTime ;
     prov:qualifiedAssociation [ a prov:Association ;
             prov:agent samian:IPSDatedSitesExporter ;
             prov:hadPlan samian:DatingModel_v1 ] ;
@@ -513,7 +513,7 @@ samian:act_dating_1003076_824d80 a prov:Activity ;
 
 samian:act_dating_1003365_0ca5ad a prov:Activity ;
     rdfs:label "Dating of Budapest — Aquincum, Hoard"@en ;
-    prov:endedAtTime "2026-07-23T10:33:48+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-07-23T10:44:41+00:00"^^xsd:dateTime ;
     prov:qualifiedAssociation [ a prov:Association ;
             prov:agent samian:IPSDatedSitesExporter ;
             prov:hadPlan samian:DatingModel_v1 ] ;
@@ -522,7 +522,7 @@ samian:act_dating_1003365_0ca5ad a prov:Activity ;
 
 samian:act_dating_1003421_a3fecc a prov:Activity ;
     rdfs:label "Dating of Velsen — Velsen I"@en ;
-    prov:endedAtTime "2026-07-23T10:33:48+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-07-23T10:44:41+00:00"^^xsd:dateTime ;
     prov:qualifiedAssociation [ a prov:Association ;
             prov:agent samian:IPSDatedSitesExporter ;
             prov:hadPlan samian:DatingModel_v1 ] ;
@@ -531,7 +531,7 @@ samian:act_dating_1003421_a3fecc a prov:Activity ;
 
 samian:act_dating_1003470_accf90 a prov:Activity ;
     rdfs:label "Dating of Chesterholm-Vindolanda — Per.1 Ditch"@en ;
-    prov:endedAtTime "2026-07-23T10:33:48+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-07-23T10:44:41+00:00"^^xsd:dateTime ;
     prov:qualifiedAssociation [ a prov:Association ;
             prov:agent samian:IPSDatedSitesExporter ;
             prov:hadPlan samian:DatingModel_v1 ] ;
@@ -540,7 +540,7 @@ samian:act_dating_1003470_accf90 a prov:Activity ;
 
 samian:act_dating_1003524_dd3cae a prov:Activity ;
     rdfs:label "Dating of Inchtuthil — Gutter"@en ;
-    prov:endedAtTime "2026-07-23T10:33:48+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-07-23T10:44:41+00:00"^^xsd:dateTime ;
     prov:qualifiedAssociation [ a prov:Association ;
             prov:agent samian:IPSDatedSitesExporter ;
             prov:hadPlan samian:DatingModel_v1 ] ;
@@ -549,7 +549,7 @@ samian:act_dating_1003524_dd3cae a prov:Activity ;
 
 samian:act_dating_1003531_5b6bc5 a prov:Activity ;
     rdfs:label "Dating of Nijmegen — Barbarossastraat"@en ;
-    prov:endedAtTime "2026-07-23T10:33:48+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-07-23T10:44:41+00:00"^^xsd:dateTime ;
     prov:qualifiedAssociation [ a prov:Association ;
             prov:agent samian:IPSDatedSitesExporter ;
             prov:hadPlan samian:DatingModel_v1 ] ;
@@ -558,7 +558,7 @@ samian:act_dating_1003531_5b6bc5 a prov:Activity ;
 
 samian:act_dating_1003761_063e8c a prov:Activity ;
     rdfs:label "Dating of Mainz — Emmeranstraße"@en ;
-    prov:endedAtTime "2026-07-23T10:33:48+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-07-23T10:44:41+00:00"^^xsd:dateTime ;
     prov:qualifiedAssociation [ a prov:Association ;
             prov:agent samian:IPSDatedSitesExporter ;
             prov:hadPlan samian:DatingModel_v1 ] ;
@@ -567,7 +567,7 @@ samian:act_dating_1003761_063e8c a prov:Activity ;
 
 samian:act_dating_1003782_0b86e2 a prov:Activity ;
     rdfs:label "Dating of Bregenz — Samian Hoard 1913"@en ;
-    prov:endedAtTime "2026-07-23T10:33:48+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-07-23T10:44:41+00:00"^^xsd:dateTime ;
     prov:qualifiedAssociation [ a prov:Association ;
             prov:agent samian:IPSDatedSitesExporter ;
             prov:hadPlan samian:DatingModel_v1 ] ;
@@ -576,7 +576,7 @@ samian:act_dating_1003782_0b86e2 a prov:Activity ;
 
 samian:act_dating_1003782_78e3f7 a prov:Activity ;
     rdfs:label "Dating of Bregenz — Böckleareal (period II)"@en ;
-    prov:endedAtTime "2026-07-23T10:33:48+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-07-23T10:44:41+00:00"^^xsd:dateTime ;
     prov:qualifiedAssociation [ a prov:Association ;
             prov:agent samian:IPSDatedSitesExporter ;
             prov:hadPlan samian:DatingModel_v1 ] ;
@@ -585,7 +585,7 @@ samian:act_dating_1003782_78e3f7 a prov:Activity ;
 
 samian:act_dating_1003782_8d9001 a prov:Activity ;
     rdfs:label "Dating of Bregenz — shop"@en ;
-    prov:endedAtTime "2026-07-23T10:33:48+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-07-23T10:44:41+00:00"^^xsd:dateTime ;
     prov:qualifiedAssociation [ a prov:Association ;
             prov:agent samian:IPSDatedSitesExporter ;
             prov:hadPlan samian:DatingModel_v1 ] ;
@@ -594,7 +594,7 @@ samian:act_dating_1003782_8d9001 a prov:Activity ;
 
 samian:act_dating_1003782_9cdfb1 a prov:Activity ;
     rdfs:label "Dating of Bregenz — Böckleareal (descruction layer period II)"@en ;
-    prov:endedAtTime "2026-07-23T10:33:48+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-07-23T10:44:41+00:00"^^xsd:dateTime ;
     prov:qualifiedAssociation [ a prov:Association ;
             prov:agent samian:IPSDatedSitesExporter ;
             prov:hadPlan samian:DatingModel_v1 ] ;
@@ -603,7 +603,7 @@ samian:act_dating_1003782_9cdfb1 a prov:Activity ;
 
 samian:act_dating_1003782_c9c8eb a prov:Activity ;
     rdfs:label "Dating of Bregenz — cellar"@en ;
-    prov:endedAtTime "2026-07-23T10:33:48+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-07-23T10:44:41+00:00"^^xsd:dateTime ;
     prov:qualifiedAssociation [ a prov:Association ;
             prov:agent samian:IPSDatedSitesExporter ;
             prov:hadPlan samian:DatingModel_v1 ] ;
@@ -612,7 +612,7 @@ samian:act_dating_1003782_c9c8eb a prov:Activity ;
 
 samian:act_dating_1003782_d60cc2 a prov:Activity ;
     rdfs:label "Dating of Bregenz — Böckleareal (period I)"@en ;
-    prov:endedAtTime "2026-07-23T10:33:48+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-07-23T10:44:41+00:00"^^xsd:dateTime ;
     prov:qualifiedAssociation [ a prov:Association ;
             prov:agent samian:IPSDatedSitesExporter ;
             prov:hadPlan samian:DatingModel_v1 ] ;
@@ -621,7 +621,7 @@ samian:act_dating_1003782_d60cc2 a prov:Activity ;
 
 samian:act_dating_1003870_32f514 a prov:Activity ;
     rdfs:label "Dating of Verulamium — Second Fire"@en ;
-    prov:endedAtTime "2026-07-23T10:33:48+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-07-23T10:44:41+00:00"^^xsd:dateTime ;
     prov:qualifiedAssociation [ a prov:Association ;
             prov:agent samian:IPSDatedSitesExporter ;
             prov:hadPlan samian:DatingModel_v1 ] ;
@@ -630,7 +630,7 @@ samian:act_dating_1003870_32f514 a prov:Activity ;
 
 samian:act_dating_1003896_fd8115 a prov:Activity ;
     rdfs:label "Dating of Alcester — Pit"@en ;
-    prov:endedAtTime "2026-07-23T10:33:48+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-07-23T10:44:41+00:00"^^xsd:dateTime ;
     prov:qualifiedAssociation [ a prov:Association ;
             prov:agent samian:IPSDatedSitesExporter ;
             prov:hadPlan samian:DatingModel_v1 ] ;
@@ -639,7 +639,7 @@ samian:act_dating_1003896_fd8115 a prov:Activity ;
 
 samian:act_dating_1003977_c4e861 a prov:Activity ;
     rdfs:label "Dating of Pompeii — Hoard"@en ;
-    prov:endedAtTime "2026-07-23T10:33:48+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-07-23T10:44:41+00:00"^^xsd:dateTime ;
     prov:qualifiedAssociation [ a prov:Association ;
             prov:agent samian:IPSDatedSitesExporter ;
             prov:hadPlan samian:DatingModel_v1 ] ;
@@ -648,7 +648,7 @@ samian:act_dating_1003977_c4e861 a prov:Activity ;
 
 samian:act_dating_1003978_969c47 a prov:Activity ;
     rdfs:label "Dating of Amiens — Sq. Bocquet pit 1973"@en ;
-    prov:endedAtTime "2026-07-23T10:33:48+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-07-23T10:44:41+00:00"^^xsd:dateTime ;
     prov:qualifiedAssociation [ a prov:Association ;
             prov:agent samian:IPSDatedSitesExporter ;
             prov:hadPlan samian:DatingModel_v1 ] ;
@@ -657,7 +657,7 @@ samian:act_dating_1003978_969c47 a prov:Activity ;
 
 samian:act_dating_1004149_402b80 a prov:Activity ;
     rdfs:label "Dating of Narbonne — les ports (La Nautique)"@en ;
-    prov:endedAtTime "2026-07-23T10:33:48+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-07-23T10:44:41+00:00"^^xsd:dateTime ;
     prov:qualifiedAssociation [ a prov:Association ;
             prov:agent samian:IPSDatedSitesExporter ;
             prov:hadPlan samian:DatingModel_v1 ] ;
@@ -666,7 +666,7 @@ samian:act_dating_1004149_402b80 a prov:Activity ;
 
 samian:act_dating_1004241_cc131f a prov:Activity ;
     rdfs:label "Dating of Cap de Creus — Cala Culip IV"@en ;
-    prov:endedAtTime "2026-07-23T10:33:48+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-07-23T10:44:41+00:00"^^xsd:dateTime ;
     prov:qualifiedAssociation [ a prov:Association ;
             prov:agent samian:IPSDatedSitesExporter ;
             prov:hadPlan samian:DatingModel_v1 ] ;
@@ -675,7 +675,7 @@ samian:act_dating_1004241_cc131f a prov:Activity ;
 
 samian:act_dating_1004709_ed615d a prov:Activity ;
     rdfs:label "Dating of Pecio del Guadiaro — Shipwreck"@en ;
-    prov:endedAtTime "2026-07-23T10:33:48+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-07-23T10:44:41+00:00"^^xsd:dateTime ;
     prov:qualifiedAssociation [ a prov:Association ;
             prov:agent samian:IPSDatedSitesExporter ;
             prov:hadPlan samian:DatingModel_v1 ] ;
@@ -2769,7 +2769,7 @@ samian:IPSDatedSitesExporter a prov:SoftwareAgent ;
 samian:dataset_sites_dating_v1_2026-07-23 a dcat:Dataset,
         prov:Entity ;
     lado:identifierScheme "sha256(NFC(trim(findspot)))[0:6], je Fundplatz-ID" ;
-    dcterms:created "2026-07-23T10:33:48+00:00"^^xsd:dateTime ;
+    dcterms:created "2026-07-23T10:44:41+00:00"^^xsd:dateTime ;
     dcterms:issued "2026-07-23"^^xsd:date ;
     dcterms:source "Samian Research / IPS, tbldistribution + tblpotter + v_discoverysite" ;
     dcterms:title "Archaeological findspots dated by samian potters' stamps"@en ;

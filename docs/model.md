@@ -72,6 +72,58 @@ each of the rows, because they describe the drawing and not the findspots.
 | `lado:colourRamp` | `interpolateRdYlGn` | Name of the colour ramp mapping quality to colour, recorded so that a reader can reproduce the fill colours rather than eyeballing them. |
 | `lado:rowOrder` | `avg_datemin ASC` | The rule by which rows are sorted, allowing the order of the published figure to be reproduced from the graph alone. |
 
+
+```mermaid
+flowchart LR
+    subgraph place["1 — place and findspot"]
+        direction TB
+        lado_DiscoverySite["lado:DiscoverySite"]
+        lado_Findspot["lado:Findspot"]
+    end
+    subgraph dating["2 — the dating"]
+        direction TB
+        lado_FindspotDating["lado:FindspotDating"]
+    end
+    subgraph presentation["3 — presentation"]
+        direction TB
+        lado_Figure["lado:Figure"]
+        lado_PlotRow["lado:PlotRow"]
+    end
+    subgraph provenance["provenance"]
+        direction TB
+        lado_DatingModel["lado:DatingModel"]
+    end
+    dcat_Dataset["dcat:Dataset"]
+    prov_Activity["prov:Activity"]
+    time_Instant["time:Instant"]
+    time_TRS["time:TRS"]
+    time_TimePosition["time:TimePosition"]
+    lado_Findspot -->|crm:P89_falls_within| lado_DiscoverySite
+    lado_Findspot -->|crm:P4_has_time-span| lado_FindspotDating
+    lado_FindspotDating -->|time:hasBeginning| time_Instant
+    lado_FindspotDating -->|time:hasEnd| time_Instant
+    time_Instant -->|time:inTimePosition| time_TimePosition
+    time_TimePosition -->|time:hasTRS| time_TRS
+    lado_PlotRow -->|lado:renders| lado_FindspotDating
+    lado_Figure -->|lado:hasRow| lado_PlotRow
+    lado_FindspotDating -->|prov:wasGeneratedBy| prov_Activity
+    prov_Activity -->|prov:hadPlan| lado_DatingModel
+    lado_FindspotDating -->|prov:wasDerivedFrom| dcat_Dataset
+    class lado_DatingModel,lado_DiscoverySite,lado_Figure,lado_Findspot,lado_FindspotDating,lado_PlotRow local
+    class time_Instant,time_TRS,time_TimePosition time
+    class dcat_Dataset,prov_Activity ext
+
+    classDef local fill:#e8eef7,stroke:#4a6b96,stroke-width:1px,color:#12181f
+    classDef crm fill:#efe7f5,stroke:#7a5a96,stroke-width:1px,color:#12181f
+    classDef time fill:#e3f2ec,stroke:#3f8a70,stroke-width:1px,color:#12181f
+    classDef ext fill:#f3f1ec,stroke:#8a857a,stroke-width:1px,color:#12181f
+    classDef io fill:#faf3e3,stroke:#a8872e,stroke-width:1px,color:#12181f
+```
+
+*The class skeleton. Boxes outside the three groups belong to OWL-Time and PROV-O: they carry no layer of ours.*
+
+<sub>Source: [`diagrams/relations.mmd`](diagrams/relations.mmd) — generated, do not edit.</sub>
+
 ## Where each column goes
 
 | SQL column | Subject | Predicate |
@@ -102,6 +154,36 @@ each of the rows, because they describe the drawing and not the findspots.
 | `unc_end_years` | `samian:plotrow_<id>_<hash>` | `lado:uncEndYears` |
 | `unc_interval_years` | `samian:plotrow_<id>_<hash>` | `lado:uncIntervalYears` |
 | `p_k_min, p_k_max, p_tau, p_w` | `samian:DatingModel_v1` | `lado:kMin / kMax / tau / volumeWeight` |
+
+
+```mermaid
+flowchart LR
+    PL["samian:loc_ds_1003978<br/><i>Amiens</i><br/>lado:DiscoverySite"]
+    FS["samian:fs_1003978_969c47<br/><i>Sq. Bocquet pit 1973</i><br/>lado:Findspot"]
+    TS["samian:ts_1003978_969c47<br/>lado:FindspotDating<br/>sigma 12.2 · k 0.6287 · q 0.50"]
+    BG["samian:ts_1003978_969c47_begin<br/>time:Instant"]
+    PO["samian:ts_1003978_969c47_begin_pos<br/>time:TimePosition<br/>numericPosition -16.6"]
+    RW["samian:plotrow_1003978_969c47<br/>lado:PlotRow<br/>uncStartYears 7"]
+
+    FS -->|crm:P89_falls_within| PL
+    FS -->|crm:P4_has_time-span| TS
+    TS -->|time:hasBeginning| BG
+    BG -->|time:inTimePosition| PO
+    RW -->|lado:renders| TS
+
+    class PL,FS,TS,RW local
+    class BG,PO time
+
+    classDef local fill:#e8eef7,stroke:#4a6b96,stroke-width:1px,color:#12181f
+    classDef crm fill:#efe7f5,stroke:#7a5a96,stroke-width:1px,color:#12181f
+    classDef time fill:#e3f2ec,stroke:#3f8a70,stroke-width:1px,color:#12181f
+    classDef ext fill:#f3f1ec,stroke:#8a857a,stroke-width:1px,color:#12181f
+    classDef io fill:#faf3e3,stroke:#a8872e,stroke-width:1px,color:#12181f
+```
+
+*One real findspot, read from the generated graph. Change the model and this picture changes with it.*
+
+<sub>Source: [`diagrams/instance.mmd`](diagrams/instance.mmd) — generated, do not edit.</sub>
 
 ## URIs
 

@@ -92,6 +92,52 @@ PREFIXES = {
 }
 
 # --------------------------------------------------------------------------
+# Beziehungen zwischen den Klassen
+# --------------------------------------------------------------------------
+# Diese Praedikate standen frueher nur inline in build_graph(). Damit waren
+# sie fuer die Dokumentation unsichtbar: ein generiertes Diagramm haette
+# sie abschreiben muessen und waere beim ersten Umbau falsch geworden.
+# Jetzt sind sie einmal deklariert; build_graph() UND make_diagrams.py
+# benutzen dieselben Namen.
+P_FALLS_WITHIN  = CRM.P89_falls_within
+P_HAS_TIME_SPAN = CRM["P4_has_time-span"]
+
+# (Subjektklasse, Praedikat, Objektklasse) — das Geruest des Graphen.
+RELATIONS = [
+    (LADO.Findspot,       P_FALLS_WITHIN,      LADO.DiscoverySite),
+    (LADO.Findspot,       P_HAS_TIME_SPAN,     LADO.FindspotDating),
+    (LADO.FindspotDating, TIME.hasBeginning,   TIME.Instant),
+    (LADO.FindspotDating, TIME.hasEnd,         TIME.Instant),
+    (TIME.Instant,        TIME.inTimePosition, TIME.TimePosition),
+    (TIME.TimePosition,   TIME.hasTRS,         TIME.TRS),
+    (LADO.PlotRow,        LADO.renders,        LADO.FindspotDating),
+    (LADO.Figure,         LADO.hasRow,         LADO.PlotRow),
+    (LADO.FindspotDating, PROV.wasGeneratedBy, PROV.Activity),
+    (PROV.Activity,       PROV.hadPlan,        LADO.DatingModel),
+    (LADO.FindspotDating, PROV.wasDerivedFrom, DCAT.Dataset),
+]
+
+# Zu welcher Schicht gehoert eine Klasse? Steuert die Gruppierung in den
+# Diagrammen und macht die Trennung nachpruefbar statt bloss behauptet.
+LAYERS = {
+    LADO.DiscoverySite:  "place",
+    LADO.Findspot:       "place",
+    LADO.DatedTimeSpan:  "dating",
+    LADO.FindspotDating: "dating",
+    LADO.DatingModel:    "provenance",
+    LADO.PlotRow:        "presentation",
+    LADO.Figure:         "presentation",
+    LADO.Location:       "place",
+}
+LAYER_LABELS = {
+    "place":        "1 — place and findspot",
+    "dating":       "2 — the dating",
+    "presentation": "3 — presentation",
+    "provenance":   "provenance",
+}
+
+
+# --------------------------------------------------------------------------
 # Konstanten der Abbildung (aus IPSDatedSites25.cfm)
 # --------------------------------------------------------------------------
 FIGURE_CONSTANTS = {
@@ -536,8 +582,8 @@ def build_graph(df: pd.DataFrame, era: str, figure_name: str,
         g.add((findspot, RDF.type, LADO.Findspot))
         g.add((findspot, RDFS.label, Literal(str(r.the_findspot))))
         g.add((findspot, SKOS.notation, Literal(fs_slug)))
-        g.add((findspot, CRM.P89_falls_within, place))
-        g.add((findspot, CRM["P4_has_time-span"], ts))
+        g.add((findspot, P_FALLS_WITHIN, place))
+        g.add((findspot, P_HAS_TIME_SPAN, ts))
 
         # --- Zeitspanne ---
         g.add((ts, RDF.type, LADO.FindspotDating))

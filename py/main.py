@@ -9,7 +9,7 @@ Ein Aufruf, vier Schritte:
     3. Zwei Abbildungen nach img/, je SVG + JPG 300 dpi
     4. Rundlaufpruefung CSV -> RDF -> SPARQL, Feld fuer Feld
     5. Standalone-Bundle nach rdf/IPSDatedSites-bundle.ttl
-    6. Dokumentation nach docs/ neu erzeugen
+    6. Dokumentation und Mermaid-Diagramme nach docs/
 
 Aufruf aus der REPO-WURZEL (Windows / VS Code):
 
@@ -161,7 +161,7 @@ def main() -> int:
     # kann. Struktur kommt aus dem Code, Prosa aus py/ips_docs_text.py.
     if not args.skip_docs:
         rule("6 · Dokumentation")
-        for pth in make_docs.build(args.docs_out):
+        for pth in make_docs.build(args.docs_out, gr):
             print(f"  {pth.relative_to(ROOT)}")
 
     rule("Ergebnis")

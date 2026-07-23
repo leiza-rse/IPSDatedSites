@@ -1,0 +1,18 @@
+flowchart LR
+    I["samian:fs_1003978_969c47<br/>one findspot"]
+    A["lado:Findspot"]
+    I -->|rdf:type, asserted| A
+    crm_E53_Place["crm:E53_Place"]
+    I -.->|rdf:type, materialised| crm_E53_Place
+    lado_Location["lado:Location"]
+    I -.->|rdf:type, materialised| lado_Location
+    class I io
+    class A local
+    class crm_E53_Place crm
+    class lado_Location local
+
+    classDef local fill:#e8eef7,stroke:#4a6b96,stroke-width:1px,color:#12181f
+    classDef crm fill:#efe7f5,stroke:#7a5a96,stroke-width:1px,color:#12181f
+    classDef time fill:#e3f2ec,stroke:#3f8a70,stroke-width:1px,color:#12181f
+    classDef ext fill:#f3f1ec,stroke:#8a857a,stroke-width:1px,color:#12181f
+    classDef io fill:#faf3e3,stroke:#a8872e,stroke-width:1px,color:#12181f

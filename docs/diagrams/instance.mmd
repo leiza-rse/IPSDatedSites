@@ -1,0 +1,22 @@
+flowchart LR
+    PL["samian:loc_ds_1003978<br/><i>Amiens</i><br/>lado:DiscoverySite"]
+    FS["samian:fs_1003978_969c47<br/><i>Sq. Bocquet pit 1973</i><br/>lado:Findspot"]
+    TS["samian:ts_1003978_969c47<br/>lado:FindspotDating<br/>sigma 12.2 · k 0.6287 · q 0.50"]
+    BG["samian:ts_1003978_969c47_begin<br/>time:Instant"]
+    PO["samian:ts_1003978_969c47_begin_pos<br/>time:TimePosition<br/>numericPosition -16.6"]
+    RW["samian:plotrow_1003978_969c47<br/>lado:PlotRow<br/>uncStartYears 7"]
+
+    FS -->|crm:P89_falls_within| PL
+    FS -->|crm:P4_has_time-span| TS
+    TS -->|time:hasBeginning| BG
+    BG -->|time:inTimePosition| PO
+    RW -->|lado:renders| TS
+
+    class PL,FS,TS,RW local
+    class BG,PO time
+
+    classDef local fill:#e8eef7,stroke:#4a6b96,stroke-width:1px,color:#12181f
+    classDef crm fill:#efe7f5,stroke:#7a5a96,stroke-width:1px,color:#12181f
+    classDef time fill:#e3f2ec,stroke:#3f8a70,stroke-width:1px,color:#12181f
+    classDef ext fill:#f3f1ec,stroke:#8a857a,stroke-width:1px,color:#12181f
+    classDef io fill:#faf3e3,stroke:#a8872e,stroke-width:1px,color:#12181f

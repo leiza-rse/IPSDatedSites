@@ -27,6 +27,42 @@ substituting a default.
 | [Bundle](bundle.md) | The standalone file for a triplestore, and why the crosswalk is materialised |
 | [Open questions](open-questions.md) | What remains unresolved and why it matters |
 
+
+```mermaid
+flowchart LR
+    DB[("PostgreSQL<br/>Samian Research / IPS")]
+    SQL["IPSDatedSites25_final.sql<br/>one row per findspot"]
+    CSV["data/*.csv"]
+    EXP["py/ips_rdf_export.py"]
+    RDF["rdf/<br/>ips_sites_dating_v1.ttl<br/>ips_sites_dating_v1.jsonld<br/>lado_dating_extension.ttl<br/>IPSDatedSites-bundle.ttl"]
+    SPQ["py/ips_sparql.py<br/>reads everything back"]
+    REN["py/ips_render.py"]
+    IMG["img/<br/>plot_v1_classic<br/>plot_v2_modern"]
+    DOC["py/make_docs.py<br/>py/make_diagrams.py"]
+    DOCS["docs/"]
+    CHK{"round trip<br/>17 fields compared"}
+
+    DB --> SQL --> CSV --> EXP --> RDF --> SPQ --> REN --> IMG
+    EXP --> DOC --> DOCS
+    SPQ --> CHK
+    CSV -.-> CHK
+
+    class DB,SQL,CSV io
+    class RDF,IMG,DOCS ext
+    class EXP,SPQ,REN,DOC local
+    class CHK time
+
+    classDef local fill:#e8eef7,stroke:#4a6b96,stroke-width:1px,color:#12181f
+    classDef crm fill:#efe7f5,stroke:#7a5a96,stroke-width:1px,color:#12181f
+    classDef time fill:#e3f2ec,stroke:#3f8a70,stroke-width:1px,color:#12181f
+    classDef ext fill:#f3f1ec,stroke:#8a857a,stroke-width:1px,color:#12181f
+    classDef io fill:#faf3e3,stroke:#a8872e,stroke-width:1px,color:#12181f
+```
+
+*The pipeline. Everything after the export reads from the graph, never from the CSV — apart from the round-trip check, which compares the two.*
+
+<sub>Source: [`diagrams/architecture.mmd`](diagrams/architecture.mmd) — generated, do not edit.</sub>
+
 ## The shape of it in one paragraph
 
 A findspot (`lado:Findspot`, beneath `crm:E53_Place`) falls within a
