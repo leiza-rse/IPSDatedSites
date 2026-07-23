@@ -26,7 +26,7 @@ authors:
 license: MIT
 version: "1.0.0"
 date-released: "2026-01-01"  # TODO: confirm release date
-repository-code: "https://github.com/ORGANISATION/IPSDatedSites"  # TODO: insert URL
+repository-code: "https://github.com/leiza-rse/IPSDatedSites"
 # doi: "10.5281/zenodo.XXXXXXX"  # TODO: add Zenodo DOI once minted
 keywords:
   - linked open data

@@ -17,6 +17,8 @@ on:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write        # der Render-Schritt committet img/diagrams/
     steps:
       - uses: actions/checkout@v5
 
@@ -67,11 +69,16 @@ jobs:
         # actual change to the figures. requirements.txt therefore pins
         # exact versions; if this step fails, compare the versions printed
         # by "Record the environment" against the local ones first.
+        #
+        # img/diagrams/ is excluded: those are rendered by this workflow,
+        # not by the Python pipeline, so the working tree cannot be
+        # expected to contain them before the render step has run.
         run: |
-          if ! git diff --quiet -- img; then
+          if ! git diff --quiet -- img ':!img/diagrams'; then
             echo "::error::img/ differs. Check the library versions above against your local ones, then run 'python py/main.py' and commit."
-            git diff --stat -- img
-            git diff -- img | grep -E '^[-+].*(Matplotlib v|clip-path)' | head -20
+            git diff --stat -- img ':!img/diagrams'
+            git diff -- img ':!img/diagrams' \
+              | grep -E '^[-+].*(Matplotlib v|clip-path)' | head -20
             exit 1
           fi
           echo "img/ matches the code."
@@ -102,25 +109,74 @@ jobs:
           print("Bundle resolves CIDOC CRM queries with no reasoner.")
           PY
 
-      - name: Validate the Mermaid sources
-        # The .mmd files are generated, but a change to the generator can
-        # still emit syntax Mermaid rejects — and a diagram that fails to
-        # parse renders as nothing on GitHub, silently.
+      - name: Render the diagrams to SVG and JPG
+        # The .mmd files are the source; these are the rendered artefacts.
+        # Rendering happens here rather than in py/main.py because it needs
+        # Node and a headless browser, which the Windows working
+        # environment does not have. The pipeline therefore stays pure
+        # Python and CI supplies the pictures.
+        #
+        # This step doubles as the syntax check: mmdc exits non-zero on a
+        # diagram Mermaid cannot parse, and a diagram that fails to parse
+        # renders as nothing on GitHub, silently.
         run: |
           npm install --no-save @mermaid-js/mermaid-cli
-          mkdir -p /tmp/mmd-out
+          mkdir -p img/diagrams
+          echo '{"args":["--no-sandbox","--disable-dev-shm-usage"]}' > /tmp/pptr.json
           for f in docs/diagrams/*.mmd; do
-            npx --no-install mmdc -i "$f" -o "/tmp/mmd-out/$(basename "${f%.mmd}").svg" \
-              --puppeteerConfigFile <(echo '{"args":["--no-sandbox"]}') \
-              && echo "  OK  $f" || { echo "::error::Mermaid rejected $f"; exit 1; }
+            n=$(basename "${f%.mmd}")
+            npx --no-install mmdc -i "$f" -o "img/diagrams/$n.svg" \
+              -b white -p /tmp/pptr.json \
+              || { echo "::error::Mermaid rejected $f"; exit 1; }
+            npx --no-install mmdc -i "$f" -o "/tmp/$n.png" \
+              -b white -s 4 -p /tmp/pptr.json \
+              || { echo "::error::PNG rendering failed for $f"; exit 1; }
+            echo "  rendered $n"
           done
 
+      - name: Convert the renderings to JPG
+        # mmdc writes PNG; the house convention for figures is JPG at high
+        # resolution alongside the SVG, so the diagrams follow the same
+        # convention as img/plot_v1_classic and img/plot_v2_modern.
+        # Scale 4 gives roughly 300 dpi at the diagrams' natural size.
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+
+          for png in sorted(Path("/tmp").glob("*.png")):
+              im = Image.open(png)
+              # JPEG has no alpha channel: flatten onto white rather than
+              # letting the converter pick a background.
+              if im.mode in ("RGBA", "LA", "P"):
+                  im = im.convert("RGBA")
+                  flat = Image.new("RGB", im.size, (255, 255, 255))
+                  flat.paste(im, mask=im.split()[-1])
+                  im = flat
+              out = Path("img/diagrams") / f"{png.stem}.jpg"
+              im.convert("RGB").save(out, "JPEG", quality=92, optimize=True)
+              print(f"  {out}  {im.size[0]}x{im.size[1]}")
+          PY
+
+      - name: Commit the rendered diagrams
+        # Committed so that the links under each diagram in docs/ resolve
+        # to a real file. A commit made with GITHUB_TOKEN does not trigger
+        # another workflow run, so this cannot loop.
+        run: |
+          if git diff --quiet -- img/diagrams; then
+            echo "Rendered diagrams unchanged."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add img/diagrams
+          git commit -m "Render diagrams from docs/diagrams/*.mmd [skip ci]"
+          git push
+        if: github.event_name == 'push'
+
       - name: Upload the rendered diagrams
-        # Not committed to the repository: on GitHub and on Pages the
-        # diagrams render from source. These SVGs are here for anyone who
-        # needs them for print or for an appendix.
         uses: actions/upload-artifact@v4
         with:
-          name: diagrams-svg
-          path: /tmp/mmd-out/*.svg
+          name: diagrams
+          path: img/diagrams/*
           if-no-files-found: error

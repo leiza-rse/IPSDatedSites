@@ -268,7 +268,8 @@ Fünf Schritte:
 3. `git diff` auf `docs/`, getrennt davon auf `img/`
 4. RDF semantisch prüfen: parst alles, und beantwortet das Bundle
    CIDOC-CRM-Abfragen ohne Reasoner?
-5. Mermaid-Quellen durch `mmdc` schicken; die SVGs landen als Artefakt
+5. Diagramme rendern: `.mmd` → SVG und JPG nach `img/diagrams/`, per
+   Bot-Commit ins Repo
 
 Die beiden Diff-Prüfungen sind **getrennt**, weil ihre Fehlerursachen es
 sind. `docs/` ist reiner Text aus den Code-Strukturen und auf jeder
@@ -286,6 +287,26 @@ Prüfung also aussagekräftig.
 
 Getestet: Code geändert ohne neu zu erzeugen → Action schlägt an;
 undokumentierte Property → Pipeline endet mit Exitcode 1.
+
+## Gerenderte Diagramme
+
+Unter jedem Diagramm in `docs/` stehen drei Verweise: **JPG**, **SVG** und
+die **Mermaid-Quelle**. Sie zeigen absolut auf github.com, nicht relativ —
+ein relativer Link auf `diagrams/*.mmd` funktioniert im Repo, aber nicht
+auf GitHub Pages, weil `docs/_config.yml` die `.mmd` dort gar nicht
+ausliefert.
+
+Gerendert wird in der Action, nicht in `py/main.py`: `mmdc` braucht Node
+und einen Headless-Browser, und die Windows-Arbeitsumgebung hat beides
+nicht. Die Pipeline bleibt dadurch reines Python, CI liefert die Bilder
+nach — SVG plus JPG bei Skalierung 4, also grob 300 dpi. Dieselbe
+Konvention wie bei den beiden Hauptabbildungen.
+
+Der Bot-Commit trägt `[skip ci]`, und ein Commit mit `GITHUB_TOKEN` löst
+ohnehin keinen weiteren Workflow-Lauf aus — eine Schleife ist also nicht
+möglich. `img/diagrams/` ist von der Byte-Prüfung auf `img/` ausgenommen,
+weil die Dateien erst später im selben Lauf entstehen und nicht aus der
+Python-Pipeline stammen.
 
 ## Warum die Versionen exakt gepinnt sind
 
