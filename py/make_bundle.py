@@ -76,6 +76,8 @@ COUNTED = [
     (X.LADO.Findspot, "findspots"),
     (X.LADO.FindspotDating, "datings"),
     (X.LADO.PlotRow, "plot rows"),
+    (X.LADO.DatingActivity, "activities"),
+    (X.CRM.E7_Activity, "CIDOC CRM activities (after materialisation)"),
     (X.CRM.E53_Place, "CIDOC CRM places (after materialisation)"),
     (X.CRM["E52_Time-Span"], "CIDOC CRM time-spans (after materialisation)"),
     (X.TIME.ProperInterval, "OWL-Time intervals (after materialisation)"),
@@ -143,11 +145,26 @@ def materialise(g: Graph) -> int:
 
 
 # --------------------------------------------------------------------------
+def type_bundle_node(g: Graph, bundle_uri: URIRef) -> None:
+    """
+    Nur die Typen des Bundle-Knotens.
+
+    Getrennt von describe() und VOR der Materialisierung aufgerufen: sonst
+    bekaeme ausgerechnet der Knoten, der das Bundle beschreibt, seine
+    CRM-Oberklassen nicht mehr und waere die einzige Instanz im Graphen,
+    die aus CIDOC-CRM-Sicht nicht existiert.
+    """
+    g.add((bundle_uri, RDF.type, VOID.Dataset))
+    g.add((bundle_uri, RDF.type, DCAT.Dataset))
+    g.add((bundle_uri, RDF.type, X.CRMDIG.D1_Digital_Object))
+
+
 def describe(g: Graph, bundle_uri: URIRef, inferred: int) -> None:
     """A self-description, so an ingesting catalogue knows what it has."""
     now = datetime.now(timezone.utc)
-    g.add((bundle_uri, RDF.type, VOID.Dataset))
-    g.add((bundle_uri, RDF.type, DCAT.Dataset))
+    # Wie der Export-Datensatz: ueber D1 erreicht auch die
+    # Selbstbeschreibung crm:E73_Information_Object.
+    g.add((bundle_uri, RDF.type, X.CRMDIG.D1_Digital_Object))
     g.add((bundle_uri, DCTERMS.title, Literal(
         "IPS dated sites — data, vocabulary and materialised CRM crosswalk",
         lang="en")))
@@ -197,11 +214,11 @@ def build(data: Graph, onto: Graph, out: Path,
         g.add(t)
     n_data = len(g) - n_onto
 
-    typed = type_discovery_sites(g) if do_type_sites else 0
-    inferred = materialise(g) if do_materialise else 0
-
     bundle_uri = X.SAMIAN["bundle_IPSDatedSites"]
-    describe(g, bundle_uri, inferred)
+    typed = type_discovery_sites(g) if do_type_sites else 0
+    type_bundle_node(g, bundle_uri)          # vor der Materialisierung
+    inferred = materialise(g) if do_materialise else 0
+    describe(g, bundle_uri, inferred)        # Zaehlungen danach
 
     out.parent.mkdir(parents=True, exist_ok=True)
     g.serialize(destination=out, format="turtle", encoding="utf-8")
@@ -209,6 +226,36 @@ def build(data: Graph, onto: Graph, out: Path,
     stats = {"ontology": n_onto, "data": n_data, "sites_typed": typed,
              "inferred": inferred, "total": len(g)}
     return out, stats
+
+
+# Klassen, die zum Vokabular gehoeren und keine Instanzen der
+# Anwendungsdomaene sind. Eine owl:Class ist kein Ding in der Welt.
+VOCABULARY_TYPES = {OWL.Class, OWL.DatatypeProperty, OWL.ObjectProperty,
+                    OWL.Ontology}
+
+
+def unanchored_instances(g: Graph) -> list[tuple]:
+    """
+    Instanzen von Anwendungsklassen ohne CIDOC-CRM-Typ.
+
+    Die Zusage lautet: JEDE Instanz einer Anwendungsklasse traegt einen
+    CRM-Typ, direkt oder ueber eine CRM-Erweiterung, die selbst in CRM
+    verankert ist. Fuer Properties gilt das nicht — wo eine OWL-Time- oder
+    PROV-Property besser passt, wird sie benutzt.
+
+    Die Zusage geht leicht verloren: eine neue Klasse ohne CRM-Oberklasse
+    faellt niemandem auf, weil alles andere weiterlaeuft. Deshalb wird sie
+    gemessen und nicht angenommen.
+    """
+    crm = str(X.CRM)
+    out = []
+    for s in {s for s in g.subjects(RDF.type, None)}:
+        types = set(g.objects(s, RDF.type))
+        if types & VOCABULARY_TYPES:
+            continue
+        if not any(str(t).startswith(crm) for t in types):
+            out.append((s, tuple(sorted(str(t) for t in types))))
+    return out
 
 
 def verify(path: Path) -> dict[str, int]:
@@ -230,6 +277,13 @@ def verify(path: Path) -> dict[str, int]:
         "time:ProperInterval": """PREFIX time: <http://www.w3.org/2006/time#>
             SELECT (COUNT(DISTINCT ?x) AS ?n)
             WHERE { ?x a time:ProperInterval }""",
+        "crm:E7_Activity": """PREFIX crm: <http://www.cidoc-crm.org/cidoc-crm/>
+            SELECT (COUNT(DISTINCT ?x) AS ?n)
+            WHERE { ?x a crm:E7_Activity }""",
+        "crm:E29_Design_or_Procedure":
+            """PREFIX crm: <http://www.cidoc-crm.org/cidoc-crm/>
+            SELECT (COUNT(DISTINCT ?x) AS ?n)
+            WHERE { ?x a crm:E29_Design_or_Procedure }""",
         "CRM-only path": """
             PREFIX crm: <http://www.cidoc-crm.org/cidoc-crm/>
             PREFIX time: <http://www.w3.org/2006/time#>
@@ -240,7 +294,16 @@ def verify(path: Path) -> dict[str, int]:
                   time:hasBeginning/time:inTimePosition/time:numericPosition ?y .
             }""",
     }
-    return {k: int(list(g.query(q))[0][0]) for k, q in checks.items()}
+    result = {k: int(list(g.query(q))[0][0]) for k, q in checks.items()}
+    loose = unanchored_instances(g)
+    if loose:
+        raise SystemExit(
+            "Instanzen ohne CIDOC-CRM-Anker:\n  "
+            + "\n  ".join(f"{s} — {', '.join(t)}" for s, t in loose[:10]))
+    total = sum(1 for s in {s for s in g.subjects(RDF.type, None)}
+                if not set(g.objects(s, RDF.type)) & VOCABULARY_TYPES)
+    result["instances anchored in CRM"] = total
+    return result
 
 
 # --------------------------------------------------------------------------

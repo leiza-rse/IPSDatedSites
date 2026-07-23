@@ -31,6 +31,7 @@ procedure.
 | `dcat` | `http://www.w3.org/ns/dcat#` |
 | `dcterms` | `http://purl.org/dc/terms/` |
 | `skos` | `http://www.w3.org/2004/02/skos/core#` |
+| `crmdig` | `http://www.ics.forth.gr/isl/CRMdig/` |
 | `pleiades` | `https://pleiades.stoa.org/places/` |
 | `owl` | `http://www.w3.org/2002/07/owl#` |
 | `xsd` | `http://www.w3.org/2001/XMLSchema#` |
@@ -44,9 +45,17 @@ procedure.
 | `lado:Findspot` | `lado:Findspot` → `lado:Location` → `crm:E53_Place` |
 | `lado:DatedTimeSpan` | `lado:DatedTimeSpan` → `crm:E52_Time-Span`<br>`lado:DatedTimeSpan` → `time:ProperInterval` |
 | `lado:FindspotDating` | `lado:FindspotDating` → `lado:DatedTimeSpan` → `crm:E52_Time-Span`<br>`lado:FindspotDating` → `lado:DatedTimeSpan` → `time:ProperInterval` |
+| `lado:DatingInstant` | `lado:DatingInstant` → `crm:E52_Time-Span`<br>`lado:DatingInstant` → `time:Instant` |
+| `lado:DatingTimePosition` | `lado:DatingTimePosition` → `crm:E54_Dimension`<br>`lado:DatingTimePosition` → `time:TimePosition` |
+| `lado:YearScale` | `lado:YearScale` → `crm:E73_Information_Object`<br>`lado:YearScale` → `time:TRS` |
 | `lado:DatingModel` | `lado:DatingModel` → `crm:E29_Design_or_Procedure`<br>`lado:DatingModel` → `prov:Plan` |
+| `lado:DatingActivity` | `lado:DatingActivity` → `crmdig:D10_Software_Execution` → `crmdig:D7_Digital_Machine_Event` → `crm:E11_Modification` → `crm:E7_Activity`<br>`lado:DatingActivity` → `crmdig:D10_Software_Execution` → `crmdig:D7_Digital_Machine_Event` → `crm:E65_Creation` → `crm:E7_Activity`<br>`lado:DatingActivity` → `prov:Activity` |
 | `lado:Figure` | `lado:Figure` → `crm:E36_Visual_Item` |
 | `lado:PlotRow` | `lado:PlotRow` → `crm:E36_Visual_Item` |
+
+Rows for classes reached through CRMdig continue past the extension into
+CIDOC CRM itself, because the axioms that carry them there are restated
+in the vocabulary file — see the note under `crmdig` below.
 
 Each row gives the complete path, not just the immediate parent, because
 the immediate parent is often another local class and hides where the
@@ -64,6 +73,18 @@ intended sense, rather than local equivalents:
 |---|---|
 | Findspot within its site | `crm:P89_falls_within` |
 | Findspot to its dating | `crm:P4_has_time-span` |
+| Outer bounds of a dating | `crm:P82a_begin_of_the_begin`, `crm:P82b_end_of_the_end` |
+
+The last row exists because typing a node is not the same as making it
+readable. Before it was added, a consumer working only in CIDOC CRM could
+follow a findspot to its time-span — all 41 of them — and then find the
+span empty, because the years hung solely behind OWL-Time. The two CRM
+properties carry the interval bounds as `xsd:gYear`, so the dating can be
+read without OWL-Time at all.
+
+They are rounded to whole years, as `time:inXSDgYear` is. The exact
+position stays in `time:numericPosition`; these two triples are the
+bridge into CRM, not the authoritative figure.
 
 
 ```mermaid
@@ -82,20 +103,39 @@ flowchart BT
     lado_DatedTimeSpan -->|subClassOf| time_ProperInterval
     lado_FindspotDating["lado:FindspotDating"]
     lado_FindspotDating -->|subClassOf| lado_DatedTimeSpan
+    lado_DatingInstant["lado:DatingInstant"]
+    time_Instant["time:Instant"]
+    lado_DatingInstant -->|subClassOf| time_Instant
+    lado_DatingInstant -->|subClassOf| crm_E52_Time_Span
+    lado_DatingTimePosition["lado:DatingTimePosition"]
+    time_TimePosition["time:TimePosition"]
+    lado_DatingTimePosition -->|subClassOf| time_TimePosition
+    crm_E54_Dimension["crm:E54_Dimension"]
+    lado_DatingTimePosition -->|subClassOf| crm_E54_Dimension
+    lado_YearScale["lado:YearScale"]
+    time_TRS["time:TRS"]
+    lado_YearScale -->|subClassOf| time_TRS
+    crm_E73_Information_Object["crm:E73_Information_Object"]
+    lado_YearScale -->|subClassOf| crm_E73_Information_Object
     lado_DatingModel["lado:DatingModel"]
     prov_Plan["prov:Plan"]
     lado_DatingModel -->|subClassOf| prov_Plan
     crm_E29_Design_or_Procedure["crm:E29_Design_or_Procedure"]
     lado_DatingModel -->|subClassOf| crm_E29_Design_or_Procedure
+    lado_DatingActivity["lado:DatingActivity"]
+    prov_Activity["prov:Activity"]
+    lado_DatingActivity -->|subClassOf| prov_Activity
+    crmdig_D10_Software_Execution["crmdig:D10_Software_Execution"]
+    lado_DatingActivity -->|subClassOf| crmdig_D10_Software_Execution
     lado_Figure["lado:Figure"]
     crm_E36_Visual_Item["crm:E36_Visual_Item"]
     lado_Figure -->|subClassOf| crm_E36_Visual_Item
     lado_PlotRow["lado:PlotRow"]
     lado_PlotRow -->|subClassOf| crm_E36_Visual_Item
-    class lado_DatedTimeSpan,lado_DatingModel,lado_DiscoverySite,lado_Figure,lado_Findspot,lado_FindspotDating,lado_Location,lado_PlotRow local
-    class crm_E29_Design_or_Procedure,crm_E36_Visual_Item,crm_E52_Time_Span,crm_E53_Place crm
-    class time_ProperInterval time
-    class prov_Plan ext
+    class lado_DatedTimeSpan,lado_DatingActivity,lado_DatingInstant,lado_DatingModel,lado_DatingTimePosition,lado_DiscoverySite,lado_Figure,lado_Findspot,lado_FindspotDating,lado_Location,lado_PlotRow,lado_YearScale local
+    class crm_E29_Design_or_Procedure,crm_E36_Visual_Item,crm_E52_Time_Span,crm_E53_Place,crm_E54_Dimension,crm_E73_Information_Object crm
+    class time_Instant,time_ProperInterval,time_TRS,time_TimePosition time
+    class crmdig_D10_Software_Execution,prov_Activity,prov_Plan ext
 
     classDef local fill:#e8eef7,stroke:#4a6b96,stroke-width:1px,color:#12181f
     classDef crm fill:#efe7f5,stroke:#7a5a96,stroke-width:1px,color:#12181f
@@ -157,6 +197,55 @@ Used for the ontology declaration and for version information.
 ### `xsd` — `http://www.w3.org/2001/XMLSchema#`
 
 Supplies the literal datatypes.
+
+## Which instances carry a CIDOC CRM type
+
+Every class in this vocabulary reaches CIDOC CRM, but that is a weaker
+statement than it sounds, because not every node in the graph is an
+instance of one of those classes. The honest position:
+
+| Group | CRM type | Why |
+|---|---|---|
+| Findspots, sites, datings, plot rows, figures, activities, the model | yes | the substance of the export |
+| The export and the bundle themselves | yes, via `crmdig:D1_Digital_Object` | reaching `crm:E73_Information_Object` |
+| The exporting software | yes, via `crmdig:D14_Software` | likewise |
+| `time:Instant`, `time:TimePosition` | no | CIDOC CRM has no class for an interval endpoint as a node; it expresses boundaries as properties of the time-span, which is why `crm:P82a_begin_of_the_begin` and `crm:P82b_end_of_the_end` are supplied |
+| `time:TRS` | no | a temporal reference system has no CRM counterpart |
+| `prov:Association` blank nodes | no | reification of an association, structural rather than a thing in the world |
+| `owl:Class`, `owl:DatatypeProperty`, `owl:ObjectProperty`, `owl:Ontology` | no | the vocabulary itself, not data described by it |
+
+Forcing the last four groups into CIDOC CRM would be worse modelling than
+leaving them alone: a reference system is not an `E55 Type`, and an
+`owl:Class` is not an `E1 CRM Entity` in any useful sense. What matters
+is not that every node carries a CRM type but that a CRM-only consumer
+can reach everything it needs, which is what the property bridge above
+secures.
+
+## Every instance reaches CIDOC CRM
+
+The rule this export holds to is stricter than it first appears: **every
+instance of an application class carries a CIDOC CRM type**, whether
+directly or through an extension that is itself anchored in CRM. It is
+not enough for the local classes to have CRM superclasses on paper — the
+instances have to arrive there.
+
+Properties are exempt. Where an OWL-Time or PROV-O property expresses the
+relation better, it is used; only classes are held to the rule.
+
+Two consequences shaped the model. Interval boundaries became
+`lado:DatingInstant` and `lado:DatingTimePosition` rather than bare
+`time:Instant` and `time:TimePosition` nodes, so that they could be
+anchored in `crm:E52_Time-Span` and `crm:E54_Dimension` without asserting
+anything about OWL-Time in general. And the PROV qualified-association
+pattern was dropped: a reification node is not a thing in the world and
+CIDOC CRM has no class for one. The two statements it carried are now
+made directly, with `prov:used` and `crm:P33_used_specific_technique`,
+which say the same and are valid in both vocabularies.
+
+The rule is checked on every run rather than assumed, because a new class
+without a CRM superclass breaks nothing visible and would otherwise go
+unnoticed. The bundle builder counts the instances and refuses to write a
+file that contains an unanchored one.
 
 ## Notes for knowledge-graph integration
 

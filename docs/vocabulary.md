@@ -45,11 +45,35 @@ A time-span inferred from dated material rather than recorded directly. Sits ben
 
 The dating of one findspot derived from samian potters' stamps. The interval is a 'virtual fuzzy year' of the form m ± k·σ and is explicitly NOT a confidence interval: it carries no probabilistic claim about where the true date lies.
 
+### `lado:DatingInstant`
+
+*Dating instant* — subclass of `time:Instant`, `crm:E52_Time-Span`
+
+One boundary of a dated interval. A local class rather than a bare time:Instant so that it can be anchored in CIDOC CRM without making any claim about time:Instant in general: crm:E52_Time-Span is the CRM notion of a temporal extent, and this one has zero duration. Every instance of an application class in this export reaches CIDOC CRM, and the boundaries are no exception — without the anchor a CRM-only consumer would see a time-span whose ends did not exist.
+
+### `lado:DatingTimePosition`
+
+*Dating time position* — subclass of `time:TimePosition`, `crm:E54_Dimension`
+
+The numeric value of a boundary together with the scale it is read on. Structurally a crm:E54_Dimension: time:numericPosition corresponds to P90 has value and time:hasTRS to P91 has unit. Kept as a local subclass so the alignment is stated here rather than asserted about OWL-Time itself.
+
+### `lado:YearScale`
+
+*Year scale* — subclass of `time:TRS`, `crm:E73_Information_Object`
+
+The temporal reference system the numeric positions are read on. A documented convention, and therefore a crm:E73_Information_Object. Its definition matters because the positions are signed years on a continuous line, not calendar labels — see eraConvention.
+
 ### `lado:DatingModel`
 
 *Dating model* — subclass of `prov:Plan`, `crm:E29_Design_or_Procedure`
 
 The parameterisation from which the intervals were computed. Holds k_min, k_max, τ, w and the fuzziness divisor, so a reader can recompute any interval from the exported figures alone. It sits beneath prov:Plan and beneath crm:E29_Design_or_Procedure, the CIDOC CRM class for a documented procedure; without the second parent this would be the one local class that never reaches CIDOC CRM, and a CRM-only consumer could see the datings but not the method behind them.
+
+### `lado:DatingActivity`
+
+*Dating activity* — subclass of `prov:Activity`, `crmdig:D10_Software_Execution`
+
+The computation that produced one dating. It sits beneath crmdig:D10_Software_Execution, whose scope note describes precisely this: a run completely determined by its digital input, the software and the generic properties of the device. Using CRMdig rather than reaching for crm:E7_Activity directly means the alignment has been done by the extension's authors — D10 leads through D7 and E11/E65 to E7_Activity — instead of this vocabulary deciding on its own whether a script run counts as an action intentionally carried out by an actor.
 
 ### `lado:Figure`
 

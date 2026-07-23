@@ -15,10 +15,10 @@ flowchart LR
     end
     subgraph provenance["provenance"]
         direction TB
+        lado_DatingActivity["lado:DatingActivity"]
         lado_DatingModel["lado:DatingModel"]
     end
     dcat_Dataset["dcat:Dataset"]
-    prov_Activity["prov:Activity"]
     time_Instant["time:Instant"]
     time_TRS["time:TRS"]
     time_TimePosition["time:TimePosition"]
@@ -30,12 +30,12 @@ flowchart LR
     time_TimePosition -->|time:hasTRS| time_TRS
     lado_PlotRow -->|lado:renders| lado_FindspotDating
     lado_Figure -->|lado:hasRow| lado_PlotRow
-    lado_FindspotDating -->|prov:wasGeneratedBy| prov_Activity
-    prov_Activity -->|prov:hadPlan| lado_DatingModel
+    lado_FindspotDating -->|prov:wasGeneratedBy| lado_DatingActivity
+    lado_DatingActivity -->|prov:hadPlan| lado_DatingModel
     lado_FindspotDating -->|prov:wasDerivedFrom| dcat_Dataset
-    class lado_DatingModel,lado_DiscoverySite,lado_Figure,lado_Findspot,lado_FindspotDating,lado_PlotRow local
+    class lado_DatingActivity,lado_DatingModel,lado_DiscoverySite,lado_Figure,lado_Findspot,lado_FindspotDating,lado_PlotRow local
     class time_Instant,time_TRS,time_TimePosition time
-    class dcat_Dataset,prov_Activity ext
+    class dcat_Dataset ext
 
     classDef local fill:#e8eef7,stroke:#4a6b96,stroke-width:1px,color:#12181f
     classDef crm fill:#efe7f5,stroke:#7a5a96,stroke-width:1px,color:#12181f

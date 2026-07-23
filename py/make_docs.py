@@ -392,7 +392,13 @@ def page_crosswalk(out: Path) -> Path:
             notes.append(f"### `{pfx}` — `{X.PREFIXES[pfx]}`\n\n"
                          f"{T.CROSSWALK_NOTES[pfx]}\n")
 
+    # Die wiederholten CRMdig- und CIDOC-CRM-Axiome gehoeren in die Kette:
+    # ohne sie endete lado:DatingActivity sichtbar bei D10, und dass die
+    # Kette von dort bis crm:E7_Activity weiterlaeuft, ist genau die
+    # Aussage, die diese Tabelle belegen soll.
     direct = {c: list(sup) for c, sup, _l, _d in X.CLASSES}
+    for sub, sup in X.EXTERNAL_AXIOMS:
+        direct.setdefault(sub, []).append(sup)
     rows = []
     for c, _sup, _l, _d in X.CLASSES:
         paths = subclass_paths(c, direct)
@@ -429,6 +435,10 @@ procedure.
 |---|---|
 {hierarchy}
 
+Rows for classes reached through CRMdig continue past the extension into
+CIDOC CRM itself, because the axioms that carry them there are restated
+in the vocabulary file — see the note under `crmdig` below.
+
 Each row gives the complete path, not just the immediate parent, because
 the immediate parent is often another local class and hides where the
 chain actually terminates. Where a class has two superclasses the chain
@@ -445,11 +455,72 @@ intended sense, rather than local equivalents:
 |---|---|
 | Findspot within its site | `crm:P89_falls_within` |
 | Findspot to its dating | `crm:P4_has_time-span` |
+| Outer bounds of a dating | `crm:P82a_begin_of_the_begin`, `crm:P82b_end_of_the_end` |
+
+The last row exists because typing a node is not the same as making it
+readable. Before it was added, a consumer working only in CIDOC CRM could
+follow a findspot to its time-span — all 41 of them — and then find the
+span empty, because the years hung solely behind OWL-Time. The two CRM
+properties carry the interval bounds as `xsd:gYear`, so the dating can be
+read without OWL-Time at all.
+
+They are rounded to whole years, as `time:inXSDgYear` is. The exact
+position stays in `time:numericPosition`; these two triples are the
+bridge into CRM, not the authoritative figure.
 
 {diagram("hierarchy", "Every path ends in an external vocabulary. That is the whole claim of the crosswalk.")}
 ## Per-vocabulary notes
 
 {chr(10).join(notes)}
+## Which instances carry a CIDOC CRM type
+
+Every class in this vocabulary reaches CIDOC CRM, but that is a weaker
+statement than it sounds, because not every node in the graph is an
+instance of one of those classes. The honest position:
+
+| Group | CRM type | Why |
+|---|---|---|
+| Findspots, sites, datings, plot rows, figures, activities, the model | yes | the substance of the export |
+| The export and the bundle themselves | yes, via `crmdig:D1_Digital_Object` | reaching `crm:E73_Information_Object` |
+| The exporting software | yes, via `crmdig:D14_Software` | likewise |
+| `time:Instant`, `time:TimePosition` | no | CIDOC CRM has no class for an interval endpoint as a node; it expresses boundaries as properties of the time-span, which is why `crm:P82a_begin_of_the_begin` and `crm:P82b_end_of_the_end` are supplied |
+| `time:TRS` | no | a temporal reference system has no CRM counterpart |
+| `prov:Association` blank nodes | no | reification of an association, structural rather than a thing in the world |
+| `owl:Class`, `owl:DatatypeProperty`, `owl:ObjectProperty`, `owl:Ontology` | no | the vocabulary itself, not data described by it |
+
+Forcing the last four groups into CIDOC CRM would be worse modelling than
+leaving them alone: a reference system is not an `E55 Type`, and an
+`owl:Class` is not an `E1 CRM Entity` in any useful sense. What matters
+is not that every node carries a CRM type but that a CRM-only consumer
+can reach everything it needs, which is what the property bridge above
+secures.
+
+## Every instance reaches CIDOC CRM
+
+The rule this export holds to is stricter than it first appears: **every
+instance of an application class carries a CIDOC CRM type**, whether
+directly or through an extension that is itself anchored in CRM. It is
+not enough for the local classes to have CRM superclasses on paper — the
+instances have to arrive there.
+
+Properties are exempt. Where an OWL-Time or PROV-O property expresses the
+relation better, it is used; only classes are held to the rule.
+
+Two consequences shaped the model. Interval boundaries became
+`lado:DatingInstant` and `lado:DatingTimePosition` rather than bare
+`time:Instant` and `time:TimePosition` nodes, so that they could be
+anchored in `crm:E52_Time-Span` and `crm:E54_Dimension` without asserting
+anything about OWL-Time in general. And the PROV qualified-association
+pattern was dropped: a reification node is not a thing in the world and
+CIDOC CRM has no class for one. The two statements it carried are now
+made directly, with `prov:used` and `crm:P33_used_specific_technique`,
+which say the same and are valid in both vocabularies.
+
+The rule is checked on every run rather than assumed, because a new class
+without a CRM superclass breaks nothing visible and would otherwise go
+unnoticed. The bundle builder counts the instances and refuses to write a
+file that contains an unanchored one.
+
 ## Notes for knowledge-graph integration
 
 Three properties of this export matter for anyone merging it:

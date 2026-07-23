@@ -13,20 +13,39 @@ flowchart BT
     lado_DatedTimeSpan -->|subClassOf| time_ProperInterval
     lado_FindspotDating["lado:FindspotDating"]
     lado_FindspotDating -->|subClassOf| lado_DatedTimeSpan
+    lado_DatingInstant["lado:DatingInstant"]
+    time_Instant["time:Instant"]
+    lado_DatingInstant -->|subClassOf| time_Instant
+    lado_DatingInstant -->|subClassOf| crm_E52_Time_Span
+    lado_DatingTimePosition["lado:DatingTimePosition"]
+    time_TimePosition["time:TimePosition"]
+    lado_DatingTimePosition -->|subClassOf| time_TimePosition
+    crm_E54_Dimension["crm:E54_Dimension"]
+    lado_DatingTimePosition -->|subClassOf| crm_E54_Dimension
+    lado_YearScale["lado:YearScale"]
+    time_TRS["time:TRS"]
+    lado_YearScale -->|subClassOf| time_TRS
+    crm_E73_Information_Object["crm:E73_Information_Object"]
+    lado_YearScale -->|subClassOf| crm_E73_Information_Object
     lado_DatingModel["lado:DatingModel"]
     prov_Plan["prov:Plan"]
     lado_DatingModel -->|subClassOf| prov_Plan
     crm_E29_Design_or_Procedure["crm:E29_Design_or_Procedure"]
     lado_DatingModel -->|subClassOf| crm_E29_Design_or_Procedure
+    lado_DatingActivity["lado:DatingActivity"]
+    prov_Activity["prov:Activity"]
+    lado_DatingActivity -->|subClassOf| prov_Activity
+    crmdig_D10_Software_Execution["crmdig:D10_Software_Execution"]
+    lado_DatingActivity -->|subClassOf| crmdig_D10_Software_Execution
     lado_Figure["lado:Figure"]
     crm_E36_Visual_Item["crm:E36_Visual_Item"]
     lado_Figure -->|subClassOf| crm_E36_Visual_Item
     lado_PlotRow["lado:PlotRow"]
     lado_PlotRow -->|subClassOf| crm_E36_Visual_Item
-    class lado_DatedTimeSpan,lado_DatingModel,lado_DiscoverySite,lado_Figure,lado_Findspot,lado_FindspotDating,lado_Location,lado_PlotRow local
-    class crm_E29_Design_or_Procedure,crm_E36_Visual_Item,crm_E52_Time_Span,crm_E53_Place crm
-    class time_ProperInterval time
-    class prov_Plan ext
+    class lado_DatedTimeSpan,lado_DatingActivity,lado_DatingInstant,lado_DatingModel,lado_DatingTimePosition,lado_DiscoverySite,lado_Figure,lado_Findspot,lado_FindspotDating,lado_Location,lado_PlotRow,lado_YearScale local
+    class crm_E29_Design_or_Procedure,crm_E36_Visual_Item,crm_E52_Time_Span,crm_E53_Place,crm_E54_Dimension,crm_E73_Information_Object crm
+    class time_Instant,time_ProperInterval,time_TRS,time_TimePosition time
+    class crmdig_D10_Software_Execution,prov_Activity,prov_Plan ext
 
     classDef local fill:#e8eef7,stroke:#4a6b96,stroke-width:1px,color:#12181f
     classDef crm fill:#efe7f5,stroke:#7a5a96,stroke-width:1px,color:#12181f

@@ -55,7 +55,7 @@ from decimal import Decimal
 from pathlib import Path
 
 import pandas as pd
-from rdflib import BNode, Graph, Literal, Namespace, RDF, RDFS, OWL, URIRef
+from rdflib import Graph, Literal, Namespace, RDF, RDFS, OWL, URIRef
 from rdflib.namespace import DCTERMS, SKOS, XSD
 
 from ips_compat import silence_gyear_warnings
@@ -77,6 +77,11 @@ PROV = Namespace("http://www.w3.org/ns/prov#")  # KORREKT. Die publizierte
 # loc_discoverysite_1.ttl bindet prov: faelschlich auf .../ns/prov-o/ ,
 # wodurch dort alle sechs PROV-Praedikate ins Leere zeigen. Nicht uebernehmen.
 GEO = Namespace("http://www.opengis.net/ont/geosparql#")
+# CRMdig — die CIDOC-CRM-Erweiterung fuer digitale Provenienz. Der
+# Namensraum ist der von FORTH vergebene; nachgeprueft gegen die offizielle
+# Definition v4.0 und gegen OntoME, weil ein falsch geratener Namensraum
+# genau der Defekt ist, den wir an der 2019er-Datei bemaengeln.
+CRMDIG = Namespace("http://www.ics.forth.gr/isl/CRMdig/")
 DCAT = Namespace("http://www.w3.org/ns/dcat#")
 PLEIADES = Namespace("https://pleiades.stoa.org/places/")
 
@@ -88,6 +93,7 @@ TRS_IPS = SAMIAN["trs_ips_year"]
 PREFIXES = {
     "samian": SAMIAN, "lado": LADO, "crm": CRM, "time": TIME, "prov": PROV,
     "geo": GEO, "dcat": DCAT, "dcterms": DCTERMS, "skos": SKOS,
+    "crmdig": CRMDIG,
     "pleiades": PLEIADES, "owl": OWL, "xsd": XSD,
 }
 
@@ -112,8 +118,8 @@ RELATIONS = [
     (TIME.TimePosition,   TIME.hasTRS,         TIME.TRS),
     (LADO.PlotRow,        LADO.renders,        LADO.FindspotDating),
     (LADO.Figure,         LADO.hasRow,         LADO.PlotRow),
-    (LADO.FindspotDating, PROV.wasGeneratedBy, PROV.Activity),
-    (PROV.Activity,       PROV.hadPlan,        LADO.DatingModel),
+    (LADO.FindspotDating, PROV.wasGeneratedBy, LADO.DatingActivity),
+    (LADO.DatingActivity, PROV.hadPlan,        LADO.DatingModel),
     (LADO.FindspotDating, PROV.wasDerivedFrom, DCAT.Dataset),
 ]
 
@@ -125,6 +131,7 @@ LAYERS = {
     LADO.DatedTimeSpan:  "dating",
     LADO.FindspotDating: "dating",
     LADO.DatingModel:    "provenance",
+    LADO.DatingActivity: "provenance",
     LADO.PlotRow:        "presentation",
     LADO.Figure:         "presentation",
     LADO.Location:       "place",
@@ -289,6 +296,22 @@ CLASSES = [
     (LADO.FindspotDating, [LADO.DatedTimeSpan], "Findspot dating",
      "Datierung einer Fundstelle aus Toepferstempeln. Das Intervall ist "
      "ein 'virtual fuzzy year' m +/- k*sigma, KEIN Konfidenzintervall."),
+    (LADO.DatingInstant, [TIME.Instant, CRM["E52_Time-Span"]],
+     "Dating instant",
+     "Eine Intervallgrenze. Eigene Anwendungsklasse, damit sie in CIDOC "
+     "CRM verankert werden kann, ohne eine Behauptung ueber time:Instant "
+     "im Allgemeinen aufzustellen: crm:E52_Time-Span ist der CRM-Begriff "
+     "fuer eine zeitliche Ausdehnung, hier eine von der Dauer null."),
+    (LADO.DatingTimePosition, [TIME.TimePosition, CRM.E54_Dimension],
+     "Dating time position",
+     "Die Zahlenangabe einer Intervallgrenze auf einer benannten Skala. "
+     "Strukturell eine crm:E54_Dimension: ein Wert plus das System, in "
+     "dem er zu lesen ist — time:numericPosition entspricht P90 has "
+     "value, time:hasTRS entspricht P91 has unit."),
+    (LADO.YearScale, [TIME.TRS, CRM.E73_Information_Object],
+     "Year scale",
+     "Das Zeitreferenzsystem, auf dem die Zahlenangaben liegen. Eine "
+     "dokumentierte Konvention und damit ein crm:E73_Information_Object."),
     (LADO.DatingModel, [PROV.Plan, CRM.E29_Design_or_Procedure],
      "Dating model",
      "Parametrisierung, aus der die Intervalle berechnet wurden. "
@@ -296,6 +319,15 @@ CLASSES = [
      "dies die einzige lokale Klasse, die CIDOC CRM nicht erreicht, und "
      "ein rein CRM-basierter Konsument saehe die Methode nicht, aus der "
      "die Datierungen stammen."),
+    (LADO.DatingActivity, [PROV.Activity, CRMDIG.D10_Software_Execution],
+     "Dating activity",
+     "Der Rechenlauf, der eine Datierung erzeugt hat. Haengt an "
+     "crmdig:D10_Software_Execution, weil dessen Scope Note genau das "
+     "beschreibt: ein Lauf, der vollstaendig durch seine digitale "
+     "Eingabe, die Software und die Eigenschaften der Maschine bestimmt "
+     "ist. CRMdig hat die Ausrichtung auf CIDOC CRM bereits gemacht, "
+     "ueber D7 und E11/E65 bis E7_Activity — das ist tragfaehiger, als "
+     "selbst zu entscheiden, ob ein Skriptlauf eine E7_Activity ist."),
     (LADO.Figure, [CRM.E36_Visual_Item], "Figure",
      "Abbildung. Traegt die Konstanten, die nicht zu den Fundplaetzen "
      "gehoeren, sondern zur Grafik."),
@@ -303,6 +335,30 @@ CLASSES = [
      "Darstellungsschicht einer Datierung. Traegt ausdruecklich die "
      "Groessen, die laut Methodendoku 'visual only' sind."),
 ]
+
+# --------------------------------------------------------------------------
+# Wiederholte Axiome fremder Vokabulare
+# --------------------------------------------------------------------------
+# Diese Tripel gehoeren CRMdig, nicht uns. Sie stehen hier, damit das
+# Standalone-Bundle CIDOC-CRM-Abfragen auch dann beantwortet, wenn CRMdig
+# nicht mitgeladen wurde: die Materialisierung in make_bundle.py folgt den
+# Axiomen, die IM GRAPHEN stehen, und ohne diese endet die Kette bei
+# crmdig:D10_Software_Execution.
+#
+# Es sind Wiederholungen, keine neuen Behauptungen — nachgeschlagen in der
+# offiziellen CRMdig-Definition v4.0 (Table 1: Class Hierarchy) und in der
+# CIDOC-CRM-Klassenhierarchie. Wer CRMdig ohnehin laedt, bekommt dieselben
+# Tripel doppelt und damit gar nichts Neues.
+EXTERNAL_AXIOMS = [
+    (CRMDIG.D10_Software_Execution, CRMDIG.D7_Digital_Machine_Event),
+    (CRMDIG.D7_Digital_Machine_Event, CRM.E11_Modification),
+    (CRMDIG.D7_Digital_Machine_Event, CRM.E65_Creation),
+    (CRM.E11_Modification, CRM.E7_Activity),
+    (CRM.E65_Creation, CRM.E7_Activity),
+    (CRMDIG.D14_Software, CRMDIG.D1_Digital_Object),
+    (CRMDIG.D1_Digital_Object, CRM.E73_Information_Object),
+]
+
 
 # (Property, Domain, Range, Label, Kommentar)
 OBJ_PROPS = [
@@ -447,6 +503,16 @@ def build_ontology() -> Graph:
             g.add((cls, RDFS.comment, Literal(comment, lang="de")))
         _describe(g, cls)
 
+    # Wiederholte Fremdaxiome, damit das Bundle ohne CRMdig aufloest.
+    g.add((onto, RDFS.comment, Literal(
+        "Contains a small number of rdfs:subClassOf axioms that belong to "
+        "CRMdig and to CIDOC CRM rather than to this vocabulary. They are "
+        "restated so that the standalone bundle resolves CIDOC CRM "
+        "queries without those ontologies being loaded; they assert "
+        "nothing new.", lang="en")))
+    for sub, sup in EXTERNAL_AXIOMS:
+        g.add((sub, RDFS.subClassOf, sup))
+
     for prop, dom, rng, label, comment in OBJ_PROPS:
         g.add((prop, RDF.type, OWL.ObjectProperty))
         g.add((prop, RDFS.domain, dom))
@@ -486,10 +552,14 @@ def build_graph(df: pd.DataFrame, era: str, figure_name: str,
     # ---- Agent, Modell, Quelle, Datensatz -------------------------------
     agent = SAMIAN.IPSDatedSitesExporter
     g.add((agent, RDF.type, PROV.SoftwareAgent))
+    # Die Software selbst ist ein digitales Objekt: ueber D14 und D1
+    # erreicht der Agent crm:E73_Information_Object.
+    g.add((agent, RDF.type, CRMDIG.D14_Software))
     g.add((agent, RDFS.label, Literal("ips_rdf_export.py", lang="en")))
 
     # ---- Zeitreferenzsystem der Quelle ----------------------------------
     g.add((TRS_IPS, RDF.type, TIME.TRS))
+    g.add((TRS_IPS, RDF.type, LADO.YearScale))
     g.add((TRS_IPS, RDFS.label, Literal("IPS signed year scale", lang="en")))
     g.add((TRS_IPS, RDFS.comment, Literal(
         "Durchgehende Zahlengerade vorzeichenbehafteter Jahreszahlen, auf "
@@ -527,6 +597,7 @@ def build_graph(df: pd.DataFrame, era: str, figure_name: str,
     dataset = SAMIAN[f"dataset_{figure_name}_{snapshot}"]
     g.add((dataset, RDF.type, DCAT.Dataset))
     g.add((dataset, RDF.type, PROV.Entity))
+    g.add((dataset, RDF.type, CRMDIG.D1_Digital_Object))
     g.add((dataset, DCTERMS.title, Literal(
         "Archaeological findspots dated by samian potters' stamps",
         lang="en")))
@@ -604,13 +675,27 @@ def build_graph(df: pd.DataFrame, era: str, figure_name: str,
         for inst, value in ((begin, r.eff_start), (end, r.eff_end)):
             pos = URIRef(str(inst) + "_pos")
             g.add((inst, RDF.type, TIME.Instant))
+            g.add((inst, RDF.type, LADO.DatingInstant))
             g.add((inst, TIME.inTimePosition, pos))
             g.add((pos, RDF.type, TIME.TimePosition))
+            g.add((pos, RDF.type, LADO.DatingTimePosition))
             g.add((pos, TIME.hasTRS, TRS_IPS))
             g.add((pos, TIME.numericPosition, dec(numeric_year(value))))
             # Zusaetzlich gerundet, fuer Konsumenten, die nur Kalender-
             # jahre verstehen. Die exakte Lage steht in numericPosition.
             g.add((inst, TIME.inXSDgYear, gyear(value, era)))
+
+        # CIDOC-CRM-eigene Zeitgrenzen. Ohne sie findet ein Konsument, der
+        # nur CRM kennt, zwar die Zeitspanne, bekommt aus ihr aber keine
+        # Jahreszahl: die Daten haengen sonst ausschliesslich hinter
+        # OWL-Time. P82a/P82b sind die aeusseren Grenzen der Zeitspanne,
+        # und genau das sind eff_start und eff_end.
+        #
+        # Gerundet auf ganze Jahre, wie time:inXSDgYear. Die genaue Lage
+        # bleibt in time:numericPosition; diese beiden Tripel sind die
+        # Bruecke fuer CRM, nicht die massgebliche Angabe.
+        g.add((ts, CRM.P82a_begin_of_the_begin, gyear(r.eff_start, era)))
+        g.add((ts, CRM.P82b_end_of_the_end, gyear(r.eff_end, era)))
 
         measures = [
             (LADO.nStamps, r.count_stamps, integer),
@@ -657,16 +742,25 @@ def build_graph(df: pd.DataFrame, era: str, figure_name: str,
 
         # --- PROV ---
         g.add((act, RDF.type, PROV.Activity))
+        g.add((act, RDF.type, LADO.DatingActivity))
         g.add((act, RDFS.label, Literal(
             f"Dating of {r.the_site} — {r.the_findspot}", lang="en")))
         g.add((act, PROV.wasAssociatedWith, agent))
         g.add((act, PROV.endedAtTime, now))
         g.add((act, PROV.used, dataset))
-        qa = BNode()
-        g.add((act, PROV.qualifiedAssociation, qa))
-        g.add((qa, RDF.type, PROV.Association))
-        g.add((qa, PROV.agent, agent))
-        g.add((qa, PROV.hadPlan, model))
+        # Frueher stand hier eine prov:qualifiedAssociation mit einem
+        # Blank Node vom Typ prov:Association. Der war die einzige
+        # Instanz im Graphen, die sich nicht in CIDOC CRM verankern liess
+        # — eine Reifikation ist kein Ding in der Welt, und CRM hat
+        # dafuer keine Klasse.
+        #
+        # Ersetzt durch zwei direkte Aussagen, die dasselbe sagen und in
+        # beiden Vokabularen gueltig sind: prov:used, weil ein prov:Plan
+        # auch eine prov:Entity ist, und crm:P33_used_specific_technique,
+        # dessen Range genau crm:E29_Design_or_Procedure ist.
+        g.add((act, PROV.used, model))
+        g.add((act, CRM.P33_used_specific_technique, model))
+        g.add((act, CRM.P14_carried_out_by, agent))
         g.add((ts, PROV.wasDerivedFrom, dataset))
 
     return g

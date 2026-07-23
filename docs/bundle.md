@@ -76,6 +76,8 @@ self-description:
 | `lado:Findspot` | findspots |
 | `lado:FindspotDating` | datings |
 | `lado:PlotRow` | plot rows |
+| `lado:DatingActivity` | activities |
+| `crm:E7_Activity` | CIDOC CRM activities (after materialisation) |
 | `crm:E53_Place` | CIDOC CRM places (after materialisation) |
 | `crm:E52_Time-Span` | CIDOC CRM time-spans (after materialisation) |
 | `time:ProperInterval` | OWL-Time intervals (after materialisation) |

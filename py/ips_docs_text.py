@@ -53,6 +53,27 @@ TERM_DOCS: dict[str, str] = {
         "The interval is a 'virtual fuzzy year' of the form m ± k·σ and is "
         "explicitly NOT a confidence interval: it carries no probabilistic "
         "claim about where the true date lies.",
+    "DatingInstant":
+        "One boundary of a dated interval. A local class rather than a "
+        "bare time:Instant so that it can be anchored in CIDOC CRM "
+        "without making any claim about time:Instant in general: "
+        "crm:E52_Time-Span is the CRM notion of a temporal extent, and "
+        "this one has zero duration. Every instance of an application "
+        "class in this export reaches CIDOC CRM, and the boundaries are "
+        "no exception — without the anchor a CRM-only consumer would see "
+        "a time-span whose ends did not exist.",
+    "DatingTimePosition":
+        "The numeric value of a boundary together with the scale it is "
+        "read on. Structurally a crm:E54_Dimension: time:numericPosition "
+        "corresponds to P90 has value and time:hasTRS to P91 has unit. "
+        "Kept as a local subclass so the alignment is stated here rather "
+        "than asserted about OWL-Time itself.",
+    "YearScale":
+        "The temporal reference system the numeric positions are read "
+        "on. A documented convention, and therefore a "
+        "crm:E73_Information_Object. Its definition matters because the "
+        "positions are signed years on a continuous line, not calendar "
+        "labels — see eraConvention.",
     "DatingModel":
         "The parameterisation from which the intervals were computed. "
         "Holds k_min, k_max, τ, w and the fuzziness divisor, so a reader "
@@ -62,6 +83,16 @@ TERM_DOCS: dict[str, str] = {
         "second parent this would be the one local class that never "
         "reaches CIDOC CRM, and a CRM-only consumer could see the "
         "datings but not the method behind them.",
+    "DatingActivity":
+        "The computation that produced one dating. It sits beneath "
+        "crmdig:D10_Software_Execution, whose scope note describes "
+        "precisely this: a run completely determined by its digital "
+        "input, the software and the generic properties of the device. "
+        "Using CRMdig rather than reaching for crm:E7_Activity directly "
+        "means the alignment has been done by the extension's authors — "
+        "D10 leads through D7 and E11/E65 to E7_Activity — instead of "
+        "this vocabulary deciding on its own whether a script run counts "
+        "as an action intentionally carried out by an actor.",
     "Figure":
         "A published figure. Carries the constants that belong to the "
         "drawing rather than to the archaeology — padding, row height, "
@@ -348,6 +379,19 @@ CROSSWALK_NOTES: dict[str, str] = {
         "and leaves its six provenance predicates pointing at terms that "
         "do not exist. This export uses http://www.w3.org/ns/prov# and "
         "does not reproduce that error.",
+    "crmdig":
+        "CRMdig is the CIDOC CRM extension for digital provenance, and it "
+        "supplies the class this export needed for the computation behind "
+        "each dating: D10 Software Execution. Its own chain into CIDOC "
+        "CRM — D10 to D7 Digital Machine Event, then to E11 Modification "
+        "and E65 Creation, both subclasses of E7 Activity — is restated "
+        "in the vocabulary file so that the standalone bundle resolves "
+        "CIDOC CRM queries without CRMdig being loaded alongside. Those "
+        "restated axioms belong to CRMdig; they are repeated, not "
+        "invented. D3 Formal Derivation was considered and rejected as "
+        "too narrow: its scope note describes representation-preserving "
+        "derivations such as resizing an image, whereas this computation "
+        "produces new values.",
     "dcat":
         "DCAT describes the export as a dataset. Because the time-span "
         "URIs are deliberately not versioned, their values change when the "
