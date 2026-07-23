@@ -1,5 +1,18 @@
-# IPS Dated Sites — RDF-Export, SPARQL-Rueckweg und Abbildungen
-rdflib>=7.0           # ab 7.5 ohne die gYear-Warnungen, siehe py/ips_compat.py
-pandas>=2.0
-matplotlib>=3.8
-pillow>=10.0          # von matplotlib fuer die JPG-Ausgabe gebraucht
+# IPS Dated Sites — exakte Pins, absichtlich.
+#
+# Die erzeugten SVGs enthalten die matplotlib-Version in ihren Metadaten,
+# und die clip-path-IDs sind nur INNERHALB einer Version deterministisch.
+# Eine Spanne wie "matplotlib>=3.8" laesst deshalb lokal und CI
+# verschiedene Dateien entstehen, und die Drift-Pruefung in
+# .github/workflows/build.yml schlaegt an, obwohl niemand etwas geaendert
+# hat. Genau das ist beim ersten CI-Lauf passiert: lokal 3.9.2, Runner
+# 3.10.9.
+#
+# Wer eine Version anhebt, laesst danach einmal `python py/main.py`
+# laufen und committet die neu erzeugten Dateien mit.
+
+rdflib==7.1.1         # ab 7.5 ohne die gYear-Warnungen, siehe py/ips_compat.py
+pandas==2.2.3
+matplotlib==3.9.2     # steht in den SVG-Metadaten, siehe oben
+pillow==10.4.0        # von matplotlib fuer die JPG-Ausgabe gebraucht
+numpy==1.26.4         # transitiv, aber mitgepinnt fuer volle Reproduzierbarkeit

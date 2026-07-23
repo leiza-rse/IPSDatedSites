@@ -260,15 +260,23 @@ das Repo aufbaut: **die erzeugten Dateien dürfen dem Code nicht
 hinterherhinken.** Ohne die Prüfung ist der Sync-Mechanismus nur eine
 Konvention, und eine ungeprüfte Konvention vergisst irgendwann jemand.
 
-Vier Schritte:
+Fünf Schritte:
 
-1. Pipeline laufen lassen — der Rundlauf steckt darin und beendet sich
+1. Umgebung protokollieren — Python- und Bibliotheksversionen
+2. Pipeline laufen lassen — der Rundlauf steckt darin und beendet sich
    bei jeder Abweichung mit Fehlercode
-2. `git diff` auf `docs/` und `img/` — schlägt an, wenn jemand Code
-   geändert und nicht neu erzeugt hat
-3. RDF semantisch prüfen: parst alles, und beantwortet das Bundle
+3. `git diff` auf `docs/`, getrennt davon auf `img/`
+4. RDF semantisch prüfen: parst alles, und beantwortet das Bundle
    CIDOC-CRM-Abfragen ohne Reasoner?
-4. Mermaid-Quellen durch `mmdc` schicken; die SVGs landen als Artefakt
+5. Mermaid-Quellen durch `mmdc` schicken; die SVGs landen als Artefakt
+
+Die beiden Diff-Prüfungen sind **getrennt**, weil ihre Fehlerursachen es
+sind. `docs/` ist reiner Text aus den Code-Strukturen und auf jeder
+Plattform identisch — ein Unterschied dort heißt: jemand hat Code
+geändert und nicht neu erzeugt. `img/` kommt aus matplotlib, und das
+schreibt seine eigene Version in die SVG-Metadaten und leitet die
+`clip-path`-IDs pro Version ab. Ein Unterschied dort ist meistens ein
+Versionskonflikt, kein inhaltlicher.
 
 `rdf/` ist von der Byte-Prüfung **ausgenommen**, und das mit Absicht: die
 Dateien tragen `dcterms:created` und `prov:endedAtTime`, die sich von Lauf
@@ -278,6 +286,32 @@ Prüfung also aussagekräftig.
 
 Getestet: Code geändert ohne neu zu erzeugen → Action schlägt an;
 undokumentierte Property → Pipeline endet mit Exitcode 1.
+
+## Warum die Versionen exakt gepinnt sind
+
+`requirements.txt` nennt exakte Versionen, nicht Spannen. Der Grund ist
+konkret: beim ersten CI-Lauf lief die Drift-Prüfung auf einen Fehler,
+weil lokal matplotlib 3.9.2 und auf dem Runner 3.10.9 installiert war.
+Im Diff stand
+
+```
+- <dc:title>Matplotlib v3.9.2 …
++ <dc:title>Matplotlib v3.10.9 …
+- clip-path="url(#p3b6c313feb)"
++ clip-path="url(#p8bcc3c5794)"
+```
+
+Die Version steht in den SVG-Metadaten, und `svg.hashsalt` macht die
+`clip-path`-IDs nur *innerhalb* einer Version deterministisch. Die
+Prüfung war also korrekt — sie hat einen echten Unterschied gemeldet,
+nur keinen inhaltlichen.
+
+Wer eine Version anhebt, lässt danach einmal `python py/main.py` laufen
+und committet die neu erzeugten Dateien mit.
+
+Schriftarten sind übrigens unkritisch: der Renderer setzt kein
+`font.family`, es gilt matplotlibs eigene DejaVu Sans, die mit dem Paket
+ausgeliefert wird. Windows und Linux erzeugen dieselben Textpfade.
 
 ## rdflib und vorchristliche Jahre
 

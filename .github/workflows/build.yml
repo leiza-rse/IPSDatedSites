@@ -18,14 +18,26 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.10"      # matches the local Windows install
 
       - name: Install dependencies
         run: pip install -r requirements.txt
+
+      - name: Record the environment
+        # The generated SVGs carry the matplotlib version in their
+        # metadata and their clip-path identifiers are only deterministic
+        # within one version. Printing the versions here makes a drift
+        # failure diagnosable in one glance instead of by bisecting.
+        run: |
+          python -c "import sys, matplotlib, rdflib, pandas; \
+            print('python    ', sys.version.split()[0]); \
+            print('matplotlib', matplotlib.__version__); \
+            print('rdflib    ', rdflib.__version__); \
+            print('pandas    ', pandas.__version__)"
 
       - name: Run the pipeline
         # Steps 1-6: export, SPARQL read-back, figures, round trip,
@@ -34,21 +46,35 @@ jobs:
         # a broken export fails here without extra assertions.
         run: python py/main.py
 
-      - name: Check the generated artefacts are up to date
-        # Byte comparison only where the pipeline guarantees determinism:
-        # docs/, docs/diagrams/ and img/ were verified to be identical
-        # across consecutive runs. rdf/ is deliberately excluded — it
-        # carries dcterms:created and prov:endedAtTime, which are meant to
-        # differ from run to run. Its correctness is checked semantically
-        # in the next step instead.
+      - name: Check the documentation is up to date
+        # Pure text, generated from the code structures. Deterministic on
+        # any platform and any library version, so a difference here means
+        # somebody changed the code without re-running the pipeline.
         run: |
-          if ! git diff --quiet -- docs img; then
-            echo "::error::Generated files are stale. Run 'python py/main.py' and commit the result."
-            git diff --stat -- docs img
-            git diff -- docs img | head -200
+          if ! git diff --quiet -- docs; then
+            echo "::error::docs/ is stale. Run 'python py/main.py' and commit the result."
+            git diff --stat -- docs
+            git diff -- docs | head -120
             exit 1
           fi
-          echo "docs/, docs/diagrams/ and img/ match the code."
+          echo "docs/ and docs/diagrams/ match the code."
+
+      - name: Check the figures are up to date
+        # Kept separate from the documentation check because the failure
+        # modes differ. Matplotlib writes its own version into the SVG
+        # metadata and derives clip-path identifiers per version, so a
+        # difference here is far more often a dependency mismatch than an
+        # actual change to the figures. requirements.txt therefore pins
+        # exact versions; if this step fails, compare the versions printed
+        # by "Record the environment" against the local ones first.
+        run: |
+          if ! git diff --quiet -- img; then
+            echo "::error::img/ differs. Check the library versions above against your local ones, then run 'python py/main.py' and commit."
+            git diff --stat -- img
+            git diff -- img | grep -E '^[-+].*(Matplotlib v|clip-path)' | head -20
+            exit 1
+          fi
+          echo "img/ matches the code."
 
       - name: Validate the RDF
         # Semantic checks rather than byte comparison: the graphs must
