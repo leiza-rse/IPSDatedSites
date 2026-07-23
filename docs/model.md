@@ -122,7 +122,7 @@ flowchart LR
 
 *The class skeleton. Boxes outside the three groups belong to OWL-Time and PROV-O: they carry no layer of ours.*
 
-<sub>Source: [`diagrams/relations.mmd`](diagrams/relations.mmd) — generated, do not edit.</sub>
+<sub>[JPG](https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/diagrams/relations.jpg) · [SVG](https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/diagrams/relations.svg) · [Mermaid source](https://github.com/leiza-rse/IPSDatedSites/blob/main/docs/diagrams/relations.mmd) — generated, do not edit.</sub>
 
 ## Where each column goes
 
@@ -183,7 +183,7 @@ flowchart LR
 
 *One real findspot, read from the generated graph. Change the model and this picture changes with it.*
 
-<sub>Source: [`diagrams/instance.mmd`](diagrams/instance.mmd) — generated, do not edit.</sub>
+<sub>[JPG](https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/diagrams/instance.jpg) · [SVG](https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/diagrams/instance.svg) · [Mermaid source](https://github.com/leiza-rse/IPSDatedSites/blob/main/docs/diagrams/instance.mmd) — generated, do not edit.</sub>
 
 ## URIs
 

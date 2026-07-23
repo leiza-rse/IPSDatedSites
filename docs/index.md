@@ -61,7 +61,7 @@ flowchart LR
 
 *The pipeline. Everything after the export reads from the graph, never from the CSV — apart from the round-trip check, which compares the two.*
 
-<sub>Source: [`diagrams/architecture.mmd`](diagrams/architecture.mmd) — generated, do not edit.</sub>
+<sub>[JPG](https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/diagrams/architecture.jpg) · [SVG](https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/diagrams/architecture.svg) · [Mermaid source](https://github.com/leiza-rse/IPSDatedSites/blob/main/docs/diagrams/architecture.mmd) — generated, do not edit.</sub>
 
 ## The shape of it in one paragraph
 

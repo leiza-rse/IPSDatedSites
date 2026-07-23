@@ -93,7 +93,7 @@ flowchart BT
 
 *Every path ends in an external vocabulary. That is the whole claim of the crosswalk.*
 
-<sub>Source: [`diagrams/hierarchy.mmd`](diagrams/hierarchy.mmd) — generated, do not edit.</sub>
+<sub>[JPG](https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/diagrams/hierarchy.jpg) · [SVG](https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/diagrams/hierarchy.svg) · [Mermaid source](https://github.com/leiza-rse/IPSDatedSites/blob/main/docs/diagrams/hierarchy.mmd) — generated, do not edit.</sub>
 
 ## Per-vocabulary notes
 

@@ -63,7 +63,7 @@ flowchart LR
 
 *Solid edge asserted, dashed edges written out by the builder. Without them a CIDOC CRM query returns nothing.*
 
-<sub>Source: [`diagrams/materialisation.mmd`](diagrams/materialisation.mmd) — generated, do not edit.</sub>
+<sub>[JPG](https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/diagrams/materialisation.jpg) · [SVG](https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/diagrams/materialisation.svg) · [Mermaid source](https://github.com/leiza-rse/IPSDatedSites/blob/main/docs/diagrams/materialisation.mmd) — generated, do not edit.</sub>
 
 ## What the bundle counts
 
