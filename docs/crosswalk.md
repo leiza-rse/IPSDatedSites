@@ -7,9 +7,16 @@
 Integration into a shared knowledge graph such as the NFDI4Objects graph
 depends on a consumer being able to reach our statements through
 vocabularies they already understand, without loading LADO first. That is
-the purpose of the subclass chain below: every local class terminates in a
-CIDOC CRM class, and temporal structure is expressed in OWL-Time rather
-than in local properties.
+the purpose of the subclass chain below: **every local class terminates in
+a CIDOC CRM class**, and temporal structure is expressed in OWL-Time
+rather than in local properties.
+
+That claim is worth checking rather than asserting, because it is easy to
+lose. `lado:DatingModel` originally sat beneath `prov:Plan` alone, which
+is an external vocabulary but not CIDOC CRM — a CRM-only consumer could
+see the datings and not the method that produced them. It now also sits
+beneath `crm:E29_Design_or_Procedure`, the CRM class for a documented
+procedure.
 
 ## Namespaces
 
@@ -37,7 +44,7 @@ than in local properties.
 | `lado:Findspot` | `lado:Findspot` → `lado:Location` → `crm:E53_Place` |
 | `lado:DatedTimeSpan` | `lado:DatedTimeSpan` → `crm:E52_Time-Span`<br>`lado:DatedTimeSpan` → `time:ProperInterval` |
 | `lado:FindspotDating` | `lado:FindspotDating` → `lado:DatedTimeSpan` → `crm:E52_Time-Span`<br>`lado:FindspotDating` → `lado:DatedTimeSpan` → `time:ProperInterval` |
-| `lado:DatingModel` | `lado:DatingModel` → `prov:Plan` |
+| `lado:DatingModel` | `lado:DatingModel` → `crm:E29_Design_or_Procedure`<br>`lado:DatingModel` → `prov:Plan` |
 | `lado:Figure` | `lado:Figure` → `crm:E36_Visual_Item` |
 | `lado:PlotRow` | `lado:PlotRow` → `crm:E36_Visual_Item` |
 
@@ -78,13 +85,15 @@ flowchart BT
     lado_DatingModel["lado:DatingModel"]
     prov_Plan["prov:Plan"]
     lado_DatingModel -->|subClassOf| prov_Plan
+    crm_E29_Design_or_Procedure["crm:E29_Design_or_Procedure"]
+    lado_DatingModel -->|subClassOf| crm_E29_Design_or_Procedure
     lado_Figure["lado:Figure"]
     crm_E36_Visual_Item["crm:E36_Visual_Item"]
     lado_Figure -->|subClassOf| crm_E36_Visual_Item
     lado_PlotRow["lado:PlotRow"]
     lado_PlotRow -->|subClassOf| crm_E36_Visual_Item
     class lado_DatedTimeSpan,lado_DatingModel,lado_DiscoverySite,lado_Figure,lado_Findspot,lado_FindspotDating,lado_Location,lado_PlotRow local
-    class crm_E36_Visual_Item,crm_E52_Time_Span,crm_E53_Place crm
+    class crm_E29_Design_or_Procedure,crm_E36_Visual_Item,crm_E52_Time_Span,crm_E53_Place crm
     class time_ProperInterval time
     class prov_Plan ext
 

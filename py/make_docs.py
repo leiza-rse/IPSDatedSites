@@ -406,9 +406,16 @@ def page_crosswalk(out: Path) -> Path:
 Integration into a shared knowledge graph such as the NFDI4Objects graph
 depends on a consumer being able to reach our statements through
 vocabularies they already understand, without loading LADO first. That is
-the purpose of the subclass chain below: every local class terminates in a
-CIDOC CRM class, and temporal structure is expressed in OWL-Time rather
-than in local properties.
+the purpose of the subclass chain below: **every local class terminates in
+a CIDOC CRM class**, and temporal structure is expressed in OWL-Time
+rather than in local properties.
+
+That claim is worth checking rather than asserting, because it is easy to
+lose. `lado:DatingModel` originally sat beneath `prov:Plan` alone, which
+is an external vocabulary but not CIDOC CRM — a CRM-only consumer could
+see the datings and not the method that produced them. It now also sits
+beneath `crm:E29_Design_or_Procedure`, the CRM class for a documented
+procedure.
 
 ## Namespaces
 

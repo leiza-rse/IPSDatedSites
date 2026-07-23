@@ -47,9 +47,9 @@ The dating of one findspot derived from samian potters' stamps. The interval is 
 
 ### `lado:DatingModel`
 
-*Dating model* — subclass of `prov:Plan`
+*Dating model* — subclass of `prov:Plan`, `crm:E29_Design_or_Procedure`
 
-The parameterisation from which the intervals were computed, expressed as a prov:Plan. Holds k_min, k_max, τ, w and the fuzziness divisor, so a reader can recompute any interval from the exported figures alone.
+The parameterisation from which the intervals were computed. Holds k_min, k_max, τ, w and the fuzziness divisor, so a reader can recompute any interval from the exported figures alone. It sits beneath prov:Plan and beneath crm:E29_Design_or_Procedure, the CIDOC CRM class for a documented procedure; without the second parent this would be the one local class that never reaches CIDOC CRM, and a CRM-only consumer could see the datings but not the method behind them.
 
 ### `lado:Figure`
 

@@ -289,8 +289,13 @@ CLASSES = [
     (LADO.FindspotDating, [LADO.DatedTimeSpan], "Findspot dating",
      "Datierung einer Fundstelle aus Toepferstempeln. Das Intervall ist "
      "ein 'virtual fuzzy year' m +/- k*sigma, KEIN Konfidenzintervall."),
-    (LADO.DatingModel, [PROV.Plan], "Dating model",
-     "Parametrisierung, aus der die Intervalle berechnet wurden."),
+    (LADO.DatingModel, [PROV.Plan, CRM.E29_Design_or_Procedure],
+     "Dating model",
+     "Parametrisierung, aus der die Intervalle berechnet wurden. "
+     "Haengt an prov:Plan UND an crm:E29_Design_or_Procedure: sonst waere "
+     "dies die einzige lokale Klasse, die CIDOC CRM nicht erreicht, und "
+     "ein rein CRM-basierter Konsument saehe die Methode nicht, aus der "
+     "die Datierungen stammen."),
     (LADO.Figure, [CRM.E36_Visual_Item], "Figure",
      "Abbildung. Traegt die Konstanten, die nicht zu den Fundplaetzen "
      "gehoeren, sondern zur Grafik."),

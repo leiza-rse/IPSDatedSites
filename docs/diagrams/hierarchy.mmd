@@ -16,13 +16,15 @@ flowchart BT
     lado_DatingModel["lado:DatingModel"]
     prov_Plan["prov:Plan"]
     lado_DatingModel -->|subClassOf| prov_Plan
+    crm_E29_Design_or_Procedure["crm:E29_Design_or_Procedure"]
+    lado_DatingModel -->|subClassOf| crm_E29_Design_or_Procedure
     lado_Figure["lado:Figure"]
     crm_E36_Visual_Item["crm:E36_Visual_Item"]
     lado_Figure -->|subClassOf| crm_E36_Visual_Item
     lado_PlotRow["lado:PlotRow"]
     lado_PlotRow -->|subClassOf| crm_E36_Visual_Item
     class lado_DatedTimeSpan,lado_DatingModel,lado_DiscoverySite,lado_Figure,lado_Findspot,lado_FindspotDating,lado_Location,lado_PlotRow local
-    class crm_E36_Visual_Item,crm_E52_Time_Span,crm_E53_Place crm
+    class crm_E29_Design_or_Procedure,crm_E36_Visual_Item,crm_E52_Time_Span,crm_E53_Place crm
     class time_ProperInterval time
     class prov_Plan ext
 
