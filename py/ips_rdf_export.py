@@ -59,6 +59,7 @@ from rdflib import BNode, Graph, Literal, Namespace, RDF, RDFS, OWL, URIRef
 from rdflib.namespace import DCTERMS, SKOS, XSD
 
 from ips_compat import silence_gyear_warnings
+from ips_docs_text import TERM_DOCS
 
 # rdflib < 7.5 kann vorchristliche xsd:gYear nicht in ein Python-date
 # wandeln und schreibt dafuer je Literal einen Traceback. Die Literale
@@ -352,6 +353,25 @@ DATA_PROPS = [
 ]
 
 
+def _local(term) -> str:
+    t = str(term)
+    return t.split("#")[-1] if "#" in t else t.rsplit("/", 1)[-1]
+
+
+def _describe(g: Graph, term) -> None:
+    """
+    Englischen rdfs:comment aus TERM_DOCS anhaengen.
+
+    Dieselbe Textquelle speist die generierte Dokumentation unter docs/.
+    Eine Definition kann dadurch nicht in der einen Haelfte stimmen und in
+    der anderen veralten. Fuer die Aufnahme in einen gemeinsamen
+    Knowledge Graph ist eine englische Definition ohnehin Pflicht.
+    """
+    text = TERM_DOCS.get(_local(term))
+    if text:
+        g.add((term, RDFS.comment, Literal(text, lang="en")))
+
+
 def build_ontology() -> Graph:
     g = Graph()
     for p, ns in PREFIXES.items():
@@ -374,6 +394,7 @@ def build_ontology() -> Graph:
             g.add((cls, RDFS.subClassOf, s))
         if comment:
             g.add((cls, RDFS.comment, Literal(comment, lang="de")))
+        _describe(g, cls)
 
     for prop, dom, rng, label, comment in OBJ_PROPS:
         g.add((prop, RDF.type, OWL.ObjectProperty))
@@ -383,6 +404,7 @@ def build_ontology() -> Graph:
         g.add((prop, RDFS.isDefinedBy, onto))
         if comment:
             g.add((prop, RDFS.comment, Literal(comment, lang="de")))
+        _describe(g, prop)
 
     for prop, dom, rng, label, comment in DATA_PROPS:
         g.add((prop, RDF.type, OWL.DatatypeProperty))
@@ -392,6 +414,7 @@ def build_ontology() -> Graph:
         g.add((prop, RDFS.isDefinedBy, onto))
         if comment:
             g.add((prop, RDFS.comment, Literal(comment, lang="de")))
+        _describe(g, prop)
     return g
 
 

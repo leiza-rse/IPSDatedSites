@@ -1,203 +1,194 @@
-# IPS Dated Sites — RDF-Export und SPARQL-Rückweg
+# IPS Dated Sites — RDF-Export, SPARQL-Rückweg, Abbildungen
 
-Lokaler Prototyp für den RDF-Export der Fundstellen-Datierung
-(Samian Research / IPS). Eingabe ist die CSV aus
-`IPSDatedSites25_final.sql`; das CFM-Skript holt später nur noch die
-Daten aus der Datenbank, die Modellierung wandert nach JavaScript in den
-Browser. Diese Python-Fassung ist die Referenzimplementierung, gegen die
-sich die spätere JS-Portierung messen lassen muss.
+Lokaler Prototyp für den RDF-Export der Fundstellen-Datierung (Samian
+Research / IPS). Eingabe ist die CSV aus `IPSDatedSites25_final.sql`, eine
+Zeile je Findspot. Das CFM-Skript holt später nur noch die Daten aus der
+Datenbank; die Modellierung wandert nach JavaScript in den Browser. Diese
+Python-Fassung ist die Referenzimplementierung, gegen die sich die
+JS-Portierung messen lassen muss.
+
+> **Was wie modelliert wurde und warum, steht in [`docs/`](docs/index.md).**
+> Dort liegen auch der Crosswalk zu CIDOC CRM, OWL-Time, GeoSPARQL und
+> PROV-O, die Formeln aus dem SQL und die offenen Punkte. Dieses README
+> beschreibt nur Bedienung und getroffene Entscheidungen — jede Aussage
+> soll genau einen Ort haben.
 
 ## Aufbau
 
 ```
-ips-rdf/
-├── data/                        Eingabe: die CSV aus IPSDatedSites25_final.sql
-├── img/                         (erzeugt) beide Abbildungen, je SVG + JPG 300 dpi
-├── rdf/                         (erzeugt) Turtle, JSON-LD, LADO-Erweiterung
-├── py/
-│   ├── main.py                  einziger Einstiegspunkt: python py/main.py
-│   ├── ips_rdf_export.py        CSV -> RDF, baut den Graphen mit rdflib
-│   ├── ips_sparql.py            Abfragen, Graphzugriff, Rundlaufprüfung
-│   └── ips_render.py            zwei Darstellungen: classic und modern
-├── queries/                     dieselben Abfragen als .rq für einen Endpoint
+IPSDatedSites/
+├── data/                    Eingabe: CSV aus IPSDatedSites25_final.sql
+├── py/                      der gesamte Code
+├── queries/                 die SPARQL-Abfragen als .rq für einen Endpoint
+├── docs/          erzeugt   Dokumentation der Modellierung (British English)
+├── rdf/           erzeugt   Turtle, JSON-LD, LADO-Erweiterung
+├── img/           erzeugt   beide Abbildungen, je SVG + JPG 300 dpi
 ├── README.md
 └── requirements.txt
 ```
 
-Alle Pfade werden über `Path(__file__).resolve().parent.parent` gegen die
-Repo-Wurzel aufgelöst — aufgerufen wird immer von dort, nicht aus `py/`.
+| Datei in `py/` | Aufgabe |
+|---|---|
+| `main.py` | einziger Einstiegspunkt, fünf Schritte |
+| `ips_rdf_export.py` | CSV → RDF, baut den Graphen mit rdflib |
+| `ips_sparql.py` | Abfragen, Graphzugriff, Rundlaufprüfung |
+| `ips_render.py` | die beiden Abbildungen |
+| `ips_docs_text.py` | englische Textquelle für Ontologie **und** Doku |
+| `make_docs.py` | erzeugt `docs/*.md` aus dem Code |
+| `ips_compat.py` | unterdrückt eine rdflib-Warnung, siehe unten |
+
+Alle Pfade lösen über `Path(__file__).resolve().parent.parent` gegen die
+Repo-Wurzel auf. Aufgerufen wird von dort, nicht aus `py/`.
+
+## Einrichtung und Lauf
+
+```powershell
+pip install -r requirements.txt
+python py/main.py
+```
+
+Terminal auf PowerShell lassen; die Skripte schreiben UTF-8 unabhängig von
+der Codepage, weil rdflib die Serialisierung übernimmt. Die CSV wird
+automatisch aus `data/` genommen.
+
+```powershell
+python py/main.py --era astronomical      # andere Ära-Konvention
+python py/main.py --findspot-uri slug     # lesbare statt gehashte URIs
+python py/main.py --emit-geometry         # IPS-Koordinaten mit ausgeben
+python py/main.py --csv data\andere.csv   # andere Eingabedatei
+python py/main.py --skip-plots            # ohne Abbildungen
+python py/main.py --skip-docs             # ohne Dokumentation
+```
+
+Die Zielordner lassen sich mit `--rdf-out`, `--img-out` und `--docs-out`
+umlenken, der Name des Figur-Knotens mit `--figure-name`. Vollständige
+Liste: `python py/main.py --help`.
+
+Fünf Schritte laufen durch:
+
+1. CSV → RDF nach `rdf/`
+2. Graph laden, alles per SPARQL zurücklesen
+3. beide Abbildungen nach `img/`
+4. Rundlaufprüfung CSV → RDF → SPARQL, Feld für Feld
+5. Dokumentation nach `docs/` neu erzeugen
+
+Aktueller Stand: 41 Zeilen, 2442 Tripel, Rundlauf über 17 Felder mit
+größter Abweichung `0.00e+00`.
+
+## Der Rundlauf ist der eigentliche Test
 
 `ips_rdf_export.py` baut den Graphen. Alles danach liest **ausschließlich
 per SPARQL** zurück — auch Randbreiten, Zeilenhöhe, Farbrampe und
 Sortierregel stehen im Graphen, nicht in den Renderern. Fehlt im Export
-etwas, das die Abbildung braucht, scheitert der Rückweg und sagt genau,
-was fehlt. Das ist der Vollständigkeitstest der Modellierung, nicht bloß
-eine nette Zugabe.
+etwas, das die Abbildung braucht, scheitert der Rückweg, statt still eine
+Konstante einzusetzen.
+
+Dass aus **einem** Graphen **zwei** verschiedene korrekte Abbildungen
+entstehen, ist der Beleg dafür, dass die Information wirklich im Graphen
+steckt und nicht in einer Zeichenroutine.
 
 ## Zwei Darstellungen
 
-**v1 classic** ist die bestehende D3-Abbildung: Box, Whisker mit Kappen,
-Extremwert-Stubs, gestrichelte Boxkanten bei vorhandener Unsicherheit,
-Gradientenlegende unten.
+**v1 classic** ist die bestehende D3-Abbildung, 1:1 — Box, Whisker mit
+Kappen, Extremwert-Stubs, gestrichelte Boxkanten, Gradientenlegende
+unten. Bleibt unangetastet, damit Webausgabe und Druckfassung konsistent
+sind.
 
-**v2 modern** zeigt dieselben Zahlen in anderer Sprache: Kapsel statt
-Box, blasse Vollbereichslinie der beitragenden Stempel im Hintergrund,
-Mittelpunktmarke, Zebra-Zeilen statt Gitternetz, BC/AD-Achse,
-Direktbeschriftung mit Spanne, n und Die-Wiederholung, Farbleiste
-rechts. Nichts davon ist neu gerechnet — es ist derselbe SPARQL-Abruf.
+**v2 modern** zeigt **exakt dieselben Kanäle**, nur sauberer gesetzt.
+Insbesondere behalten die Whisker ihre Farbe nach `q_start` / `q_end`:
+die stehen an keiner anderen Stelle im Bild, und ein roter Whisker an den
+frühen arretinischen Fundstellen ist eine Aussage, die man sehen und
+nicht aus Zahlen zusammensuchen soll.
 
-Beide schreiben SVG (vektoriell, für den Satz) und JPG mit 300 dpi.
+Modernisiert ist nur die Machart: Zebra-Zeilen statt Gitternetz,
+BC/AD-Achse, zurückgenommene Hilfslinien, Farbleiste rechts, mehr Luft
+zwischen den Zeilen, ein weißer Halo unter den Whiskern, damit die Farbe
+über dem Zebra klar bleibt.
 
-## Einrichtung (Windows / VS Code)
+Rechts der Zeitachse steht eine **Wertetabelle** mit acht Spalten:
+`interval`, `n`, `sigma`, `unc start`, `q start`, `q int`, `unc end`,
+`q end`. Sie deckt ab, was die Webanwendung im Hover-Popup zeigt, plus
+die Zahlen, die dort am Whisker stehen. Zwei Gründe: am Whisker
+kollidierten sie mit dem Whisker selbst, sobald die Balken lang wurden —
+und ein Popup funktioniert nur im Browser, gedruckt wäre die Information
+schlicht weg. Die Spalte `sigma` stand nicht in der Webausgabe; sie ist
+ergänzt, weil `Breite = 2·k·σ` gilt und man ohne sie sieht, *wie* breit
+die Box ist, aber nicht *warum*. Wer sie nicht will, löscht eine Zeile in
+`TABLE_COLUMNS`.
 
-```powershell
-pip install -r requirements.txt
-```
+Eine frühere v2 hatte die Whiskerfarbe zugunsten einer Kapselform
+aufgegeben. Das war ein Fehler: es sah aufgeräumter aus und war weniger
+informativ. Die Regel ist es wert, festgehalten zu werden — **modernisiert
+wird die Machart, nicht das, was kodiert ist.**
 
-Terminal auf PowerShell lassen; die Skripte schreiben UTF-8 unabhängig
-von der Codepage, weil rdflib die Serialisierung übernimmt.
+## Die drei Entscheidungen
 
-## Ablauf
+**Ära-Konvention: `historical`.** `-40` in der Datenbank bedeutet 40
+v. Chr. Da `xsd:gYear` astronomisch zählt, wird um +1 verschoben.
+Kontrolle an Amiens: `eff_start = -16.6` → gerundet 17 v. Chr. →
+`time:inXSDgYear "-0016"`. Umgerechnet wird **nur das Kalenderlabel**;
+die `time:numericPosition` bleibt der Quellwert. Begründung in
+[`docs/open-questions.md`](docs/open-questions.md).
 
-```powershell
-python py/main.py
-python py/main.py --era astronomical       # andere Ära-Konvention
-python py/main.py --findspot-uri slug      # lesbare statt gehashte URIs
-python py/main.py --skip-plots             # nur Export und Rundlauf
-```
-
-Die CSV wird automatisch aus `data/` genommen. Mit `--csv` lässt sich
-eine andere angeben.
-
-Erzeugt wird:
-
-| Datei | Inhalt |
-|---|---|
-| `rdf/ips_sites_dating_v1.ttl` | der Graph, 2442 Tripel aus 41 Zeilen |
-| `rdf/ips_sites_dating_v1.jsonld` | derselbe Graph als JSON-LD |
-| `rdf/lado_dating_extension.ttl` | die LADO-Erweiterung (Klassen, Properties) |
-| `img/plot_v1_classic.svg` / `.jpg` | 1:1 der bestehenden Abbildung |
-| `img/plot_v2_modern.svg` / `.jpg` | dieselben Daten, moderne Fassung |
-
-Die SVGs sind byte-stabil: `SOURCE_DATE_EPOCH` und ein fester
-`svg.hashsalt` sorgen dafür, dass ein Rebuild ohne inhaltliche Änderung
-identische Dateien erzeugt. Sonst schriebe matplotlib bei jedem Lauf
-einen neuen Zeitstempel und neu gewürfelte Element-IDs, und beide
-Abbildungen stünden in `git status` dauerhaft als geändert — eine Datei,
-deren Diff immer rot ist, ist eine Datei, deren Diff niemand mehr liest.
-
-Der Rückweg endet mit einer Feldprüfung gegen die CSV. Aktueller Stand:
-größte Abweichung über alle 17 verglichenen Felder = `0.00e+00`.
-
-## Aufbau des Graphen
-
-Drei Schichten, bewusst getrennt:
-
-**1 — Ort und Fundstelle.** `samian:loc_ds_<id>` ist bereits publiziert
-und wird nur referenziert, nie neu typisiert. Neu ist die Fundstelle
-`samian:fs_<id>_<slug>`, die per `crm:P89_falls_within` in den Fundplatz
-fällt. Deshalb kann Bregenz sechs Fundstellen tragen, ohne dass sechs
-Zeitspannen direkt am Ort hängen.
-
-**2 — Datierung.** `samian:ts_<id>_<slug>` ist eine
-`lado:FindspotDating`, über zwei Stufen `rdfs:subClassOf` unter
-`crm:E52_Time-Span` und `time:ProperInterval`. Sie trägt die
-inhaltliche Aussage: Beginn und Ende als OWL-Time-Instants mit
-`time:TimePosition`, dazu σ, k, n, D, r, `q_interval`, `q_repetition`
-und die avg/min/max-Werte.
-
-**3 — Darstellung.** `samian:plotrow_<id>_<slug>` trägt `unc_start`,
-`unc_end` und `unc_interval`. Die stehen hier und nicht an der
-Zeitspanne, weil eure Methodendoku sie ausdrücklich als *visual only*
-führt — `√(s²ₐ+s²_b)` ist die Streuung von nichts im Modell. Hingen sie
-an der Zeitspanne, behauptete der Graph das Gegenteil. Die Konstanten
-der Abbildung (`padYears`, `rowHeight`, Farbrampe, Sortierregel) hängen
-einmal am `lado:Figure`-Knoten statt 41-mal in den Zeilen.
-
-Dazu PROV: ein `lado:DatingModel` als `prov:Plan` mit k_min, k_max, τ,
-w und dem Divisor 12, pro Zeile eine `prov:Activity` mit
-`prov:qualifiedAssociation` auf diesen Plan.
-
-## Die drei Entscheidungen — beantwortet
-
-**Ära-Konvention: `historical`.** Bestätigt: `-40` in der Datenbank
-bedeutet 40 v. Chr. Da `xsd:gYear` astronomisch zählt (Jahr 0 = 1 v.
-Chr.), wird um +1 verschoben. Kontrolle an Amiens: `eff_start = -16.6`
-→ gerundet 17 v. Chr. → `time:inXSDgYear "-0016"`. Der Schalter
-`--era astronomical` bleibt für den Fall, dass sich das je ändert.
-
-Wichtig: umgerechnet wird **nur das Kalenderlabel**. Die
-`time:numericPosition` bleibt exakt der Quellwert und hängt an einem
-eigenen, dokumentierten `samian:trs_ips_year`. Grund: die Query rechnet
-`eff = m ± k·σ` auf einer durchgehenden Zahlengeraden; ein „+1 nur für
-negative Werte" spränge bei −0,5 → +0,5, wäre nicht umkehrbar und
-zerstörte die Arithmetik, aus der der Wert stammt.
-
-**Findspot-URI: Hash.** Die Fundstelle hat keine eigene ID, also
-`samian:fs_<site-id>_<hash>` mit sechsstelligem Hash aus dem Namen:
-
-```
-sha256( NFC( trim(findspot) ) ).hexdigest()[0:6]
-```
-
-Amiens / *Sq. Bocquet pit 1973* wird damit zu
-`samian:fs_1003978_969c47`. Das Rezept steht als
-`lado:identifierScheme` im Datensatz, weil die spätere JS-Portierung es
-**zeichengenau** reproduzieren muss — `str.normalize("NFC")` vor dem
-Hashen ist dabei nicht Kosmetik: liefert die Quelle `ö` einmal als
-U+00F6 und einmal als `o`+U+0308, ergäben sich sonst zwei URIs für
-dieselbe Fundstelle. Der Export prüft auf Kollisionen und bricht ab,
-statt still zwei Fundstellen zu verschmelzen.
-
-Ehrlichkeitshalber: der Hash löst die Stabilität **nicht**. Ändert
-jemand den Namen, ändert sich der Hash genauso wie ein Slug — man sieht
-es nur nicht mehr. Deshalb bleibt der lesbare Slug zusätzlich als
-`skos:notation` am Knoten, damit ein gebrochener Link diagnostizierbar
-ist. Mit `--findspot-uri slug` lässt sich auf lesbare Fragmente
-umstellen; dann greift die Transliteration (`Emmeranstraße` →
-`emmeranstrasse`, nicht `emmeranstrae`, weil `ß` keine NFD-Dekomposition
-hat).
+**Findspot-URI: Hash.** `samian:fs_<site-id>_<hash>` mit
+`sha256(NFC(trim(findspot)))[0:6]`. Amiens / *Sq. Bocquet pit 1973* wird
+zu `samian:fs_1003978_969c47`. Das Rezept steht als
+`lado:identifierScheme` im Graphen, weil die JS-Portierung es
+zeichengenau reproduzieren muss. Mit `--findspot-uri slug` auf lesbare
+Fragmente umstellbar — aber die Entscheidung sollte einmalig fallen, ein
+späterer Wechsel erzeugt einen zweiten Satz URIs für dieselben
+Fundstellen.
 
 **Basis-URI: nicht versioniert.** Fundstellen- und Zeitspannen-URIs
-bleiben stabil und bezeichnen dauerhaft dieselbe Fundstelle bzw. deren
-*jeweils aktuelle* Datierung. Ändern sich die Quelldaten, ändern sich
-die Werte unter derselben URI.
+bleiben stabil und bezeichnen die *jeweils aktuelle* Datierung. Zitierbar
+ist stattdessen der datierte Datensatz
+(`samian:dataset_sites_dating_v1_<Datum>`), an dem jede Zeitspanne per
+`prov:wasDerivedFrom` hängt.
 
-Damit ist die Zeitspanne allerdings ein bewegliches Ziel für Zitate.
-Aufgelöst wird das über den Datensatz: der bekommt ein Datum
-(`samian:dataset_sites_dating_v1_2026-07-22`, mit `dcterms:issued` und
-`owl:versionInfo`), und jede Zeitspanne hängt per
-`prov:wasDerivedFrom` daran. Zitiert wird der datierte Snapshot,
-referenziert die stabile URI.
+## Dokumentation, die nicht wegdriften kann
 
-**Geometrie.** `--emit-geometry` ist standardmäßig **aus**, weil
-`loc_discoverysite_1.ttl` für dieselben Orte bereits eine Geometrie
-publiziert. Einschalten nur, wenn ihr die IPS-Koordinaten bewusst
-danebenstellen wollt.
+`docs/` wird bei jedem Lauf neu erzeugt, auf British English. Der Punkt
+ist nicht Bequemlichkeit, sondern dass handgeschriebene Strukturdoku beim
+ersten neuen Property auseinanderläuft.
 
-## NULL-Kontrakt
+Die **Struktur** liest `make_docs.py` zur Laufzeit aus dem Code: Klassen,
+Properties mit Domain und Range, Namensräume, Figur-Konstanten und die
+SPARQL-Abfragen kommen aus `ips_rdf_export.py`, `ips_render.py` und
+`ips_sparql.py` selbst. Die **Prosa** steht in `ips_docs_text.py` — und
+diese Datei speist zugleich die englischen `rdfs:comment` der Ontologie.
+Eine Definition kann also nicht in der Doku stimmen und im RDF veraltet
+sein; es ist derselbe String.
 
-Fehlt ein Wert, wird das Tripel weggelassen — nie `0` oder `0.5`
-behauptet. Damit Abwesenheit nicht mit „noch nicht gerechnet"
-verwechselt wird, setzt der Export zusätzlich einen expliziten Marker:
+Der Generator **bricht ab**, wenn eine Klasse oder Property im Code keinen
+Eintrag hat:
 
-```turtle
-samian:ts_1000080_ne_gate lado:undefinedMeasure lado:qInterval .
+```
+Undocumented terms — add them to py/ips_docs_text.py:
+  property testProperty
 ```
 
-In diesem Datenstand feuert der Marker nirgends — die 41 Zeilen sind in
-`q_*` und `unc_*` vollständig.
+Geprüft: neue Property ohne Doku → Exitcode 1; Doku ergänzt → Exitcode 0,
+und der Text erscheint danach in `docs/vocabulary.md` **und** als
+`rdfs:comment@en` in `rdf/lado_dating_extension.ttl`.
+
+| Seite | Inhalt |
+|---|---|
+| [`index.md`](docs/index.md) | Überblick und Einstieg |
+| [`model.md`](docs/model.md) | die drei Schichten, URI-Strategie, NULL-Kontrakt |
+| [`vocabulary.md`](docs/vocabulary.md) | alle Klassen und Properties, generiert |
+| [`crosswalk.md`](docs/crosswalk.md) | CIDOC CRM, OWL-Time, GeoSPARQL, PROV-O, DCAT, SKOS |
+| [`statistics.md`](docs/statistics.md) | die Formeln aus dem SQL |
+| [`queries.md`](docs/queries.md) | die SPARQL-Abfragen und der Rundlauf |
+| [`open-questions.md`](docs/open-questions.md) | was offen ist, inklusive des Filters |
 
 ## rdflib und vorchristliche Jahre
 
 rdflib 7.1.x bildet `xsd:gYear` auf Pythons `datetime.date` ab. Das kann
 keine Jahre vor 1 darstellen (`datetime.MINYEAR == 1`), weshalb jedes
-v.-Chr.-Jahr beim Anlegen *und* beim Parsen des Literals eine Warnung
-samt Traceback auf die Konsole schreibt. Bei den aktuellen Daten
-betrifft das acht Literale.
+v.-Chr.-Jahr beim Anlegen *und* beim Parsen des Literals eine Warnung samt
+Traceback schreibt. Bei den aktuellen Daten betrifft das acht Literale.
 
-Das Literal selbst ist dabei in allen Fällen korrekt — nachgeprüft mit
-genau dieser Version:
+Das Literal selbst ist korrekt — nachgeprüft mit genau dieser Version:
 
 ```
 Literal("-0016", datatype=XSD.gYear).n3()
@@ -205,45 +196,26 @@ Literal("-0016", datatype=XSD.gYear).n3()
 ```
 
 Nur `.value` bleibt `None`. Folgenlos, weil keine Abfrage auf `gYear`
-rechnet: die verwertbare Zeitangabe steht als `time:numericPosition` an
-der `time:TimePosition`, `time:inXSDgYear` ist die Beigabe für
-Konsumenten, die nur Kalenderjahre lesen. Ab rdflib 7.5 ist der
-Konverter entfernt und es schweigt ohnehin.
+rechnet. Ab rdflib 7.5 ist der Konverter entfernt und es schweigt
+ohnehin.
 
-`py/ips_compat.py` unterdrückt deshalb **genau diese eine Meldung** und
-sonst nichts — ein pauschales Stummschalten von `rdflib.term` wäre die
-falsche Lösung, dort landen auch Meldungen, die man sehen will. Die
-Anzahl betroffener Literale gibt `main.py` stattdessen aus, damit sie
-sichtbar bleibt statt bloß stummgestellt zu sein.
+`py/ips_compat.py` unterdrückt **genau diese eine Meldung** und sonst
+nichts — ein pauschales Stummschalten von `rdflib.term` wäre falsch, dort
+landen auch Meldungen, die man sehen will. Die Anzahl betroffener
+Literale gibt `main.py` stattdessen aus, damit sie sichtbar bleibt statt
+bloß stummgestellt zu sein.
 
-Eine Anmerkung zu `"0000"`: das ist astronomisch 1 v. Chr. und nach
-XSD **1.1** gültig, nach XSD 1.0 nicht. Es entsteht bei Intervallenden
-wie `eff_end = -0.9`. Sollte ein Validator darüber stolpern, ist das die
-Stelle.
+## Byte-stabile SVGs
 
-## Bewusst nicht übernommen
+`SOURCE_DATE_EPOCH` und ein fester `svg.hashsalt` sorgen dafür, dass ein
+Rebuild ohne inhaltliche Änderung identische Dateien erzeugt. Sonst
+schriebe matplotlib bei jedem Lauf einen neuen Zeitstempel und neu
+gewürfelte Element-IDs, und beide Abbildungen stünden dauerhaft als
+geändert in `git status` — eine Datei, deren Diff immer rot ist, ist eine
+Datei, deren Diff niemand mehr liest.
 
-Die publizierte `loc_discoverysite_1.ttl` bindet `prov:` auf
-`http://www.w3.org/ns/prov-o/`. Dadurch zeigen dort alle sechs
-PROV-Prädikate auf nicht existierende Terme. Dieser Export benutzt den
-korrekten Namensraum `http://www.w3.org/ns/prov#`. Ebenso wird das `.0`
-an den Pleiades-Kennungen abgeschnitten — es steckt bereits in der
-Datenbankspalte und macht in der publizierten TTL alle 280
-Pleiades-Links unerreichbar.
+## Noch nicht enthalten
 
-## Offene Punkte
-
-- Der Findspot hat keinen eigenen Schlüssel in der Datenbank. Die URI
-  wird aus dem Text abgeleitet und bricht, sobald jemand einen
-  Fundstellennamen korrigiert. Im Datenstand steht z. B.
-  `Böckleareal (descruction layer period II)` — ein Tippfehler für
-  *destruction*, mitten in einem URI-bildenden Feld.
-- `p.datemax NOT IN (260,120,150)` steht als `lado:excludedDatemax` im
-  Graphen, die Bedeutung ist weiter ungeklärt.
-- `q_start` / `q_end` hängen am Kalender-Nullpunkt und benachteiligen
-  augusteisches Material systematisch. Sie sind exportiert, aber der
-  Kommentar in der Ontologie warnt davor.
-- Die Farbrampe ist hier stückweise linear durch ColorBrewer RdYlGn-11
-  interpoliert; `d3.interpolateRdYlGn` legt eine Basis-Spline hindurch.
-  Minimale Abweichungen in den Zwischentönen sind normal und nur
-  optisch.
+`LICENSE`, `CITATION.cff` und `.gitignore` fehlen. Sie gehören dazu,
+sobald das Ganze ein zitierfähiges Repo werden soll — aber welche Lizenz
+und welche Autorenschaft, ist eine Entscheidung des Teams.

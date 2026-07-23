@@ -8,6 +8,7 @@ Ein Aufruf, vier Schritte:
     2. Graph laden, alles per SPARQL abfragen
     3. Zwei Abbildungen nach img/, je SVG + JPG 300 dpi
     4. Rundlaufpruefung CSV -> RDF -> SPARQL, Feld fuer Feld
+    5. Dokumentation nach docs/ neu erzeugen
 
 Aufruf aus der REPO-WURZEL (Windows / VS Code):
 
@@ -23,6 +24,7 @@ import sys
 from pathlib import Path
 
 import ips_compat
+import make_docs
 import ips_render
 import ips_sparql
 from ips_rdf_export import build_graph, build_ontology
@@ -65,6 +67,8 @@ def main() -> int:
     ap.add_argument("--figure-name", default="sites_dating_v1")
     ap.add_argument("--emit-geometry", action="store_true")
     ap.add_argument("--skip-plots", action="store_true")
+    ap.add_argument("--skip-docs", action="store_true")
+    ap.add_argument("--docs-out", type=Path, default=ROOT / "docs")
     args = ap.parse_args()
 
     import pandas as pd
@@ -132,11 +136,21 @@ def main() -> int:
     rule("4 · Rundlauf  CSV -> RDF -> SPARQL")
     ok = ips_sparql.roundtrip(rows, csv)
 
+    # ---- 5. Dokumentation ------------------------------------------------
+    # Wird bei jedem Lauf neu erzeugt, damit sie nicht vom Code wegdriften
+    # kann. Struktur kommt aus dem Code, Prosa aus py/ips_docs_text.py.
+    if not args.skip_docs:
+        rule("5 · Dokumentation")
+        for pth in make_docs.build(args.docs_out):
+            print(f"  {pth.relative_to(ROOT)}")
+
     rule("Ergebnis")
     print("  " + ("Alles konsistent." if ok
                   else "Rundlauf fehlgeschlagen — siehe oben."))
     print(f"  RDF        : {out}")
     print(f"  Abbildungen: {img}")
+    if not args.skip_docs:
+        print(f"  Dokumentation: {args.docs_out}")
     return 0 if ok else 2
 
 
