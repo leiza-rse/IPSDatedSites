@@ -1,0 +1,53 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata below."
+title: "IPSDatedSites: findspot datings from samian potters' stamps as linked data"
+abstract: >-
+  Exports the dating of archaeological findspots by samian potters' stamps
+  from the Samian Research / IPS database into RDF, and reconstructs the
+  published figure from that RDF by SPARQL. Each findspot becomes a
+  time-span built on CIDOC CRM and OWL-Time, carrying every quantity needed
+  to recompute its interval, with provenance in PROV-O and the presentation
+  layer held deliberately apart from the archaeological claim. The
+  round-trip reconstruction of the figure serves as the completeness test
+  of the model.
+type: software
+authors:
+  - family-names: Thiery
+    given-names: Florian
+    orcid: "https://orcid.org/0000-0002-3246-3531"
+    affiliation: "Leibniz-Zentrum für Archäologie (LEIZA)"
+  # TODO: confirm the domain author and their ORCID before release.
+  # Allard Mees is assumed here as the Samian Research / IPS lead; correct
+  # if someone else should be credited, and remove this comment.
+  - family-names: Mees
+    given-names: Allard
+    orcid: "https://orcid.org/0000-0000-0000-0000"  # TODO: insert ORCID
+    affiliation: "Leibniz-Zentrum für Archäologie (LEIZA)"
+license: MIT
+version: "1.0.0"
+date-released: "2026-01-01"  # TODO: confirm release date
+repository-code: "https://github.com/ORGANISATION/IPSDatedSites"  # TODO: insert URL
+# doi: "10.5281/zenodo.XXXXXXX"  # TODO: add Zenodo DOI once minted
+keywords:
+  - linked open data
+  - RDF
+  - SPARQL
+  - CIDOC CRM
+  - OWL-Time
+  - PROV-O
+  - archaeological dating
+  - samian ware
+  - terra sigillata
+  - potters' stamps
+  - Samian Research
+  - reproducible research
+references:
+  - type: database
+    title: "Samian Research / Index Professionum Signorum (IPS)"
+    abstract: >-
+      Source database of samian ware potters' stamps and their distribution.
+      The rights in the data are held by the database publishers and are
+      independent of the MIT licence covering this software.
+    authors:
+      - name: "Leibniz-Zentrum für Archäologie (LEIZA)"  # TODO: confirm
+    url: "https://www.rgzm.de/samian"  # TODO: confirm current URL

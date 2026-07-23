@@ -23,6 +23,9 @@ IPSDatedSites/
 ├── docs/          erzeugt   Dokumentation der Modellierung (British English)
 ├── rdf/           erzeugt   Turtle, JSON-LD, LADO-Erweiterung
 ├── img/           erzeugt   beide Abbildungen, je SVG + JPG 300 dpi
+├── .gitignore
+├── CITATION.cff
+├── LICENSE
 ├── README.md
 └── requirements.txt
 ```
@@ -214,8 +217,29 @@ gewürfelte Element-IDs, und beide Abbildungen stünden dauerhaft als
 geändert in `git status` — eine Datei, deren Diff immer rot ist, ist eine
 Datei, deren Diff niemand mehr liest.
 
-## Noch nicht enthalten
+## Lizenz und Zitierbarkeit
 
-`LICENSE`, `CITATION.cff` und `.gitignore` fehlen. Sie gehören dazu,
-sobald das Ganze ein zitierfähiges Repo werden soll — aber welche Lizenz
-und welche Autorenschaft, ist eine Entscheidung des Teams.
+Code unter **MIT**, siehe `LICENSE`. Die Metadaten für die Zitation stehen
+in `CITATION.cff`; GitHub und Zenodo lesen die Datei direkt aus.
+
+**Die Daten sind davon unabhängig.** Sie stammen aus Samian Research /
+IPS und nicht aus eigener Erhebung — die MIT-Lizenz deckt nur den Code.
+Wie die Datenbank zu zitieren und unter welcher Lizenz sie nachzunutzen
+ist, gehört vor der Veröffentlichung geklärt; in `CITATION.cff` steht
+dafür ein `references`-Block bereit.
+
+Sieben Stellen sind noch offen und als `TODO` markiert: die ORCID des
+Fachautors, das Release-Datum, die Repo-URL, der Zenodo-DOI sowie
+Herausgeber und URL der Quelldatenbank. Und eine Entscheidung, die ich
+nicht treffen kann: als Fachautor ist derzeit **Allard Mees** eingetragen,
+weil er in diesem Projekt der Ansprechpartner ist — falls jemand anderes
+genannt gehört, ist das die Zeile, die geändert werden muss.
+
+Die Hausvorlage der `wdt-*`-Repos führt standardmäßig Fiona Schenk als
+Fachautorin. Das ist hier bewusst **nicht** übernommen: sie gehört zum
+WD1-Speläothem-Paper, nicht zu Samian Research.
+
+`.gitignore` ignoriert `__pycache__`, virtuelle Umgebungen und
+Editor-Artefakte. `data/`, `rdf/`, `img/` und `docs/` bleiben **bewusst
+versioniert** — sie sind das Ergebnis und müssen diffbar sein. Genau
+deshalb sind die SVGs byte-stabil.

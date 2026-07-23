@@ -1,0 +1,31 @@
+# --- Python ---
+**/__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# --- Virtual environments ---
+.venv/
+venv/
+env/
+ENV/
+
+# --- Editors / OS ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# --- Note ---
+# data/, img/, rdf/ and docs/ are part of the reproducible archive.
+
+# --- This repository ---
+# rdf/, img/ and docs/ are generated but ARE part of the archive:
+# they are the deliverable and must be diffable. Do not ignore them.
+# The SVGs are byte-stable (SOURCE_DATE_EPOCH + fixed svg.hashsalt), so a
+# rebuild without a content change leaves git status clean.
