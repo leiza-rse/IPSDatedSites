@@ -27,6 +27,7 @@ IPSDatedSites/
 │   └── diagrams/  erzeugt   die fünf .mmd-Dateien
 ├── rdf/           erzeugt   Turtle, JSON-LD, LADO-Erweiterung, Bundle
 ├── img/           erzeugt   beide Abbildungen, je SVG + JPG 300 dpi
+│   └── diagrams/  nur CI     die gerenderten Mermaid-Diagramme
 ├── .gitignore
 ├── CITATION.cff
 ├── LICENSE
@@ -301,6 +302,13 @@ und einen Headless-Browser, und die Windows-Arbeitsumgebung hat beides
 nicht. Die Pipeline bleibt dadurch reines Python, CI liefert die Bilder
 nach — SVG plus JPG bei Skalierung 4, also grob 300 dpi. Dieselbe
 Konvention wie bei den beiden Hauptabbildungen.
+
+**Daraus folgt: `img/diagrams/` gibt es lokal erst nach einem `git pull`.**
+Egal wie oft `python py/main.py` läuft, der Ordner entsteht dabei nicht —
+er wird von der Action erzeugt und per Bot-Commit eingecheckt. Bis der
+erste Lauf durch ist, laufen die JPG- und SVG-Verweise unter den
+Diagrammen ins Leere; die Mermaid-Quelle und der eingebettete Block sind
+davon unberührt.
 
 Der Bot-Commit trägt `[skip ci]`, und ein Commit mit `GITHUB_TOKEN` löst
 ohnehin keinen weiteren Workflow-Lauf aus — eine Schleife ist also nicht
