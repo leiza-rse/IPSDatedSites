@@ -1,18 +1,17 @@
-# IPS Dated Sites — exakte Pins, absichtlich.
+# IPS Dated Sites — exact pins, deliberately.
 #
-# Die erzeugten SVGs enthalten die matplotlib-Version in ihren Metadaten,
-# und die clip-path-IDs sind nur INNERHALB einer Version deterministisch.
-# Eine Spanne wie "matplotlib>=3.8" laesst deshalb lokal und CI
-# verschiedene Dateien entstehen, und die Drift-Pruefung in
-# .github/workflows/build.yml schlaegt an, obwohl niemand etwas geaendert
-# hat. Genau das ist beim ersten CI-Lauf passiert: lokal 3.9.2, Runner
-# 3.10.9.
+# The generated SVGs carry the matplotlib version in their metadata, and
+# the clip-path identifiers are deterministic only WITHIN one version. A
+# range such as "matplotlib>=3.8" therefore produces different files
+# locally and in CI, and the drift check in .github/workflows/build.yml
+# fires although nobody changed anything. That is exactly what happened on
+# the first CI run: 3.9.2 locally, 3.10.9 on the runner.
 #
-# Wer eine Version anhebt, laesst danach einmal `python py/main.py`
-# laufen und committet die neu erzeugten Dateien mit.
+# Whoever raises a version runs `python py/main.py` once afterwards and
+# commits the regenerated files with it.
 
-rdflib==7.1.1         # ab 7.5 ohne die gYear-Warnungen, siehe py/ips_compat.py
+rdflib==7.1.1         # 7.5 drops the gYear warnings, see py/ips_compat.py
 pandas==2.2.3
-matplotlib==3.9.2     # steht in den SVG-Metadaten, siehe oben
-pillow==10.4.0        # von matplotlib fuer die JPG-Ausgabe gebraucht
-numpy==1.26.4         # transitiv, aber mitgepinnt fuer volle Reproduzierbarkeit
+matplotlib==3.9.2     # recorded in the SVG metadata, see above
+pillow==10.4.0        # needed by matplotlib for the JPG output
+numpy==1.26.4         # transitive, pinned anyway for full reproducibility

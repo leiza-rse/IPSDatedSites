@@ -1,33 +1,36 @@
-# IPS Dated Sites — RDF-Export, SPARQL-Rückweg, Abbildungen
+# IPS Dated Sites — RDF export, SPARQL round trip, figures
 
-Lokaler Prototyp für den RDF-Export der Fundstellen-Datierung (Samian
-Research / IPS). Eingabe ist die CSV aus `IPSDatedSites25_final.sql`, eine
-Zeile je Findspot. Das CFM-Skript holt später nur noch die Daten aus der
-Datenbank; die Modellierung wandert nach JavaScript in den Browser. Diese
-Python-Fassung ist die Referenzimplementierung, gegen die sich die
-JS-Portierung messen lassen muss.
+Local prototype for the RDF export of findspot datings (Samian Research /
+IPS). The input is the CSV produced by `sql/IPSDatedSites.sql`, one row per
+findspot. The CFM script will eventually only fetch the data from the
+database; the modelling moves to JavaScript in the browser. This Python
+version is the reference implementation the JavaScript port has to be
+measured against.
 
-> **Was wie modelliert wurde und warum, steht in [`docs/`](docs/index.md).**
-> Dort liegen auch der Crosswalk zu CIDOC CRM, OWL-Time, GeoSPARQL und
-> PROV-O, die Formeln aus dem SQL und die offenen Punkte. Dieses README
-> beschreibt nur Bedienung und getroffene Entscheidungen — jede Aussage
-> soll genau einen Ort haben.
+> **What was modelled how, and why, is in [`docs/`](docs/index.md).** The
+> crosswalk to CIDOC CRM, OWL-Time, GeoSPARQL and PROV-O lives there too,
+> along with the formulas from the SQL and the open questions. This README
+> covers operation and the decisions taken — every statement should have
+> exactly one home.
 
-## Aufbau
+## Layout
 
 ```
 IPSDatedSites/
-├── data/                    Eingabe: CSV aus IPSDatedSites25_final.sql
-├── py/                      der gesamte Code
-├── queries/                 die SPARQL-Abfragen als .rq für einen Endpoint
-├── .github/workflows/       CI: Pipeline, Drift-Prüfung, Validierung
-├── docs/          erzeugt   Dokumentation der Modellierung (British English)
-│   ├── _config.yml          Jekyll, damit GitHub Pages die Diagramme rendert
-│   ├── _layouts/            Layout mit mermaid.js
-│   └── diagrams/  erzeugt   die fünf .mmd-Dateien
-├── rdf/           erzeugt   Turtle, JSON-LD, LADO-Erweiterung, Bundle
-├── img/           erzeugt   beide Abbildungen, je SVG + JPG 300 dpi
-│   └── diagrams/  nur CI     die gerenderten Mermaid-Diagramme
+├── data/                    input: CSV from sql/IPSDatedSites.sql
+│   └── derived/   generated verification.json, written by step 0
+├── sql/                     the source query, for provenance
+├── py/                      all of the code
+├── queries/                 the SPARQL queries as .rq for an endpoint
+├── .github/workflows/       CI: pipeline, drift check, validation
+├── docs/          generated documentation of the model (British English)
+│   ├── _config.yml          Jekyll, so that GitHub Pages renders the diagrams
+│   ├── _layouts/            layout with mermaid.js
+│   ├── diagrams/  generated the five .mmd files
+│   └── docu/                hand-built companion pages for the CFM application
+├── rdf/           generated Turtle, JSON-LD, LADO extension, bundle
+├── img/           generated both figures, SVG + JPG at 300 dpi each
+│   └── diagrams/  CI only   the rendered Mermaid diagrams
 ├── .gitignore
 ├── CITATION.cff
 ├── LICENSE
@@ -35,293 +38,324 @@ IPSDatedSites/
 └── requirements.txt
 ```
 
-| Datei in `py/` | Aufgabe |
+| File in `py/` | Purpose |
 |---|---|
-| `main.py` | einziger Einstiegspunkt, fünf Schritte |
-| `ips_rdf_export.py` | CSV → RDF, baut den Graphen mit rdflib |
-| `ips_sparql.py` | Abfragen, Graphzugriff, Rundlaufprüfung |
-| `ips_render.py` | die beiden Abbildungen |
-| `ips_docs_text.py` | englische Textquelle für Ontologie **und** Doku |
-| `make_bundle.py` | baut das Standalone-Bundle für einen Triplestore |
-| `make_diagrams.py` | erzeugt die Mermaid-Diagramme aus Code und Graph |
-| `make_docs.py` | erzeugt `docs/*.md` aus dem Code |
-| `ips_compat.py` | unterdrückt eine rdflib-Warnung, siehe unten |
+| `main.py` | the single entry point, seven steps |
+| `verify.py` | step 0: checks the CSV against the model it claims to carry |
+| `ips_rdf_export.py` | CSV → RDF, builds the graph with rdflib |
+| `ips_sparql.py` | queries, graph access, round-trip check |
+| `ips_render.py` | the two figures |
+| `ips_docs_text.py` | English text source for the ontology **and** the docs |
+| `make_bundle.py` | builds the standalone bundle for a triplestore |
+| `make_diagrams.py` | generates the Mermaid diagrams from code and graph |
+| `make_docs.py` | generates `docs/*.md` from the code |
+| `ips_compat.py` | suppresses one rdflib warning, see below |
 
-Alle Pfade lösen über `Path(__file__).resolve().parent.parent` gegen die
-Repo-Wurzel auf. Aufgerufen wird von dort, nicht aus `py/`.
+All paths resolve against the repository root through
+`Path(__file__).resolve().parent.parent`. Run from there, not from `py/`.
 
-## Einrichtung und Lauf
+## Setup and running
 
 ```powershell
 pip install -r requirements.txt
 python py/main.py
 ```
 
-Terminal auf PowerShell lassen; die Skripte schreiben UTF-8 unabhängig von
-der Codepage, weil rdflib die Serialisierung übernimmt. Die CSV wird
-automatisch aus `data/` genommen.
+Leave the terminal on PowerShell; the scripts write UTF-8 regardless of the
+code page, because rdflib handles the serialisation. The CSV is picked up
+from `data/` automatically — exactly one CSV must be there, or the run stops
+and names the candidates.
 
 ```powershell
-python py/main.py --era astronomical      # andere Ära-Konvention
-python py/main.py --findspot-uri slug     # lesbare statt gehashte URIs
-python py/main.py --emit-geometry         # IPS-Koordinaten mit ausgeben
-python py/main.py --csv data\andere.csv   # andere Eingabedatei
-python py/main.py --skip-plots            # ohne Abbildungen
-python py/main.py --skip-bundle           # ohne Standalone-Bundle
-python py/main.py --skip-docs             # ohne Dokumentation
+python py/main.py --era astronomical      # the other era convention
+python py/main.py --findspot-uri slug     # readable instead of hashed URIs
+python py/main.py --emit-geometry         # emit the IPS coordinates as well
+python py/main.py --csv data\other.csv    # a different input file
+python py/main.py --skip-verify           # without step 0
+python py/main.py --verify-strict         # step 0 fails on warnings too
+python py/main.py --skip-plots            # without the figures
+python py/main.py --skip-bundle           # without the standalone bundle
+python py/main.py --skip-docs             # without the documentation
 ```
 
-Die Zielordner lassen sich mit `--rdf-out`, `--img-out` und `--docs-out`
-umlenken, der Name des Figur-Knotens mit `--figure-name`. Vollständige
-Liste: `python py/main.py --help`.
+The target folders can be redirected with `--rdf-out`, `--img-out` and
+`--docs-out`, the name of the figure node with `--figure-name`. Full list:
+`python py/main.py --help`.
 
-Sechs Schritte laufen durch:
+Seven steps run through:
 
-1. CSV → RDF nach `rdf/`
-2. Graph laden, alles per SPARQL zurücklesen
-3. beide Abbildungen nach `img/`
-4. Rundlaufprüfung CSV → RDF → SPARQL, Feld für Feld
-5. Standalone-Bundle nach `rdf/IPSDatedSites-bundle.ttl`
-6. Dokumentation und Mermaid-Diagramme nach `docs/`
+0. verify the CSV against the model, report to `data/derived/`
+1. CSV → RDF into `rdf/`
+2. load the graph, read everything back by SPARQL
+3. both figures into `img/`
+4. round-trip check CSV → RDF → SPARQL, field by field
+5. standalone bundle to `rdf/IPSDatedSites-bundle.ttl`
+6. documentation into `docs/`
 
-Aktueller Stand: 41 Zeilen, 2442 Tripel, Rundlauf über 17 Felder mit
-größter Abweichung `0.00e+00`.
+Current state: 41 rows, 2691 triples, round trip over 17 fields with a
+largest deviation of `0.00e+00`.
 
-## Das Standalone-Bundle
+## Step 0 verifies rather than recomputes
 
-`rdf/IPSDatedSites-bundle.ttl` enthält Daten, das komplette Vokabular und
-einen **materialisierten** CIDOC-CRM-Crosswalk in einer Datei — gedacht
-für einen Triplestore, insbesondere den NFDI4Objects-KG.
+The query is authoritative. `verify.py` recomputes nothing: it recovers each
+published value from the other columns of the **same row** and asserts
+agreement. Thirteen checks, carrying the letters used in the header of
+`sql/IPSDatedSites.sql` so that the two can be read side by side:
 
-Materialisiert, weil Triplestores in der Regel nicht über
-`rdfs:subClassOf` schließen. Mit den Axiomen allein liefert
+```
+c   k_eff  from n_stamps_die and the k parameters
+d   interval width equals 2 · k_eff · sigma_eff
+h   q_start / q_end from unc_*_years_exact and t0
+i   q decreases monotonically in sigma
+l   epoch drift sits in the box width          [reported, never fails]
+```
+
+plus the parameter columns being constant, the NULL policy, the integer
+casts, and the absence of the fabricated 0.5 fallback removed earlier.
+
+Check `i` is the one worth understanding. Until the reference length `t0`
+was introduced, `q_start` and `q_end` divided by the mean calendar year,
+which made the measure depend on the distance from the era boundary rather
+than on the scatter. Feeding those old values back through `verify.py`
+produces 21 inversions — findspots with larger scatter scoring better. That
+is what a quality measure looks like when it is measuring the wrong thing,
+and the check exists so that it cannot happen again unnoticed.
+
+The module is deliberately dependency-free, standard library only. Something
+that verifies the pipeline should not share a numerics stack with the code
+whose numbers it is checking.
+
+Its JSON report carries a `facts` block holding every figure the
+documentation quotes. No timestamp is written unless `--stamp` is passed, so
+that repeated runs stay byte-identical.
+
+## The standalone bundle
+
+`rdf/IPSDatedSites-bundle.ttl` holds the data, the complete vocabulary and a
+**materialised** CIDOC CRM crosswalk in one file — meant for a triplestore,
+the NFDI4Objects KG in particular.
+
+Materialised, because triplestores generally do not reason over
+`rdfs:subClassOf`. With the axioms alone,
 
 ```sparql
 SELECT (COUNT(DISTINCT ?x) AS ?n) WHERE { ?x a crm:E53_Place }
 ```
 
-genau `0`, obwohl jede Fundstelle laut Axiomen ein Place ist. Der Builder
-schreibt deshalb die transitive Hülle über `rdfs:subClassOf` als
-`rdf:type`-Tripel aus. Die Axiome bleiben daneben stehen, ein
-schließender Store leitet also nichts Neues ab und nichts widerspricht
-sich.
+returns exactly `0`, although by the axioms every findspot is a place. The
+builder therefore writes out the transitive closure over `rdfs:subClassOf`
+as `rdf:type` triples. The axioms stay alongside, so a reasoning store
+derives nothing new and nothing conflicts.
 
-Gegenprobe nach jedem Lauf, reine CRM/OWL-Time-Abfragen ohne Reasoner:
+Counter-check after every run, plain CRM/OWL-Time queries without a reasoner:
 
 ```
-crm:E53_Place          73     (41 Fundstellen + 32 Fundplätze)
-crm:E52_Time-Span      41
+crm:E53_Place          73     (41 findspots + 32 discovery sites)
+crm:E52_Time-Span     123
 crm:E36_Visual_Item    42
 time:ProperInterval    41
-CRM-only path          41     Ort -> Time-Span -> numerisches Jahr
+CRM-only path          41     place -> time-span -> numeric year
 ```
 
 Details in [`docs/bundle.md`](docs/bundle.md).
 
-## Der Rundlauf ist der eigentliche Test
+## The round trip is the real test
 
-`ips_rdf_export.py` baut den Graphen. Alles danach liest **ausschließlich
-per SPARQL** zurück — auch Randbreiten, Zeilenhöhe, Farbrampe und
-Sortierregel stehen im Graphen, nicht in den Renderern. Fehlt im Export
-etwas, das die Abbildung braucht, scheitert der Rückweg, statt still eine
-Konstante einzusetzen.
+`ips_rdf_export.py` builds the graph. Everything after it reads back
+**exclusively by SPARQL** — margins, row height, colour ramp and sort rule
+are in the graph, not in the renderers. If something the figure needs is
+missing from the export, the retrieval fails rather than quietly
+substituting a constant.
 
-Dass aus **einem** Graphen **zwei** verschiedene korrekte Abbildungen
-entstehen, ist der Beleg dafür, dass die Information wirklich im Graphen
-steckt und nicht in einer Zeichenroutine.
+That **two** different correct figures come out of **one** graph is the
+evidence that the information really is in the graph and not in a drawing
+routine.
 
-## Zwei Darstellungen
+## Two renderings
 
-**v1 classic** ist die bestehende D3-Abbildung, 1:1 — Box, Whisker mit
-Kappen, Extremwert-Stubs, gestrichelte Boxkanten, Gradientenlegende
-unten. Bleibt unangetastet, damit Webausgabe und Druckfassung konsistent
-sind.
+**v1 classic** is the existing D3 figure, one to one — box, whiskers with
+caps, extreme-value stubs, dashed box edges, gradient legend underneath.
+Left untouched so that the web output and the print version stay consistent.
 
-**v2 modern** zeigt **exakt dieselben Kanäle**, nur sauberer gesetzt.
-Insbesondere behalten die Whisker ihre Farbe nach `q_start` / `q_end`:
-die stehen an keiner anderen Stelle im Bild, und ein roter Whisker an den
-frühen arretinischen Fundstellen ist eine Aussage, die man sehen und
-nicht aus Zahlen zusammensuchen soll.
+**v2 modern** shows **exactly the same channels**, only set more carefully.
+The whiskers in particular keep their colour from `q_start` / `q_end`: those
+appear nowhere else in the picture, and a red whisker at the early Arretine
+findspots is a statement meant to be seen rather than assembled from
+numbers.
 
-Modernisiert ist nur die Machart: Zebra-Zeilen statt Gitternetz,
-BC/AD-Achse, zurückgenommene Hilfslinien, Farbleiste rechts, mehr Luft
-zwischen den Zeilen, ein weißer Halo unter den Whiskern, damit die Farbe
-über dem Zebra klar bleibt.
+What is modernised is the presentation: banded rows instead of a grid, a
+BC/AD axis, restrained rules, a colour bar on the right, more air between
+the rows, a white halo under the whiskers so that the colour stays clear
+over the banding.
 
-Rechts der Zeitachse steht eine **Wertetabelle** mit acht Spalten:
+To the right of the time axis sits a **value table** with eight columns:
 `interval`, `n`, `sigma`, `unc start`, `q start`, `q int`, `unc end`,
-`q end`. Sie deckt ab, was die Webanwendung im Hover-Popup zeigt, plus
-die Zahlen, die dort am Whisker stehen. Zwei Gründe: am Whisker
-kollidierten sie mit dem Whisker selbst, sobald die Balken lang wurden —
-und ein Popup funktioniert nur im Browser, gedruckt wäre die Information
-schlicht weg. Die Spalte `sigma` stand nicht in der Webausgabe; sie ist
-ergänzt, weil `Breite = 2·k·σ` gilt und man ohne sie sieht, *wie* breit
-die Box ist, aber nicht *warum*. Wer sie nicht will, löscht eine Zeile in
-`TABLE_COLUMNS`.
+`q end`. It covers what the web application shows in its hover popup, plus
+the numbers that sit on the whiskers there. Two reasons: on the whisker they
+collided with the whisker itself once the bars grew long — and a popup only
+works in a browser, so in print the information would simply be gone. The
+`sigma` column was not in the web output; it is added because
+`width = 2·k·σ` holds and without it one sees *how* wide the box is but not
+*why*. To drop it, delete one line in `TABLE_COLUMNS`.
 
-Eine frühere v2 hatte die Whiskerfarbe zugunsten einer Kapselform
-aufgegeben. Das war ein Fehler: es sah aufgeräumter aus und war weniger
-informativ. Die Regel ist es wert, festgehalten zu werden — **modernisiert
-wird die Machart, nicht das, was kodiert ist.**
+An earlier v2 gave up the whisker colour in favour of a capsule shape. That
+was a mistake: it looked tidier and carried less. The rule is worth writing
+down — **modernise the presentation, not what is encoded.**
 
-## Die drei Entscheidungen
+## The three decisions
 
-**Ära-Konvention: `historical`.** `-40` in der Datenbank bedeutet 40
-v. Chr. Da `xsd:gYear` astronomisch zählt, wird um +1 verschoben.
-Kontrolle an Amiens: `eff_start = -16.6` → gerundet 17 v. Chr. →
-`time:inXSDgYear "-0016"`. Umgerechnet wird **nur das Kalenderlabel**;
-die `time:numericPosition` bleibt der Quellwert. Begründung in
+**Era convention: `historical`.** `-40` in the database means 40 BC. Since
+`xsd:gYear` counts astronomically, the label is shifted by +1. Check against
+Amiens: `eff_start = -16.6` → rounded 17 BC → `time:inXSDgYear "-0016"`.
+Only the **calendar label** is converted; `time:numericPosition` stays the
+source value. Reasoning in
 [`docs/open-questions.md`](docs/open-questions.md).
 
-**Findspot-URI: Hash.** `samian:fs_<site-id>_<hash>` mit
-`sha256(NFC(trim(findspot)))[0:6]`. Amiens / *Sq. Bocquet pit 1973* wird
-zu `samian:fs_1003978_969c47`. Das Rezept steht als
-`lado:identifierScheme` im Graphen, weil die JS-Portierung es
-zeichengenau reproduzieren muss. Mit `--findspot-uri slug` auf lesbare
-Fragmente umstellbar — aber die Entscheidung sollte einmalig fallen, ein
-späterer Wechsel erzeugt einen zweiten Satz URIs für dieselben
-Fundstellen.
+**Findspot URI: hash.** `samian:fs_<site-id>_<hash>` with
+`sha256(NFC(trim(findspot)))[0:6]`. Amiens / *Sq. Bocquet pit 1973* becomes
+`samian:fs_1003978_969c47`. The recipe is in the graph as
+`lado:identifierScheme`, because the JavaScript port has to reproduce it
+character for character. `--findspot-uri slug` switches to readable
+fragments — but the decision should be taken once, since a later change
+creates a second set of URIs for the same findspots.
 
-**Basis-URI: nicht versioniert.** Fundstellen- und Zeitspannen-URIs
-bleiben stabil und bezeichnen die *jeweils aktuelle* Datierung. Zitierbar
-ist stattdessen der datierte Datensatz
-(`samian:dataset_sites_dating_v1_<Datum>`), an dem jede Zeitspanne per
-`prov:wasDerivedFrom` hängt.
+**Base URI: not versioned.** Findspot and time-span URIs stay stable and
+denote the *current* dating. What is citable instead is the dated dataset
+(`samian:dataset_sites_dating_v1_<date>`), to which every time-span is
+attached by `prov:wasDerivedFrom`.
 
-## Dokumentation, die nicht wegdriften kann
+## Documentation that cannot drift
 
-`docs/` wird bei jedem Lauf neu erzeugt, auf British English. Der Punkt
-ist nicht Bequemlichkeit, sondern dass handgeschriebene Strukturdoku beim
-ersten neuen Property auseinanderläuft.
+`docs/` is regenerated on every run, in British English. The point is not
+convenience but that hand-written structural documentation diverges at the
+first new property.
 
-Die **Struktur** liest `make_docs.py` zur Laufzeit aus dem Code: Klassen,
-Properties mit Domain und Range, Namensräume, Figur-Konstanten und die
-SPARQL-Abfragen kommen aus `ips_rdf_export.py`, `ips_render.py` und
-`ips_sparql.py` selbst. Die **Prosa** steht in `ips_docs_text.py` — und
-diese Datei speist zugleich die englischen `rdfs:comment` der Ontologie.
-Eine Definition kann also nicht in der Doku stimmen und im RDF veraltet
-sein; es ist derselbe String.
+`make_docs.py` reads the **structure** out of the code at runtime: classes,
+properties with domain and range, namespaces, figure constants and the
+SPARQL queries come from `ips_rdf_export.py`, `ips_render.py` and
+`ips_sparql.py` themselves. The **prose** lives in `ips_docs_text.py` — and
+that same file feeds the English `rdfs:comment` of the ontology. A
+definition therefore cannot be right in the documentation and stale in the
+RDF; it is the same string.
 
-Dasselbe gilt für die **fünf Mermaid-Diagramme** unter `docs/diagrams/`:
-Architektur, Klassenhierarchie, Beziehungen nach Schichten, eine echte
-Instanz und die Materialisierung im Bundle. Keines ist gezeichnet — die
-Hierarchie kommt aus `CLASSES`, die Beziehungen aus `RELATIONS` und
-`LAYERS`, die Instanz per SPARQL aus dem gerade erzeugten Graphen, die
-Materialisierung aus derselben Closure-Funktion, die das Bundle benutzt.
+The same holds for the **five Mermaid diagrams** under `docs/diagrams/`:
+architecture, class hierarchy, relations by layer, a real instance and the
+materialisation in the bundle. None of them is drawn — the hierarchy comes
+from `CLASSES`, the relations from `RELATIONS` and `LAYERS`, the instance by
+SPARQL from the graph just produced, the materialisation from the same
+closure function the bundle uses.
 
-Jedes Diagramm wird zweimal aus **einem** String geschrieben: als
-`.mmd`-Datei und als ` ```mermaid `-Block in der `.md`. github.com rendert
-den Block direkt; GitHub Pages braucht dafür `mermaid.js` im Layout, bis
-dahin ist die `.mmd` der Ausweg.
+Every diagram is written twice from **one** string: as a `.mmd` file and as
+a ` ```mermaid ` block in the `.md`. github.com renders the block directly;
+GitHub Pages needs `mermaid.js` in the layout, and until then the `.mmd` is
+the way out.
 
-Nebenbei hat das den Exportcode verbessert: `crm:P89_falls_within` und
-`crm:P4_has_time-span` standen vorher nur inline in `build_graph`. Jetzt
-sind sie in `RELATIONS` deklariert, und `build_graph` benutzt dieselben
-Konstanten — sonst wäre das Diagramm eine Abschrift gewesen, die beim
-ersten Umbau falsch wird.
+This improved the export code as a side effect: `crm:P89_falls_within` and
+`crm:P4_has_time-span` previously sat inline in `build_graph` only. They are
+now declared in `RELATIONS`, and `build_graph` uses the same constants —
+otherwise the diagram would have been a transcription that goes wrong at the
+first restructuring.
 
-Der Generator **bricht ab**, wenn eine Klasse oder Property im Code keinen
-Eintrag hat:
+The generator **stops** if a class or property in the code has no entry:
 
 ```
 Undocumented terms — add them to py/ips_docs_text.py:
   property testProperty
 ```
 
-Geprüft: neue Property ohne Doku → Exitcode 1; Doku ergänzt → Exitcode 0,
-und der Text erscheint danach in `docs/vocabulary.md` **und** als
-`rdfs:comment@en` in `rdf/lado_dating_extension.ttl`.
+Tested: new property without documentation → exit code 1; documentation
+added → exit code 0, and the text then appears in `docs/vocabulary.md`
+**and** as `rdfs:comment@en` in `rdf/lado_dating_extension.ttl`.
 
-| Seite | Inhalt |
+| Page | Contents |
 |---|---|
-| [`index.md`](docs/index.md) | Überblick und Einstieg |
-| [`model.md`](docs/model.md) | die drei Schichten, URI-Strategie, NULL-Kontrakt |
-| [`vocabulary.md`](docs/vocabulary.md) | alle Klassen und Properties, generiert |
+| [`index.md`](docs/index.md) | overview and starting point |
+| [`model.md`](docs/model.md) | the three layers, URI strategy, the NULL contract |
+| [`vocabulary.md`](docs/vocabulary.md) | all classes and properties, generated |
 | [`crosswalk.md`](docs/crosswalk.md) | CIDOC CRM, OWL-Time, GeoSPARQL, PROV-O, DCAT, SKOS |
-| [`statistics.md`](docs/statistics.md) | die Formeln aus dem SQL |
-| [`queries.md`](docs/queries.md) | die SPARQL-Abfragen und der Rundlauf |
-| [`open-questions.md`](docs/open-questions.md) | was offen ist, inklusive des Filters |
+| [`statistics.md`](docs/statistics.md) | the formulas from the SQL |
+| [`queries.md`](docs/queries.md) | the SPARQL queries and the round trip |
+| [`open-questions.md`](docs/open-questions.md) | what remains open |
 
-## GitHub Pages und die Diagramme
+`docs/docu/` is different in kind: three hand-built pages that accompany the
+CFM application — method and formulae, an at-a-glance summary, and a
+walkthrough of the query. They are **not** generated and are currently
+behind the model; bringing them up to date is the next piece of work.
 
-github.com rendert ` ```mermaid `-Blöcke nativ, **GitHub Pages nicht** —
-dort läuft Jekyll, und der Block kommt als Code-Element an. Deshalb
-liegen unter `docs/` ein `_config.yml` und ein `_layouts/default.html`
-mit `mermaid.js`; das Layout wandelt die Code-Elemente beim Laden in
-Diagramme um.
+## GitHub Pages and the diagrams
 
-Der Markdown-Quelltext bleibt dabei für beide Ziele identisch — eine
-Quelle, zwei Renderer. Das `_config.yml` setzt das Layout per `defaults`
-für alle Seiten, damit `make_docs.py` nichts über Jekyll wissen muss.
+github.com renders ` ```mermaid ` blocks natively, **GitHub Pages does
+not** — Jekyll runs there, and the block arrives as a code element. Hence a
+`_config.yml` and a `_layouts/default.html` with `mermaid.js` under `docs/`;
+the layout converts the code elements into diagrams on load.
 
-## Die GitHub Action
+The Markdown source stays identical for both targets — one source, two
+renderers. `_config.yml` sets the layout through `defaults` for all pages,
+so that `make_docs.py` needs to know nothing about Jekyll.
 
-`.github/workflows/build.yml` erzwingt bei jedem Push die Zusage, auf der
-das Repo aufbaut: **die erzeugten Dateien dürfen dem Code nicht
-hinterherhinken.** Ohne die Prüfung ist der Sync-Mechanismus nur eine
-Konvention, und eine ungeprüfte Konvention vergisst irgendwann jemand.
+## The GitHub Action
 
-Fünf Schritte:
+`.github/workflows/build.yml` enforces, on every push, the undertaking the
+repository rests on: **the generated files must not lag behind the code.**
+Without the check the sync mechanism is only a convention, and an unchecked
+convention is eventually forgotten.
 
-1. Umgebung protokollieren — Python- und Bibliotheksversionen
-2. Pipeline laufen lassen — der Rundlauf steckt darin und beendet sich
-   bei jeder Abweichung mit Fehlercode
-3. `git diff` auf `docs/`, getrennt davon auf `img/`
-4. RDF semantisch prüfen: parst alles, und beantwortet das Bundle
-   CIDOC-CRM-Abfragen ohne Reasoner?
-5. Diagramme rendern: `.mmd` → SVG und JPG nach `img/diagrams/`, per
-   Bot-Commit ins Repo
+Five steps:
 
-Die beiden Diff-Prüfungen sind **getrennt**, weil ihre Fehlerursachen es
-sind. `docs/` ist reiner Text aus den Code-Strukturen und auf jeder
-Plattform identisch — ein Unterschied dort heißt: jemand hat Code
-geändert und nicht neu erzeugt. `img/` kommt aus matplotlib, und das
-schreibt seine eigene Version in die SVG-Metadaten und leitet die
-`clip-path`-IDs pro Version ab. Ein Unterschied dort ist meistens ein
-Versionskonflikt, kein inhaltlicher.
+1. record the environment — Python and library versions
+2. run the pipeline — the round trip is inside it and exits with an error
+   code on any deviation
+3. `git diff` on `docs/`, separately on `img/`
+4. check the RDF semantically: does everything parse, and does the bundle
+   answer CIDOC CRM queries without a reasoner?
+5. render the diagrams: `.mmd` → SVG and JPG into `img/diagrams/`, committed
+   by the bot
 
-`rdf/` ist von der Byte-Prüfung **ausgenommen**, und das mit Absicht: die
-Dateien tragen `dcterms:created` und `prov:endedAtTime`, die sich von Lauf
-zu Lauf ändern sollen. Nachgemessen sind `docs/`, `docs/diagrams/` und
-`img/` byte-identisch über aufeinanderfolgende Läufe — dort ist die
-Prüfung also aussagekräftig.
+The two diff checks are **separate** because their causes are. `docs/` is
+plain text from the code structures and identical on every platform — a
+difference there means somebody changed code and did not regenerate. `img/`
+comes from matplotlib, which writes its own version into the SVG metadata
+and derives the `clip-path` identifiers per version. A difference there is
+usually a version conflict rather than a substantive one.
 
-Getestet: Code geändert ohne neu zu erzeugen → Action schlägt an;
-undokumentierte Property → Pipeline endet mit Exitcode 1.
+`rdf/` is **exempt** from the byte check, deliberately: the files carry
+`dcterms:created` and `prov:endedAtTime`, which are meant to change from run
+to run. Measured: `docs/`, `docs/diagrams/` and `img/` are byte-identical
+across consecutive runs, so the check is meaningful there.
 
-## Gerenderte Diagramme
+Tested: code changed without regenerating → the action fires; undocumented
+property → the pipeline ends with exit code 1.
 
-Unter jedem Diagramm in `docs/` stehen drei Verweise: **JPG**, **SVG** und
-die **Mermaid-Quelle**. Sie zeigen absolut auf github.com, nicht relativ —
-ein relativer Link auf `diagrams/*.mmd` funktioniert im Repo, aber nicht
-auf GitHub Pages, weil `docs/_config.yml` die `.mmd` dort gar nicht
-ausliefert.
+## Rendered diagrams
 
-Gerendert wird in der Action, nicht in `py/main.py`: `mmdc` braucht Node
-und einen Headless-Browser, und die Windows-Arbeitsumgebung hat beides
-nicht. Die Pipeline bleibt dadurch reines Python, CI liefert die Bilder
-nach — SVG plus JPG bei Skalierung 4, also grob 300 dpi. Dieselbe
-Konvention wie bei den beiden Hauptabbildungen.
+Under each diagram in `docs/` are three links: **JPG**, **SVG** and the
+**Mermaid source**. They point absolutely at github.com, not relatively — a
+relative link to `diagrams/*.mmd` works in the repository but not on GitHub
+Pages, because `docs/_config.yml` does not publish the `.mmd` there.
 
-**Daraus folgt: `img/diagrams/` gibt es lokal erst nach einem `git pull`.**
-Egal wie oft `python py/main.py` läuft, der Ordner entsteht dabei nicht —
-er wird von der Action erzeugt und per Bot-Commit eingecheckt. Bis der
-erste Lauf durch ist, laufen die JPG- und SVG-Verweise unter den
-Diagrammen ins Leere; die Mermaid-Quelle und der eingebettete Block sind
-davon unberührt.
+Rendering happens in the action, not in `py/main.py`: `mmdc` needs Node and
+a headless browser, and the Windows working environment has neither. The
+pipeline therefore stays pure Python and CI supplies the images afterwards —
+SVG plus JPG at scale 4, roughly 300 dpi. The same convention as for the two
+main figures.
 
-Der Bot-Commit trägt `[skip ci]`, und ein Commit mit `GITHUB_TOKEN` löst
-ohnehin keinen weiteren Workflow-Lauf aus — eine Schleife ist also nicht
-möglich. `img/diagrams/` ist von der Byte-Prüfung auf `img/` ausgenommen,
-weil die Dateien erst später im selben Lauf entstehen und nicht aus der
-Python-Pipeline stammen.
+**It follows that `img/diagrams/` only exists locally after a `git pull`.**
+However often `python py/main.py` runs, the folder is not created by it — it
+is produced by the action and checked in by a bot commit. Until the first
+run completes, the JPG and SVG links under the diagrams lead nowhere; the
+Mermaid source and the embedded block are unaffected.
 
-## Warum die Versionen exakt gepinnt sind
+The bot commit carries `[skip ci]`, and a commit made with `GITHUB_TOKEN`
+does not trigger another workflow run anyway — a loop is therefore
+impossible. `img/diagrams/` is exempt from the byte check on `img/` because
+the files appear later in the same run and do not come from the Python
+pipeline.
 
-`requirements.txt` nennt exakte Versionen, nicht Spannen. Der Grund ist
-konkret: beim ersten CI-Lauf lief die Drift-Prüfung auf einen Fehler,
-weil lokal matplotlib 3.9.2 und auf dem Runner 3.10.9 installiert war.
-Im Diff stand
+## Why the versions are pinned exactly
+
+`requirements.txt` names exact versions rather than ranges. The reason is
+concrete: on the first CI run the drift check failed because matplotlib
+3.9.2 was installed locally and 3.10.9 on the runner. The diff read
 
 ```
 - <dc:title>Matplotlib v3.9.2 …
@@ -330,74 +364,71 @@ Im Diff stand
 + clip-path="url(#p8bcc3c5794)"
 ```
 
-Die Version steht in den SVG-Metadaten, und `svg.hashsalt` macht die
-`clip-path`-IDs nur *innerhalb* einer Version deterministisch. Die
-Prüfung war also korrekt — sie hat einen echten Unterschied gemeldet,
-nur keinen inhaltlichen.
+The version is in the SVG metadata, and `svg.hashsalt` makes the
+`clip-path` identifiers deterministic only *within* one version. The check
+was correct — it reported a real difference, just not a substantive one.
 
-Wer eine Version anhebt, lässt danach einmal `python py/main.py` laufen
-und committet die neu erzeugten Dateien mit.
+Whoever raises a version runs `python py/main.py` once afterwards and
+commits the regenerated files with it.
 
-Schriftarten sind übrigens unkritisch: der Renderer setzt kein
-`font.family`, es gilt matplotlibs eigene DejaVu Sans, die mit dem Paket
-ausgeliefert wird. Windows und Linux erzeugen dieselben Textpfade.
+Fonts, incidentally, are not a concern: the renderer sets no `font.family`,
+so matplotlib's own DejaVu Sans applies, shipped with the package. Windows
+and Linux produce the same text paths.
 
-## rdflib und vorchristliche Jahre
+## rdflib and pre-Christian years
 
-rdflib 7.1.x bildet `xsd:gYear` auf Pythons `datetime.date` ab. Das kann
-keine Jahre vor 1 darstellen (`datetime.MINYEAR == 1`), weshalb jedes
-v.-Chr.-Jahr beim Anlegen *und* beim Parsen des Literals eine Warnung samt
-Traceback schreibt. Bei den aktuellen Daten betrifft das acht Literale.
+rdflib 7.1.x maps `xsd:gYear` onto Python's `datetime.date`, which cannot
+represent years before 1 (`datetime.MINYEAR == 1`). Every BC year therefore
+writes a warning and a traceback both when the literal is created *and* when
+it is parsed. With the current data that affects eight literals.
 
-Das Literal selbst ist korrekt — nachgeprüft mit genau dieser Version:
+The literal itself is correct — checked against exactly this version:
 
 ```
 Literal("-0016", datatype=XSD.gYear).n3()
 → "-0016"^^<http://www.w3.org/2001/XMLSchema#gYear>
 ```
 
-Nur `.value` bleibt `None`. Folgenlos, weil keine Abfrage auf `gYear`
-rechnet. Ab rdflib 7.5 ist der Konverter entfernt und es schweigt
-ohnehin.
+Only `.value` stays `None`. Of no consequence, because no query computes on
+`gYear`. From rdflib 7.5 the converter is gone and the noise stops by
+itself.
 
-`py/ips_compat.py` unterdrückt **genau diese eine Meldung** und sonst
-nichts — ein pauschales Stummschalten von `rdflib.term` wäre falsch, dort
-landen auch Meldungen, die man sehen will. Die Anzahl betroffener
-Literale gibt `main.py` stattdessen aus, damit sie sichtbar bleibt statt
-bloß stummgestellt zu sein.
+`py/ips_compat.py` suppresses **exactly that one message** and nothing else
+— silencing `rdflib.term` wholesale would be wrong, since messages worth
+seeing arrive on the same logger. `main.py` reports the number of affected
+literals instead, so that they stay visible rather than merely silenced.
 
-## Byte-stabile SVGs
+## Byte-stable SVGs
 
-`SOURCE_DATE_EPOCH` und ein fester `svg.hashsalt` sorgen dafür, dass ein
-Rebuild ohne inhaltliche Änderung identische Dateien erzeugt. Sonst
-schriebe matplotlib bei jedem Lauf einen neuen Zeitstempel und neu
-gewürfelte Element-IDs, und beide Abbildungen stünden dauerhaft als
-geändert in `git status` — eine Datei, deren Diff immer rot ist, ist eine
-Datei, deren Diff niemand mehr liest.
+`SOURCE_DATE_EPOCH` and a fixed `svg.hashsalt` ensure that a rebuild without
+a content change produces identical files. Otherwise matplotlib would write
+a fresh timestamp and freshly randomised element identifiers on every run,
+and both figures would sit permanently modified in `git status` — a file
+whose diff is always red is a file whose diff nobody reads.
 
-## Lizenz und Zitierbarkeit
+## Licence and citation
 
-Code unter **MIT**, siehe `LICENSE`. Die Metadaten für die Zitation stehen
-in `CITATION.cff`; GitHub und Zenodo lesen die Datei direkt aus.
+Code under **MIT**, see `LICENSE`. The citation metadata is in
+`CITATION.cff`; GitHub and Zenodo read the file directly.
 
-**Die Daten sind davon unabhängig.** Sie stammen aus Samian Research /
-IPS und nicht aus eigener Erhebung — die MIT-Lizenz deckt nur den Code.
-Wie die Datenbank zu zitieren und unter welcher Lizenz sie nachzunutzen
-ist, gehört vor der Veröffentlichung geklärt; in `CITATION.cff` steht
-dafür ein `references`-Block bereit.
+**The data are independent of that.** They come from Samian Research / IPS
+and not from our own collection — the MIT licence covers the code only. How
+the database is to be cited and under which licence it may be reused should
+be settled before publication; `CITATION.cff` holds a `references` block
+ready for it.
 
-Sieben Stellen sind noch offen und als `TODO` markiert: die ORCID des
-Fachautors, das Release-Datum, die Repo-URL, der Zenodo-DOI sowie
-Herausgeber und URL der Quelldatenbank. Und eine Entscheidung, die ich
-nicht treffen kann: als Fachautor ist derzeit **Allard Mees** eingetragen,
-weil er in diesem Projekt der Ansprechpartner ist — falls jemand anderes
-genannt gehört, ist das die Zeile, die geändert werden muss.
+Seven places are still open and marked `TODO`: the ORCID of the subject
+author, the release date, the repository URL, the Zenodo DOI, and the
+publisher and URL of the source database. Plus one decision that is not mine
+to take: **Allard Mees** is currently entered as subject author because he
+is the point of contact in this project — if somebody else belongs there,
+that is the line to change.
 
-Die Hausvorlage der `wdt-*`-Repos führt standardmäßig Fiona Schenk als
-Fachautorin. Das ist hier bewusst **nicht** übernommen: sie gehört zum
-WD1-Speläothem-Paper, nicht zu Samian Research.
+The house template of the `wdt-*` repositories lists Fiona Schenk as subject
+author by default. That is deliberately **not** carried over here: she
+belongs to the WD1 speleothem paper, not to Samian Research.
 
-`.gitignore` ignoriert `__pycache__`, virtuelle Umgebungen und
-Editor-Artefakte. `data/`, `rdf/`, `img/` und `docs/` bleiben **bewusst
-versioniert** — sie sind das Ergebnis und müssen diffbar sein. Genau
-deshalb sind die SVGs byte-stabil.
+`.gitignore` ignores `__pycache__`, virtual environments and editor
+artefacts. `data/`, `rdf/`, `img/` and `docs/` stay **deliberately
+versioned** — they are the result and have to be diffable. That is exactly
+why the SVGs are byte-stable.

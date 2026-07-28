@@ -1,46 +1,46 @@
 """
-IPS Dated Sites — RDF-Export
+IPS Dated Sites — RDF export
 ============================
 
-Liest die CSV aus IPSDatedSites25_final.sql und baut daraus einen
-Knowledge Graph in Turtle / JSON-LD.
+Reads the CSV produced by sql/IPSDatedSites.sql and builds a knowledge
+graph from it in Turtle / JSON-LD.
 
-Der Graph wird mit rdflib *konstruiert*, nicht als Text zusammengeklebt.
-Damit ist die gesamte Fehlerklasse des alten Exporters (ungueltige
-Literale wie 0.0953^^xsd:decimal, kaputte Escapes, offene Statements)
-konstruktionsbedingt ausgeschlossen.
+The graph is *constructed* with rdflib rather than glued together as text.
+That rules out, by construction, the whole class of faults the earlier
+exporter suffered from: invalid literals such as 0.0953^^xsd:decimal,
+broken escapes, unterminated statements.
 
-AUFBAU IN DREI SCHICHTEN
-------------------------
-  1. ORT & FUNDSTELLE   — was in der Welt ist
-       samian:loc_ds_<id>          bereits publiziert, wird nur referenziert
-       samian:fs_<id>_<slug>       Fundstelle, crm:P89_falls_within Ort
+THREE LAYERS
+------------
+  1. PLACE & FINDSPOT   — what exists in the world
+       samian:loc_ds_<id>          already published, only referenced here
+       samian:fs_<id>_<slug>       findspot, crm:P89_falls_within place
 
-  2. DATIERUNG          — die inhaltliche Aussage
+  2. DATING             — the substantive claim
        samian:ts_<id>_<slug>       lado:FindspotDating
                                    -> crm:E52_Time-Span, time:ProperInterval
-       traegt eff_start/eff_end (als OWL-Time TimePosition), sigma, k,
+       carries eff_start/eff_end (as OWL-Time time positions), sigma, k,
        n, D, r, q_interval, q_repetition, q_start, q_end, avg/min/max
 
-  3. DARSTELLUNG        — was die Abbildung erzeugt
-       samian:plotrow_<id>_<slug>  lado:PlotRow, lado:renders -> Time-Span
-                                   traegt unc_* (laut Doku "visual only")
-       samian:fig_<name>           lado:Figure, Konstanten der Abbildung
+  3. PRESENTATION       — what the figure makes of it
+       samian:plotrow_<id>_<slug>  lado:PlotRow, lado:renders -> time-span
+                                   carries unc_* ("visual only" per the docs)
+       samian:fig_<name>           lado:Figure, the figure constants
 
-  + PROV: DatingModel (prov:Plan) mit k_min/k_max/tau/w, pro Zeile eine
-    prov:Activity, dazu Agent, Quelldatensatz und der ungeklaerte Filter.
+  + PROV: DatingModel (prov:Plan) with k_min/k_max/tau/w, one prov:Activity
+    per row, plus agent, source dataset and the documented filter.
 
-NULL-KONTRAKT
--------------
-Fehlt ein Wert, wird das Tripel WEGGELASSEN — nie 0 oder 0.5 behauptet.
-Damit Abwesenheit nicht mit "noch nicht gerechnet" verwechselt wird,
-setzt der Export zusaetzlich einen expliziten Marker:
+THE NULL CONTRACT
+-----------------
+Where a value is missing the triple is OMITTED — never 0 or 0.5 asserted.
+So that absence is not mistaken for "not computed yet", the export also
+writes an explicit marker:
     <ts> lado:undefinedMeasure lado:qInterval .
 
-Aufruf (Windows / VS Code):
-    python py/ips_rdf_export.py --csv data/daten.csv --out rdf
+Direct use (Windows / VS Code):
+    python py/ips_rdf_export.py --csv data/data.csv --out rdf
 
-Normalerweise nicht direkt aufrufen, sondern ueber py/main.py.
+Normally not called directly, but through py/main.py.
 """
 
 from __future__ import annotations
@@ -61,9 +61,9 @@ from rdflib.namespace import DCTERMS, SKOS, XSD
 from ips_compat import silence_gyear_warnings
 from ips_docs_text import TERM_DOCS
 
-# rdflib < 7.5 kann vorchristliche xsd:gYear nicht in ein Python-date
-# wandeln und schreibt dafuer je Literal einen Traceback. Die Literale
-# selbst sind korrekt; Begruendung und Nachweis in ips_compat.py.
+# rdflib < 7.5 cannot convert pre-Christian xsd:gYear into a Python date
+# and writes a traceback per literal. The literals themselves are correct;
+# the reasoning and the evidence are in ips_compat.py.
 silence_gyear_warnings()
 
 # --------------------------------------------------------------------------
@@ -74,20 +74,20 @@ LADO = Namespace("http://archaeology.link/ontology#")
 CRM = Namespace("http://www.cidoc-crm.org/cidoc-crm/")
 TIME = Namespace("http://www.w3.org/2006/time#")
 PROV = Namespace("http://www.w3.org/ns/prov#")  # KORREKT. Die publizierte
-# loc_discoverysite_1.ttl bindet prov: faelschlich auf .../ns/prov-o/ ,
-# wodurch dort alle sechs PROV-Praedikate ins Leere zeigen. Nicht uebernehmen.
+# loc_discoverysite_1.ttl wrongly binds prov: to .../ns/prov-o/ , which
+# leaves all six PROV predicates there pointing nowhere. Do not copy it.
 GEO = Namespace("http://www.opengis.net/ont/geosparql#")
-# CRMdig — die CIDOC-CRM-Erweiterung fuer digitale Provenienz. Der
-# Namensraum ist der von FORTH vergebene; nachgeprueft gegen die offizielle
-# Definition v4.0 und gegen OntoME, weil ein falsch geratener Namensraum
-# genau der Defekt ist, den wir an der 2019er-Datei bemaengeln.
+# CRMdig — the CIDOC CRM extension for digital provenance. The namespace is
+# the one assigned by FORTH, checked against the official v4.0 definition and
+# against OntoME, because a guessed-wrong namespace is precisely the defect
+# we criticise in the 2019 file.
 CRMDIG = Namespace("http://www.ics.forth.gr/isl/CRMdig/")
 DCAT = Namespace("http://www.w3.org/ns/dcat#")
 PLEIADES = Namespace("https://pleiades.stoa.org/places/")
 
 TRS_GREGORIAN = URIRef("http://www.opengis.net/def/uom/ISO-8601/0/Gregorian")
-# Eigenes TRS fuer die Zahlengerade, auf der die Quelle rechnet.
-# Begruendung siehe numeric_year().
+# A time reference system of our own for the number line the source
+# computes on. See numeric_year() for the reasoning.
 TRS_IPS = SAMIAN["trs_ips_year"]
 
 PREFIXES = {
@@ -98,17 +98,17 @@ PREFIXES = {
 }
 
 # --------------------------------------------------------------------------
-# Beziehungen zwischen den Klassen
+# Relations between the classes
 # --------------------------------------------------------------------------
-# Diese Praedikate standen frueher nur inline in build_graph(). Damit waren
-# sie fuer die Dokumentation unsichtbar: ein generiertes Diagramm haette
-# sie abschreiben muessen und waere beim ersten Umbau falsch geworden.
-# Jetzt sind sie einmal deklariert; build_graph() UND make_diagrams.py
+# These predicates used to sit inline in build_graph() only, which made them
+# invisible to the documentation: a generated diagram would have had to copy
+# them out and would have gone wrong at the first restructuring. Now they are
+# declared once; build_graph() AND make_diagrams.py
 # benutzen dieselben Namen.
 P_FALLS_WITHIN  = CRM.P89_falls_within
 P_HAS_TIME_SPAN = CRM["P4_has_time-span"]
 
-# (Subjektklasse, Praedikat, Objektklasse) — das Geruest des Graphen.
+# (subject class, predicate, object class) — the skeleton of the graph.
 RELATIONS = [
     (LADO.Findspot,       P_FALLS_WITHIN,      LADO.DiscoverySite),
     (LADO.Findspot,       P_HAS_TIME_SPAN,     LADO.FindspotDating),
@@ -123,8 +123,8 @@ RELATIONS = [
     (LADO.FindspotDating, PROV.wasDerivedFrom, DCAT.Dataset),
 ]
 
-# Zu welcher Schicht gehoert eine Klasse? Steuert die Gruppierung in den
-# Diagrammen und macht die Trennung nachpruefbar statt bloss behauptet.
+# Which layer does a class belong to? Drives the grouping in the diagrams
+# and makes the separation checkable rather than merely asserted.
 LAYERS = {
     LADO.DiscoverySite:  "place",
     LADO.Findspot:       "place",
@@ -145,7 +145,7 @@ LAYER_LABELS = {
 
 
 # --------------------------------------------------------------------------
-# Konstanten der Abbildung (aus IPSDatedSites25.cfm)
+# Figure constants (from IPSDatedSites27.cfm)
 # --------------------------------------------------------------------------
 FIGURE_CONSTANTS = {
     "padYears": (60, XSD.integer),            # Z. 373
@@ -161,15 +161,15 @@ FIGURE_CONSTANTS = {
     "rowOrder": ("avg_datemin ASC", XSD.string),
 }
 
-# Der ungeklaerte Filter aus der Quell-Query.
+# The end-date filter from the source query.
 EXCLUDED_DATEMAX = [260, 120, 150]
 
 # --------------------------------------------------------------------------
 # Slug — Transliteration VOR Normalisierung
 # --------------------------------------------------------------------------
-# Reines NFD/NFKD reicht fuer Deutsch nicht: 'ß' hat gar keine
-# Dekomposition und fiele ersatzlos weg ("Emmeranstraße" -> "emmeranstrae").
-# Und in JavaScript ist \w ASCII-only, weshalb der alte v5-Exporter aus
+# Plain NFD/NFKD is not enough for German: 'ß' has no decomposition at all
+# and would simply vanish ("Emmeranstraße" -> "emmeranstrae"). And in
+# JavaScript \w is ASCII-only, which is why the old v5 exporter turned
 # "Köln" ein "kln" gemacht hat. Beides faengt diese Tabelle ab.
 TRANSLIT = {
     "ä": "ae", "ö": "oe", "ü": "ue", "Ä": "Ae", "Ö": "Oe", "Ü": "Ue",
@@ -189,27 +189,27 @@ def slug(text: str) -> str:
     return s or "unknown"
 
 
-# Rezept fuer den Findspot-Schluessel. Muss in der spaeteren
-# JS-Portierung ZEICHENGENAU reproduziert werden, sonst zeigen die
-# beiden Implementierungen auf verschiedene URIs.
-KEY_ALGORITHM = "sha256(NFC(trim(findspot)))[0:6], je Fundplatz-ID"
+# The recipe for the findspot key. A later JavaScript port must reproduce
+# it CHARACTER FOR CHARACTER, otherwise the two implementations point at
+# different URIs.
+KEY_ALGORITHM = "sha256(NFC(trim(findspot)))[0:6], per discovery-site id"
 
 
 def findspot_hash(findspot: str) -> str:
     """
-    Sechsstelliger Hash aus dem Fundstellennamen.
+    A six-character hash of the findspot name.
 
-    NFC-Normalisierung ist hier nicht Kosmetik: liefert die Quelle 'ö'
-    einmal als U+00F6 und einmal als 'o'+U+0308, ergaeben sich sonst
-    zwei verschiedene Hashes fuer dieselbe Fundstelle. In JavaScript
-    entspricht das str.normalize("NFC") vor dem Hashen.
+    NFC normalisation is not cosmetic here: if the source delivers 'ö' once
+    as U+00F6 and once as 'o'+U+0308, the same findspot would otherwise
+    receive two different hashes. In JavaScript this corresponds to
+    str.normalize("NFC") before hashing.
     """
     raw = unicodedata.normalize("NFC", str(findspot).strip())
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:6]
 
 
 def build_keys(df: pd.DataFrame, mode: str) -> dict:
-    """(the_id, findspot) -> URI-Fragment. Prueft auf Kollisionen."""
+    """(the_id, findspot) -> URI fragment. Checks for collisions."""
     keys, seen = {}, {}
     for _, r in df.iterrows():
         sid = int(r.the_id)
@@ -220,7 +220,7 @@ def build_keys(df: pd.DataFrame, mode: str) -> dict:
         prev = seen.setdefault((sid, frag), str(r.the_findspot))
         if prev != str(r.the_findspot):
             raise SystemExit(
-                f"URI-Kollision am Fundplatz {sid}: '{prev}' und "
+                f"URI collision at discovery site {sid}: '{prev}' and "
                 f"'{r.the_findspot}' ergeben beide '{frag}'.")
     return keys
 
@@ -243,12 +243,13 @@ def integer(v) -> Literal:
 
 def gyear(year_db: float, era: str) -> Literal:
     """
-    Ganzjahr -> xsd:gYear.
+    Whole year -> xsd:gYear.
 
-    era='historical'   : -40 in der DB bedeutet 40 v.Chr. -- so bestaetigt
-                         fuer die IPS-Datenbank. xsd:gYear zaehlt
-                         astronomisch (Jahr 0 = 1 v.Chr.), also -40 -> -0039.
-    era='astronomical' : der DB-Wert ist bereits astronomisch, unveraendert.
+    era='historical'   : -40 in the database means 40 BC — confirmed for the
+                         IPS database. xsd:gYear counts astronomically
+                         (year 0 = 1 BC), so -40 -> -0039.
+    era='astronomical' : the database value is already astronomical, passed
+                         through unchanged.
     """
     y = int(round(year_db))
     if era == "historical" and y < 0:
@@ -259,17 +260,17 @@ def gyear(year_db: float, era: str) -> Literal:
 
 def numeric_year(value: float) -> Decimal:
     """
-    Dezimaljahr — UNVERAENDERT aus der Quelle.
+    Decimal year — UNCHANGED from the source.
 
-    Bewusst ohne Aera-Umrechnung. Die Quelle rechnet eff = m +/- k*sigma
-    auf einer durchgehenden Zahlengeraden; ein '+1 nur fuer negative
-    Werte' wuerde bei -0.5 -> +0.5 springen, waere nicht umkehrbar und
-    zerstoerte die Arithmetik, aus der der Wert stammt.
+    Deliberately without era conversion. The source computes
+    eff = m +/- k*sigma on a continuous number line; a '+1 for negative
+    values only' would jump from -0.5 to +0.5, would not be invertible, and
+    would destroy the arithmetic the value comes from.
 
-    Die Aera-Konvention gehoert deshalb an das KALENDER-LABEL
-    (time:inXSDgYear), nicht an die Position auf der Zahlengeraden.
-    Die Zahlengerade selbst bekommt ein eigenes, dokumentiertes TRS
-    (samian:trs_ips_year) statt stillschweigend als Gregorian zu gelten.
+    The era convention therefore belongs on the CALENDAR LABEL
+    (time:inXSDgYear), not on the position on the number line. The number
+    line itself gets a documented time reference system of its own
+    (samian:trs_ips_year) rather than passing silently as Gregorian.
     """
     return Decimal(str(value))
 
@@ -277,9 +278,9 @@ def numeric_year(value: float) -> Decimal:
 # --------------------------------------------------------------------------
 # Ontologie-Erweiterung (LADO)
 # --------------------------------------------------------------------------
-# Klassen haengen ueber mehrere Stufen unter CIDOC CRM. Die vorhandenen
-# LADO-Klassen der publizierten Daten werden hier nachtraeglich in CRM
-# verankert, OHNE die publizierten Instanzen neu zu typisieren.
+# Classes hang under CIDOC CRM through several steps. The existing LADO
+# classes of the published data are anchored in CRM here after the fact,
+# WITHOUT retyping the published instances.
 CLASSES = [
     # (Klasse, Oberklassen, Label, Kommentar)
     (LADO.Location, [CRM.E53_Place], "Location",
@@ -337,18 +338,18 @@ CLASSES = [
 ]
 
 # --------------------------------------------------------------------------
-# Wiederholte Axiome fremder Vokabulare
+# Restated axioms of foreign vocabularies
 # --------------------------------------------------------------------------
-# Diese Tripel gehoeren CRMdig, nicht uns. Sie stehen hier, damit das
-# Standalone-Bundle CIDOC-CRM-Abfragen auch dann beantwortet, wenn CRMdig
-# nicht mitgeladen wurde: die Materialisierung in make_bundle.py folgt den
-# Axiomen, die IM GRAPHEN stehen, und ohne diese endet die Kette bei
+# These triples belong to CRMdig, not to us. They are here so that the
+# standalone bundle answers CIDOC CRM queries even when CRMdig has not been
+# loaded alongside: the materialisation in make_bundle.py follows the axioms
+# present IN THE GRAPH, and without these the chain stops at
 # crmdig:D10_Software_Execution.
 #
-# Es sind Wiederholungen, keine neuen Behauptungen — nachgeschlagen in der
-# offiziellen CRMdig-Definition v4.0 (Table 1: Class Hierarchy) und in der
+# They are restatements, not new claims — looked up in the official CRMdig
+# v4.0 definition (Table 1: Class Hierarchy) and in the
 # CIDOC-CRM-Klassenhierarchie. Wer CRMdig ohnehin laedt, bekommt dieselben
-# Tripel doppelt und damit gar nichts Neues.
+# triples twice over, and therefore nothing new at all.
 EXTERNAL_AXIOMS = [
     (CRMDIG.D10_Software_Execution, CRMDIG.D7_Digital_Machine_Event),
     (CRMDIG.D7_Digital_Machine_Event, CRM.E11_Modification),
@@ -420,7 +421,7 @@ DATA_PROPS = [
      "uncertainty end (years)", "VISUAL ONLY. Siehe uncStartYears."),
     (LADO.uncIntervalYears, LADO.PlotRow, XSD.integer,
      "uncertainty interval (years)", "VISUAL ONLY."),
-    # Modell
+    # Model
     (LADO.kMin, LADO.DatingModel, XSD.decimal, "k min", ""),
     (LADO.kMax, LADO.DatingModel, XSD.decimal, "k max", ""),
     (LADO.tau, LADO.DatingModel, XSD.decimal, "tau",
@@ -467,12 +468,12 @@ def _local(term) -> str:
 
 def _describe(g: Graph, term) -> None:
     """
-    Englischen rdfs:comment aus TERM_DOCS anhaengen.
+    Attach the English rdfs:comment from TERM_DOCS.
 
-    Dieselbe Textquelle speist die generierte Dokumentation unter docs/.
-    Eine Definition kann dadurch nicht in der einen Haelfte stimmen und in
-    der anderen veralten. Fuer die Aufnahme in einen gemeinsamen
-    Knowledge Graph ist eine englische Definition ohnehin Pflicht.
+    The same text source feeds the generated documentation under docs/, so a
+    definition cannot be right in one half and stale in the other. For
+    inclusion in a shared knowledge graph an English definition is required
+    in any case.
     """
     text = TERM_DOCS.get(_local(term))
     if text:
@@ -503,7 +504,7 @@ def build_ontology() -> Graph:
             g.add((cls, RDFS.comment, Literal(comment, lang="de")))
         _describe(g, cls)
 
-    # Wiederholte Fremdaxiome, damit das Bundle ohne CRMdig aufloest.
+    # Restated foreign axioms, so that the bundle resolves without CRMdig.
     g.add((onto, RDFS.comment, Literal(
         "Contains a small number of rdfs:subClassOf axioms that belong to "
         "CRMdig and to CIDOC CRM rather than to this vocabulary. They are "
@@ -549,15 +550,15 @@ def build_graph(df: pd.DataFrame, era: str, figure_name: str,
     snapshot = now_dt.strftime("%Y-%m-%d")
     keys = build_keys(df, key_mode)
 
-    # ---- Agent, Modell, Quelle, Datensatz -------------------------------
+    # ---- Agent, model, source, dataset ----------------------------------
     agent = SAMIAN.IPSDatedSitesExporter
     g.add((agent, RDF.type, PROV.SoftwareAgent))
-    # Die Software selbst ist ein digitales Objekt: ueber D14 und D1
-    # erreicht der Agent crm:E73_Information_Object.
+    # The software itself is a digital object: through D14 and D1 the
+    # agent reaches crm:E73_Information_Object.
     g.add((agent, RDF.type, CRMDIG.D14_Software))
     g.add((agent, RDFS.label, Literal("ips_rdf_export.py", lang="en")))
 
-    # ---- Zeitreferenzsystem der Quelle ----------------------------------
+    # ---- Time reference system of the source ----------------------------
     g.add((TRS_IPS, RDF.type, TIME.TRS))
     g.add((TRS_IPS, RDF.type, LADO.YearScale))
     g.add((TRS_IPS, RDFS.label, Literal("IPS signed year scale", lang="en")))
@@ -591,9 +592,9 @@ def build_graph(df: pd.DataFrame, era: str, figure_name: str,
     for v in EXCLUDED_DATEMAX:
         g.add((model, LADO.excludedDatemax, integer(v)))
 
-    # Die Time-Span-URIs bleiben stabil; ihr WERT aendert sich mit den
-    # Daten. Zitierfaehig ist deshalb der datierte Snapshot, nicht die
-    # einzelne Zeitspanne.
+    # The time-span URIs stay stable; their VALUE changes with the data.
+    # What is citable is therefore the dated snapshot, not the individual
+    # time-span.
     dataset = SAMIAN[f"dataset_{figure_name}_{snapshot}"]
     g.add((dataset, RDF.type, DCAT.Dataset))
     g.add((dataset, RDF.type, PROV.Entity))
@@ -627,10 +628,10 @@ def build_graph(df: pd.DataFrame, era: str, figure_name: str,
         lit = dec(value) if dt == XSD.decimal else Literal(value, datatype=dt)
         g.add((figure, LADO[name], lit))
 
-    # ---- Zeilen ---------------------------------------------------------
+    # ---- Rows -----------------------------------------------------------
     for _, r in df.iterrows():
         sid = int(r.the_id)
-        fs_slug = slug(r.the_findspot)          # nur noch als skos:notation
+        fs_slug = slug(r.the_findspot)          # as skos:notation only
         key = f"{sid}_{keys[(sid, str(r.the_findspot))]}"
 
         place = SAMIAN[f"loc_ds_{sid}"]
@@ -639,12 +640,12 @@ def build_graph(df: pd.DataFrame, era: str, figure_name: str,
         row = SAMIAN[f"plotrow_{key}"]
         act = SAMIAN[f"act_dating_{key}"]
 
-        # --- Ort: nur referenzieren, nicht neu behaupten ---
+        # --- Place: reference only, do not reassert ---
         g.add((place, RDFS.label, Literal(str(r.the_site), lang="en")))
         if not isna(r.latinsitename):
             g.add((place, LADO.ancientName, Literal(str(r.latinsitename))))
         if not isna(r.pleiades):
-            # Das '.0' steckt bereits in der Datenbank; sauber casten.
+            # The '.0' is already in the database; cast it away cleanly.
             g.add((place, LADO.pleiadesID,
                    PLEIADES[str(int(float(r.pleiades)))]))
         if emit_geometry and not isna(r.lat) and not isna(r["long"]):
@@ -654,7 +655,7 @@ def build_graph(df: pd.DataFrame, era: str, figure_name: str,
                 f"<http://www.opengis.net/def/crs/EPSG/0/4326> "
                 f"POINT({r['long']} {r.lat})", datatype=GEO.wktLiteral)))
 
-        # --- Fundstelle ---
+        # --- Findspot ---
         g.add((findspot, RDF.type, LADO.Findspot))
         g.add((findspot, RDFS.label, Literal(str(r.the_findspot))))
         g.add((findspot, SKOS.notation, Literal(fs_slug)))
@@ -681,19 +682,19 @@ def build_graph(df: pd.DataFrame, era: str, figure_name: str,
             g.add((pos, RDF.type, LADO.DatingTimePosition))
             g.add((pos, TIME.hasTRS, TRS_IPS))
             g.add((pos, TIME.numericPosition, dec(numeric_year(value))))
-            # Zusaetzlich gerundet, fuer Konsumenten, die nur Kalender-
-            # jahre verstehen. Die exakte Lage steht in numericPosition.
+            # Rounded as well, for consumers that understand calendar
+            # years only. The exact position is in numericPosition.
             g.add((inst, TIME.inXSDgYear, gyear(value, era)))
 
-        # CIDOC-CRM-eigene Zeitgrenzen. Ohne sie findet ein Konsument, der
-        # nur CRM kennt, zwar die Zeitspanne, bekommt aus ihr aber keine
-        # Jahreszahl: die Daten haengen sonst ausschliesslich hinter
-        # OWL-Time. P82a/P82b sind die aeusseren Grenzen der Zeitspanne,
-        # und genau das sind eff_start und eff_end.
+        # CIDOC CRM's own time bounds. Without them a consumer that knows
+        # only CRM finds the time-span but gets no year out of it: the data
+        # would otherwise hang exclusively behind OWL-Time. P82a/P82b are
+        # the outer bounds of the time-span, and that is exactly what
+        # eff_start and eff_end are.
         #
-        # Gerundet auf ganze Jahre, wie time:inXSDgYear. Die genaue Lage
-        # bleibt in time:numericPosition; diese beiden Tripel sind die
-        # Bruecke fuer CRM, nicht die massgebliche Angabe.
+        # Rounded to whole years, as time:inXSDgYear is. The exact position
+        # stays in time:numericPosition; these two triples are the bridge
+        # for CRM, not the authoritative statement.
         g.add((ts, CRM.P82a_begin_of_the_begin, gyear(r.eff_start, era)))
         g.add((ts, CRM.P82b_end_of_the_end, gyear(r.eff_end, era)))
 
@@ -718,7 +719,7 @@ def build_graph(df: pd.DataFrame, era: str, figure_name: str,
         ]
         for prop, value, caster in measures:
             if isna(value):
-                # NULL-KONTRAKT: kein Tripel, aber explizit markiert.
+                # THE NULL CONTRACT: no triple, but marked explicitly.
                 g.add((ts, LADO.undefinedMeasure, prop))
             else:
                 g.add((ts, prop, caster(value)))
@@ -748,16 +749,15 @@ def build_graph(df: pd.DataFrame, era: str, figure_name: str,
         g.add((act, PROV.wasAssociatedWith, agent))
         g.add((act, PROV.endedAtTime, now))
         g.add((act, PROV.used, dataset))
-        # Frueher stand hier eine prov:qualifiedAssociation mit einem
-        # Blank Node vom Typ prov:Association. Der war die einzige
-        # Instanz im Graphen, die sich nicht in CIDOC CRM verankern liess
-        # — eine Reifikation ist kein Ding in der Welt, und CRM hat
-        # dafuer keine Klasse.
+        # This used to be a prov:qualifiedAssociation with a blank node of
+        # type prov:Association. That was the one instance in the graph
+        # which could not be anchored in CIDOC CRM — a reification is not a
+        # thing in the world, and CRM has no class for it.
         #
-        # Ersetzt durch zwei direkte Aussagen, die dasselbe sagen und in
-        # beiden Vokabularen gueltig sind: prov:used, weil ein prov:Plan
-        # auch eine prov:Entity ist, und crm:P33_used_specific_technique,
-        # dessen Range genau crm:E29_Design_or_Procedure ist.
+        # Replaced by two direct statements that say the same thing and are
+        # valid in both vocabularies: prov:used, because a prov:Plan is also
+        # a prov:Entity, and crm:P33_used_specific_technique, whose range is
+        # exactly crm:E29_Design_or_Procedure.
         g.add((act, PROV.used, model))
         g.add((act, CRM.P33_used_specific_technique, model))
         g.add((act, CRM.P14_carried_out_by, agent))
@@ -771,22 +771,22 @@ def main() -> int:
     ap = argparse.ArgumentParser(
         description="IPS Dated Sites: CSV -> RDF (Turtle / JSON-LD)")
     ap.add_argument("--csv", required=True, type=Path,
-                    help="Ergebnis-CSV aus IPSDatedSites25_final.sql")
+                    help="result CSV from sql/IPSDatedSites.sql")
     ap.add_argument("--out", default=Path("rdf"), type=Path,
-                    help="Ausgabeverzeichnis (Standard: rdf)")
+                    help="output directory (default: rdf)")
     ap.add_argument("--era", choices=("historical", "astronomical"),
                     default="historical",
-                    help="Lesart negativer Jahreszahlen der Quelle. "
+                    help="reading of negative years in the source. "
                          "historical: -40 = 40 v.Chr. (xsd:gYear -0039). "
                          "astronomical: -40 = xsd:gYear -0040.")
     ap.add_argument("--findspot-uri", choices=("hash", "slug"),
                     default="hash",
-                    help="Wie das Fundstellen-Fragment gebildet wird. "
-                         "hash: sechsstellig aus dem Namen (Standard). "
-                         "slug: lesbar transliteriert.")
+                    help="how the findspot fragment is formed. "
+                         "hash: six characters from the name (default). "
+                         "slug: readable transliteration.")
     ap.add_argument("--figure-name", default="sites_dating_v1")
     ap.add_argument("--emit-geometry", action="store_true",
-                    help="Koordinaten aus IPS mit ausgeben. Standard aus, "
+                    help="emit the IPS coordinates as well. Off by default, "
                          "weil loc_discoverysite_1.ttl bereits eine "
                          "Geometrie fuer diese Orte publiziert.")
     args = ap.parse_args()
@@ -811,21 +811,21 @@ def main() -> int:
     g.serialize(destination=jld_path, format="json-ld", indent=2,
                 auto_compact=True, encoding="utf-8")
 
-    # Rueckleseprobe: was geschrieben wurde, muss auch parsbar sein.
+    # Read-back check: what was written has to be parseable too.
     check = Graph()
     check.parse(ttl_path, format="turtle")
 
-    print(f"Zeilen gelesen        : {len(df)}")
-    print(f"Ontologie             : {onto_path}  ({len(onto)} Tripel)")
-    print(f"Graph (Turtle)        : {ttl_path}  ({len(g)} Tripel)")
+    print(f"Rows read             : {len(df)}")
+    print(f"Ontology              : {onto_path}  ({len(onto)} triples)")
+    print(f"Graph (Turtle)        : {ttl_path}  ({len(g)} triples)")
     print(f"Graph (JSON-LD)       : {jld_path}")
-    print(f"Rueckleseprobe        : OK, {len(check)} Tripel geparst")
-    print(f"Aera-Konvention       : {args.era}")
+    print(f"Read-back check       : OK, {len(check)} triples parsed")
+    print(f"Era convention        : {args.era}")
     if args.era == "historical":
-        print("  -> negative Quelljahre werden als v.Chr. gelesen und fuer")
-        print("     xsd:gYear um +1 auf astronomische Zaehlung verschoben.")
-        print("     Falls die Datenbank bereits astronomisch zaehlt:")
-        print("     mit --era astronomical erneut ausfuehren.")
+        print("  -> negative source years are read as BC and shifted by +1")
+        print("     for xsd:gYear onto astronomical counting.")
+        print("     If the database already counts astronomically:")
+        print("     re-run with --era astronomical.")
     return 0
 
 

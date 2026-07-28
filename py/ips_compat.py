@@ -1,35 +1,34 @@
 """
-IPS Dated Sites — Kompatibilitaet mit aelteren rdflib-Versionen
-===============================================================
+IPS Dated Sites — compatibility with older rdflib versions
+==========================================================
 
-rdflib 7.1.x bildet `xsd:gYear` auf Pythons `datetime.date` ab. Das kann
-keine Jahre vor 1 darstellen (`datetime.MINYEAR == 1`), weshalb JEDES
-vorchristliche Jahr beim Anlegen und beim Parsen des Literals eine
-Warnung samt Traceback auf die Konsole schreibt:
+rdflib 7.1.x maps `xsd:gYear` onto Python's `datetime.date`, which cannot
+represent years before 1 (`datetime.MINYEAR == 1`). EVERY pre-Christian
+year therefore writes a warning and a traceback to the console, both when
+the literal is created and when it is parsed:
 
     Failed to convert Literal lexical form to value.
     Datatype=...XMLSchema#gYear ... ValueError: year -16 is out of range
 
-Betroffen sind bei uns die acht Instants der sechs vorchristlichen
-Fundstellen sowie die Jahreszahl 0000 (= 1 v. Chr. in astronomischer
-Zaehlung).
+Affected here are the eight instants of the six pre-Christian findspots,
+and the year 0000 (= 1 BC in astronomical counting).
 
-WICHTIG: das Literal selbst ist in allen Faellen korrekt und wird
-korrekt serialisiert — nachgeprueft mit rdflib 7.1.1:
+IMPORTANT: the literal itself is correct in every case and is serialised
+correctly — checked against rdflib 7.1.1:
 
     Literal("-0016", datatype=XSD.gYear).n3()
     -> "-0016"^^<http://www.w3.org/2001/XMLSchema#gYear>
 
-Nur `.value` bleibt None. Das ist fuer uns folgenlos, weil keine Abfrage
-auf gYear rechnet: die verwertbare Zeitangabe steht als
-`time:numericPosition` an der `time:TimePosition`, `time:inXSDgYear` ist
-die Beigabe fuer Konsumenten, die nur Kalenderjahre lesen.
+Only `.value` stays None, which is of no consequence here because no query
+computes on gYear: the usable time value sits on the `time:TimePosition`
+as `time:numericPosition`, and `time:inXSDgYear` is the courtesy for
+consumers that read calendar years only.
 
-Ab rdflib 7.5 ist der Konverter entfernt, dort schweigt es ohnehin.
+From rdflib 7.5 the converter is gone and the noise stops by itself.
 
-Dieser Filter unterdrueckt deshalb GENAU diese eine Meldung und nichts
-sonst. Ein pauschales Stummschalten von `rdflib.term` waere die falsche
-Loesung — dort landen auch Meldungen, die man sehen will.
+This filter therefore suppresses EXACTLY that one message and nothing
+else. Silencing `rdflib.term` wholesale would be the wrong fix — messages
+worth seeing arrive on the same logger.
 """
 
 from __future__ import annotations
@@ -38,7 +37,7 @@ import logging
 
 
 class _GYearConversionNoise(logging.Filter):
-    """Laesst alles durch ausser der gYear-Konvertierungswarnung."""
+    """Lets everything through except the gYear conversion warning."""
 
     def filter(self, record: logging.LogRecord) -> bool:
         try:
@@ -53,7 +52,7 @@ _installed = False
 
 
 def silence_gyear_warnings() -> None:
-    """Einmalig den Filter setzen. Mehrfachaufruf ist unschaedlich."""
+    """Install the filter once. Calling this repeatedly is harmless."""
     global _installed
     if not _installed:
         logging.getLogger("rdflib.term").addFilter(_GYearConversionNoise())
@@ -62,10 +61,10 @@ def silence_gyear_warnings() -> None:
 
 def count_bc_gyears(graph) -> int:
     """
-    Zaehlt die geschriebenen v.-Chr.-Jahreszahlen.
+    Count the BC years written out.
 
-    Wird von main.py ausgegeben, damit die betroffenen Literale sichtbar
-    bleiben, statt bloss stumm gestellt zu sein.
+    Reported by main.py so that the affected literals stay visible rather
+    than merely silenced.
     """
     from rdflib.namespace import XSD
 

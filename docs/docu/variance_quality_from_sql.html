@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Method &amp; formulae — dating archaeological findspots from potters' stamps</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;0,700;1,400&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+<style>
+:root{
+  --ink:#1b2430;          /* museum label board          */
+  --ink-soft:#46525f;
+  --paper:#fbfaf7;
+  --paper-2:#f2efe8;
+  --rule:#d9d3c6;
+  --slip:#9e3b26;         /* samian slip, deep           */
+  --slip-tint:#f6e8e3;
+  --ochre:#b07d31;        /* kiln                        */
+  --sage:#40655c;         /* retained / correct          */
+  --sage-tint:#e6efeb;
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:"Public Sans",system-ui,sans-serif;
+  font-size:16px; line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ---------- tab bar (this page is tab 2) ---------- */
+.tabs{
+  position:sticky; top:0; z-index:50;
+  background:var(--ink); border-bottom:3px solid var(--slip);
+}
+.tabs-inner{max-width:1080px; margin:0 auto; display:flex; align-items:stretch; gap:2px; padding:0 24px}
+.tab{
+  display:flex; align-items:center; gap:.55rem;
+  padding:.85rem 1.4rem; text-decoration:none;
+  font-size:.83rem; font-weight:600; letter-spacing:.08em; text-transform:uppercase;
+  color:#9aa7b4; border-bottom:3px solid transparent; margin-bottom:-3px;
+}
+.tab:hover{color:#e7e3da; background:rgba(255,255,255,.05)}
+.tab[aria-current="page"]{color:var(--paper); border-bottom-color:var(--slip); background:rgba(158,59,38,.18)}
+.tab .num{
+  font-family:"IBM Plex Mono",monospace; font-size:.72rem;
+  opacity:.65; font-weight:400;
+}
+
+/* ---------- masthead ---------- */
+header.mast{
+  background:var(--ink); color:var(--paper);
+  padding:3.4rem 24px 3rem;
+}
+.mast-inner{max-width:1080px; margin:0 auto; display:grid; grid-template-columns:1fr auto; gap:2.5rem; align-items:end}
+.mast h1{
+  font-family:Spectral,Georgia,serif; font-weight:600;
+  font-size:clamp(1.9rem,4vw,2.9rem); line-height:1.14; margin:0 0 .7rem;
+  letter-spacing:-.01em;
+}
+.mast .kicker{
+  font-family:"IBM Plex Mono",monospace; font-size:.76rem; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--ochre); margin:0 0 1.1rem;
+}
+.mast p.lede{margin:0; max-width:56ch; color:#c3cbd3; font-size:1.02rem}
+.stamp{opacity:.9}
+
+/* ---------- layout ---------- */
+main{max-width:1080px; margin:0 auto; padding:0 24px 6rem}
+section{padding-top:3.2rem; scroll-margin-top:4.5rem}
+h2{
+  font-family:Spectral,Georgia,serif; font-weight:600; font-size:1.55rem;
+  margin:0 0 .3rem; display:flex; align-items:center; gap:.85rem;
+}
+h3{font-family:Spectral,Georgia,serif; font-weight:600; font-size:1.13rem; margin:2rem 0 .5rem}
+h2 + .sub{
+  margin:0 0 1.5rem 3.6rem; color:var(--ink-soft); font-size:.94rem;
+  border-left:2px solid var(--rule); padding-left:.9rem;
+}
+p{max-width:74ch}
+a{color:var(--slip)}
+code,.mono{font-family:"IBM Plex Mono",monospace; font-size:.88em}
+p code, li code, td code{background:var(--paper-2); padding:.1em .38em; border-radius:2px}
+
+/* section marker: tabula ansata, after the stamp cartouches themselves */
+.ansa{flex:0 0 auto}
+
+/* ---------- content devices ---------- */
+.formula{
+  background:#fff; border:1px solid var(--rule); border-left:3px solid var(--slip);
+  padding:.4rem 1.3rem; margin:1.2rem 0; overflow-x:auto;
+}
+.formula .why{
+  font-size:.88rem; color:var(--ink-soft); border-top:1px dashed var(--rule);
+  margin-top:.2rem; padding:.7rem 0 .3rem;
+}
+.note{
+  background:var(--sage-tint); border-left:3px solid var(--sage);
+  padding:.9rem 1.2rem; margin:1.3rem 0; font-size:.94rem;
+}
+.warn{
+  background:var(--slip-tint); border-left:3px solid var(--slip);
+  padding:.9rem 1.2rem; margin:1.3rem 0; font-size:.94rem;
+}
+.note strong,.warn strong{font-weight:600}
+.open{
+  border:1px dashed var(--ochre); background:#fdf8ef;
+  padding:.9rem 1.2rem; margin:1.3rem 0; font-size:.94rem;
+}
+.open::before{
+  content:"Open question"; display:block;
+  font-family:"IBM Plex Mono",monospace; font-size:.7rem; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--ochre); margin-bottom:.35rem;
+}
+
+table{border-collapse:collapse; width:100%; margin:1.3rem 0; font-size:.9rem}
+th,td{border-bottom:1px solid var(--rule); padding:.55rem .7rem; text-align:left; vertical-align:top}
+thead th{
+  background:var(--paper-2); border-bottom:2px solid var(--ink);
+  font-size:.74rem; letter-spacing:.07em; text-transform:uppercase; font-weight:600;
+}
+td.num{text-align:right; font-family:"IBM Plex Mono",monospace}
+tbody tr:hover{background:#fff}
+
+pre{
+  background:var(--ink); color:#dfe5ea; padding:1.1rem 1.3rem; overflow-x:auto;
+  font-family:"IBM Plex Mono",monospace; font-size:.82rem; line-height:1.55;
+  border-left:3px solid var(--ochre); margin:1.2rem 0;
+}
+pre .c{color:#8d9aa6; font-style:italic}
+pre .k{color:#e0a06a}
+
+figure{margin:1.8rem 0; }
+figure svg{max-width:100%; height:auto; display:block}
+figcaption{
+  font-size:.85rem; color:var(--ink-soft); margin-top:.6rem;
+  border-top:1px solid var(--rule); padding-top:.5rem; max-width:74ch;
+}
+
+.pill{
+  display:inline-block; font-family:"IBM Plex Mono",monospace; font-size:.72rem;
+  letter-spacing:.06em; text-transform:uppercase; padding:.15em .55em;
+  border:1px solid currentColor; border-radius:2px; vertical-align:.1em;
+}
+.pill.keep{color:var(--sage)}
+.pill.drop{color:var(--slip)}
+.pill.legacy{color:var(--ochre)}
+
+/* ---------- contents ---------- */
+nav.toc{
+  background:#fff; border:1px solid var(--rule); padding:1.3rem 1.5rem;
+  margin-top:2.6rem; columns:2; column-gap:2.5rem;
+}
+nav.toc h2{font-size:.76rem; letter-spacing:.14em; text-transform:uppercase;
+  font-family:"IBM Plex Mono",monospace; margin:0 0 .7rem; column-span:all; color:var(--ink-soft)}
+nav.toc ol{margin:0; padding-left:1.4rem; font-size:.9rem}
+nav.toc li{margin:.28rem 0; break-inside:avoid}
+nav.toc a{text-decoration:none; color:var(--ink)}
+nav.toc a:hover{color:var(--slip); text-decoration:underline}
+
+footer{
+  border-top:3px solid var(--ink); margin-top:4rem; padding:2rem 24px 3rem;
+  font-size:.85rem; color:var(--ink-soft);
+}
+footer .fi{max-width:1080px; margin:0 auto}
+
+@media (max-width:760px){
+  .mast-inner{grid-template-columns:1fr}
+  .stamp{display:none}
+  nav.toc{columns:1}
+  h2 + .sub{margin-left:0}
+}
+@media print{
+  .tabs{display:none} header.mast{background:#fff;color:#000}
+  .mast .lede{color:#333} pre{background:#f4f4f4;color:#000}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ TAB BAR ============ -->
+<div class="tabs">
+  <div class="tabs-inner">
+    <a class="tab" href="IPSDatedSites27.cfm"><span class="num">01</span> Interactive query</a>
+    <a class="tab" href="variance_quality_from_sql.html" aria-current="page"><span class="num">02</span> Method &amp; formulae</a>
+    <a class="tab" href="variance_quality_summary.html"><span class="num">03</span> At a glance</a>
+    <a class="tab" href="variance_quality_sql.html"><span class="num">04</span> SQL walkthrough</a>
+  </div>
+</div>
+
+<!-- ============ MASTHEAD ============ -->
+<header class="mast">
+  <div class="mast-inner">
+    <div>
+      <p class="kicker">Samian Research · IPS database · method note</p>
+      <h1>Dating archaeological findspots<br>from potters' stamps</h1>
+      <p class="lede">Every quantity computed by the PostgreSQL query behind the interactive
+      plot, written out in full: what it is, how it is derived, why that derivation was
+      chosen over the alternatives, and where it should not be trusted.</p>
+    </div>
+    <!-- signature device: a tabula ansata, the frame in which samian stamps are impressed -->
+    <svg class="stamp" width="230" height="120" viewBox="0 0 230 120" aria-hidden="true">
+      <g fill="none" stroke="#b07d31" stroke-width="1.5">
+        <path d="M45 30 L185 30 L185 90 L45 90 Z"/>
+        <path d="M45 30 L18 45 L18 75 L45 90"/>
+        <path d="M185 30 L212 45 L212 75 L185 90"/>
+        <path d="M52 37 L178 37 L178 83 L52 83 Z" stroke-opacity=".45"/>
+      </g>
+      <text x="115" y="68" text-anchor="middle" fill="#fbfaf7"
+            font-family="Spectral, Georgia, serif" font-size="25" letter-spacing="4">OFGERM</text>
+    </svg>
+  </div>
+</header>
+
+<main>
+
+<nav class="toc">
+  <h2>Contents</h2>
+  <ol>
+    <li><a href="#scope">Purpose and scope</a></li>
+    <li><a href="#unit">Unit of analysis and data sources</a></li>
+    <li><a href="#selection">Selection criteria</a></li>
+    <li><a href="#notation">Notation</a></li>
+    <li><a href="#central">Central tendency</a></li>
+    <li><a href="#dispersion">Dispersion: the aoristic \(\sigma\)</a></li>
+    <li><a href="#kfactor">The coverage factor \(k\)</a></li>
+    <li><a href="#fuzzy">The virtual fuzzy year</a></li>
+    <li><a href="#qspread">Quality axis I: dating sharpness</a></li>
+    <li><a href="#qrep">Quality axis II: die repetition</a></li>
+    <li><a href="#twoaxes">Why the two axes are not combined</a></li>
+    <li><a href="#legacy">Legacy quantities kept for the plot</a></li>
+    <li><a href="#superseded">Superseded formulation</a></li>
+    <li><a href="#limits">Limitations and open questions</a></li>
+    <li><a href="#params">Parameter reference</a></li>
+    <li><a href="#glossary">Column glossary</a></li>
+    <li><a href="#refs">References</a></li>
+  </ol>
+</nav>
+
+<!-- ============ 1 ============ -->
+<section id="scope">
+  <h2><svg class="ansa" width="34" height="22" viewBox="0 0 34 22" aria-hidden="true"><g fill="none" stroke="#9e3b26" stroke-width="1.3"><path d="M7 3 L27 3 L27 19 L7 19 Z"/><path d="M7 3 L1 7 L1 15 L7 19"/><path d="M27 3 L33 7 L33 15 L27 19"/></g><text x="17" y="15" text-anchor="middle" fill="#9e3b26" font-family="IBM Plex Mono, monospace" font-size="10">1</text></svg>Purpose and scope</h2>
+  <p class="sub">What the query claims, and what it deliberately does not claim.</p>
+
+  <p>The query dates <em>findspots</em>, not pottery and not potters. For each findspot it
+  collects the stamps recovered there, looks up the production date range of each
+  stamp's potter, and summarises those ranges into a single interval with an
+  associated statement of confidence.</p>
+
+  <p>The resulting interval is a <strong>virtual fuzzy year</strong>: a compact central
+  region of the date distribution implied by the stamps, not a statement about when
+  the site was founded or abandoned. It is a typological estimate. Where a findspot is
+  independently dated — by a destruction horizon, an inscription, or a historical
+  source — that external date is better evidence than anything computed here, and this
+  method makes no attempt to incorporate it.</p>
+
+  <div class="note">
+    <strong>Read the two families of output separately.</strong> The <em>interval</em>
+    (<code>eff_start</code>, <code>eff_end</code>) answers <em>when</em>. The
+    <em>quality measures</em> (<code>q_interval</code>, <code>q_repetition</code>)
+    answer <em>how well supported</em>, along two independent axes. No quality measure
+    feeds back into the interval, and the interval does not feed into the quality
+    measures.
+  </div>
+</section>
+
+<!-- ============ 2 ============ -->
+<section id="unit">
+  <h2><svg class="ansa" width="34" height="22" viewBox="0 0 34 22" aria-hidden="true"><g fill="none" stroke="#9e3b26" stroke-width="1.3"><path d="M7 3 L27 3 L27 19 L7 19 Z"/><path d="M7 3 L1 7 L1 15 L7 19"/><path d="M27 3 L33 7 L33 15 L27 19"/></g><text x="17" y="15" text-anchor="middle" fill="#9e3b26" font-family="IBM Plex Mono, monospace" font-size="10">2</text></svg>Unit of analysis and data sources</h2>
+  <p class="sub">One row of output = one findspot, not one site.</p>
+
+  <p>Rows are grouped by <code>(site, findspot)</code>. A site with several excavated
+  contexts therefore produces several rows — Bregenz contributes six, London and
+  Colchester two each. This is deliberate: a single site may contain contexts of very
+  different date and very different reliability, and collapsing them would average away
+  precisely the information the method depends on.</p>
+
+  <table>
+    <thead><tr><th>Source</th><th>Provides</th><th>Joined on</th></tr></thead>
+    <tbody>
+      <tr><td><code>tbldistribution</code></td><td>stamp occurrences: site, findspot, potter name, die</td><td>—</td></tr>
+      <tr><td><code>tblpotter</code></td><td><code>datemin</code>, <code>datemax</code> per potter</td><td><code>lower(trim(pottername))</code></td></tr>
+      <tr><td><code>v_discoverysite</code></td><td>stable Linked Open Data identifier <code>the_id</code></td><td><code>site = label</code></td></tr>
+    </tbody>
+  </table>
+
+  <p>The join to <code>v_discoverysite</code> resolves each site against the published
+  archaeology.link location dataset, so that every row carries a persistent identifier
+  suitable for RDF export rather than a name that has to be matched again downstream.
+  On the current selection this join succeeds for every row.</p>
+
+  <div class="warn">
+    <strong>The potter join is effectively an inner join.</strong> It is written
+    <code>LEFT JOIN tblpotter</code>, but the <code>WHERE</code> clause tests
+    <code>p.datemin &lt;&gt; 0</code>, which discards any row where the join failed.
+    Stamps whose potter is not present in <code>tblpotter</code> are silently absent
+    from the result. This is almost certainly the intended behaviour — an undated
+    potter cannot contribute to a date — but it is not what the query appears to say.
+  </div>
+</section>
+
+<!-- ============ 3 ============ -->
+<section id="selection">
+  <h2><svg class="ansa" width="34" height="22" viewBox="0 0 34 22" aria-hidden="true"><g fill="none" stroke="#9e3b26" stroke-width="1.3"><path d="M7 3 L27 3 L27 19 L7 19 Z"/><path d="M7 3 L1 7 L1 15 L7 19"/><path d="M27 3 L33 7 L33 15 L27 19"/></g><text x="17" y="15" text-anchor="middle" fill="#9e3b26" font-family="IBM Plex Mono, monospace" font-size="10">3</text></svg>Selection criteria</h2>
+  <p class="sub">Which stamps enter the calculation.</p>
+
+<pre><span class="c">-- applied to every stamp occurrence before aggregation</span>
+<span class="k">WHERE</span> di.isdate       = 'Θ'          <span class="c">-- occurrence is usable for dating</span>
+  <span class="k">AND</span> sitecharacter  = 'Σ'          <span class="c">-- settlement-type site</span>
+  <span class="k">AND</span> findspot IS NOT NULL           <span class="c">-- context is resolvable</span>
+  <span class="k">AND</span> p.datemin &lt;&gt; 0                <span class="c">-- potter carries a real date</span>
+  <span class="k">AND</span> p.datemax NOT IN (260,120,150) <span class="c">-- ??? see below</span></pre>
+
+  <div class="open">
+    <p style="margin:0">The exclusion <code>p.datemax NOT IN (260, 120, 150)</code> removes every
+    potter whose end date is exactly one of three years. No comment records what these
+    values mean. Three plausible readings — placeholder values standing for "unknown",
+    a legacy correction for a specific data problem, or a deliberate chronological
+    cut — have very different consequences for how the results should be read, and the
+    exclusion is not neutral: it silently removes potters from every findspot at which
+    they occur. This must be resolved and documented before publication, and recorded
+    as provenance in any RDF export.</p>
+  </div>
+
+  <p>One further asymmetry is worth noting. The die-based measures in
+  <a href="#qrep">§10</a> apply an additional filter, <code>di.die IS NOT NULL</code>,
+  because a stamp without a recorded die cannot contribute to a repetition count.
+  Consequently <code>count_stamps</code> (all qualifying stamps) and
+  <code>n_stamps_die</code> (those with a die) may differ, and it is
+  <code>n_stamps_die</code> that drives the coverage factor in <a href="#kfactor">§7</a>.</p>
+</section>
+
+<!-- ============ 4 ============ -->
+<section id="notation">
+  <h2><svg class="ansa" width="34" height="22" viewBox="0 0 34 22" aria-hidden="true"><g fill="none" stroke="#9e3b26" stroke-width="1.3"><path d="M7 3 L27 3 L27 19 L7 19 Z"/><path d="M7 3 L1 7 L1 15 L7 19"/><path d="M27 3 L33 7 L33 15 L27 19"/></g><text x="17" y="15" text-anchor="middle" fill="#9e3b26" font-family="IBM Plex Mono, monospace" font-size="10">4</text></svg>Notation</h2>
+  <p class="sub">Symbols used throughout, fixed for one findspot.</p>
+
+  <table>
+    <thead><tr><th>Symbol</th><th>Meaning</th><th>SQL</th></tr></thead>
+    <tbody>
+      <tr><td>\(i = 1 \dots n\)</td><td>stamp occurrences at the findspot</td><td>rows of <code>tbldistribution</code></td></tr>
+      <tr><td>\(a_i\)</td><td>earliest production year of stamp \(i\)'s potter</td><td><code>p.datemin</code></td></tr>
+      <tr><td>\(b_i\)</td><td>latest production year of stamp \(i\)'s potter</td><td><code>p.datemax</code></td></tr>
+      <tr><td>\(w_i = b_i - a_i\)</td><td>width of that potter's range</td><td>—</td></tr>
+      <tr><td>\(c_i = \tfrac{a_i + b_i}{2}\)</td><td>midpoint of that potter's range</td><td>—</td></tr>
+      <tr><td>\(n_{\text{die}}\)</td><td>stamps with a recorded die</td><td><code>n_stamps_die</code></td></tr>
+      <tr><td>\(D\)</td><td>distinct \((\text{potter}, \text{die})\) pairs</td><td><code>n_dies</code></td></tr>
+    </tbody>
+  </table>
+
+  <div class="note">
+    <strong>Dies are potter-bound.</strong> \(D\) counts distinct
+    <em>combinations</em> of potter and die, because die numbers are only unique within
+    a potter: potter X die 2 and potter Y die 2 are two different objects. In SQL this
+    is achieved by counting <code>DISTINCT die</code> within each potter first and
+    summing afterwards, not by a single <code>COUNT(DISTINCT die)</code> across the
+    findspot.
+  </div>
+</section>
+
+<!-- ============ 5 ============ -->
+<section id="central">
+  <h2><svg class="ansa" width="34" height="22" viewBox="0 0 34 22" aria-hidden="true"><g fill="none" stroke="#9e3b26" stroke-width="1.3"><path d="M7 3 L27 3 L27 19 L7 19 Z"/><path d="M7 3 L1 7 L1 15 L7 19"/><path d="M27 3 L33 7 L33 15 L27 19"/></g><text x="17" y="15" text-anchor="middle" fill="#9e3b26" font-family="IBM Plex Mono, monospace" font-size="10">5</text></svg>Central tendency</h2>
+  <p class="sub">Where the distribution of dates sits.</p>
+
+  <div class="formula">
+    \[ \overline{a} = \frac{1}{n}\sum_{i=1}^{n} a_i \qquad
+       \overline{b} = \frac{1}{n}\sum_{i=1}^{n} b_i \qquad
+       m = \frac{\overline{a} + \overline{b}}{2} \]
+    <div class="why"><code>avg_datemin</code>, <code>avg_datemax</code>,
+    <code>midpoint_year</code>. The midpoint \(m\) is the anchor about which the fuzzy
+    year is built; \(\overline{a}\) and \(\overline{b}\) are reported for reference and
+    are <em>not</em> the plotted box.</div>
+  </div>
+
+  <p>The extremes <code>min_datemin</code>, <code>max_datemin</code>,
+  <code>min_datemax</code> and <code>max_datemax</code> are reported unchanged. In the
+  plot they appear as the short stubs at either end, marking the outermost dates any
+  single potter at the findspot allows.</p>
+
+  <div class="warn">
+    <strong>Averaging is occurrence-weighted, not potter-weighted.</strong> A potter
+    represented by forty stamps at a findspot enters \(\overline{a}\) forty times. This
+    is defensible — more attestations are more evidence — but it means the average
+    describes the assemblage as excavated, not the set of potters present, and it must
+    be stated as such.
+  </div>
+</section>
+
+<!-- ============ 6 ============ -->
+<section id="dispersion">
+  <h2><svg class="ansa" width="34" height="22" viewBox="0 0 34 22" aria-hidden="true"><g fill="none" stroke="#9e3b26" stroke-width="1.3"><path d="M7 3 L27 3 L27 19 L7 19 Z"/><path d="M7 3 L1 7 L1 15 L7 19"/><path d="M27 3 L33 7 L33 15 L27 19"/></g><text x="17" y="15" text-anchor="middle" fill="#9e3b26" font-family="IBM Plex Mono, monospace" font-size="10">6</text></svg>Dispersion: the aoristic \(\sigma\)</h2>
+  <p class="sub">The core of the method, and the quantity most often got wrong.</p>
+
+  <p>Each stamp does not supply a date but a <em>range</em>. Following aoristic practice,
+  each stamp is treated as distributing one unit of probability uniformly across the
+  years its potter was active. The findspot's date distribution is the sum of those
+  uniform blocks, and the dispersion wanted is the standard deviation of that sum.</p>
+
+  <p>That dispersion has two components, and the law of total variance separates them
+  exactly:</p>
+
+  <div class="formula">
+    \[ \operatorname{Var}(X) \;=\; \underbrace{\mathbb{E}\big[\operatorname{Var}(X \mid i)\big]}_{\text{within stamps}}
+       \;+\; \underbrace{\operatorname{Var}\big(\mathbb{E}[X \mid i]\big)}_{\text{between stamps}} \]
+  </div>
+
+  <p>For a uniform distribution on \([a_i, b_i]\) the within-stamp variance is
+  \(w_i^{2}/12\); the between-stamp component is the sample variance of the midpoints
+  \(c_i\). Hence:</p>
+
+  <div class="formula">
+    \[ \sigma \;=\; \sqrt{\;\underbrace{\frac{1}{n}\sum_{i=1}^{n}\frac{w_i^{2}}{12}}_{\text{fuzziness of each stamp}}
+       \;+\; \underbrace{\frac{1}{n-1}\sum_{i=1}^{n}\left(c_i - \overline{c}\right)^{2}}_{\text{disagreement between stamps}}\;} \]
+    <div class="why">
+      In SQL: <code>SQRT( AVG(POWER(datemax-datemin,2)/12.0) + COALESCE(VAR_SAMP((datemin+datemax)/2.0), 0) )</code>.
+      The <code>COALESCE</code> handles \(n = 1\), where the between-stamp variance is
+      undefined but the within-stamp fuzziness is still perfectly well defined.
+    </div>
+  </div>
+
+  <figure>
+    <svg viewBox="0 0 700 235" role="img" aria-label="Variance decomposition: three stamp ranges of different widths, their midpoints, and the resulting dispersion">
+      <defs><marker id="ar" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="#46525f"/></marker></defs>
+      <line x1="60" y1="200" x2="670" y2="200" stroke="#46525f" stroke-width="1"/>
+      <g font-family="IBM Plex Mono, monospace" font-size="10" fill="#46525f" text-anchor="middle">
+        <text x="120" y="218">40</text><text x="260" y="218">60</text>
+        <text x="400" y="218">80</text><text x="540" y="218">100</text><text x="660" y="218">120</text>
+      </g>
+      <!-- stamp 1: narrow -->
+      <rect x="330" y="30" width="70" height="20" fill="#9e3b26" fill-opacity=".2" stroke="#9e3b26"/>
+      <circle cx="365" cy="40" r="3.5" fill="#9e3b26"/>
+      <text x="316" y="45" text-anchor="end" font-family="Public Sans" font-size="11" fill="#1b2430">stamp 1 · narrow</text>
+      <!-- stamp 2: wide -->
+      <rect x="200" y="66" width="330" height="20" fill="#9e3b26" fill-opacity=".2" stroke="#9e3b26"/>
+      <circle cx="365" cy="76" r="3.5" fill="#9e3b26"/>
+      <text x="186" y="81" text-anchor="end" font-family="Public Sans" font-size="11" fill="#1b2430">stamp 2 · wide</text>
+      <!-- stamp 3: narrow, offset -->
+      <rect x="430" y="102" width="90" height="20" fill="#9e3b26" fill-opacity=".2" stroke="#9e3b26"/>
+      <circle cx="475" cy="112" r="3.5" fill="#9e3b26"/>
+      <text x="416" y="117" text-anchor="end" font-family="Public Sans" font-size="11" fill="#1b2430">stamp 3 · offset</text>
+      <!-- within brace -->
+      <line x1="200" y1="145" x2="530" y2="145" stroke="#b07d31" stroke-width="1.4" marker-start="url(#ar)" marker-end="url(#ar)"/>
+      <text x="365" y="140" text-anchor="middle" font-family="Public Sans" font-size="11" fill="#b07d31">within-stamp fuzziness · mean w²/12</text>
+      <!-- between -->
+      <line x1="365" y1="172" x2="475" y2="172" stroke="#40655c" stroke-width="1.4" marker-start="url(#ar)" marker-end="url(#ar)"/>
+      <text x="420" y="167" text-anchor="middle" font-family="Public Sans" font-size="11" fill="#40655c">between-stamp scatter · Var(c)</text>
+    </svg>
+    <figcaption>Both components are real dispersion and both must be counted. A findspot
+    whose stamps all share one broad potter range is genuinely less well dated than one
+    whose stamps are individually sharp, even when their midpoints agree perfectly —
+    a distinction that a formula based on midpoints alone cannot make.</figcaption>
+  </figure>
+
+  <div class="note">
+    <strong>Why not the standard deviation of the midpoints alone?</strong> Because it
+    ignores \(w_i\) entirely. Two findspots whose stamps have identical midpoints would
+    receive identical dispersion, even if one is built from potters dated to five years
+    and the other from potters dated to eighty. The decomposition above is the minimal
+    correction that restores the missing term.
+  </div>
+</section>
+
+<!-- ============ 7 ============ -->
+<section id="kfactor">
+  <h2><svg class="ansa" width="34" height="22" viewBox="0 0 34 22" aria-hidden="true"><g fill="none" stroke="#9e3b26" stroke-width="1.3"><path d="M7 3 L27 3 L27 19 L7 19 Z"/><path d="M7 3 L1 7 L1 15 L7 19"/><path d="M27 3 L33 7 L33 15 L27 19"/></g><text x="17" y="15" text-anchor="middle" fill="#9e3b26" font-family="IBM Plex Mono, monospace" font-size="10">7</text></svg>The coverage factor \(k\)</h2>
+  <p class="sub">How many standard deviations wide the reported interval is.</p>
+
+  <p>\(\sigma\) says how scattered the evidence is; \(k\) says how much of that scatter
+  to show. It is a model parameter, not a confidence level: it expresses an
+  archaeological convention about how far a findspot's evidence should be trusted, and
+  it is driven by the quantity of that evidence.</p>
+
+  <div class="formula">
+    \[ k \;=\; k_{\max} \;-\; \big(k_{\max} - k_{\min}\big)\Big(1 - e^{-\,n_{\text{die}}/\tau}\Big) \]
+    <div class="why">
+      With \(k_{\min} = 0.5\), \(k_{\max} = 1.5\), \(\tau = 20\). A findspot with no
+      attestations would receive \(k_{\max}\); as attestations accumulate, \(k\)
+      decreases towards \(k_{\min}\), so the reported interval narrows. Saturation is
+      exponential: the difference between two and twelve stamps matters far more than
+      the difference between eighty and ninety.
+    </div>
+  </div>
+
+  <figure>
+    <svg viewBox="0 0 700 210" role="img" aria-label="k as a function of the number of stamps, decreasing exponentially from k_max to k_min">
+      <line x1="70" y1="30" x2="70" y2="170" stroke="#46525f"/>
+      <line x1="70" y1="170" x2="660" y2="170" stroke="#46525f"/>
+      <line x1="70" y1="40" x2="660" y2="40" stroke="#9e3b26" stroke-dasharray="4,3" stroke-opacity=".6"/>
+      <line x1="70" y1="160" x2="660" y2="160" stroke="#40655c" stroke-dasharray="4,3" stroke-opacity=".6"/>
+      <path d="M70,40 C160,95 250,127 340,143 C430,154 540,159 660,161"
+            fill="none" stroke="#1b2430" stroke-width="2"/>
+      <line x1="188" y1="40" x2="188" y2="170" stroke="#b07d31" stroke-dasharray="3,3"/>
+      <g font-family="IBM Plex Mono, monospace" font-size="10" fill="#46525f">
+        <text x="62" y="44" text-anchor="end">1.5</text>
+        <text x="62" y="164" text-anchor="end">0.5</text>
+        <text x="188" y="186" text-anchor="middle" fill="#b07d31">τ = 20</text>
+        <text x="660" y="186" text-anchor="end">stamps with a die →</text>
+      </g>
+      <g font-family="Public Sans" font-size="11">
+        <text x="600" y="34" text-anchor="end" fill="#9e3b26">k_max · thinly attested</text>
+        <text x="600" y="154" text-anchor="end" fill="#40655c">k_min · richly attested</text>
+      </g>
+    </svg>
+    <figcaption>At \(n = \tau\) roughly 63 % of the available narrowing has been
+    achieved. \(\tau\) therefore sets the assemblage size at which a findspot is
+    considered substantially attested.</figcaption>
+  </figure>
+
+  <div class="note">
+    <strong>Volume only.</strong> Die repetition was tested as a second driver of \(k\)
+    and rejected: across the current selection it changed the ordering of findspots
+    only marginally, and a single-signal model is easier to state and to defend. Die
+    repetition is retained in full, but as a descriptive measure
+    (<a href="#qrep">§10</a>) rather than as a component of the interval width.
+  </div>
+
+  <div class="warn">
+    <strong>\(k\) cannot see external dating.</strong> A findspot with three stamps
+    receives a wide interval even where its true date is known to the year from other
+    evidence. Inchtuthil, historically fixed to AD 83–86, is the standing example: from
+    the stamps alone it is thinly attested, and the honest data-driven answer is a wide
+    band. This is a property of the evidence, not a defect of the formula — but it means
+    the interval must never be read as the best available date, only as the best date
+    the stamps support.
+  </div>
+</section>
+
+<!-- ============ 8 ============ -->
+<section id="fuzzy">
+  <h2><svg class="ansa" width="34" height="22" viewBox="0 0 34 22" aria-hidden="true"><g fill="none" stroke="#9e3b26" stroke-width="1.3"><path d="M7 3 L27 3 L27 19 L7 19 Z"/><path d="M7 3 L1 7 L1 15 L7 19"/><path d="M27 3 L33 7 L33 15 L27 19"/></g><text x="17" y="15" text-anchor="middle" fill="#9e3b26" font-family="IBM Plex Mono, monospace" font-size="10">8</text></svg>The virtual fuzzy year</h2>
+  <p class="sub">The plotted box; the interval exported to RDF.</p>
+
+  <div class="formula">
+    \[ \text{eff\_start} = m - k\sigma \qquad\qquad \text{eff\_end} = m + k\sigma \]
+    <div class="why">Symmetric about the midpoint by construction. Where the die-based
+    counts are unavailable, \(k\) falls back to \(k_{\max}\), producing the widest
+    interval the model allows rather than an arbitrary value.</div>
+  </div>
+
+  <figure>
+    <svg viewBox="0 0 700 175" role="img" aria-label="Anatomy of one plotted row: extreme stubs, fuzzy-year box, midpoint and whiskers">
+      <line x1="40" y1="130" x2="670" y2="130" stroke="#46525f"/>
+      <!-- extreme stubs -->
+      <line x1="70" y1="70" x2="120" y2="70" stroke="#46525f" stroke-width="1.2" stroke-opacity=".6"/>
+      <line x1="70" y1="58" x2="70" y2="82" stroke="#46525f" stroke-opacity=".6"/>
+      <line x1="580" y1="70" x2="630" y2="70" stroke="#46525f" stroke-width="1.2" stroke-opacity=".6"/>
+      <line x1="630" y1="58" x2="630" y2="82" stroke="#46525f" stroke-opacity=".6"/>
+      <!-- box -->
+      <rect x="250" y="48" width="200" height="44" fill="#9e3b26" fill-opacity=".22" stroke="#1b2430"/>
+      <line x1="350" y1="40" x2="350" y2="100" stroke="#1b2430" stroke-width="1.6"/>
+      <!-- whiskers -->
+      <line x1="180" y1="70" x2="250" y2="70" stroke="#b07d31" stroke-width="3"/>
+      <line x1="180" y1="60" x2="180" y2="80" stroke="#b07d31" stroke-width="3"/>
+      <line x1="450" y1="70" x2="520" y2="70" stroke="#b07d31" stroke-width="3"/>
+      <line x1="520" y1="60" x2="520" y2="80" stroke="#b07d31" stroke-width="3"/>
+      <g font-family="Public Sans" font-size="11" fill="#1b2430">
+        <text x="350" y="32" text-anchor="middle">midpoint m</text>
+        <text x="350" y="115" text-anchor="middle" fill="#9e3b26">box = m ± kσ  ·  eff_start … eff_end</text>
+        <text x="215" y="152" text-anchor="middle" fill="#b07d31">whisker</text>
+        <text x="485" y="152" text-anchor="middle" fill="#b07d31">whisker</text>
+        <text x="95" y="152" text-anchor="middle" fill="#46525f" fill-opacity=".85">extreme stub</text>
+        <text x="605" y="152" text-anchor="middle" fill="#46525f" fill-opacity=".85">extreme stub</text>
+      </g>
+    </svg>
+    <figcaption>One row of the plot. The box is the fuzzy year; the whiskers are the
+    legacy standard deviations of <a href="#legacy">§12</a> and are visual only; the
+    stubs mark the outermost dates permitted by any single potter present.</figcaption>
+  </figure>
+</section>
+
+<!-- ============ 9 ============ -->
+<section id="qspread">
+  <h2><svg class="ansa" width="34" height="22" viewBox="0 0 34 22" aria-hidden="true"><g fill="none" stroke="#9e3b26" stroke-width="1.3"><path d="M7 3 L27 3 L27 19 L7 19 Z"/><path d="M7 3 L1 7 L1 15 L7 19"/><path d="M27 3 L33 7 L33 15 L27 19"/></g><text x="17" y="15" text-anchor="middle" fill="#9e3b26" font-family="IBM Plex Mono, monospace" font-size="10">9</text></svg>Quality axis I: dating sharpness</h2>
+  <p class="sub"><code>q_interval</code> — how closely the potters agree.</p>
+
+  <div class="formula">
+    \[ q_{\text{interval}} \;=\; \exp\!\left(-\,\frac{\sqrt{s^{2}_{a} + s^{2}_{b}}}{\left|\overline{b} - \overline{a}\right|}\right) \]
+    <div class="why">\(s^2_a, s^2_b\) are the sample variances of the start and end dates.
+    The ratio is dispersion measured in units of the interval's own length, so the
+    measure is dimensionless and bounded in \((0, 1]\): 1 means the potters agree
+    perfectly relative to the span they describe, values near 0 mean they scatter far
+    more widely than the span itself.</div>
+  </div>
+
+  <p>The endpoint measures follow the same shape but normalise against the mean year
+  rather than the interval length:</p>
+
+  <div class="formula">
+    \[ q_{\text{start}} = \exp\!\left(-\frac{s_a}{\left|\overline{a}\right|}\right)
+       \qquad
+       q_{\text{end}} = \exp\!\left(-\frac{s_b}{\left|\overline{b}\right|}\right) \]
+    <div class="why">These drive the whisker colours in the plot.</div>
+  </div>
+
+  <div class="warn">
+    <strong>\(q_{\text{start}}\) and \(q_{\text{end}}\) depend on the calendar origin.</strong>
+    Dividing by \(|\overline{a}|\) makes the measure a coefficient of variation about
+    year zero, which has no archaeological meaning: a findspot averaging AD 5 receives a
+    near-zero quality for a scatter that would be unremarkable at AD 150, and Augustan
+    and Antonine material are treated on incomparable scales. The <code>CASE WHEN
+    AVG(datemin) = 0</code> guard prevents the division by zero but not the underlying
+    distortion. <code>q_interval</code>, normalised against the interval length, does
+    not have this problem and should be preferred wherever one measure must be chosen.
+  </div>
+
+  <div class="open">
+    <p style="margin:0">All three quality measures fall back to <code>0.5</code> via
+    <code>COALESCE</code> when their inputs are undefined — chiefly at \(n = 1\), where
+    no sample variance exists. In the plot this is a harmless neutral grey. In an RDF
+    export it becomes an assertion that the dating quality <em>is</em> 0.5, which is
+    fabricated. The export must omit these triples rather than emit the fallback.</p>
+  </div>
+</section>
+
+<!-- ============ 10 ============ -->
+<section id="qrep">
+  <h2><svg class="ansa" width="34" height="22" viewBox="0 0 34 22" aria-hidden="true"><g fill="none" stroke="#9e3b26" stroke-width="1.3"><path d="M7 3 L27 3 L27 19 L7 19 Z"/><path d="M7 3 L1 7 L1 15 L7 19"/><path d="M27 3 L33 7 L33 15 L27 19"/></g><text x="17" y="15" text-anchor="middle" fill="#9e3b26" font-family="IBM Plex Mono, monospace" font-size="10">10</text></svg>Quality axis II: die repetition</h2>
+  <p class="sub"><code>die_repetition</code>, <code>q_repetition</code> — the hoard signature.</p>
+
+  <p>When the same die recurs at a findspot, the assemblage carries the signature of a
+  closed group — a merchant's consignment, a hoard, a single delivery — rather than the
+  accumulated background of ordinary settlement rubbish. This is a statement about the
+  <em>character of the deposit</em>, and it is archaeologically significant in its own
+  right.</p>
+
+  <div class="formula">
+    \[ r = \frac{n_{\text{die}}}{D} \qquad\qquad
+       q_{\text{repetition}} = 1 - \frac{1}{\max(r,\,1)} \]
+    <div class="why">\(r\) is the mean number of attestations per distinct
+    potter–die combination, so \(r \geq 1\) always. \(q_{\text{repetition}} = 0\) means
+    every die occurs exactly once; values approaching 1 indicate strong repetition.
+    Köln (Hafen), with 26 stamps from 4 dies, gives \(r = 6.5\) and
+    \(q_{\text{repetition}} = 0.85\).</div>
+  </div>
+
+  <div class="note">
+    <strong>Zero is not missing.</strong> \(q_{\text{repetition}} = 0\) means
+    "measured, and no repetition present". Where no die is recorded at all the value is
+    <code>NULL</code>, meaning "not measurable". The distinction matters for RDF, where
+    an absent triple and a triple asserting zero say different things.
+  </div>
+</section>
+
+<!-- ============ 11 ============ -->
+<section id="twoaxes">
+  <h2><svg class="ansa" width="34" height="22" viewBox="0 0 34 22" aria-hidden="true"><g fill="none" stroke="#9e3b26" stroke-width="1.3"><path d="M7 3 L27 3 L27 19 L7 19 Z"/><path d="M7 3 L1 7 L1 15 L7 19"/><path d="M27 3 L33 7 L33 15 L27 19"/></g><text x="17" y="15" text-anchor="middle" fill="#9e3b26" font-family="IBM Plex Mono, monospace" font-size="10">11</text></svg>Why the two axes are not combined</h2>
+  <p class="sub">A rejected simplification, recorded because it is tempting.</p>
+
+  <p>A single composite quality score was drafted as the geometric mean
+  \(\sqrt{q_{\text{interval}} \cdot q_{\text{repetition}}}\). It was abandoned, and the
+  reason is instructive.</p>
+
+  <p>Because a geometric mean vanishes when either factor vanishes, any findspot without
+  die repetition received a composite quality of exactly zero. Inchtuthil —
+  \(q_{\text{interval}} = 0.7\), three stamps from three dies — was scored at 0,
+  implying that its dating was worthless. It is not: it is a perfectly ordinary,
+  reasonably sharp settlement assemblage that simply is not a hoard.</p>
+
+  <div class="formula">
+    \[ \sqrt{0.7 \times 0} \;=\; 0 \qquad\text{but the dating quality is }0.7 \]
+    <div class="why">The composite conflated "not a hoard" with "not datable".</div>
+  </div>
+
+  <p>The two measures answer different questions and can vary independently in all four
+  combinations:</p>
+
+  <table>
+    <thead><tr><th></th><th>Low \(q_{\text{repetition}}\)</th><th>High \(q_{\text{repetition}}\)</th></tr></thead>
+    <tbody>
+      <tr><td><strong>High \(q_{\text{interval}}\)</strong></td>
+          <td>Sharply dated settlement context (Inchtuthil)</td>
+          <td>Sharply dated closed group — the ideal case</td></tr>
+      <tr><td><strong>Low \(q_{\text{interval}}\)</strong></td>
+          <td>Diffuse background scatter</td>
+          <td>Closed group of chronologically disparate material</td></tr>
+    </tbody>
+  </table>
+
+  <p>Collapsing that table into one number destroys exactly the contrast that makes each
+  case interesting. Both measures are therefore reported side by side, in the table,
+  in the hover panel, and as separate predicates in RDF.</p>
+</section>
+
+<!-- ============ 12 ============ -->
+<section id="legacy">
+  <h2><svg class="ansa" width="34" height="22" viewBox="0 0 34 22" aria-hidden="true"><g fill="none" stroke="#9e3b26" stroke-width="1.3"><path d="M7 3 L27 3 L27 19 L7 19 Z"/><path d="M7 3 L1 7 L1 15 L7 19"/><path d="M27 3 L33 7 L33 15 L27 19"/></g><text x="17" y="15" text-anchor="middle" fill="#9e3b26" font-family="IBM Plex Mono, monospace" font-size="10">12</text></svg>Legacy quantities kept for the plot</h2>
+  <p class="sub">Retained deliberately, but not part of the model.</p>
+
+  <div class="formula">
+    \[ \text{unc\_start\_years} = s_a \qquad
+       \text{unc\_end\_years} = s_b \qquad
+       \text{unc\_interval\_years} = \sqrt{s^{2}_{a} + s^{2}_{b}} \]
+  </div>
+
+  <p>These drive the whiskers. They are <span class="pill legacy">visual only</span>:
+  they predate the current dispersion model and use a different notion of spread from
+  the \(\sigma\) of <a href="#dispersion">§6</a>. Two consequences follow.</p>
+
+  <p>First, <code>unc_interval_years</code> is the standard deviation of the
+  <em>sum</em> \(a_i + b_i\) under an independence assumption that nothing in the data
+  justifies — it is not the dispersion of any quantity that appears in the model.
+  Second, the whiskers add \(s_a\) and \(s_b\) to a box that is already \(\pm k\sigma\)
+  wide, so two different measures of spread are drawn on top of one another.</p>
+
+  <div class="note">
+    <strong>This is acceptable in the plot and unacceptable in the export.</strong> As
+    a graphical cue to "there is scatter here" the whiskers work. They must not be
+    exported as bounds of anything, and they must not be described in a caption as
+    uncertainty of the fuzzy year.
+  </div>
+</section>
+
+<!-- ============ 13 ============ -->
+<section id="superseded">
+  <h2><svg class="ansa" width="34" height="22" viewBox="0 0 34 22" aria-hidden="true"><g fill="none" stroke="#9e3b26" stroke-width="1.3"><path d="M7 3 L27 3 L27 19 L7 19 Z"/><path d="M7 3 L1 7 L1 15 L7 19"/><path d="M27 3 L33 7 L33 15 L27 19"/></g><text x="17" y="15" text-anchor="middle" fill="#9e3b26" font-family="IBM Plex Mono, monospace" font-size="10">13</text></svg>Superseded formulation</h2>
+  <p class="sub">What the query used to compute, and why it was replaced.</p>
+
+  <p>Earlier versions defined the box as</p>
+
+  <div class="formula">
+    \[ \text{eff} = m \pm \tfrac{1}{2}\sqrt{s^{2}_{a} + s^{2}_{b}}
+       \qquad\text{except where } q_{\text{interval}} \text{ rounds to } 1.000,
+       \text{ where } \text{eff} = [\overline{a},\, \overline{b}] \]
+  </div>
+
+  <p>Three defects made this unusable as an exported date.</p>
+
+  <p><strong>The quantity had no referent.</strong> \(\sqrt{s^2_a + s^2_b}\) is the
+  standard deviation of \(a_i + b_i\), the sum of two calendar years — a quantity
+  nobody wants. It scales like a dispersion without being the dispersion of anything
+  in the model. The factor \(\tfrac{1}{2}\) was likewise unmotivated.</p>
+
+  <p><strong>The conditional produced a discontinuity.</strong> The two branches return
+  different kinds of quantity — a date range in one, a scatter band in the other —
+  switched at a rounding threshold:</p>
+
+  <table>
+    <thead><tr><th>\(\sqrt{s^2_a+s^2_b}\)</th><th>\(\overline{b}-\overline{a}\)</th><th>\(q_{\text{interval}}\)</th><th>Branch</th><th class="num">Box width</th></tr></thead>
+    <tbody>
+      <tr><td>0</td><td>30</td><td>1.000</td><td>date range</td><td class="num">30 years</td></tr>
+      <tr><td>0.1</td><td>30</td><td>0.997</td><td>scatter band</td><td class="num">0.1 years</td></tr>
+    </tbody>
+  </table>
+
+  <p>A negligible amount of disagreement collapsed the interval from thirty years to a
+  tenth of a year. As a thin rectangle in a plot this passes unnoticed; as
+  <code>time:hasBeginning</code> and <code>time:hasEnd</code> it asserts a findspot
+  dated to within seven weeks.</p>
+
+  <p><strong>Neither branch counted the width of the potters' ranges.</strong> The
+  within-stamp term of <a href="#dispersion">§6</a> was absent altogether.</p>
+
+  <div class="note">
+    <strong>The replacement removes the conditional entirely.</strong> \(\sigma\) tends
+    smoothly to zero as the stamps converge, so no special case is needed for perfect
+    agreement, and every row of output is now the same kind of quantity.
+  </div>
+</section>
+
+<!-- ============ 14 ============ -->
+<section id="limits">
+  <h2><svg class="ansa" width="34" height="22" viewBox="0 0 34 22" aria-hidden="true"><g fill="none" stroke="#9e3b26" stroke-width="1.3"><path d="M7 3 L27 3 L27 19 L7 19 Z"/><path d="M7 3 L1 7 L1 15 L7 19"/><path d="M27 3 L33 7 L33 15 L27 19"/></g><text x="17" y="15" text-anchor="middle" fill="#9e3b26" font-family="IBM Plex Mono, monospace" font-size="10">14</text></svg>Limitations and open questions</h2>
+  <p class="sub">To be settled before publication.</p>
+
+  <ol>
+    <li><strong>The three excluded end dates.</strong> <code>p.datemax NOT IN (260, 120, 150)</code>
+    is undocumented and not neutral. <a href="#selection">§3</a></li>
+
+    <li><strong>Fabricated fallbacks.</strong> <code>COALESCE(..., 0.5)</code> on the quality
+    measures and <code>COALESCE(..., 0)</code> on the uncertainties turn "undefined" into
+    a number. Tolerable in a plot, false in RDF. <a href="#qspread">§9</a></li>
+
+    <li><strong>Occurrence weighting.</strong> Averages are weighted by stamp count, not by
+    potter. Defensible, but it must be stated. <a href="#central">§5</a></li>
+
+    <li><strong>Calendar-origin dependence of \(q_{\text{start}}\) and \(q_{\text{end}}\).</strong>
+    Normalising by the mean year makes early material look systematically worse.
+    <a href="#qspread">§9</a></li>
+
+    <li><strong>Uniformity assumption.</strong> Each potter's range is treated as uniform.
+    If production is better modelled as rising and falling, the \(w^2/12\) term would
+    change; the structure of the decomposition would not.</li>
+
+    <li><strong>External dates are invisible.</strong> Historically fixed contexts receive no
+    benefit from that fact. <a href="#kfactor">§7</a></li>
+
+    <li><strong>Parameters are conventions, not estimates.</strong> \(k_{\min}\), \(k_{\max}\)
+    and \(\tau\) were chosen by inspection against known assemblages. They must travel
+    with the data as provenance, or the intervals cannot be reproduced.</li>
+  </ol>
+</section>
+
+<!-- ============ 15 ============ -->
+<section id="params">
+  <h2><svg class="ansa" width="34" height="22" viewBox="0 0 34 22" aria-hidden="true"><g fill="none" stroke="#9e3b26" stroke-width="1.3"><path d="M7 3 L27 3 L27 19 L7 19 Z"/><path d="M7 3 L1 7 L1 15 L7 19"/><path d="M27 3 L33 7 L33 15 L27 19"/></g><text x="17" y="15" text-anchor="middle" fill="#9e3b26" font-family="IBM Plex Mono, monospace" font-size="10">15</text></svg>Parameter reference</h2>
+  <p class="sub">Everything adjustable, in one place.</p>
+
+  <table>
+    <thead><tr><th>Parameter</th><th class="num">Value</th><th>Effect</th><th>Set in</th></tr></thead>
+    <tbody>
+      <tr><td>\(k_{\min}\)</td><td class="num">0.5</td><td>narrowest interval, richly attested findspots</td><td><code>params</code> CTE</td></tr>
+      <tr><td>\(k_{\max}\)</td><td class="num">1.5</td><td>widest interval; also the fallback where dies are unrecorded</td><td><code>params</code> CTE</td></tr>
+      <tr><td>\(\tau\)</td><td class="num">20</td><td>assemblage size at which ~63 % of the narrowing is reached</td><td><code>params</code> CTE</td></tr>
+      <tr><td>\(w\)</td><td class="num">1.0</td><td>weight of volume against repetition in \(k\); 1.0 = volume only</td><td>fixed, not exposed</td></tr>
+      <tr><td>within-stamp variance</td><td class="num">\(w^2/12\)</td><td>uniform distribution across each potter's range</td><td>hard-coded</td></tr>
+    </tbody>
+  </table>
+
+  <div class="note">
+    <strong>For RDF export.</strong> All five belong on the time-span as provenance,
+    together with \(\sigma\), \(k\), \(n\), \(D\) and \(r\). Without them the reported
+    interval is a bare pair of years that cannot be checked, recomputed, or compared
+    against a run with different conventions.
+  </div>
+</section>
+
+<!-- ============ 16 ============ -->
+<section id="glossary">
+  <h2><svg class="ansa" width="34" height="22" viewBox="0 0 34 22" aria-hidden="true"><g fill="none" stroke="#9e3b26" stroke-width="1.3"><path d="M7 3 L27 3 L27 19 L7 19 Z"/><path d="M7 3 L1 7 L1 15 L7 19"/><path d="M27 3 L33 7 L33 15 L27 19"/></g><text x="17" y="15" text-anchor="middle" fill="#9e3b26" font-family="IBM Plex Mono, monospace" font-size="10">16</text></svg>Column glossary</h2>
+  <p class="sub">Output of the query, in order of appearance.</p>
+
+  <table>
+    <thead><tr><th>Column</th><th>Meaning</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td><code>the_id</code></td><td>archaeology.link location identifier</td><td><span class="pill keep">key</span></td></tr>
+      <tr><td><code>the_site</code>, <code>the_findspot</code></td><td>grouping unit</td><td><span class="pill keep">key</span></td></tr>
+      <tr><td><code>latinsitename</code>, <code>long</code>, <code>lat</code>, <code>pleiades</code></td><td>descriptive attributes carried through</td><td>—</td></tr>
+      <tr><td><code>count_stamps</code></td><td>qualifying stamp occurrences (all)</td><td>—</td></tr>
+      <tr><td><code>avg_datemin</code>, <code>avg_datemax</code></td><td>\(\overline{a}\), \(\overline{b}\)</td><td>reference</td></tr>
+      <tr><td><code>min_datemin</code> … <code>max_datemax</code></td><td>extremes; plotted as stubs</td><td>reference</td></tr>
+      <tr><td><code>q_start</code>, <code>q_end</code></td><td>endpoint sharpness; whisker colour</td><td><span class="pill legacy">caveat §9</span></td></tr>
+      <tr><td><code>q_interval</code></td><td>dating sharpness — quality axis I</td><td><span class="pill keep">model</span></td></tr>
+      <tr><td><code>n_dies</code></td><td>\(D\), distinct potter–die pairs</td><td><span class="pill keep">model</span></td></tr>
+      <tr><td><code>die_repetition</code></td><td>\(r\), attestations per die</td><td><span class="pill keep">model</span></td></tr>
+      <tr><td><code>q_repetition</code></td><td>hoard character — quality axis II</td><td><span class="pill keep">model</span></td></tr>
+      <tr><td><code>avg_interval</code></td><td>display string of \(\overline{a}\) to \(\overline{b}\)</td><td>display</td></tr>
+      <tr><td><code>unc_start_years</code>, <code>unc_end_years</code>, <code>unc_interval_years</code></td><td>whisker lengths</td><td><span class="pill legacy">visual only</span></td></tr>
+      <tr><td><code>midpoint_year</code></td><td>\(m\)</td><td><span class="pill keep">model</span></td></tr>
+      <tr><td><code>eff_start</code>, <code>eff_end</code></td><td>the virtual fuzzy year</td><td><span class="pill keep">primary</span></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 17 ============ -->
+<section id="refs">
+  <h2><svg class="ansa" width="34" height="22" viewBox="0 0 34 22" aria-hidden="true"><g fill="none" stroke="#9e3b26" stroke-width="1.3"><path d="M7 3 L27 3 L27 19 L7 19 Z"/><path d="M7 3 L1 7 L1 15 L7 19"/><path d="M27 3 L33 7 L33 15 L27 19"/></g><text x="17" y="15" text-anchor="middle" fill="#9e3b26" font-family="IBM Plex Mono, monospace" font-size="10">17</text></svg>References</h2>
+  <p class="sub">Methodological background.</p>
+
+  <ul>
+    <li>Johnson, I. (2004). Aoristic analysis: seeds of a new approach to mapping
+    archaeological distributions through time. — the standard statement of distributing
+    a find's probability mass uniformly across its date range.</li>
+    <li>Crema, E. R. (2012). Modelling temporal uncertainty in archaeological analysis. —
+    aggregation of aoristic distributions and the treatment of chronological
+    uncertainty.</li>
+    <li>Law of total variance — any standard probability text; the identity underlying
+    <a href="#dispersion">§6</a>.</li>
+    <li>Variance of the continuous uniform distribution on \([a,b]\): \((b-a)^2/12\).</li>
+  </ul>
+
+  <div class="open">
+    <p style="margin:0">Full bibliographic details to be completed against the editions
+    actually cited in the paper.</p>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="fi">
+    <p style="margin:0 0 .3rem"><strong>Samian Research · IPS</strong> — method note accompanying
+    <code>IPSDatedSites27.cfm</code>.</p>
+    <p style="margin:0">Every formula on this page corresponds to a named expression in the
+    PostgreSQL query. Where the page and the query disagree, the query is wrong.</p>
+  </div>
+</footer>
+
+</body>
+</html>

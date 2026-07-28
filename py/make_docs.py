@@ -95,26 +95,26 @@ def check_coverage() -> list[str]:
     return missing
 
 
-# Wohin die Verweise unter den Diagrammen zeigen.
-# Relative Links funktionieren auf github.com, aber nicht auf GitHub
-# Pages: dort liegen die .mmd gar nicht, weil docs/_config.yml sie
-# ausschliesst. Absolute Links funktionieren aus beiden Kontexten.
+# Where the links under the diagrams point.
+# Relative links work on github.com but not on GitHub Pages: the .mmd
+# files are not there at all, because docs/_config.yml excludes them.
+# Absolute links work from both contexts.
 REPO = "leiza-rse/IPSDatedSites"
 BRANCH = "main"
 RAW_BASE = f"https://raw.githubusercontent.com/{REPO}/{BRANCH}"
 BLOB_BASE = f"https://github.com/{REPO}/blob/{BRANCH}"
 
-# Diagramme, einmal erzeugt und an beide Ausgaben gegeben: als .mmd unter
-# docs/diagrams/ und als Inline-Block hier. Eine Quelle, zwei Ausgaben.
+# Diagrams, generated once and handed to both outputs: as .mmd under
+# docs/diagrams/ and as an inline block here. One source, two outputs.
 _DIAGRAMS: dict[str, str] = {}
 
 
 def diagram(name: str, caption: str = "") -> str:
     """
-    Mermaid-Block plus Verweis auf die eigenstaendige Datei.
+    A Mermaid block plus a link to the standalone file.
 
-    github.com rendert den Block direkt. GitHub Pages braucht dafuer
-    mermaid.js im Layout; bis dahin ist die .mmd-Datei der Ausweg.
+    github.com renders the block directly. GitHub Pages needs mermaid.js in
+    the layout for that; until then the .mmd file is the way out.
     """
     src = _DIAGRAMS.get(name)
     if not src:
@@ -392,10 +392,10 @@ def page_crosswalk(out: Path) -> Path:
             notes.append(f"### `{pfx}` — `{X.PREFIXES[pfx]}`\n\n"
                          f"{T.CROSSWALK_NOTES[pfx]}\n")
 
-    # Die wiederholten CRMdig- und CIDOC-CRM-Axiome gehoeren in die Kette:
-    # ohne sie endete lado:DatingActivity sichtbar bei D10, und dass die
-    # Kette von dort bis crm:E7_Activity weiterlaeuft, ist genau die
-    # Aussage, die diese Tabelle belegen soll.
+    # The repeated CRMdig and CIDOC CRM axioms belong in the chain: without
+    # them lado:DatingActivity would visibly stop at D10, and that the chain
+    # continues from there to crm:E7_Activity is precisely the claim this
+    # table is meant to substantiate.
     direct = {c: list(sup) for c, sup, _l, _d in X.CLASSES}
     for sub, sup in X.EXTERNAL_AXIOMS:
         direct.setdefault(sub, []).append(sup)
@@ -849,7 +849,7 @@ caveat. `lado:qInterval` is unaffected and is the measure to prefer.
 
 # --------------------------------------------------------------------------
 def build(out: Path, graph=None) -> list[Path]:
-    # Diagramme zuerst: die Seiten betten sie ein.
+    # Diagrams first: the pages embed them.
     _DIAGRAMS.clear()
     _DIAGRAMS.update(D.build(out / "diagrams", graph))
     missing = check_coverage()

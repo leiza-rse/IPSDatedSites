@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>At a glance — the formulae and what they mean</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;600&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+<style>
+:root{
+  --ink:#1b2430; --ink-soft:#46525f;
+  --paper:#fbfaf7; --paper-2:#f2efe8; --rule:#d9d3c6;
+  --slip:#9e3b26; --ochre:#b07d31; --sage:#40655c;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:"Public Sans",system-ui,sans-serif; font-size:16px; line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+
+.tabs{position:sticky; top:0; z-index:50; background:var(--ink); border-bottom:3px solid var(--slip)}
+.tabs-inner{max-width:940px; margin:0 auto; display:flex; gap:2px; padding:0 24px}
+.tab{
+  display:flex; align-items:center; gap:.55rem; padding:.85rem 1.3rem; text-decoration:none;
+  font-size:.8rem; font-weight:600; letter-spacing:.07em; text-transform:uppercase;
+  color:#9aa7b4; border-bottom:3px solid transparent; margin-bottom:-3px;
+}
+.tab:hover{color:#e7e3da; background:rgba(255,255,255,.05)}
+.tab[aria-current="page"]{color:var(--paper); border-bottom-color:var(--slip); background:rgba(158,59,38,.18)}
+.tab .num{font-family:"IBM Plex Mono",monospace; font-size:.7rem; opacity:.65; font-weight:400}
+
+header.mast{background:var(--ink); color:var(--paper); padding:2.6rem 24px 2.4rem}
+.mast-inner{max-width:940px; margin:0 auto}
+.mast .kicker{
+  font-family:"IBM Plex Mono",monospace; font-size:.73rem; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--ochre); margin:0 0 .8rem;
+}
+.mast h1{font-family:Spectral,Georgia,serif; font-weight:600; font-size:clamp(1.7rem,3.6vw,2.4rem); margin:0 0 .6rem}
+.mast p{margin:0; max-width:58ch; color:#c3cbd3}
+
+main{max-width:940px; margin:0 auto; padding:0 24px 5rem}
+
+.step{
+  background:#fff; border:1px solid var(--rule); border-top:3px solid var(--slip);
+  padding:1.4rem 1.6rem 1.1rem; margin:1.6rem 0;
+}
+.step h2{
+  font-family:Spectral,Georgia,serif; font-weight:600; font-size:1.2rem;
+  margin:0 0 .15rem; display:flex; align-items:baseline; gap:.7rem;
+}
+.step h2 .n{
+  font-family:"IBM Plex Mono",monospace; font-size:.78rem; color:var(--slip);
+  border:1px solid var(--slip); padding:.08em .45em; letter-spacing:.05em;
+}
+.step .lead{margin:0 0 .9rem; color:var(--ink-soft); font-size:.95rem}
+.step .out{
+  font-family:"IBM Plex Mono",monospace; font-size:.82rem; color:var(--sage);
+  border-top:1px dashed var(--rule); margin-top:.9rem; padding-top:.7rem;
+}
+.eq{overflow-x:auto; padding:.2rem 0}
+
+h2.band{
+  font-family:Spectral,Georgia,serif; font-weight:600; font-size:1.35rem;
+  margin:3rem 0 .3rem; padding-bottom:.4rem; border-bottom:2px solid var(--ink);
+}
+h2.band + p{margin-top:.6rem; color:var(--ink-soft); max-width:70ch}
+
+table{border-collapse:collapse; width:100%; margin:1.1rem 0; font-size:.92rem}
+th,td{border-bottom:1px solid var(--rule); padding:.55rem .7rem; text-align:left; vertical-align:top}
+thead th{background:var(--paper-2); border-bottom:2px solid var(--ink);
+  font-size:.72rem; letter-spacing:.07em; text-transform:uppercase; font-weight:600}
+td.v{font-family:"IBM Plex Mono",monospace; white-space:nowrap; width:1%}
+
+.swatch{display:inline-block; width:.85em; height:.85em; border:1px solid rgba(0,0,0,.25);
+  vertical-align:-.08em; margin-right:.45em}
+
+.example{background:var(--paper-2); border-left:3px solid var(--ochre); padding:1.2rem 1.5rem; margin:1.6rem 0}
+.example h3{font-family:Spectral,Georgia,serif; font-size:1.05rem; margin:0 0 .7rem}
+.example table{margin:.7rem 0; font-size:.88rem}
+.example table td,.example table th{border-bottom-color:#ddd6c8}
+.calc{font-family:"IBM Plex Mono",monospace; font-size:.85rem; line-height:1.9}
+.calc b{color:var(--slip)}
+
+.answer{
+  background:var(--ink); color:var(--paper); padding:1rem 1.3rem; margin-top:1rem;
+  font-family:"IBM Plex Mono",monospace; font-size:.9rem;
+}
+.answer span{color:var(--ochre)}
+
+code{font-family:"IBM Plex Mono",monospace; font-size:.88em;
+  background:var(--paper-2); padding:.1em .38em; border-radius:2px}
+
+footer{border-top:3px solid var(--ink); margin-top:3.5rem; padding:1.6rem 24px 3rem;
+  font-size:.85rem; color:var(--ink-soft)}
+footer div{max-width:940px; margin:0 auto}
+footer a{color:var(--slip)}
+
+@media (max-width:700px){ .tabs-inner{overflow-x:auto} .tab{white-space:nowrap} }
+</style>
+</head>
+<body>
+
+<div class="tabs">
+  <div class="tabs-inner">
+    <a class="tab" href="IPSDatedSites27.cfm"><span class="num">01</span> Interactive query</a>
+    <a class="tab" href="variance_quality_from_sql.html"><span class="num">02</span> Method &amp; formulae</a>
+    <a class="tab" href="variance_quality_summary.html" aria-current="page"><span class="num">03</span> At a glance</a>
+    <a class="tab" href="variance_quality_sql.html"><span class="num">04</span> SQL walkthrough</a>
+  </div>
+</div>
+
+<header class="mast">
+  <div class="mast-inner">
+    <p class="kicker">Samian Research · IPS · quick reference</p>
+    <h1>The formulae, and what the numbers mean</h1>
+    <p>Four steps produce the date. Two independent measures describe how well it is
+    supported. Nothing else is needed to read the plot.</p>
+  </div>
+</header>
+
+<main>
+
+<!-- ================= THE DATE ================= -->
+<h2 class="band">Part one · the date</h2>
+<p>For one findspot, take every stamp found there and the production range
+\([a_i,\,b_i]\) of the potter who made it.</p>
+
+<div class="step">
+  <h2><span class="n">1</span> Where the dates sit</h2>
+  <p class="lead">Average the earliest and latest years, then take the centre.</p>
+  <div class="eq">
+    \[ \overline{a} = \frac{1}{n}\sum a_i \qquad
+       \overline{b} = \frac{1}{n}\sum b_i \qquad
+       m = \frac{\overline{a} + \overline{b}}{2} \]
+  </div>
+  <p class="out">→ <code>avg_datemin</code>, <code>avg_datemax</code>, <code>midpoint_year</code></p>
+</div>
+
+<div class="step">
+  <h2><span class="n">2</span> How scattered they are</h2>
+  <p class="lead">Two things blur the date: each potter's range is itself wide, and
+  different potters point to different years. Both are added together.</p>
+  <div class="eq">
+    \[ \sigma = \sqrt{\;\underbrace{\overline{\left(\frac{(b_i-a_i)^2}{12}\right)}}_{\text{each range is wide}}
+       \;+\; \underbrace{\operatorname{Var}\!\left(\frac{a_i+b_i}{2}\right)}_{\text{the potters disagree}}\;} \]
+  </div>
+  <p class="out">→ \(\sigma\) in years. Small \(\sigma\) = the stamps point to a narrow window.</p>
+</div>
+
+<div class="step">
+  <h2><span class="n">3</span> How far to trust it</h2>
+  <p class="lead">The more stamps a findspot yields, the tighter the interval that may
+  reasonably be claimed. \(k\) falls from 1.5 to 0.5 as the material accumulates.</p>
+  <div class="eq">
+    \[ k = 1.5 - 1.0\left(1 - e^{-n/20}\right) \]
+  </div>
+  <p class="out">→ \(k \approx 1.4\) for a handful of stamps · \(k \approx 0.6\) for fifty or more</p>
+</div>
+
+<div class="step">
+  <h2><span class="n">4</span> The date</h2>
+  <p class="lead">The centre, widened by the scatter, scaled by the trust.</p>
+  <div class="eq">
+    \[ \text{eff\_start} = m - k\sigma \qquad\qquad \text{eff\_end} = m + k\sigma \]
+  </div>
+  <p class="out">→ <code>eff_start</code>, <code>eff_end</code> — the box in the plot</p>
+</div>
+
+<h2 class="band">What the date means</h2>
+<p>The interval is a <strong>virtual fuzzy year</strong>: the central region of the date
+distribution the stamps imply. Read it as <em>"the material at this findspot clusters
+here"</em> — not as the foundation and abandonment of the site, and not as a
+replacement for a date known from a destruction horizon or a written source.</p>
+
+<table>
+  <thead><tr><th>Interval</th><th>Read as</th></tr></thead>
+  <tbody>
+    <tr><td class="v">narrow, ≲ 20 years</td><td>Stamps agree closely and there is enough of them; a usable working date.</td></tr>
+    <tr><td class="v">moderate, 20–50 years</td><td>A generation-scale window. Normal for most settlement assemblages.</td></tr>
+    <tr><td class="v">wide, ≳ 50 years</td><td>Either the potters disagree, or too little material. Check which, using the quality measures below.</td></tr>
+  </tbody>
+</table>
+
+<!-- ================= THE QUALITY ================= -->
+<h2 class="band">Part two · the quality</h2>
+<p>Two measures, deliberately kept apart. They answer different questions and a findspot
+may score high on one and low on the other.</p>
+
+<div class="step">
+  <h2><span class="n">Q1</span> Dating sharpness</h2>
+  <p class="lead">Do the potters agree, relative to the length of the span they describe?</p>
+  <div class="eq">
+    \[ q_{\text{interval}} = \exp\!\left(-\frac{\sqrt{s^2_a + s^2_b}}{\left|\overline{b}-\overline{a}\right|}\right) \]
+  </div>
+  <p class="out">→ <code>q_interval</code>, between 0 and 1 · drives the box colour</p>
+</div>
+
+<table>
+  <thead><tr><th>Value</th><th>Meaning</th></tr></thead>
+  <tbody>
+    <tr><td class="v"><span class="swatch" style="background:#1a9850"></span>0.8 – 1.0</td>
+        <td>The potters point to nearly the same years. Sharp date.</td></tr>
+    <tr><td class="v"><span class="swatch" style="background:#fee08b"></span>0.5 – 0.8</td>
+        <td>Moderate agreement. The date is meaningful but broad.</td></tr>
+    <tr><td class="v"><span class="swatch" style="background:#d73027"></span>below 0.5</td>
+        <td>The potters scatter more widely than the interval they define. Treat the date as indicative only.</td></tr>
+  </tbody>
+</table>
+
+<div class="step">
+  <h2><span class="n">Q2</span> Die repetition</h2>
+  <p class="lead">Does the same stamp die recur? \(r\) is the number of attestations per
+  distinct potter–die combination.</p>
+  <div class="eq">
+    \[ r = \frac{\text{stamps with a die}}{\text{distinct potter–die pairs}}
+       \qquad\qquad
+       q_{\text{repetition}} = 1 - \frac{1}{r} \]
+  </div>
+  <p class="out">→ <code>die_repetition</code>, <code>q_repetition</code></p>
+</div>
+
+<table>
+  <thead><tr><th>Value</th><th>Meaning</th></tr></thead>
+  <tbody>
+    <tr><td class="v">0.0</td><td>Every die occurs once. An ordinary accumulated assemblage.</td></tr>
+    <tr><td class="v">0.3 – 0.6</td><td>Noticeable repetition. Possibly a partly closed group.</td></tr>
+    <tr><td class="v">above 0.6</td><td>Strong repetition — the signature of a hoard, consignment or single delivery.</td></tr>
+    <tr><td class="v">— (empty)</td><td>No dies recorded. Not measured, rather than zero.</td></tr>
+  </tbody>
+</table>
+
+<h2 class="band">Reading the two together</h2>
+<table>
+  <thead><tr><th></th><th>Low repetition</th><th>High repetition</th></tr></thead>
+  <tbody>
+    <tr><td class="v">High sharpness</td>
+        <td>Well-dated settlement context.</td>
+        <td>Well-dated closed group — the strongest evidence available.</td></tr>
+    <tr><td class="v">Low sharpness</td>
+        <td>Diffuse background material.</td>
+        <td>A closed group of chronologically mixed pottery.</td></tr>
+  </tbody>
+</table>
+<p>A low repetition score is <strong>not</strong> a poor result. It says the deposit is
+not a hoard, which is true of most findspots and says nothing about how well they are
+dated.</p>
+
+<!-- ================= WORKED EXAMPLE ================= -->
+<h2 class="band">A worked example</h2>
+
+<div class="example">
+  <h3>Three stamps at one findspot</h3>
+  <table>
+    <thead><tr><th>Stamp</th><th>Potter dated</th><th>Width \(w\)</th><th>Midpoint \(c\)</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td class="v">AD 60 – 80</td><td class="v">20</td><td class="v">70</td></tr>
+      <tr><td>2</td><td class="v">AD 65 – 85</td><td class="v">20</td><td class="v">75</td></tr>
+      <tr><td>3</td><td class="v">AD 50 – 90</td><td class="v">40</td><td class="v">70</td></tr>
+    </tbody>
+  </table>
+
+  <p class="calc">
+    <b>1</b> &nbsp; ā = 58.3 &nbsp;·&nbsp; b̄ = 85.0 &nbsp;·&nbsp; m = 71.7<br>
+    <b>2</b> &nbsp; within = (400+400+1600)/12/3 = 66.7 &nbsp;·&nbsp; between = 8.3
+             &nbsp;→&nbsp; σ = √75.0 = <b>8.7 years</b><br>
+    <b>3</b> &nbsp; n = 3 dies &nbsp;→&nbsp; k = 1.5 − 1.0(1 − e<sup>−3/20</sup>) = <b>1.36</b><br>
+    <b>4</b> &nbsp; 71.7 ± 1.36 × 8.7 = 71.7 ± 11.8<br><br>
+    <b>Q1</b> &nbsp; √(58.3 + 25.0) = 9.1 &nbsp;·&nbsp; span = 26.7
+              &nbsp;→&nbsp; q<sub>interval</sub> = e<sup>−0.34</sup> = <b>0.71</b><br>
+    <b>Q2</b> &nbsp; 3 stamps ÷ 3 dies → r = 1 &nbsp;→&nbsp; q<sub>repetition</sub> = <b>0.00</b>
+  </p>
+
+  <div class="answer">
+    Date <span>AD 60 – 83</span> &nbsp;|&nbsp; sharpness <span>0.71</span> &nbsp;|&nbsp; repetition <span>0.00</span>
+  </div>
+
+  <p style="margin:.9rem 0 0; font-size:.92rem">Reasonably sharp for the material available,
+  and no hoard signature: a normal settlement deposit of the Neronian–Flavian period.
+  The interval is wide chiefly because three stamps is very little — with thirty stamps
+  of the same dates, \(k\) would fall to about 0.7 and the interval would tighten to
+  roughly AD 66 – 78.</p>
+</div>
+
+</main>
+
+<footer>
+  <div>
+    <p style="margin:0">Derivations, rejected alternatives and known limitations:
+    <a href="variance_quality_from_sql.html">Method &amp; formulae</a>.</p>
+  </div>
+</footer>
+
+</body>
+</html>

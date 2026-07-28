@@ -1,22 +1,22 @@
 """
-IPS Dated Sites — zwei Darstellungen desselben Graphen
-======================================================
+IPS Dated Sites — two renderings of the same graph
+==================================================
 
-v1  classic  — 1:1 der bestehenden D3-Abbildung: Box, Whisker mit Kappen,
-               Extremwert-Stubs, gestrichelte Boxkanten, Farbrampe
-               RdYlGn, Gradientenlegende. Bleibt unangetastet, damit
-               Webausgabe und Druckfassung konsistent sind.
+v1  classic  — the existing D3 figure one to one: box, whiskers with
+               caps, extreme-value stubs, dashed box edges, RdYlGn colour
+               ramp, gradient legend. Left untouched so that the web
+               output and the print version stay consistent.
 
-v2  modern   — DIESELBE Kodierung wie v1, nur sauberer gesetzt.
-               Insbesondere behalten die Whisker ihre Farbe: q_start und
-               q_end stehen an keiner anderen Stelle im Bild, ein roter
-               Whisker an den fruehen arretinischen Fundstellen ist eine
-               eigene Aussage. Modernisiert wird die Machart — Typografie,
-               Abstaende, ruhigeres Raster, BC/AD-Achse, Wertetabelle —
-               nicht das, was kodiert ist.
+v2  modern   — the SAME encoding as v1, only set more carefully. The
+               whiskers in particular keep their colour: q_start and
+               q_end appear nowhere else in the picture, and a red
+               whisker at the early Arretine findspots is a statement in
+               its own right. What is modernised is the presentation —
+               typography, spacing, a quieter grid, a BC/AD axis, a value
+               table — not what is encoded.
 
-Beide beziehen JEDEN Wert aus dem Graphen, auch Randbreiten, Zeilenhoehe
-und Sortierregel. Beide schreiben SVG und hochaufloesendes JPG.
+Both take EVERY value from the graph, margins, row height and sort rule
+included. Both write SVG and high-resolution JPG.
 """
 
 from __future__ import annotations
@@ -27,12 +27,11 @@ from pathlib import Path
 import matplotlib
 matplotlib.use("Agg")
 
-# Byte-stabile SVGs. Ohne das schreibt matplotlib bei jedem Lauf einen
-# neuen <dc:date>-Zeitstempel und neu gewuerfelte Element-IDs, sodass
-# beide Abbildungen in git IMMER als geaendert erscheinen. Eine Datei,
-# die immer geaendert ist, ist eine Datei, deren Diff niemand mehr liest
-# — und dann faellt eine echte Aenderung an einer publizierten Abbildung
-# nicht mehr auf.
+# Byte-stable SVGs. Without this, matplotlib writes a fresh <dc:date>
+# timestamp and freshly randomised element identifiers on every run, so
+# that both figures ALWAYS appear modified in git. A file that is always
+# modified is a file whose diff nobody reads any more — and a real change
+# to a published figure then goes unnoticed.
 os.environ.setdefault("SOURCE_DATE_EPOCH", "1700000000")
 matplotlib.rcParamsDefault["svg.hashsalt"] = "ips-dated-sites"
 matplotlib.rcParams["svg.hashsalt"] = "ips-dated-sites"
@@ -49,12 +48,12 @@ JPG_DPI = 300
 
 
 def colour(q):
-    """Qualitaet -> Farbe. None ist ein eigener Zustand, kein Fehlerfall."""
+    """Quality -> colour. None is a state of its own, not a failure."""
     return GREY if q is None else CMAP(NORM(q))
 
 
 def year_label(v: float, era: str) -> str:
-    """Jahreszahl der Quelle als Kalenderlabel."""
+    """The source year as a calendar label."""
     y = int(round(v))
     if y < 0:
         return f"{abs(y) if era == 'historical' else abs(y) + 1} BC"
@@ -122,13 +121,13 @@ def render_classic(fig_const: dict, rows: list[dict], era: str,
         y0, y1 = cy - band / 2, cy + band / 2
         us, ue = r["uncStart"], r["uncEnd"]
 
-        # Beschriftung links: Fundplatz, darunter Fundstelle
+        # Labels on the left: discovery site, findspot underneath
         ax.text(-0.012, cy - 0.12, r["site"], transform=tf, ha="right",
                 va="center", fontsize=11, color="black")
         ax.text(-0.012, cy + 0.22, r["findspot"], transform=tf, ha="right",
                 va="center", fontsize=9, color="#555555")
 
-        # Extremwert-Stubs mit Kappen
+        # Extreme-value stubs with caps
         ax.plot([r["minDatemin"], min(r["minDatemin"] + stub, r["effStart"])],
                 [cy, cy], color="#555555", alpha=0.5, linewidth=1)
         ax.plot([max(r["maxDatemax"] - stub, r["effEnd"]), r["maxDatemax"]],
@@ -137,7 +136,7 @@ def render_classic(fig_const: dict, rows: list[dict], era: str,
             ax.plot([xv, xv], [cy - band * 0.15, cy + band * 0.15],
                     color="#333333", alpha=0.5, linewidth=1)
 
-        # Whisker mit Kappen, eingefaerbt nach q_start / q_end
+        # Whiskers with caps, coloured by q_start / q_end
         for xa, xb, q in ((r["effStart"], r["effStart"] - us, r["qStart"]),
                           (r["effEnd"], r["effEnd"] + ue, r["qEnd"])):
             c = colour(q)
@@ -190,17 +189,18 @@ def render_classic(fig_const: dict, rows: list[dict], era: str,
 # ==========================================================================
 # v2 — modern
 # ==========================================================================
-# Bewusst KEINE neue Bildsprache. v2 zeigt exakt dieselben Kanaele wie v1:
+# Deliberately NO new visual language. v2 shows exactly the same channels
+# as v1:
 #
 #   Box            eff_start .. eff_end,  Fuellung = q_interval
 #   Whisker        Unsicherheit links/rechts, Farbe = q_start / q_end
-#   Whisker-Kappe  Ende der Unsicherheit
-#   Stub + Kappe   min_datemin / max_datemax, der Vollbereich
-#   Boxkante       gestrichelt, wo eine Unsicherheit anliegt
+#   whisker cap    end of the uncertainty
+#   stub + cap     min_datemin / max_datemax, the full range
+#   box edge       dashed where an uncertainty applies
 #
-# Die Zahlen stehen nicht mehr am Whisker, sondern rechts in der
-# Wertetabelle. Am Whisker kollidierten sie mit dem Whisker selbst,
-# sobald die Balken lang wurden.
+# The numbers no longer sit on the whisker but in the value table on the
+# right. On the whisker they collided with the whisker itself as soon as
+# the bars grew long.
 
 INK = "#12181f"
 MUTED = "#5d6a78"
@@ -210,21 +210,21 @@ PAPER = "#ffffff"
 BAND = "#f5f6f7"
 
 # --------------------------------------------------------------------------
-# Wertetabelle rechts der Zeitachse
+# Value table to the right of the time axis
 # --------------------------------------------------------------------------
-# Deckt vollstaendig ab, was die Webanwendung zeigt:
-#   aus dem Hover-Popup          : interval, n stamps, q(interval)
-#   aus der Whisker-Beschriftung : Jahreszahl und q auf BEIDEN Seiten
+# Covers in full what the web application shows:
+#   from the hover popup         : interval, n stamps, q(interval)
+#   from the whisker labels      : year and q on BOTH sides
 #                                  ("7 (q=0.71)" -> Spalten unc start / q start)
 #
-# Ergaenzt um sigma. Das stand NICHT in der Webausgabe. Es ist die
-# Streuung aus der Varianzzerlegung, die zusammen mit k die Boxbreite
-# erzeugt: Breite = 2*k*sigma. Ohne sie sieht man, wie breit die Box ist,
-# aber nicht warum. Wer die Spalte nicht will, loescht hier die Zeile
-# mit "sigma" — die Positionen der uebrigen bleiben gueltig.
+# With sigma added. That was NOT in the web output. It is the dispersion
+# from the variance decomposition which, together with k, produces the box
+# width: width = 2*k*sigma. Without it one sees how wide the box is but
+# not why. To drop the column, delete the "sigma" line here — the
+# positions of the others stay valid.
 #
-# x steht in Achsenanteilen, y in Datenkoordinaten. Dadurch bleiben die
-# Zeilen automatisch auf Hoehe ihres Balkens, ohne Nachrechnen.
+# x is in axes fractions, y in data coordinates. The rows therefore stay
+# level with their bar automatically, with nothing to recompute.
 TABLE_COLUMNS = [
     # (x, Ausrichtung, Kopf, Funktion)
     (1.040, "left",  "interval",
@@ -251,12 +251,12 @@ def render_modern(fig_const: dict, rows: list[dict], era: str,
     pad = fig_const["padYears"]
     stub = fig_const["extremeStubYears"]
 
-    row_h = 0.40                      # Zoll je Zeile, luftiger als v1
+    row_h = 0.40                      # inches per row, airier than v1
     fig = plt.figure(figsize=(17.0, 1.9 + n * row_h), dpi=100,
                      facecolor=PAPER)
-    # Plotflaeche schmal halten: rechts steht die Wertetabelle.
+    # Keep the plotting area narrow: the value table sits to its right.
     # Achsenanteil 1.985 entspricht Figure-x 0.100 + 1.985*0.400 = 0.894.
-    # Die Farbleiste sitzt erst bei 0.945 und kollidiert damit nicht.
+    # The colour bar starts only at 0.945 and so does not collide.
     ax = fig.add_axes((0.100, 0.062, 0.400, 0.880))
     ax.set_facecolor(PAPER)
 
@@ -267,8 +267,8 @@ def render_modern(fig_const: dict, rows: list[dict], era: str,
     ax.set_xlim(lo, hi)
     ax.set_ylim(n - 0.5, -0.5)
 
-    # Ruhiges Raster: Zebra statt Gitternetz in der Vertikalen,
-    # feine Haarlinien in der Horizontalen.
+    # A quiet grid: banding instead of vertical rules, fine hairlines in
+    # the horizontal.
     for i in range(n):
         if i % 2:
             ax.add_patch(Rectangle((lo, i - 0.5), hi - lo, 1,
@@ -289,14 +289,14 @@ def render_modern(fig_const: dict, rows: list[dict], era: str,
     ax.set_xticks(ticks)
     ax.set_xticklabels([year_label(t, era) for t in ticks])
 
-    bh = 0.30                          # Boxhoehe in Zeileneinheiten
+    bh = 0.30                          # Box height in row units
     tf = ax.get_yaxis_transform()
 
     for i, r in enumerate(rows):
         y0, y1 = i - bh / 2, i + bh / 2
         us, ue = r["uncStart"], r["uncEnd"]
 
-        # --- Vollbereich: Stubs mit Kappen ---
+        # --- Full range: stubs with caps ---
         ax.plot([r["minDatemin"], min(r["minDatemin"] + stub, r["effStart"])],
                 [i, i], color=FAINT, linewidth=1.0, zorder=2)
         ax.plot([max(r["maxDatemax"] - stub, r["effEnd"]), r["maxDatemax"]],
@@ -306,8 +306,8 @@ def render_modern(fig_const: dict, rows: list[dict], era: str,
                     color=FAINT, linewidth=1.0, zorder=2)
 
         # --- Whisker: FARBIG nach q_start / q_end ---
-        # Weisser Halo darunter, damit die Farbe auch ueber dem Zebra und
-        # ueber den Rasterlinien klar bleibt.
+        # A white halo underneath, so that the colour stays clear over the
+        # banding and over the grid lines.
         for xa, xb, q in ((r["effStart"], r["effStart"] - us, r["qStart"]),
                           (r["effEnd"], r["effEnd"] + ue, r["qEnd"])):
             if xa == xb:
@@ -327,8 +327,8 @@ def render_modern(fig_const: dict, rows: list[dict], era: str,
         ax.add_patch(Rectangle((r["effStart"], y0), w, bh,
                                facecolor=colour(r["qInterval"]),
                                edgecolor="none", zorder=5))
-        # Kanten: oben/unten durchgezogen, seitlich gestrichelt wo eine
-        # Unsicherheit anliegt — dieselbe Regel wie v1.
+        # Edges: solid top and bottom, dashed at the sides where an
+        # uncertainty applies — the same rule as v1.
         for yv in (y0, y1):
             ax.plot([r["effStart"], r["effEnd"]], [yv, yv], color=INK,
                     linewidth=0.9, zorder=6)
@@ -352,7 +352,7 @@ def render_modern(fig_const: dict, rows: list[dict], era: str,
             linewidth=0.9, clip_on=False, zorder=1)
 
     for i, r in enumerate(rows):
-        if i % 2:   # Zebra bis unter die Tabelle durchziehen
+        if i % 2:   # Carry the banding through under the table
             ax.add_patch(Rectangle((TAB_L, i - 0.5), TAB_R - TAB_L, 1,
                                    transform=tf, facecolor=BAND,
                                    edgecolor="none", clip_on=False, zorder=0))
@@ -360,7 +360,7 @@ def render_modern(fig_const: dict, rows: list[dict], era: str,
             ax.text(x, i, fn(r, era), transform=tf, ha=ha, va="center",
                     fontsize=8.2, color=MUTED, clip_on=False, zorder=2)
 
-    # --- Farbleiste ganz rechts, klar neben der Tabelle ---
+    # --- Colour bar at the far right, clearly beside the table ---
     cax = fig.add_axes((0.945, 0.40, 0.008, 0.30))
     cb = fig.colorbar(ScalarMappable(norm=NORM, cmap=CMAP), cax=cax)
     cb.outline.set_visible(False)

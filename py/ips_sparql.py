@@ -1,14 +1,14 @@
 """
-IPS Dated Sites — SPARQL-Schicht
-================================
+IPS Dated Sites — SPARQL layer
+==============================
 
-Holt alles, was die Abbildungen brauchen, AUSSCHLIESSLICH per SPARQL aus
-dem Graphen. Auch Randbreiten, Zeilenhoehe, Farbrampe und Sortierregel —
-nichts davon steht in den Renderern.
+Retrieves everything the figures need, EXCLUSIVELY by SPARQL against the
+graph. Margins, row height, colour ramp and sort rule included — none of
+it lives in the renderers.
 
-Das ist der Vollstaendigkeitstest der Modellierung: fehlt im Export eine
-Groesse, die die Abbildung braucht, scheitert der Abruf hier, statt dass
-ein Renderer still eine Konstante einsetzt.
+This is the completeness test of the modelling: if a quantity the figure
+needs is missing from the export, the retrieval fails here rather than a
+renderer quietly substituting a constant.
 """
 
 from __future__ import annotations
@@ -40,9 +40,9 @@ WHERE {
 }
 """
 
-# Eine Zeile der Abbildung.
-# Der Weg zu den Intervallgrenzen laeuft ueber echte OWL-Time-Konstrukte
-# (Zeitspanne -> Instant -> TimePosition -> numericPosition) und ist als
+# One row of the figure.
+# The path to the interval bounds runs through genuine OWL-Time constructs
+# (time-span -> instant -> time position -> numeric position) and is still
 # Property-Path trotzdem ein Einzeiler.
 Q_ROWS = """
 PREFIX lado: <http://archaeology.link/ontology#>
@@ -143,7 +143,7 @@ def rows(g: Graph) -> list[dict]:
     for b in g.query(Q_ROWS):
         out.append({
             "site": str(b.site), "findspot": str(b.findspot),
-            # numericPosition steht unveraendert auf der Quell-Zahlengeraden
+            # numericPosition sits unshifted on the source number line
             # (samian:trs_ips_year) — nichts zurueckzurechnen.
             "effStart": num(b.effStart), "effEnd": num(b.effEnd),
             "qInterval": num(b.qInterval), "qStart": num(b.qStart),
@@ -173,23 +173,23 @@ FIELD_PAIRS = [
 
 
 def roundtrip(rows_rdf: list[dict], csv: Path, tol: float = 1e-6) -> bool:
-    """Vergleicht CSV -> RDF -> SPARQL Feld fuer Feld."""
+    """Compare CSV -> RDF -> SPARQL, field by field."""
     import pandas as pd
 
     d = pd.read_csv(csv).sort_values("avg_datemin", kind="mergesort")
     r = pd.DataFrame(rows_rdf)
-    print(f"  CSV-Zeilen: {len(d)} | SPARQL-Zeilen: {len(r)}")
+    print(f"  CSV rows: {len(d)} | SPARQL rows: {len(r)}")
     if len(d) != len(r):
-        print("  FEHLER: Zeilenzahl weicht ab.")
+        print("  ERROR: row counts differ.")
         return False
 
-    # Zuordnung ueber (site, findspot), nicht ueber die Position
+    # Matched on (site, findspot), not on row position
     d = d.set_index(pd.Index(d.the_site.astype(str) + "|"
                              + d.the_findspot.astype(str)))
     r = r.set_index(pd.Index(r.site.astype(str) + "|"
                              + r.findspot.astype(str)))
     if set(d.index) ^ set(r.index):
-        print("  FEHLER: Zeilen ohne Gegenstueck.")
+        print("  ERROR: rows without a counterpart.")
         return False
     r = r.loc[d.index]
 
@@ -200,6 +200,6 @@ def roundtrip(rows_rdf: list[dict], csv: Path, tol: float = 1e-6) -> bool:
         flag = "OK" if dev < 1e-9 else ("~ " if dev < tol else "XX")
         print(f"  {flag}  {b:<22} max |Delta| = {dev:.2e}")
     ok = worst < tol
-    print(f"\n  Groesste Abweichung: {worst:.2e} — "
-          + ("Rundlauf verlustfrei." if ok else "ABWEICHUNG, Export pruefen."))
+    print(f"\n  Largest deviation: {worst:.2e} — "
+          + ("Round trip lossless." if ok else "DEVIATION, check the export."))
     return ok

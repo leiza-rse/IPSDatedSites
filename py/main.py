@@ -1,31 +1,35 @@
 """
-IPS Dated Sites — Hauptskript
+IPS Dated Sites — main script
 =============================
 
-Ein Aufruf, vier Schritte:
+One call, seven steps:
 
-    1. CSV aus data/  ->  rdf/  (Turtle + JSON-LD + LADO-Erweiterung)
-    2. Graph laden, alles per SPARQL abfragen
-    3. Zwei Abbildungen nach img/, je SVG + JPG 300 dpi
-    4. Rundlaufpruefung CSV -> RDF -> SPARQL, Feld fuer Feld
-    5. Standalone-Bundle nach rdf/IPSDatedSites-bundle.ttl
-    6. Dokumentation und Mermaid-Diagramme nach docs/
+    0. Verify the CSV against the model it claims to carry
+    1. CSV from data/  ->  rdf/  (Turtle + JSON-LD + LADO extension)
+    2. Load the graph, retrieve everything by SPARQL
+    3. Two figures to img/, SVG + JPG at 300 dpi each
+    4. Round-trip check CSV -> RDF -> SPARQL, field by field
+    5. Standalone bundle to rdf/IPSDatedSites-bundle.ttl
+    6. Documentation to docs/
 
-Aufruf aus der REPO-WURZEL (Windows / VS Code):
+Run from the REPOSITORY ROOT (Windows / VS Code):
 
     python py/main.py
     python py/main.py --era astronomical
-    python py/main.py --csv data\\meine_daten.csv
+    python py/main.py --csv data\\my_data.csv
+    python py/main.py --skip-verify        # skip step 0
 """
 
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
 import ips_compat
 import make_bundle
+import verify as ips_verify
 import make_docs
 import ips_render
 import ips_sparql
@@ -40,10 +44,15 @@ def find_csv(explicit: Path | None) -> Path:
     candidates = sorted((ROOT / "data").glob("*.csv"))
     if not candidates:
         raise SystemExit(
-            "Keine CSV in data/ gefunden. Ergebnis von "
-            "IPSDatedSites25_final.sql dort ablegen oder --csv angeben.")
+            "No CSV found in data/. Put the result of "
+            "sql/IPSDatedSites.sql there, or pass --csv.")
     if len(candidates) > 1:
-        print(f"Mehrere CSV in data/, nehme: {candidates[0].name}")
+        names = ", ".join(c.name for c in candidates)
+        raise SystemExit(
+            f"More than one CSV in data/: {names}\n"
+            "The first was previously taken in silence — with two export "
+            "states side by side the whole pipeline then runs on the wrong "
+            "one. Leave exactly one CSV in data/, or pass --csv.")
     return candidates[0]
 
 
@@ -53,21 +62,29 @@ def rule(title: str) -> None:
 
 def main() -> int:
     ap = argparse.ArgumentParser(
-        description="IPS Dated Sites: CSV -> RDF -> SPARQL -> Abbildungen")
+        description="IPS Dated Sites: CSV -> RDF -> SPARQL -> figures")
     ap.add_argument("--csv", type=Path, default=None,
-                    help="Standard: erste CSV in data/")
+                    help="default: the CSV in data/")
     ap.add_argument("--rdf-out", type=Path, default=ROOT / "rdf",
-                    help="Zielordner fuer TTL / JSON-LD")
+                    help="target folder for TTL / JSON-LD")
     ap.add_argument("--img-out", type=Path, default=ROOT / "img",
-                    help="Zielordner fuer die Abbildungen")
+                    help="target folder for the figures")
     ap.add_argument("--era", choices=("historical", "astronomical"),
                     default="historical",
-                    help="Lesart negativer Jahreszahlen. historical: "
-                         "-40 = 40 v.Chr. -> xsd:gYear -0039.")
+                    help="reading of negative years. historical: "
+                         "-40 = 40 BC -> xsd:gYear -0039.")
     ap.add_argument("--findspot-uri", choices=("hash", "slug"),
                     default="hash")
     ap.add_argument("--figure-name", default="sites_dating_v1")
     ap.add_argument("--emit-geometry", action="store_true")
+    ap.add_argument("--skip-verify", action="store_true",
+                    help="skip step 0. Only sensible when the CSV comes "
+                         "from a different query on purpose.")
+    ap.add_argument("--verify-strict", action="store_true",
+                    help="in step 0, treat warnings as failures too")
+    ap.add_argument("--verify-out", type=Path,
+                    default=ROOT / "data" / "derived" / "verification.json",
+                    help="target path of the verification report")
     ap.add_argument("--skip-plots", action="store_true")
     ap.add_argument("--skip-docs", action="store_true")
     ap.add_argument("--skip-bundle", action="store_true")
@@ -82,10 +99,35 @@ def main() -> int:
     out.mkdir(parents=True, exist_ok=True)
     img.mkdir(parents=True, exist_ok=True)
 
+    # ---- 0. Verification ------------------------------------------------
+    # The query is authoritative; nothing is recomputed here. Every
+    # published value is recovered from the other columns of the SAME row.
+    # If that fails, the CSV is not the output of the query it is taken to
+    # be — and everything downstream models something other than what is
+    # assumed.
+    if not args.skip_verify:
+        rule("0 · Verification  CSV against the model")
+        marks = {"pass": "ok", "warn": "!!", "fail": "XX", "info": "--"}
+        vreport = ips_verify.verify(csv)
+        for check in vreport.checks:
+            print(f"  [{marks[check.status]}] {check.key:<3} {check.title}")
+            if check.status != "pass":
+                print(f"         {check.detail}")
+        args.verify_out.parent.mkdir(parents=True, exist_ok=True)
+        args.verify_out.write_text(
+            json.dumps(vreport.to_dict(), indent=2, ensure_ascii=False,
+                       sort_keys=True) + "\n",
+            encoding="utf-8")
+        print(f"  Report            : {args.verify_out.relative_to(ROOT)}")
+        if vreport.failed or (args.verify_strict and vreport.warned):
+            print("\n  Stopping: the CSV does not carry the model it "
+                  "claims to carry.")
+            return 2
+
     # ---- 1. Export ------------------------------------------------------
     rule("1 · Export  CSV -> RDF")
     df = pd.read_csv(csv)
-    print(f"  Quelle            : {csv.relative_to(ROOT)}  ({len(df)} Zeilen)")
+    print(f"  Source            : {csv.relative_to(ROOT)}  ({len(df)} rows)")
     onto = build_ontology()
     g = build_graph(df, args.era, args.figure_name,
                     args.emit_geometry, args.findspot_uri)
@@ -97,36 +139,36 @@ def main() -> int:
     g.serialize(destination=ttl_path, format="turtle", encoding="utf-8")
     g.serialize(destination=jld_path, format="json-ld", indent=2,
                 auto_compact=True, encoding="utf-8")
-    print(f"  Ontologie         : {onto_path.name}  ({len(onto)} Tripel)")
-    print(f"  Graph             : {ttl_path.name}  ({len(g)} Tripel)")
+    print(f"  Ontology          : {onto_path.name}  ({len(onto)} triples)")
+    print(f"  Graph             : {ttl_path.name}  ({len(g)} triples)")
     print(f"  JSON-LD           : {jld_path.name}")
-    print(f"  Aera-Konvention   : {args.era}")
-    print(f"  Findspot-URI      : {args.findspot_uri}")
+    print(f"  Era convention    : {args.era}")
+    print(f"  Findspot URI      : {args.findspot_uri}")
     bc = ips_compat.count_bc_gyears(g)
     if bc:
-        print(f"  v.Chr.-Jahre      : {bc} gYear-Literale vor Jahr 1")
-        print("                      (rdflib < 7.5 kann sie nicht in ein")
-        print("                       Python-date wandeln; die Literale")
-        print("                       selbst sind korrekt, siehe ips_compat)")
+        print(f"  BC years          : {bc} gYear literals before year 1")
+        print("                      (rdflib < 7.5 cannot turn them into a")
+        print("                       Python date; the literals themselves")
+        print("                       are correct, see ips_compat)")
 
-    # ---- 2. Zurueck aus dem Graphen -------------------------------------
-    rule("2 · Abruf  RDF -> SPARQL")
+    # ---- 2. Back out of the graph ---------------------------------------
+    rule("2 · Retrieval  RDF -> SPARQL")
     gr = ips_sparql.load(ttl_path)
-    print(f"  Rueckleseprobe    : OK, {len(gr)} Tripel geparst")
+    print(f"  Read-back check   : OK, {len(gr)} triples parsed")
     fig_const = ips_sparql.figure_constants(gr)
     era = ips_sparql.era(gr)
     model = ips_sparql.model(gr)
     rows = ips_sparql.rows(gr)
-    print(f"  Figur-Konstanten  : aus dem Graphen "
+    print(f"  Figure constants  : from the graph "
           f"(rowOrder='{fig_const['rowOrder']}', "
           f"ramp={fig_const['colourRamp']})")
-    print(f"  Modell            : k_min={model['kMin']}, "
+    print(f"  Model             : k_min={model['kMin']}, "
           f"k_max={model['kMax']}, tau={model['tau']}, w={model['w']}")
-    print(f"  Zeilen            : {len(rows)}")
+    print(f"  Rows              : {len(rows)}")
 
-    # ---- 3. Abbildungen -------------------------------------------------
+    # ---- 3. Figures ------------------------------------------------------
     if not args.skip_plots:
-        rule("3 · Abbildungen")
+        rule("3 · Figures")
         for label, fn, kw in (
             ("v1 classic", ips_render.render_classic, {}),
             ("v2 modern", ips_render.render_modern, {"model": model}),
@@ -135,42 +177,42 @@ def main() -> int:
             names = ", ".join(p.name for p in paths)
             print(f"  {label:<12}: {names}")
 
-    # ---- 4. Rundlauf ----------------------------------------------------
-    rule("4 · Rundlauf  CSV -> RDF -> SPARQL")
+    # ---- 4. Round trip ---------------------------------------------------
+    rule("4 · Round trip  CSV -> RDF -> SPARQL")
     ok = ips_sparql.roundtrip(rows, csv)
 
     # ---- 5. Standalone-Bundle -------------------------------------------
-    # Daten + Vokabular + materialisierter CIDOC-CRM-Crosswalk in einer
-    # Datei. Materialisiert, weil Triplestores in der Regel nicht ueber
-    # rdfs:subClassOf schliessen — ohne das liefert eine CRM-Abfrage im
-    # N4O-KG null Treffer.
+    # Data + vocabulary + a materialised CIDOC CRM crosswalk in one
+    # file. Materialised because triplestores generally do not reason over
+    # rdfs:subClassOf — without it a CRM query against the N4O KG returns
+    # nothing at all.
     if not args.skip_bundle:
-        rule("5 · Standalone-Bundle")
+        rule("5 · Standalone bundle")
         bpath, bstats = make_bundle.build(
             g, onto, out / "IPSDatedSites-bundle.ttl")
-        print(f"  {bpath.name}  ({bstats['total']} Tripel)")
-        print(f"    Vokabular {bstats['ontology']}, Daten {bstats['data']}, "
-              f"Fundplatz-Typen {bstats['sites_typed']}, "
-              f"materialisiert {bstats['inferred']}")
-        print("  Gegenprobe, reine CRM/OWL-Time-Abfragen ohne Reasoner:")
+        print(f"  {bpath.name}  ({bstats['total']} triples)")
+        print(f"    vocabulary {bstats['ontology']}, data {bstats['data']}, "
+              f"site types {bstats['sites_typed']}, "
+              f"materialised {bstats['inferred']}")
+        print("  Counter-check, plain CRM/OWL-Time queries without a reasoner:")
         for k, v in make_bundle.verify(bpath).items():
             print(f"    {k:<22} {v}")
 
-    # ---- 6. Dokumentation ------------------------------------------------
-    # Wird bei jedem Lauf neu erzeugt, damit sie nicht vom Code wegdriften
-    # kann. Struktur kommt aus dem Code, Prosa aus py/ips_docs_text.py.
+    # ---- 6. Documentation -------------------------------------------------
+    # Regenerated on every run so that it cannot drift away from the code.
+    # The structure comes from the code, the prose from py/ips_docs_text.py.
     if not args.skip_docs:
-        rule("6 · Dokumentation")
+        rule("6 · Documentation")
         for pth in make_docs.build(args.docs_out, gr):
             print(f"  {pth.relative_to(ROOT)}")
 
-    rule("Ergebnis")
-    print("  " + ("Alles konsistent." if ok
-                  else "Rundlauf fehlgeschlagen — siehe oben."))
+    rule("Result")
+    print("  " + ("All consistent." if ok
+                  else "Round trip failed — see above."))
     print(f"  RDF        : {out}")
-    print(f"  Abbildungen: {img}")
+    print(f"  Figures    : {img}")
     if not args.skip_docs:
-        print(f"  Dokumentation: {args.docs_out}")
+        print(f"  Docs       : {args.docs_out}")
     return 0 if ok else 2
 
 

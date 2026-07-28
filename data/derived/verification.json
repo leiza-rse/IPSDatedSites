@@ -1,0 +1,138 @@
+{
+  "checks": [
+    {
+      "detail": "40 columns, all 22 required ones present.",
+      "key": "k",
+      "offenders": [],
+      "status": "pass",
+      "title": "column set"
+    },
+    {
+      "detail": "41 findspots, as expected.",
+      "key": "a",
+      "offenders": [],
+      "status": "pass",
+      "title": "row count"
+    },
+    {
+      "detail": "k_min=0.5, k_max=1.5, tau=20, w=1, t0=20",
+      "key": "p",
+      "offenders": [],
+      "status": "pass",
+      "title": "parameter columns constant"
+    },
+    {
+      "detail": "worst deviation 4.80e-05, within the numeric(10,4) cast.",
+      "key": "c",
+      "offenders": [],
+      "status": "pass",
+      "title": "k_eff from n_stamps_die"
+    },
+    {
+      "detail": "worst deviation 0.093 years, within the numeric(10,1) casts.",
+      "key": "d",
+      "offenders": [],
+      "status": "pass",
+      "title": "interval width = 2 k sigma"
+    },
+    {
+      "detail": "exact in all rows (t0 = 20 years).",
+      "key": "h",
+      "offenders": [],
+      "status": "pass",
+      "title": "q_start = exp(-sigma / t0)"
+    },
+    {
+      "detail": "exact in all rows (t0 = 20 years).",
+      "key": "h'",
+      "offenders": [],
+      "status": "pass",
+      "title": "q_end = exp(-sigma / t0)"
+    },
+    {
+      "detail": "41 values, no inversion.",
+      "key": "i",
+      "offenders": [],
+      "status": "pass",
+      "title": "q_start decreases monotonically in sigma"
+    },
+    {
+      "detail": "41 values, no inversion.",
+      "key": "i'",
+      "offenders": [],
+      "status": "pass",
+      "title": "q_end decreases monotonically in sigma"
+    },
+    {
+      "detail": "q is null exactly where the standard deviation is undefined.",
+      "key": "n",
+      "offenders": [],
+      "status": "pass",
+      "title": "NULL policy"
+    },
+    {
+      "detail": "no undefined input is reported as a number.",
+      "key": "f",
+      "offenders": [],
+      "status": "pass",
+      "title": "no fabricated 0.5 fallback"
+    },
+    {
+      "detail": "every rounded whisker length is within half a year of its exact value.",
+      "key": "r",
+      "offenders": [],
+      "status": "pass",
+      "title": "integer casts agree with exact columns"
+    },
+    {
+      "detail": "r(width, midpoint year) = +0.431; median width 19.8 years before AD 100 against 32.1 from AD 100. Later material is dated less sharply because the chronological framework thins out — this belongs in the width, and is the reason no epoch correction is applied to the colour.",
+      "key": "l",
+      "offenders": [],
+      "status": "info",
+      "title": "epoch drift sits in the box width"
+    }
+  ],
+  "facts": {
+    "anchors": {
+      "q_at_sharp": 0.779,
+      "q_at_unusable": 0.287,
+      "sharp_years": 5.0,
+      "unusable_years": 25.0
+    },
+    "epoch_drift": {
+      "median_width_before_ad100": 19.75,
+      "median_width_from_ad100": 32.10000000000002,
+      "n_before_ad100": 28,
+      "n_from_ad100": 13,
+      "r_q_end_vs_year": 0.10326625133502758,
+      "r_q_start_vs_year": -0.4381738702395513,
+      "r_sigma_eff_vs_year": 0.39036976236297044,
+      "r_width_vs_year": 0.4310720949267335
+    },
+    "n_findspots": 41,
+    "parameters": {
+      "k_max": 1.5,
+      "k_min": 0.5,
+      "t0": 20.0,
+      "tau": 20.0,
+      "w": 1.0
+    },
+    "q_spectrum": {
+      "max": 1.0,
+      "median": 0.646,
+      "min": 0.161
+    },
+    "sigma_spectrum": {
+      "max": 36.549931,
+      "median": 8.7397125,
+      "min": 0.0,
+      "n": 82
+    }
+  },
+  "source": "C:\\git\\IPSDatedSites\\data\\data-1785242661572.csv",
+  "summary": {
+    "checks": 13,
+    "failed": 0,
+    "warned": 0
+  }
+}

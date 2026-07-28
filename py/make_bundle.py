@@ -147,12 +147,12 @@ def materialise(g: Graph) -> int:
 # --------------------------------------------------------------------------
 def type_bundle_node(g: Graph, bundle_uri: URIRef) -> None:
     """
-    Nur die Typen des Bundle-Knotens.
+    The types of the bundle node alone.
 
-    Getrennt von describe() und VOR der Materialisierung aufgerufen: sonst
-    bekaeme ausgerechnet der Knoten, der das Bundle beschreibt, seine
-    CRM-Oberklassen nicht mehr und waere die einzige Instanz im Graphen,
-    die aus CIDOC-CRM-Sicht nicht existiert.
+    Kept apart from describe() and called BEFORE materialisation:
+    otherwise the very node that describes the bundle would lose its CRM
+    superclasses and be the one instance in the graph that does not exist
+    from a CIDOC CRM point of view.
     """
     g.add((bundle_uri, RDF.type, VOID.Dataset))
     g.add((bundle_uri, RDF.type, DCAT.Dataset))
@@ -162,7 +162,7 @@ def type_bundle_node(g: Graph, bundle_uri: URIRef) -> None:
 def describe(g: Graph, bundle_uri: URIRef, inferred: int) -> None:
     """A self-description, so an ingesting catalogue knows what it has."""
     now = datetime.now(timezone.utc)
-    # Wie der Export-Datensatz: ueber D1 erreicht auch die
+    # As with the export dataset: through D1 the
     # Selbstbeschreibung crm:E73_Information_Object.
     g.add((bundle_uri, RDF.type, X.CRMDIG.D1_Digital_Object))
     g.add((bundle_uri, DCTERMS.title, Literal(
@@ -216,7 +216,7 @@ def build(data: Graph, onto: Graph, out: Path,
 
     bundle_uri = X.SAMIAN["bundle_IPSDatedSites"]
     typed = type_discovery_sites(g) if do_type_sites else 0
-    type_bundle_node(g, bundle_uri)          # vor der Materialisierung
+    type_bundle_node(g, bundle_uri)          # before materialisation
     inferred = materialise(g) if do_materialise else 0
     describe(g, bundle_uri, inferred)        # Zaehlungen danach
 
@@ -228,24 +228,24 @@ def build(data: Graph, onto: Graph, out: Path,
     return out, stats
 
 
-# Klassen, die zum Vokabular gehoeren und keine Instanzen der
-# Anwendungsdomaene sind. Eine owl:Class ist kein Ding in der Welt.
+# Classes belonging to the vocabulary rather than instances of the
+# application domain. An owl:Class is not a thing in the world.
 VOCABULARY_TYPES = {OWL.Class, OWL.DatatypeProperty, OWL.ObjectProperty,
                     OWL.Ontology}
 
 
 def unanchored_instances(g: Graph) -> list[tuple]:
     """
-    Instanzen von Anwendungsklassen ohne CIDOC-CRM-Typ.
+    Instances of application classes that carry no CIDOC CRM type.
 
-    Die Zusage lautet: JEDE Instanz einer Anwendungsklasse traegt einen
-    CRM-Typ, direkt oder ueber eine CRM-Erweiterung, die selbst in CRM
-    verankert ist. Fuer Properties gilt das nicht — wo eine OWL-Time- oder
-    PROV-Property besser passt, wird sie benutzt.
+    The undertaking is: EVERY instance of an application class carries a
+    CRM type, directly or through a CRM extension that is itself anchored
+    in CRM. It does not extend to properties — where an OWL-Time or PROV
+    property fits better, that one is used.
 
-    Die Zusage geht leicht verloren: eine neue Klasse ohne CRM-Oberklasse
-    faellt niemandem auf, weil alles andere weiterlaeuft. Deshalb wird sie
-    gemessen und nicht angenommen.
+    The undertaking is easily lost: a new class without a CRM superclass
+    goes unnoticed because everything else keeps working. It is therefore
+    measured rather than assumed.
     """
     crm = str(X.CRM)
     out = []

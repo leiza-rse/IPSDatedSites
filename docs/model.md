@@ -187,7 +187,7 @@ flowchart LR
 
 ## URIs
 
-Findspot fragments are built as `sha256(NFC(trim(findspot)))[0:6], je Fundplatz-ID`. The recipe is
+Findspot fragments are built as `sha256(NFC(trim(findspot)))[0:6], per discovery-site id`. The recipe is
 recorded in the graph as `lado:identifierScheme`, because any further
 implementation — the planned JavaScript port in particular — must
 reproduce it character for character. The Unicode normalisation step is
