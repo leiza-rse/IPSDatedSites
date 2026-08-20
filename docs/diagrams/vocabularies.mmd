@@ -1,0 +1,31 @@
+flowchart LR
+    LADO["lado:<br/><b>local extension</b><br/>only what the standards do not cover"]
+    crm["CIDOC CRM<br/>places, time-spans,<br/>activities, dimensions<br/><i>8 class(es) anchored</i>"]
+    LADO --> crm
+    time["OWL-Time<br/>instants, positions,<br/>time reference systems<br/><i>4 class(es) anchored</i>"]
+    LADO --> time
+    crmdig["CRMdig<br/>the computation<br/>that produced a dating<br/><i>1 class(es) anchored</i>"]
+    LADO --> crmdig
+    prov["PROV-O<br/>activity, plan, agent,<br/>derivation<br/><i>2 class(es) anchored</i>"]
+    LADO --> prov
+    geo["GeoSPARQL<br/>geometry<br/>(off by default)"]
+    LADO -.-> geo
+    dcat["DCAT<br/>the dataset snapshot"]
+    LADO -.-> dcat
+    skos["SKOS<br/>notations and<br/>loose matches"]
+    LADO -.-> skos
+    dcterms["Dublin Core<br/>titles, dates, sources"]
+    LADO -.-> dcterms
+    pleiades["Pleiades<br/>ancient places<br/>as external identifiers"]
+    LADO -.-> pleiades
+
+    class LADO local
+    class crm,crmdig crm
+    class time time
+    class prov,geo,dcat,skos,dcterms,pleiades ext
+
+    classDef local fill:#e8eef7,stroke:#4a6b96,stroke-width:1px,color:#12181f
+    classDef crm fill:#efe7f5,stroke:#7a5a96,stroke-width:1px,color:#12181f
+    classDef time fill:#e3f2ec,stroke:#3f8a70,stroke-width:1px,color:#12181f
+    classDef ext fill:#f3f1ec,stroke:#8a857a,stroke-width:1px,color:#12181f
+    classDef io fill:#faf3e3,stroke:#a8872e,stroke-width:1px,color:#12181f

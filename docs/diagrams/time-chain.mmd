@@ -1,0 +1,26 @@
+flowchart TB
+    TS["lado:FindspotDating<br/>crm:E52_Time-Span · time:ProperInterval"]
+    I["time:Instant<br/>lado:DatingInstant"]
+    P["time:TimePosition<br/>lado:DatingTimePosition"]
+    TRS["samian:trs_ips_year<br/>time:TRS · lado:YearScale"]
+    NUM["time:numericPosition<br/><b>-18.2</b><br/><i>signed number line,<br/>never shifted</i>"]
+    CAL["time:inXSDgYear<br/><b>-0017</b><br/><i>calendar label,<br/>shifted by +1 for BC</i>"]
+    GREG["ISO-8601 Gregorian"]
+
+    TS -->|time:hasBeginning| I
+    I -->|time:inTimePosition| P
+    P -->|time:hasTRS| TRS
+    P --> NUM
+    I --> CAL
+    TRS -.->|skos:closeMatch| GREG
+
+    class TS,TRS local
+    class I,P time
+    class NUM,CAL io
+    class GREG ext
+
+    classDef local fill:#e8eef7,stroke:#4a6b96,stroke-width:1px,color:#12181f
+    classDef crm fill:#efe7f5,stroke:#7a5a96,stroke-width:1px,color:#12181f
+    classDef time fill:#e3f2ec,stroke:#3f8a70,stroke-width:1px,color:#12181f
+    classDef ext fill:#f3f1ec,stroke:#8a857a,stroke-width:1px,color:#12181f
+    classDef io fill:#faf3e3,stroke:#a8872e,stroke-width:1px,color:#12181f

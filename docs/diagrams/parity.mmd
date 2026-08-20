@@ -1,0 +1,31 @@
+flowchart TB
+    SRC["py/ips_rdf_export.py<br/><i>the model</i>"]
+    GEN["py/make_webjs.py<br/><i>injects prefixes, measure lists,<br/>figure constants, subclass closure,<br/>the vocabulary prelude</i>"]
+    BODY["py/templates/ips_rdf_body.js<br/><i>graph shape, hand-written</i>"]
+    JS["webjs/ips_rdf.js"]
+
+    CSV["one CSV"]
+    GPY["graph, built in Python"]
+    GJS["graph, built in the browser"]
+    GATE{"sorted N-Triples<br/>SHA-256 compared"}
+    OUT["identical, or the build fails"]
+
+    SRC --> GEN --> JS
+    BODY --> JS
+    CSV --> GPY
+    CSV --> GJS
+    SRC --> GPY
+    JS --> GJS
+    GPY --> GATE
+    GJS --> GATE
+    GATE --> OUT
+
+    class SRC,GEN,BODY local
+    class JS,CSV,GPY,GJS ext
+    class GATE,OUT time
+
+    classDef local fill:#e8eef7,stroke:#4a6b96,stroke-width:1px,color:#12181f
+    classDef crm fill:#efe7f5,stroke:#7a5a96,stroke-width:1px,color:#12181f
+    classDef time fill:#e3f2ec,stroke:#3f8a70,stroke-width:1px,color:#12181f
+    classDef ext fill:#f3f1ec,stroke:#8a857a,stroke-width:1px,color:#12181f
+    classDef io fill:#faf3e3,stroke:#a8872e,stroke-width:1px,color:#12181f

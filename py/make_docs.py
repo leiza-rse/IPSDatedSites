@@ -277,6 +277,39 @@ each of the rows, because they describe the drawing and not the findspots.
 {rows}
 
 {diagram("instance", "One real findspot, read from the generated graph. Change the model and this picture changes with it.")}
+
+### The descent from an interval to a number
+
+{diagram("time-chain", "One boundary, all the way down. The fork at the bottom is the point: the calendar label and the arithmetic position disagree about negative years on purpose.")}
+
+The same thing again, but drawn from the triples themselves rather than
+from the model — cut out of the published graph with a `CONSTRUCT` and laid
+out by GraphViz, so it can only show what is really there:
+
+![The OWL-Time descent of one interval boundary](https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/graphs/time-chain.svg)
+
+<sub>[SVG](https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/graphs/time-chain.svg) · [GraphViz source](https://github.com/leiza-rse/IPSDatedSites/blob/main/img/graphs/time-chain.dot) — cut from the graph by CONSTRUCT, generated, do not edit.</sub>
+
+And the findspot in full:
+
+![One findspot, as modelled](https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/graphs/findspot.svg)
+
+<sub>[SVG](https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/graphs/findspot.svg) · [GraphViz source](https://github.com/leiza-rse/IPSDatedSites/blob/main/img/graphs/findspot.dot) — cut from the graph by CONSTRUCT, generated, do not edit.</sub>
+
+### Where a dating comes from
+
+{diagram("provenance", "Two vocabularies say the same thing on purpose: PROV for the provenance world, CIDOC CRM so that a CRM-only consumer sees the method too.")}
+
+![Where one dating comes from](https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/graphs/provenance.svg)
+
+<sub>[SVG](https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/graphs/provenance.svg) · [GraphViz source](https://github.com/leiza-rse/IPSDatedSites/blob/main/img/graphs/provenance.dot) — cut from the graph by CONSTRUCT, generated, do not edit.</sub>
+
+Note in the drawn version that `lado:tau` and `lado:referenceLength` end at
+the same literal. They both read 20, and identical literals are the same
+term in RDF, so the two arrows genuinely land on one node. The shared value
+is a coincidence: tau governs how fast the interval tightens as stamps
+accumulate, referenceLength is the fixed scale against which qStart and
+qEnd are read.
 ## URIs
 
 Findspot fragments are built as `{X.KEY_ALGORITHM}`. The recipe is
@@ -467,6 +500,10 @@ read without OWL-Time at all.
 They are rounded to whole years, as `time:inXSDgYear` is. The exact
 position stays in `time:numericPosition`; these two triples are the
 bridge into CRM, not the authoritative figure.
+
+{diagram("vocabularies", "Which vocabulary carries what. The local extension exists only where the standards are silent; a solid edge means one of our classes actually hangs from that vocabulary.")}
+
+{diagram("links", "What makes this Linked Data rather than only RDF. The sites are referenced under the URIs archaeology.link already publishes, not re-asserted under new ones.")}
 
 {diagram("hierarchy", "Every path ends in an external vocabulary. That is the whole claim of the crosswalk.")}
 ## Per-vocabulary notes
@@ -731,6 +768,14 @@ from a hard-coded table, so adding a superclass in the export propagates
 into the bundle without a second edit.
 
 {diagram("materialisation", "Solid edge asserted, dashed edges written out by the builder. Without them a CIDOC CRM query returns nothing.")}
+
+The same node in the finished bundle, drawn from the triples:
+
+![Every type one findspot carries](https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/graphs/types.svg)
+
+<sub>[SVG](https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/graphs/types.svg) · [GraphViz source](https://github.com/leiza-rse/IPSDatedSites/blob/main/img/graphs/types.dot) — cut from the graph by CONSTRUCT, generated, do not edit.</sub>
+
+{diagram("parity", "The browser emitter is generated where the model is tabular and hand-written where it is a graph shape. What holds the two together is the hash comparison, not the generation.")}
 ## What the bundle counts
 
 Each of these is reported as a `void:classPartition` in the file's own

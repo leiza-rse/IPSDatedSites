@@ -88,6 +88,79 @@ bridge into CRM, not the authoritative figure.
 
 
 ```mermaid
+flowchart LR
+    LADO["lado:<br/><b>local extension</b><br/>only what the standards do not cover"]
+    crm["CIDOC CRM<br/>places, time-spans,<br/>activities, dimensions<br/><i>8 class(es) anchored</i>"]
+    LADO --> crm
+    time["OWL-Time<br/>instants, positions,<br/>time reference systems<br/><i>4 class(es) anchored</i>"]
+    LADO --> time
+    crmdig["CRMdig<br/>the computation<br/>that produced a dating<br/><i>1 class(es) anchored</i>"]
+    LADO --> crmdig
+    prov["PROV-O<br/>activity, plan, agent,<br/>derivation<br/><i>2 class(es) anchored</i>"]
+    LADO --> prov
+    geo["GeoSPARQL<br/>geometry<br/>(off by default)"]
+    LADO -.-> geo
+    dcat["DCAT<br/>the dataset snapshot"]
+    LADO -.-> dcat
+    skos["SKOS<br/>notations and<br/>loose matches"]
+    LADO -.-> skos
+    dcterms["Dublin Core<br/>titles, dates, sources"]
+    LADO -.-> dcterms
+    pleiades["Pleiades<br/>ancient places<br/>as external identifiers"]
+    LADO -.-> pleiades
+
+    class LADO local
+    class crm,crmdig crm
+    class time time
+    class prov,geo,dcat,skos,dcterms,pleiades ext
+
+    classDef local fill:#e8eef7,stroke:#4a6b96,stroke-width:1px,color:#12181f
+    classDef crm fill:#efe7f5,stroke:#7a5a96,stroke-width:1px,color:#12181f
+    classDef time fill:#e3f2ec,stroke:#3f8a70,stroke-width:1px,color:#12181f
+    classDef ext fill:#f3f1ec,stroke:#8a857a,stroke-width:1px,color:#12181f
+    classDef io fill:#faf3e3,stroke:#a8872e,stroke-width:1px,color:#12181f
+```
+
+*Which vocabulary carries what. The local extension exists only where the standards are silent; a solid edge means one of our classes actually hangs from that vocabulary.*
+
+<sub>[JPG](https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/diagrams/vocabularies.jpg) · [SVG](https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/diagrams/vocabularies.svg) · [Mermaid source](https://github.com/leiza-rse/IPSDatedSites/blob/main/docs/diagrams/vocabularies.mmd) — generated, do not edit.</sub>
+
+
+
+```mermaid
+flowchart LR
+    subgraph ours["this repository"]
+        direction TB
+        FS["lado:Findspot<br/>42 findspots<br/><i>URI = sha256(name)[0:6]</i>"]
+        DSITE["lado:DiscoverySite<br/>0 sites"]
+        FS -->|crm:P89_falls_within| DSITE
+    end
+
+    AL["archaeology.link<br/><i>loc_discoverysite_1.ttl</i><br/>the sites are referenced,<br/>not re-asserted"]
+    PL["Pleiades<br/>20 sites carry<br/>an ancient-place URI"]
+    N4O["NFDI4Objects<br/>knowledge graph<br/><i>target for the bundle</i>"]
+
+    DSITE ==>|same URI| AL
+    DSITE -->|lado:pleiadesID| PL
+    ours ==>|IPSDatedSites-bundle.ttl| N4O
+
+    class FS,DSITE local
+    class AL,PL,N4O ext
+
+    classDef local fill:#e8eef7,stroke:#4a6b96,stroke-width:1px,color:#12181f
+    classDef crm fill:#efe7f5,stroke:#7a5a96,stroke-width:1px,color:#12181f
+    classDef time fill:#e3f2ec,stroke:#3f8a70,stroke-width:1px,color:#12181f
+    classDef ext fill:#f3f1ec,stroke:#8a857a,stroke-width:1px,color:#12181f
+    classDef io fill:#faf3e3,stroke:#a8872e,stroke-width:1px,color:#12181f
+```
+
+*What makes this Linked Data rather than only RDF. The sites are referenced under the URIs archaeology.link already publishes, not re-asserted under new ones.*
+
+<sub>[JPG](https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/diagrams/links.jpg) · [SVG](https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/diagrams/links.svg) · [Mermaid source](https://github.com/leiza-rse/IPSDatedSites/blob/main/docs/diagrams/links.mmd) — generated, do not edit.</sub>
+
+
+
+```mermaid
 flowchart BT
     lado_Location["lado:Location"]
     crm_E53_Place["crm:E53_Place"]

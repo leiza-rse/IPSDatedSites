@@ -26,6 +26,12 @@ jobs:
         with:
           python-version: "3.10"      # matches the local Windows install
 
+      - name: Install GraphViz
+        # Needed by py/make_instance_graphs.py (step 9). Without it
+        # the step skips rather than fails, which would let the
+        # committed SVGs drift away from the graph unnoticed.
+        run: sudo apt-get update -qq && sudo apt-get install -y graphviz
+
       - name: Install dependencies
         run: pip install -r requirements.txt
 
@@ -82,11 +88,16 @@ jobs:
         # img/diagrams/ is excluded: those are rendered by this workflow,
         # not by the Python pipeline, so the working tree cannot be
         # expected to contain them before the render step has run.
+        #
+        # img/graphs/ is excluded too, for the reason docs/bundle.ttl is:
+        # the provenance cut contains the dataset node, whose URI carries
+        # the export date, so the SVG differs after every run whether or
+        # not the model changed.
         run: |
-          if ! git diff --quiet -- img ':!img/diagrams'; then
+          if ! git diff --quiet -- img ':!img/diagrams' ':!img/graphs'; then
             echo "::error::img/ differs. Check the library versions above against your local ones, then run 'python py/main.py' and commit."
-            git diff --stat -- img ':!img/diagrams'
-            git diff -- img ':!img/diagrams' \
+            git diff --stat -- img ':!img/diagrams' ':!img/graphs'
+            git diff -- img ':!img/diagrams' ':!img/graphs' \
               | grep -E '^[-+].*(Matplotlib v|clip-path)' | head -20
             exit 1
           fi

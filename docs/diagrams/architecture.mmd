@@ -1,6 +1,6 @@
 flowchart LR
     DB[("PostgreSQL<br/>Samian Research / IPS")]
-    SQL["IPSDatedSites25_final.sql<br/>one row per findspot"]
+    SQL["sql/IPSDatedSites.sql<br/>one row per findspot"]
     CSV["data/*.csv"]
     EXP["py/ips_rdf_export.py"]
     RDF["rdf/<br/>ips_sites_dating_v1.ttl<br/>ips_sites_dating_v1.jsonld<br/>lado_dating_extension.ttl<br/>IPSDatedSites-bundle.ttl"]
@@ -9,17 +9,28 @@ flowchart LR
     IMG["img/<br/>plot_v1_classic<br/>plot_v2_modern"]
     DOC["py/make_docs.py<br/>py/make_diagrams.py"]
     DOCS["docs/"]
+    VER["py/verify.py<br/>step 0"]
+    WEB["py/make_webjs.py"]
+    JS["webjs/<br/>ips_rdf.js<br/>to the ColdFusion server"]
+    SPB["py/build_sparql.py<br/>queries.yaml"]
+    PAGE["docs/sparql.html<br/>docs/bundle.ttl<br/>qmd/"]
     CHK{"round trip<br/>17 fields compared"}
+    PAR{"parity<br/>sorted N-Triples, SHA-256"}
 
     DB --> SQL --> CSV --> EXP --> RDF --> SPQ --> REN --> IMG
+    CSV --> VER
     EXP --> DOC --> DOCS
+    EXP --> WEB --> JS
+    RDF --> SPB --> PAGE
     SPQ --> CHK
     CSV -.-> CHK
+    WEB --> PAR
+    EXP -.-> PAR
 
     class DB,SQL,CSV io
-    class RDF,IMG,DOCS ext
-    class EXP,SPQ,REN,DOC local
-    class CHK time
+    class RDF,IMG,DOCS,JS,PAGE ext
+    class EXP,SPQ,REN,DOC,WEB,SPB local
+    class CHK,PAR,VER time
 
     classDef local fill:#e8eef7,stroke:#4a6b96,stroke-width:1px,color:#12181f
     classDef crm fill:#efe7f5,stroke:#7a5a96,stroke-width:1px,color:#12181f

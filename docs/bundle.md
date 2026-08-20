@@ -65,6 +65,52 @@ flowchart LR
 
 <sub>[JPG](https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/diagrams/materialisation.jpg) · [SVG](https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/diagrams/materialisation.svg) · [Mermaid source](https://github.com/leiza-rse/IPSDatedSites/blob/main/docs/diagrams/materialisation.mmd) — generated, do not edit.</sub>
 
+
+The same node in the finished bundle, drawn from the triples:
+
+![Every type one findspot carries](https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/graphs/types.svg)
+
+<sub>[SVG](https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/graphs/types.svg) · [GraphViz source](https://github.com/leiza-rse/IPSDatedSites/blob/main/img/graphs/types.dot) — cut from the graph by CONSTRUCT, generated, do not edit.</sub>
+
+
+```mermaid
+flowchart TB
+    SRC["py/ips_rdf_export.py<br/><i>the model</i>"]
+    GEN["py/make_webjs.py<br/><i>injects prefixes, measure lists,<br/>figure constants, subclass closure,<br/>the vocabulary prelude</i>"]
+    BODY["py/templates/ips_rdf_body.js<br/><i>graph shape, hand-written</i>"]
+    JS["webjs/ips_rdf.js"]
+
+    CSV["one CSV"]
+    GPY["graph, built in Python"]
+    GJS["graph, built in the browser"]
+    GATE{"sorted N-Triples<br/>SHA-256 compared"}
+    OUT["identical, or the build fails"]
+
+    SRC --> GEN --> JS
+    BODY --> JS
+    CSV --> GPY
+    CSV --> GJS
+    SRC --> GPY
+    JS --> GJS
+    GPY --> GATE
+    GJS --> GATE
+    GATE --> OUT
+
+    class SRC,GEN,BODY local
+    class JS,CSV,GPY,GJS ext
+    class GATE,OUT time
+
+    classDef local fill:#e8eef7,stroke:#4a6b96,stroke-width:1px,color:#12181f
+    classDef crm fill:#efe7f5,stroke:#7a5a96,stroke-width:1px,color:#12181f
+    classDef time fill:#e3f2ec,stroke:#3f8a70,stroke-width:1px,color:#12181f
+    classDef ext fill:#f3f1ec,stroke:#8a857a,stroke-width:1px,color:#12181f
+    classDef io fill:#faf3e3,stroke:#a8872e,stroke-width:1px,color:#12181f
+```
+
+*The browser emitter is generated where the model is tabular and hand-written where it is a graph shape. What holds the two together is the hash comparison, not the generation.*
+
+<sub>[JPG](https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/diagrams/parity.jpg) · [SVG](https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/diagrams/parity.svg) · [Mermaid source](https://github.com/leiza-rse/IPSDatedSites/blob/main/docs/diagrams/parity.mmd) — generated, do not edit.</sub>
+
 ## What the bundle counts
 
 Each of these is reported as a `void:classPartition` in the file's own

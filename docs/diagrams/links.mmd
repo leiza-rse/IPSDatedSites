@@ -1,0 +1,24 @@
+flowchart LR
+    subgraph ours["this repository"]
+        direction TB
+        FS["lado:Findspot<br/>42 findspots<br/><i>URI = sha256(name)[0:6]</i>"]
+        DSITE["lado:DiscoverySite<br/>0 sites"]
+        FS -->|crm:P89_falls_within| DSITE
+    end
+
+    AL["archaeology.link<br/><i>loc_discoverysite_1.ttl</i><br/>the sites are referenced,<br/>not re-asserted"]
+    PL["Pleiades<br/>20 sites carry<br/>an ancient-place URI"]
+    N4O["NFDI4Objects<br/>knowledge graph<br/><i>target for the bundle</i>"]
+
+    DSITE ==>|same URI| AL
+    DSITE -->|lado:pleiadesID| PL
+    ours ==>|IPSDatedSites-bundle.ttl| N4O
+
+    class FS,DSITE local
+    class AL,PL,N4O ext
+
+    classDef local fill:#e8eef7,stroke:#4a6b96,stroke-width:1px,color:#12181f
+    classDef crm fill:#efe7f5,stroke:#7a5a96,stroke-width:1px,color:#12181f
+    classDef time fill:#e3f2ec,stroke:#3f8a70,stroke-width:1px,color:#12181f
+    classDef ext fill:#f3f1ec,stroke:#8a857a,stroke-width:1px,color:#12181f
+    classDef io fill:#faf3e3,stroke:#a8872e,stroke-width:1px,color:#12181f

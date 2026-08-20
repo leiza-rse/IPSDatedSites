@@ -185,6 +185,102 @@ flowchart LR
 
 <sub>[JPG](https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/diagrams/instance.jpg) · [SVG](https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/diagrams/instance.svg) · [Mermaid source](https://github.com/leiza-rse/IPSDatedSites/blob/main/docs/diagrams/instance.mmd) — generated, do not edit.</sub>
 
+
+### The descent from an interval to a number
+
+
+```mermaid
+flowchart TB
+    TS["lado:FindspotDating<br/>crm:E52_Time-Span · time:ProperInterval"]
+    I["time:Instant<br/>lado:DatingInstant"]
+    P["time:TimePosition<br/>lado:DatingTimePosition"]
+    TRS["samian:trs_ips_year<br/>time:TRS · lado:YearScale"]
+    NUM["time:numericPosition<br/><b>-18.2</b><br/><i>signed number line,<br/>never shifted</i>"]
+    CAL["time:inXSDgYear<br/><b>-0017</b><br/><i>calendar label,<br/>shifted by +1 for BC</i>"]
+    GREG["ISO-8601 Gregorian"]
+
+    TS -->|time:hasBeginning| I
+    I -->|time:inTimePosition| P
+    P -->|time:hasTRS| TRS
+    P --> NUM
+    I --> CAL
+    TRS -.->|skos:closeMatch| GREG
+
+    class TS,TRS local
+    class I,P time
+    class NUM,CAL io
+    class GREG ext
+
+    classDef local fill:#e8eef7,stroke:#4a6b96,stroke-width:1px,color:#12181f
+    classDef crm fill:#efe7f5,stroke:#7a5a96,stroke-width:1px,color:#12181f
+    classDef time fill:#e3f2ec,stroke:#3f8a70,stroke-width:1px,color:#12181f
+    classDef ext fill:#f3f1ec,stroke:#8a857a,stroke-width:1px,color:#12181f
+    classDef io fill:#faf3e3,stroke:#a8872e,stroke-width:1px,color:#12181f
+```
+
+*One boundary, all the way down. The fork at the bottom is the point: the calendar label and the arithmetic position disagree about negative years on purpose.*
+
+<sub>[JPG](https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/diagrams/time-chain.jpg) · [SVG](https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/diagrams/time-chain.svg) · [Mermaid source](https://github.com/leiza-rse/IPSDatedSites/blob/main/docs/diagrams/time-chain.mmd) — generated, do not edit.</sub>
+
+
+The same thing again, but drawn from the triples themselves rather than
+from the model — cut out of the published graph with a `CONSTRUCT` and laid
+out by GraphViz, so it can only show what is really there:
+
+![The OWL-Time descent of one interval boundary](https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/graphs/time-chain.svg)
+
+<sub>[SVG](https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/graphs/time-chain.svg) · [GraphViz source](https://github.com/leiza-rse/IPSDatedSites/blob/main/img/graphs/time-chain.dot) — cut from the graph by CONSTRUCT, generated, do not edit.</sub>
+
+And the findspot in full:
+
+![One findspot, as modelled](https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/graphs/findspot.svg)
+
+<sub>[SVG](https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/graphs/findspot.svg) · [GraphViz source](https://github.com/leiza-rse/IPSDatedSites/blob/main/img/graphs/findspot.dot) — cut from the graph by CONSTRUCT, generated, do not edit.</sub>
+
+### Where a dating comes from
+
+
+```mermaid
+flowchart LR
+    TS["lado:FindspotDating<br/><i>the dating</i>"]
+    ACT["lado:DatingActivity<br/>prov:Activity · crmdig:D10_Software_Execution"]
+    MOD["lado:DatingModel<br/>prov:Plan · crm:E29_Design_or_Procedure<br/><i>kMin kMax tau referenceLength<br/>volumeWeight eraConvention<br/>excludedDatemax</i>"]
+    AG["samian:IPSDatedSitesExporter<br/>prov:SoftwareAgent · crmdig:D14_Software"]
+    DS["dcat:Dataset<br/><i>dated snapshot</i>"]
+
+    TS -->|prov:wasGeneratedBy| ACT
+    TS -->|prov:wasDerivedFrom| DS
+    ACT -->|prov:used| MOD
+    ACT -.->|crm:P33_used_specific_technique| MOD
+    ACT -->|prov:wasAssociatedWith| AG
+    ACT -.->|crm:P14_carried_out_by| AG
+    ACT -->|prov:used| DS
+
+    class TS,ACT,MOD,AG local
+    class DS ext
+
+    classDef local fill:#e8eef7,stroke:#4a6b96,stroke-width:1px,color:#12181f
+    classDef crm fill:#efe7f5,stroke:#7a5a96,stroke-width:1px,color:#12181f
+    classDef time fill:#e3f2ec,stroke:#3f8a70,stroke-width:1px,color:#12181f
+    classDef ext fill:#f3f1ec,stroke:#8a857a,stroke-width:1px,color:#12181f
+    classDef io fill:#faf3e3,stroke:#a8872e,stroke-width:1px,color:#12181f
+```
+
+*Two vocabularies say the same thing on purpose: PROV for the provenance world, CIDOC CRM so that a CRM-only consumer sees the method too.*
+
+<sub>[JPG](https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/diagrams/provenance.jpg) · [SVG](https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/diagrams/provenance.svg) · [Mermaid source](https://github.com/leiza-rse/IPSDatedSites/blob/main/docs/diagrams/provenance.mmd) — generated, do not edit.</sub>
+
+
+![Where one dating comes from](https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/graphs/provenance.svg)
+
+<sub>[SVG](https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/graphs/provenance.svg) · [GraphViz source](https://github.com/leiza-rse/IPSDatedSites/blob/main/img/graphs/provenance.dot) — cut from the graph by CONSTRUCT, generated, do not edit.</sub>
+
+Note in the drawn version that `lado:tau` and `lado:referenceLength` end at
+the same literal. They both read 20, and identical literals are the same
+term in RDF, so the two arrows genuinely land on one node. The shared value
+is a coincidence: tau governs how fast the interval tightens as stamps
+accumulate, referenceLength is the fixed scale against which qStart and
+qEnd are read.
 ## URIs
 
 Findspot fragments are built as `sha256(NFC(trim(findspot)))[0:6], per discovery-site id`. The recipe is

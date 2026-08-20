@@ -11,6 +11,11 @@ in the pictures on the next run.
     3  relations      the class skeleton, grouped by the three layers
     4  instance       one real findspot, read from the generated graph
     5  materialisation what the bundle adds so CRM queries resolve
+    6  vocabularies   which external vocabulary carries what
+    7  time-chain     one interval boundary, down to the number
+    8  provenance     where a dating comes from
+    9  links          what makes this Linked Data rather than only RDF
+   10  parity         two emitters held to one model
 
 Sources:
 
@@ -95,7 +100,7 @@ def diagram_architecture(**_) -> str:
     img_list = "<br/>".join(outs["img"])
     return f"""flowchart LR
     DB[("PostgreSQL<br/>Samian Research / IPS")]
-    SQL["IPSDatedSites25_final.sql<br/>one row per findspot"]
+    SQL["sql/IPSDatedSites.sql<br/>one row per findspot"]
     CSV["data/*.csv"]
     EXP["py/ips_rdf_export.py"]
     RDF["rdf/<br/>{rdf_list}"]
@@ -104,17 +109,28 @@ def diagram_architecture(**_) -> str:
     IMG["img/<br/>{img_list}"]
     DOC["py/make_docs.py<br/>py/make_diagrams.py"]
     DOCS["docs/"]
+    VER["py/verify.py<br/>step 0"]
+    WEB["py/make_webjs.py"]
+    JS["webjs/<br/>ips_rdf.js<br/>to the ColdFusion server"]
+    SPB["py/build_sparql.py<br/>queries.yaml"]
+    PAGE["docs/sparql.html<br/>docs/bundle.ttl<br/>qmd/"]
     CHK{{"round trip<br/>17 fields compared"}}
+    PAR{{"parity<br/>sorted N-Triples, SHA-256"}}
 
     DB --> SQL --> CSV --> EXP --> RDF --> SPQ --> REN --> IMG
+    CSV --> VER
     EXP --> DOC --> DOCS
+    EXP --> WEB --> JS
+    RDF --> SPB --> PAGE
     SPQ --> CHK
     CSV -.-> CHK
+    WEB --> PAR
+    EXP -.-> PAR
 
     class DB,SQL,CSV io
-    class RDF,IMG,DOCS ext
-    class EXP,SPQ,REN,DOC local
-    class CHK time
+    class RDF,IMG,DOCS,JS,PAGE ext
+    class EXP,SPQ,REN,DOC,WEB,SPB local
+    class CHK,PAR,VER time
 {STYLES}"""
 
 
@@ -291,6 +307,227 @@ def diagram_materialisation(**_) -> str:
     return "\n".join(l for l in lines if l)
 
 
+
+# --------------------------------------------------------------------------
+# 6 — vocabularies
+# --------------------------------------------------------------------------
+def diagram_vocabularies(**_) -> str:
+    """
+    Which external vocabulary carries what.
+
+    Built from PREFIXES and from the superclasses actually used in
+    CLASSES, so a vocabulary that stops being used disappears from the
+    picture instead of lingering as a claim.
+    """
+    # Which foreign namespaces do our own classes actually hang from?
+    used: dict[str, set[str]] = {}
+    for cls, supers, *_ in X.CLASSES:
+        for sup in supers:
+            q = qname(sup)
+            if ":" in q and not q.startswith("lado:"):
+                used.setdefault(q.split(":", 1)[0], set()).add(qname(cls))
+
+    ROLES = {
+        "crm": ("CIDOC CRM", "places, time-spans,<br/>activities, dimensions"),
+        "time": ("OWL-Time", "instants, positions,<br/>time reference systems"),
+        "crmdig": ("CRMdig", "the computation<br/>that produced a dating"),
+        "prov": ("PROV-O", "activity, plan, agent,<br/>derivation"),
+        "geo": ("GeoSPARQL", "geometry<br/>(off by default)"),
+        "dcat": ("DCAT", "the dataset snapshot"),
+        "skos": ("SKOS", "notations and<br/>loose matches"),
+        "dcterms": ("Dublin Core", "titles, dates, sources"),
+        "pleiades": ("Pleiades", "ancient places<br/>as external identifiers"),
+    }
+
+    lines = ["flowchart LR",
+             '    LADO["lado:<br/><b>local extension</b><br/>only what the '
+             'standards do not cover"]']
+    for pfx, (label, role) in ROLES.items():
+        if pfx not in X.PREFIXES:
+            continue
+        n = len(used.get(pfx, ()))
+        anchored = f"<br/><i>{n} class(es) anchored</i>" if n else ""
+        lines.append(f'    {pfx}["{label}<br/>{role}{anchored}"]')
+        edge = "-->" if n else "-.->"
+        lines.append(f"    LADO {edge} {pfx}")
+    lines.append("")
+    lines.append("    class LADO local")
+    for grp, pfxs in (("crm", ("crm", "crmdig")), ("time", ("time",))):
+        ids = [p for p in pfxs if p in X.PREFIXES]
+        if ids:
+            lines.append(f"    class {','.join(ids)} {grp}")
+    rest = [p for p in ROLES if p in X.PREFIXES
+            and p not in ("crm", "crmdig", "time")]
+    if rest:
+        lines.append(f"    class {','.join(rest)} ext")
+    lines.append(STYLES)
+    return "\n".join(lines)
+
+
+# --------------------------------------------------------------------------
+# 7 — the time chain
+# --------------------------------------------------------------------------
+def diagram_time_chain(graph: Graph | None = None, **_) -> str:
+    """
+    One interval boundary, all the way down to the number.
+
+    The fork at the bottom is the point: the calendar label and the
+    arithmetic position deliberately disagree about negative years.
+    Values are read from the graph when one is supplied.
+    """
+    num, cal = "-16.6", "-0016"
+    if graph is not None:
+        q = """
+        PREFIX lado: <http://archaeology.link/ontology#>
+        PREFIX crm:  <http://www.cidoc-crm.org/cidoc-crm/>
+        PREFIX time: <http://www.w3.org/2006/time#>
+        SELECT ?num ?cal WHERE {
+          ?ts a lado:FindspotDating ; time:hasBeginning ?i .
+          ?i time:inXSDgYear ?cal ; time:inTimePosition ?p .
+          ?p time:numericPosition ?num .
+          FILTER(?num < 0)
+        } ORDER BY ?num LIMIT 1
+        """
+        for row in graph.query(q):
+            num, cal = str(row[0]), str(row[1])
+
+    return f"""flowchart TB
+    TS["lado:FindspotDating<br/>crm:E52_Time-Span · time:ProperInterval"]
+    I["time:Instant<br/>lado:DatingInstant"]
+    P["time:TimePosition<br/>lado:DatingTimePosition"]
+    TRS["samian:trs_ips_year<br/>time:TRS · lado:YearScale"]
+    NUM["time:numericPosition<br/><b>{num}</b><br/><i>signed number line,<br/>never shifted</i>"]
+    CAL["time:inXSDgYear<br/><b>{cal}</b><br/><i>calendar label,<br/>shifted by +1 for BC</i>"]
+    GREG["ISO-8601 Gregorian"]
+
+    TS -->|time:hasBeginning| I
+    I -->|time:inTimePosition| P
+    P -->|time:hasTRS| TRS
+    P --> NUM
+    I --> CAL
+    TRS -.->|skos:closeMatch| GREG
+
+    class TS,TRS local
+    class I,P time
+    class NUM,CAL io
+    class GREG ext
+""" + STYLES
+
+
+# --------------------------------------------------------------------------
+# 8 — provenance
+# --------------------------------------------------------------------------
+def diagram_provenance(**_) -> str:
+    """
+    Where a dating comes from.
+
+    Two vocabularies say the same thing on purpose: PROV for the
+    provenance world, CIDOC CRM so that a CRM-only consumer sees the
+    method too. The duplication is deliberate and is drawn as such.
+    """
+    return f"""flowchart LR
+    TS["lado:FindspotDating<br/><i>the dating</i>"]
+    ACT["lado:DatingActivity<br/>prov:Activity · crmdig:D10_Software_Execution"]
+    MOD["lado:DatingModel<br/>prov:Plan · crm:E29_Design_or_Procedure<br/><i>kMin kMax tau referenceLength<br/>volumeWeight eraConvention<br/>excludedDatemax</i>"]
+    AG["samian:IPSDatedSitesExporter<br/>prov:SoftwareAgent · crmdig:D14_Software"]
+    DS["dcat:Dataset<br/><i>dated snapshot</i>"]
+
+    TS -->|prov:wasGeneratedBy| ACT
+    TS -->|prov:wasDerivedFrom| DS
+    ACT -->|prov:used| MOD
+    ACT -.->|crm:P33_used_specific_technique| MOD
+    ACT -->|prov:wasAssociatedWith| AG
+    ACT -.->|crm:P14_carried_out_by| AG
+    ACT -->|prov:used| DS
+
+    class TS,ACT,MOD,AG local
+    class DS ext
+{STYLES}"""
+
+
+# --------------------------------------------------------------------------
+# 9 — outward links
+# --------------------------------------------------------------------------
+def diagram_links(graph: Graph | None = None, **_) -> str:
+    """
+    What makes this Linked Data rather than only RDF.
+
+    Counts come from the graph, so a claim about how many findspots reach
+    Pleiades cannot go stale.
+    """
+    n_sites = n_pleiades = n_findspots = 0
+    if graph is not None:
+        def count(q):
+            for r in graph.query(q):
+                return int(r[0])
+            return 0
+        base = "PREFIX lado: <http://archaeology.link/ontology#>\n"
+        n_sites = count(base + "SELECT (COUNT(DISTINCT ?s) AS ?n) WHERE "
+                               "{ ?s a lado:DiscoverySite }")
+        n_findspots = count(base + "SELECT (COUNT(DISTINCT ?s) AS ?n) WHERE "
+                                   "{ ?s a lado:Findspot }")
+        n_pleiades = count(base + "SELECT (COUNT(DISTINCT ?s) AS ?n) WHERE "
+                                  "{ ?s lado:pleiadesID ?p }")
+
+    return f"""flowchart LR
+    subgraph ours["this repository"]
+        direction TB
+        FS["lado:Findspot<br/>{n_findspots} findspots<br/><i>URI = sha256(name)[0:6]</i>"]
+        DSITE["lado:DiscoverySite<br/>{n_sites} sites"]
+        FS -->|crm:P89_falls_within| DSITE
+    end
+
+    AL["archaeology.link<br/><i>loc_discoverysite_1.ttl</i><br/>the sites are referenced,<br/>not re-asserted"]
+    PL["Pleiades<br/>{n_pleiades} sites carry<br/>an ancient-place URI"]
+    N4O["NFDI4Objects<br/>knowledge graph<br/><i>target for the bundle</i>"]
+
+    DSITE ==>|same URI| AL
+    DSITE -->|lado:pleiadesID| PL
+    ours ==>|IPSDatedSites-bundle.ttl| N4O
+
+    class FS,DSITE local
+    class AL,PL,N4O ext
+{STYLES}"""
+
+
+# --------------------------------------------------------------------------
+# 10 — two emitters, one model
+# --------------------------------------------------------------------------
+def diagram_parity(**_) -> str:
+    """
+    How the browser emitter is kept from drifting.
+
+    The tabular parts are generated; the graph shape is not, and is held
+    in step by comparing hashes instead. Drawing the gate makes the
+    asymmetry visible rather than leaving it in a docstring.
+    """
+    return f"""flowchart TB
+    SRC["py/ips_rdf_export.py<br/><i>the model</i>"]
+    GEN["py/make_webjs.py<br/><i>injects prefixes, measure lists,<br/>figure constants, subclass closure,<br/>the vocabulary prelude</i>"]
+    BODY["py/templates/ips_rdf_body.js<br/><i>graph shape, hand-written</i>"]
+    JS["webjs/ips_rdf.js"]
+
+    CSV["one CSV"]
+    GPY["graph, built in Python"]
+    GJS["graph, built in the browser"]
+    GATE{{"sorted N-Triples<br/>SHA-256 compared"}}
+    OUT["identical, or the build fails"]
+
+    SRC --> GEN --> JS
+    BODY --> JS
+    CSV --> GPY
+    CSV --> GJS
+    SRC --> GPY
+    JS --> GJS
+    GPY --> GATE
+    GJS --> GATE
+    GATE --> OUT
+
+    class SRC,GEN,BODY local
+    class JS,CSV,GPY,GJS ext
+    class GATE,OUT time
+{STYLES}"""
+
 # --------------------------------------------------------------------------
 DIAGRAMS = {
     "architecture": (diagram_architecture,
@@ -303,6 +540,16 @@ DIAGRAMS = {
                  "One real findspot as modelled"),
     "materialisation": (diagram_materialisation,
                         "What the bundle adds for reasoner-free CRM queries"),
+    "vocabularies": (diagram_vocabularies,
+                     "Which external vocabulary carries what"),
+    "time-chain": (diagram_time_chain,
+                   "One interval boundary, down to the number"),
+    "provenance": (diagram_provenance,
+                   "Where a dating comes from"),
+    "links": (diagram_links,
+              "What makes this Linked Data rather than only RDF"),
+    "parity": (diagram_parity,
+               "Two emitters held to one model"),
 }
 
 

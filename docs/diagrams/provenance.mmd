@@ -1,0 +1,23 @@
+flowchart LR
+    TS["lado:FindspotDating<br/><i>the dating</i>"]
+    ACT["lado:DatingActivity<br/>prov:Activity · crmdig:D10_Software_Execution"]
+    MOD["lado:DatingModel<br/>prov:Plan · crm:E29_Design_or_Procedure<br/><i>kMin kMax tau referenceLength<br/>volumeWeight eraConvention<br/>excludedDatemax</i>"]
+    AG["samian:IPSDatedSitesExporter<br/>prov:SoftwareAgent · crmdig:D14_Software"]
+    DS["dcat:Dataset<br/><i>dated snapshot</i>"]
+
+    TS -->|prov:wasGeneratedBy| ACT
+    TS -->|prov:wasDerivedFrom| DS
+    ACT -->|prov:used| MOD
+    ACT -.->|crm:P33_used_specific_technique| MOD
+    ACT -->|prov:wasAssociatedWith| AG
+    ACT -.->|crm:P14_carried_out_by| AG
+    ACT -->|prov:used| DS
+
+    class TS,ACT,MOD,AG local
+    class DS ext
+
+    classDef local fill:#e8eef7,stroke:#4a6b96,stroke-width:1px,color:#12181f
+    classDef crm fill:#efe7f5,stroke:#7a5a96,stroke-width:1px,color:#12181f
+    classDef time fill:#e3f2ec,stroke:#3f8a70,stroke-width:1px,color:#12181f
+    classDef ext fill:#f3f1ec,stroke:#8a857a,stroke-width:1px,color:#12181f
+    classDef io fill:#faf3e3,stroke:#a8872e,stroke-width:1px,color:#12181f

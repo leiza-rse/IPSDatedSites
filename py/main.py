@@ -34,6 +34,7 @@ import build_sparql
 import make_bundle
 import verify as ips_verify
 import make_docs
+import make_instance_graphs
 import make_webjs
 import ips_render
 import ips_sparql
@@ -98,6 +99,9 @@ def main() -> int:
                          "(for instance when node is unavailable)")
     ap.add_argument("--webjs-out", type=Path, default=ROOT / "webjs")
     ap.add_argument("--skip-sparql", action="store_true")
+    ap.add_argument("--skip-graphs", action="store_true")
+    ap.add_argument("--graphs-out", type=Path,
+                    default=ROOT / "img" / "graphs")
     ap.add_argument("--docs-out", type=Path, default=ROOT / "docs")
     args = ap.parse_args()
 
@@ -236,6 +240,16 @@ def main() -> int:
         rule("8 · Documentation")
         for pth in make_docs.build(args.docs_out, gr):
             print(f"  {pth.relative_to(ROOT)}")
+
+    # ---- 9. Instance graphs ----------------------------------------------
+    # Real subgraphs, cut with CONSTRUCT and laid out by GraphViz. The
+    # Mermaid diagrams show the model; these show the triples. Skipped
+    # with a note if GraphViz is absent, because the SVGs are committed.
+    if not args.skip_graphs:
+        rule("9 \u00b7 Instance graphs (img/graphs/)")
+        if make_instance_graphs.run(
+                out / "IPSDatedSites-bundle.ttl", args.graphs_out) != 0:
+            ok = False
 
     rule("Result")
     print("  " + ("All consistent." if ok
