@@ -1,0 +1,96 @@
+---
+title: "[[ qmd.title ]]"
+format: live-html
+engine: knitr
+pyodide:
+  packages:
+    - micropip
+---
+
+{{< include ../_extensions/r-wasm/live/_knitr.qmd >}}
+
+## About this notebook
+
+[[ qmd.about ]]
+
+[[ qmd.notes ]]
+
+## Step 1 — Set up and load the graph
+
+`rdflib` is not pre-bundled with Pyodide, so it is installed with `micropip`.
+HTTP has to go through `pyodide.http.pyfetch`: `requests` and `urllib.request`
+do not work in the browser.
+
+```{pyodide}
+#| autorun: false
+#| label: setup
+#| output: false
+import micropip
+await micropip.install("rdflib==[[ rdflib_version ]]")
+
+from pyodide.http import pyfetch
+from rdflib import Graph
+
+GRAPH_URL = "[[ qmd.graph_url ]]"
+
+_cache = {}
+
+async def load(url):
+    """Fetch a Turtle file and parse it into a Graph. Cached per URL."""
+    if url in _cache:
+        return _cache[url]
+    resp = await pyfetch(url)
+    if resp.status != 200:
+        raise RuntimeError(f"{url} -> HTTP {resp.status}")
+    g = Graph()
+    g.parse(data=await resp.string(), format="turtle")
+    _cache[url] = g
+    return g
+
+def show(graph, query):
+    """Run a query and return the rows as a list of dicts."""
+    res = graph.query(PREFIXES + query)
+    cols = [str(v) for v in res.vars]
+    return [{c: (None if r[i] is None else str(r[i])) for i, c in enumerate(cols)}
+            for r in res]
+
+PREFIXES = """
+[[ prefixes ]]"""
+```
+
+Now fetch the graph. It is about [[ qmd.megabytes ]] MB and holds the findspot
+datings, the full vocabulary, and the rdf:type triples materialised over
+`rdfs:subClassOf` — which is why the CIDOC CRM queries below resolve without a
+reasoner.
+
+```{pyodide}
+#| autorun: false
+#| label: load-graph
+base = await load(GRAPH_URL)
+print(f"{len(base)} triples loaded from {GRAPH_URL}")
+```
+[% for q in queries %]
+## Step [[ loop.index + 1 ]] — [[ q.title ]]
+
+[[ q.intro ]]
+
+```{pyodide}
+#| autorun: false
+#| label: query-[[ q.id ]]
+assert "base" in dir(), "Run the 'load-graph' cell first."
+rows = show(base, """
+[[ q.sparql ]]
+""")
+print(f"{len(rows)} rows")
+for r in rows[:15]:
+    print(r)
+```
+[% endfor %]
+## Where this comes from
+
+Every query above is generated from `queries.yaml` in the
+[IPSDatedSites repository](https://github.com/leiza-rse/IPSDatedSites), which
+also produces the [browser query page]([[ qmd.graph_url | replace("bundle.ttl", "sparql.html") ]])
+and the plain `.rq` files. One source, three products, so they cannot drift
+apart — and each query is executed against the real graph at build time, with
+an empty result failing the build.

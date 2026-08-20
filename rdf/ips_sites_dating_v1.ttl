@@ -26,6 +26,7 @@ samian:fig_sites_dating_v1 a lado:Figure ;
         samian:plotrow_1000593_5ced78,
         samian:plotrow_1000737_a532a0,
         samian:plotrow_1000853_e9031f,
+        samian:plotrow_1001015_ed9581,
         samian:plotrow_1001033_079251,
         samian:plotrow_1001099_8d9001,
         samian:plotrow_1001244_54bf01,
@@ -47,8 +48,8 @@ samian:fig_sites_dating_v1 a lado:Figure ;
         samian:plotrow_1003761_063e8c,
         samian:plotrow_1003782_0b86e2,
         samian:plotrow_1003782_78e3f7,
+        samian:plotrow_1003782_8034d4,
         samian:plotrow_1003782_8d9001,
-        samian:plotrow_1003782_9cdfb1,
         samian:plotrow_1003782_c9c8eb,
         samian:plotrow_1003782_d60cc2,
         samian:plotrow_1003870_32f514,
@@ -66,7 +67,7 @@ samian:fig_sites_dating_v1 a lado:Figure ;
     lado:rowHeight 36 ;
     lado:rowOrder "avg_datemin ASC"^^xsd:string ;
     lado:svgWidth 1200 ;
-    dcterms:isPartOf samian:dataset_sites_dating_v1_2026-07-28 .
+    dcterms:isPartOf samian:dataset_sites_dating_v1_2026-08-20 .
 
 samian:fs_1000080_4e9d57 a lado:Findspot ;
     rdfs:label "Pottery Shop II" ;
@@ -121,6 +122,12 @@ samian:fs_1000853_e9031f a lado:Findspot ;
     crm:P4_has_time-span samian:ts_1000853_e9031f ;
     crm:P89_falls_within samian:loc_ds_1000853 ;
     skos:notation "gutter" .
+
+samian:fs_1001015_ed9581 a lado:Findspot ;
+    rdfs:label "rue de l'Equerre" ;
+    crm:P4_has_time-span samian:ts_1001015_ed9581 ;
+    crm:P89_falls_within samian:loc_ds_1001015 ;
+    skos:notation "rue_de_l_equerre" .
 
 samian:fs_1001033_079251 a lado:Findspot ;
     rdfs:label "Hafen" ;
@@ -248,17 +255,17 @@ samian:fs_1003782_78e3f7 a lado:Findspot ;
     crm:P89_falls_within samian:loc_ds_1003782 ;
     skos:notation "boeckleareal_period_ii" .
 
+samian:fs_1003782_8034d4 a lado:Findspot ;
+    rdfs:label "Böckleareal (destruction layer period II)" ;
+    crm:P4_has_time-span samian:ts_1003782_8034d4 ;
+    crm:P89_falls_within samian:loc_ds_1003782 ;
+    skos:notation "boeckleareal_destruction_layer_period_ii" .
+
 samian:fs_1003782_8d9001 a lado:Findspot ;
     rdfs:label "shop" ;
     crm:P4_has_time-span samian:ts_1003782_8d9001 ;
     crm:P89_falls_within samian:loc_ds_1003782 ;
     skos:notation "shop" .
-
-samian:fs_1003782_9cdfb1 a lado:Findspot ;
-    rdfs:label "Böckleareal (descruction layer period II)" ;
-    crm:P4_has_time-span samian:ts_1003782_9cdfb1 ;
-    crm:P89_falls_within samian:loc_ds_1003782 ;
-    skos:notation "boeckleareal_descruction_layer_period_ii" .
 
 samian:fs_1003782_c9c8eb a lado:Findspot ;
     rdfs:label "cellar" ;
@@ -319,9 +326,9 @@ samian:act_dating_1000080_4e9d57 a lado:DatingActivity,
     rdfs:label "Dating of Colchester — Pottery Shop II"@en ;
     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;
     crm:P33_used_specific_technique samian:DatingModel_v1 ;
-    prov:endedAtTime "2026-07-28T15:06:02+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-08-20T09:55:40+00:00"^^xsd:dateTime ;
     prov:used samian:DatingModel_v1,
-        samian:dataset_sites_dating_v1_2026-07-28 ;
+        samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasAssociatedWith samian:IPSDatedSitesExporter .
 
 samian:act_dating_1000080_e4a7d3 a lado:DatingActivity,
@@ -329,9 +336,9 @@ samian:act_dating_1000080_e4a7d3 a lado:DatingActivity,
     rdfs:label "Dating of Colchester — Pottery Shop I"@en ;
     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;
     crm:P33_used_specific_technique samian:DatingModel_v1 ;
-    prov:endedAtTime "2026-07-28T15:06:02+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-08-20T09:55:40+00:00"^^xsd:dateTime ;
     prov:used samian:DatingModel_v1,
-        samian:dataset_sites_dating_v1_2026-07-28 ;
+        samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasAssociatedWith samian:IPSDatedSitesExporter .
 
 samian:act_dating_1000136_32f514 a lado:DatingActivity,
@@ -339,9 +346,9 @@ samian:act_dating_1000136_32f514 a lado:DatingActivity,
     rdfs:label "Dating of London — Second Fire"@en ;
     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;
     crm:P33_used_specific_technique samian:DatingModel_v1 ;
-    prov:endedAtTime "2026-07-28T15:06:02+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-08-20T09:55:40+00:00"^^xsd:dateTime ;
     prov:used samian:DatingModel_v1,
-        samian:dataset_sites_dating_v1_2026-07-28 ;
+        samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasAssociatedWith samian:IPSDatedSitesExporter .
 
 samian:act_dating_1000136_83ac45 a lado:DatingActivity,
@@ -349,9 +356,9 @@ samian:act_dating_1000136_83ac45 a lado:DatingActivity,
     rdfs:label "Dating of London — New Fresh Wharf: quay"@en ;
     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;
     crm:P33_used_specific_technique samian:DatingModel_v1 ;
-    prov:endedAtTime "2026-07-28T15:06:02+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-08-20T09:55:40+00:00"^^xsd:dateTime ;
     prov:used samian:DatingModel_v1,
-        samian:dataset_sites_dating_v1_2026-07-28 ;
+        samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasAssociatedWith samian:IPSDatedSitesExporter .
 
 samian:act_dating_1000442_d9517d a lado:DatingActivity,
@@ -359,9 +366,9 @@ samian:act_dating_1000442_d9517d a lado:DatingActivity,
     rdfs:label "Dating of Berlingen — tumulus"@en ;
     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;
     crm:P33_used_specific_technique samian:DatingModel_v1 ;
-    prov:endedAtTime "2026-07-28T15:06:02+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-08-20T09:55:40+00:00"^^xsd:dateTime ;
     prov:used samian:DatingModel_v1,
-        samian:dataset_sites_dating_v1_2026-07-28 ;
+        samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasAssociatedWith samian:IPSDatedSitesExporter .
 
 samian:act_dating_1000535_d9517d a lado:DatingActivity,
@@ -369,9 +376,9 @@ samian:act_dating_1000535_d9517d a lado:DatingActivity,
     rdfs:label "Dating of Rougham — tumulus"@en ;
     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;
     crm:P33_used_specific_technique samian:DatingModel_v1 ;
-    prov:endedAtTime "2026-07-28T15:06:02+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-08-20T09:55:40+00:00"^^xsd:dateTime ;
     prov:used samian:DatingModel_v1,
-        samian:dataset_sites_dating_v1_2026-07-28 ;
+        samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasAssociatedWith samian:IPSDatedSitesExporter .
 
 samian:act_dating_1000593_5ced78 a lado:DatingActivity,
@@ -379,9 +386,9 @@ samian:act_dating_1000593_5ced78 a lado:DatingActivity,
     rdfs:label "Dating of Cap Drammont — wreck 6"@en ;
     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;
     crm:P33_used_specific_technique samian:DatingModel_v1 ;
-    prov:endedAtTime "2026-07-28T15:06:02+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-08-20T09:55:40+00:00"^^xsd:dateTime ;
     prov:used samian:DatingModel_v1,
-        samian:dataset_sites_dating_v1_2026-07-28 ;
+        samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasAssociatedWith samian:IPSDatedSitesExporter .
 
 samian:act_dating_1000737_a532a0 a lado:DatingActivity,
@@ -389,9 +396,9 @@ samian:act_dating_1000737_a532a0 a lado:DatingActivity,
     rdfs:label "Dating of Saalburg — Erdkastell"@en ;
     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;
     crm:P33_used_specific_technique samian:DatingModel_v1 ;
-    prov:endedAtTime "2026-07-28T15:06:02+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-08-20T09:55:40+00:00"^^xsd:dateTime ;
     prov:used samian:DatingModel_v1,
-        samian:dataset_sites_dating_v1_2026-07-28 ;
+        samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasAssociatedWith samian:IPSDatedSitesExporter .
 
 samian:act_dating_1000853_e9031f a lado:DatingActivity,
@@ -399,9 +406,19 @@ samian:act_dating_1000853_e9031f a lado:DatingActivity,
     rdfs:label "Dating of Wroxeter — gutter"@en ;
     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;
     crm:P33_used_specific_technique samian:DatingModel_v1 ;
-    prov:endedAtTime "2026-07-28T15:06:02+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-08-20T09:55:40+00:00"^^xsd:dateTime ;
     prov:used samian:DatingModel_v1,
-        samian:dataset_sites_dating_v1_2026-07-28 ;
+        samian:dataset_sites_dating_v1_2026-08-20 ;
+    prov:wasAssociatedWith samian:IPSDatedSitesExporter .
+
+samian:act_dating_1001015_ed9581 a lado:DatingActivity,
+        prov:Activity ;
+    rdfs:label "Dating of Reims — rue de l'Equerre"@en ;
+    crm:P14_carried_out_by samian:IPSDatedSitesExporter ;
+    crm:P33_used_specific_technique samian:DatingModel_v1 ;
+    prov:endedAtTime "2026-08-20T09:55:40+00:00"^^xsd:dateTime ;
+    prov:used samian:DatingModel_v1,
+        samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasAssociatedWith samian:IPSDatedSitesExporter .
 
 samian:act_dating_1001033_079251 a lado:DatingActivity,
@@ -409,9 +426,9 @@ samian:act_dating_1001033_079251 a lado:DatingActivity,
     rdfs:label "Dating of Köln — Hafen"@en ;
     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;
     crm:P33_used_specific_technique samian:DatingModel_v1 ;
-    prov:endedAtTime "2026-07-28T15:06:02+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-08-20T09:55:40+00:00"^^xsd:dateTime ;
     prov:used samian:DatingModel_v1,
-        samian:dataset_sites_dating_v1_2026-07-28 ;
+        samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasAssociatedWith samian:IPSDatedSitesExporter .
 
 samian:act_dating_1001099_8d9001 a lado:DatingActivity,
@@ -419,9 +436,9 @@ samian:act_dating_1001099_8d9001 a lado:DatingActivity,
     rdfs:label "Dating of Eschenz — shop"@en ;
     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;
     crm:P33_used_specific_technique samian:DatingModel_v1 ;
-    prov:endedAtTime "2026-07-28T15:06:02+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-08-20T09:55:40+00:00"^^xsd:dateTime ;
     prov:used samian:DatingModel_v1,
-        samian:dataset_sites_dating_v1_2026-07-28 ;
+        samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasAssociatedWith samian:IPSDatedSitesExporter .
 
 samian:act_dating_1001244_54bf01 a lado:DatingActivity,
@@ -429,9 +446,9 @@ samian:act_dating_1001244_54bf01 a lado:DatingActivity,
     rdfs:label "Dating of Basel — Münster, Sch. 3 o"@en ;
     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;
     crm:P33_used_specific_technique samian:DatingModel_v1 ;
-    prov:endedAtTime "2026-07-28T15:06:02+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-08-20T09:55:40+00:00"^^xsd:dateTime ;
     prov:used samian:DatingModel_v1,
-        samian:dataset_sites_dating_v1_2026-07-28 ;
+        samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasAssociatedWith samian:IPSDatedSitesExporter .
 
 samian:act_dating_1001320_520e5d a lado:DatingActivity,
@@ -439,9 +456,9 @@ samian:act_dating_1001320_520e5d a lado:DatingActivity,
     rdfs:label "Dating of La Graufesenque — Fosse Cirratus"@en ;
     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;
     crm:P33_used_specific_technique samian:DatingModel_v1 ;
-    prov:endedAtTime "2026-07-28T15:06:02+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-08-20T09:55:40+00:00"^^xsd:dateTime ;
     prov:used samian:DatingModel_v1,
-        samian:dataset_sites_dating_v1_2026-07-28 ;
+        samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasAssociatedWith samian:IPSDatedSitesExporter .
 
 samian:act_dating_1001320_f64b28 a lado:DatingActivity,
@@ -449,9 +466,9 @@ samian:act_dating_1001320_f64b28 a lado:DatingActivity,
     rdfs:label "Dating of La Graufesenque — Fosse Malaval"@en ;
     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;
     crm:P33_used_specific_technique samian:DatingModel_v1 ;
-    prov:endedAtTime "2026-07-28T15:06:02+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-08-20T09:55:40+00:00"^^xsd:dateTime ;
     prov:used samian:DatingModel_v1,
-        samian:dataset_sites_dating_v1_2026-07-28 ;
+        samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasAssociatedWith samian:IPSDatedSitesExporter .
 
 samian:act_dating_1001764_d7e65e a lado:DatingActivity,
@@ -459,9 +476,9 @@ samian:act_dating_1001764_d7e65e a lado:DatingActivity,
     rdfs:label "Dating of Cirencester — fort ditch"@en ;
     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;
     crm:P33_used_specific_technique samian:DatingModel_v1 ;
-    prov:endedAtTime "2026-07-28T15:06:02+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-08-20T09:55:40+00:00"^^xsd:dateTime ;
     prov:used samian:DatingModel_v1,
-        samian:dataset_sites_dating_v1_2026-07-28 ;
+        samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasAssociatedWith samian:IPSDatedSitesExporter .
 
 samian:act_dating_1002124_2c219b a lado:DatingActivity,
@@ -469,9 +486,9 @@ samian:act_dating_1002124_2c219b a lado:DatingActivity,
     rdfs:label "Dating of Vindonissa — Keltengraben"@en ;
     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;
     crm:P33_used_specific_technique samian:DatingModel_v1 ;
-    prov:endedAtTime "2026-07-28T15:06:02+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-08-20T09:55:40+00:00"^^xsd:dateTime ;
     prov:used samian:DatingModel_v1,
-        samian:dataset_sites_dating_v1_2026-07-28 ;
+        samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasAssociatedWith samian:IPSDatedSitesExporter .
 
 samian:act_dating_1002124_bd7039 a lado:DatingActivity,
@@ -479,9 +496,9 @@ samian:act_dating_1002124_bd7039 a lado:DatingActivity,
     rdfs:label "Dating of Vindonissa — Depotfund"@en ;
     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;
     crm:P33_used_specific_technique samian:DatingModel_v1 ;
-    prov:endedAtTime "2026-07-28T15:06:02+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-08-20T09:55:40+00:00"^^xsd:dateTime ;
     prov:used samian:DatingModel_v1,
-        samian:dataset_sites_dating_v1_2026-07-28 ;
+        samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasAssociatedWith samian:IPSDatedSitesExporter .
 
 samian:act_dating_1002381_297861 a lado:DatingActivity,
@@ -489,9 +506,9 @@ samian:act_dating_1002381_297861 a lado:DatingActivity,
     rdfs:label "Dating of Burghöfe — Geschirrdepot"@en ;
     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;
     crm:P33_used_specific_technique samian:DatingModel_v1 ;
-    prov:endedAtTime "2026-07-28T15:06:02+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-08-20T09:55:40+00:00"^^xsd:dateTime ;
     prov:used samian:DatingModel_v1,
-        samian:dataset_sites_dating_v1_2026-07-28 ;
+        samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasAssociatedWith samian:IPSDatedSitesExporter .
 
 samian:act_dating_1002387_d9517d a lado:DatingActivity,
@@ -499,9 +516,9 @@ samian:act_dating_1002387_d9517d a lado:DatingActivity,
     rdfs:label "Dating of Helsoven — tumulus"@en ;
     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;
     crm:P33_used_specific_technique samian:DatingModel_v1 ;
-    prov:endedAtTime "2026-07-28T15:06:02+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-08-20T09:55:40+00:00"^^xsd:dateTime ;
     prov:used samian:DatingModel_v1,
-        samian:dataset_sites_dating_v1_2026-07-28 ;
+        samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasAssociatedWith samian:IPSDatedSitesExporter .
 
 samian:act_dating_1002513_2a2274 a lado:DatingActivity,
@@ -509,9 +526,9 @@ samian:act_dating_1002513_2a2274 a lado:DatingActivity,
     rdfs:label "Dating of Castleford — Pottery Shop"@en ;
     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;
     crm:P33_used_specific_technique samian:DatingModel_v1 ;
-    prov:endedAtTime "2026-07-28T15:06:02+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-08-20T09:55:40+00:00"^^xsd:dateTime ;
     prov:used samian:DatingModel_v1,
-        samian:dataset_sites_dating_v1_2026-07-28 ;
+        samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasAssociatedWith samian:IPSDatedSitesExporter .
 
 samian:act_dating_1002611_c2e54a a lado:DatingActivity,
@@ -519,9 +536,9 @@ samian:act_dating_1002611_c2e54a a lado:DatingActivity,
     rdfs:label "Dating of Oberaden — Military camp"@en ;
     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;
     crm:P33_used_specific_technique samian:DatingModel_v1 ;
-    prov:endedAtTime "2026-07-28T15:06:02+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-08-20T09:55:40+00:00"^^xsd:dateTime ;
     prov:used samian:DatingModel_v1,
-        samian:dataset_sites_dating_v1_2026-07-28 ;
+        samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasAssociatedWith samian:IPSDatedSitesExporter .
 
 samian:act_dating_1003076_824d80 a lado:DatingActivity,
@@ -529,9 +546,9 @@ samian:act_dating_1003076_824d80 a lado:DatingActivity,
     rdfs:label "Dating of Langenhain — store"@en ;
     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;
     crm:P33_used_specific_technique samian:DatingModel_v1 ;
-    prov:endedAtTime "2026-07-28T15:06:02+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-08-20T09:55:40+00:00"^^xsd:dateTime ;
     prov:used samian:DatingModel_v1,
-        samian:dataset_sites_dating_v1_2026-07-28 ;
+        samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasAssociatedWith samian:IPSDatedSitesExporter .
 
 samian:act_dating_1003365_0ca5ad a lado:DatingActivity,
@@ -539,9 +556,9 @@ samian:act_dating_1003365_0ca5ad a lado:DatingActivity,
     rdfs:label "Dating of Budapest — Aquincum, Hoard"@en ;
     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;
     crm:P33_used_specific_technique samian:DatingModel_v1 ;
-    prov:endedAtTime "2026-07-28T15:06:02+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-08-20T09:55:40+00:00"^^xsd:dateTime ;
     prov:used samian:DatingModel_v1,
-        samian:dataset_sites_dating_v1_2026-07-28 ;
+        samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasAssociatedWith samian:IPSDatedSitesExporter .
 
 samian:act_dating_1003421_a3fecc a lado:DatingActivity,
@@ -549,9 +566,9 @@ samian:act_dating_1003421_a3fecc a lado:DatingActivity,
     rdfs:label "Dating of Velsen — Velsen I"@en ;
     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;
     crm:P33_used_specific_technique samian:DatingModel_v1 ;
-    prov:endedAtTime "2026-07-28T15:06:02+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-08-20T09:55:40+00:00"^^xsd:dateTime ;
     prov:used samian:DatingModel_v1,
-        samian:dataset_sites_dating_v1_2026-07-28 ;
+        samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasAssociatedWith samian:IPSDatedSitesExporter .
 
 samian:act_dating_1003470_accf90 a lado:DatingActivity,
@@ -559,9 +576,9 @@ samian:act_dating_1003470_accf90 a lado:DatingActivity,
     rdfs:label "Dating of Chesterholm-Vindolanda — Per.1 Ditch"@en ;
     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;
     crm:P33_used_specific_technique samian:DatingModel_v1 ;
-    prov:endedAtTime "2026-07-28T15:06:02+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-08-20T09:55:40+00:00"^^xsd:dateTime ;
     prov:used samian:DatingModel_v1,
-        samian:dataset_sites_dating_v1_2026-07-28 ;
+        samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasAssociatedWith samian:IPSDatedSitesExporter .
 
 samian:act_dating_1003524_dd3cae a lado:DatingActivity,
@@ -569,9 +586,9 @@ samian:act_dating_1003524_dd3cae a lado:DatingActivity,
     rdfs:label "Dating of Inchtuthil — Gutter"@en ;
     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;
     crm:P33_used_specific_technique samian:DatingModel_v1 ;
-    prov:endedAtTime "2026-07-28T15:06:02+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-08-20T09:55:40+00:00"^^xsd:dateTime ;
     prov:used samian:DatingModel_v1,
-        samian:dataset_sites_dating_v1_2026-07-28 ;
+        samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasAssociatedWith samian:IPSDatedSitesExporter .
 
 samian:act_dating_1003531_5b6bc5 a lado:DatingActivity,
@@ -579,9 +596,9 @@ samian:act_dating_1003531_5b6bc5 a lado:DatingActivity,
     rdfs:label "Dating of Nijmegen — Barbarossastraat"@en ;
     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;
     crm:P33_used_specific_technique samian:DatingModel_v1 ;
-    prov:endedAtTime "2026-07-28T15:06:02+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-08-20T09:55:40+00:00"^^xsd:dateTime ;
     prov:used samian:DatingModel_v1,
-        samian:dataset_sites_dating_v1_2026-07-28 ;
+        samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasAssociatedWith samian:IPSDatedSitesExporter .
 
 samian:act_dating_1003761_063e8c a lado:DatingActivity,
@@ -589,9 +606,9 @@ samian:act_dating_1003761_063e8c a lado:DatingActivity,
     rdfs:label "Dating of Mainz — Emmeranstraße"@en ;
     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;
     crm:P33_used_specific_technique samian:DatingModel_v1 ;
-    prov:endedAtTime "2026-07-28T15:06:02+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-08-20T09:55:40+00:00"^^xsd:dateTime ;
     prov:used samian:DatingModel_v1,
-        samian:dataset_sites_dating_v1_2026-07-28 ;
+        samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasAssociatedWith samian:IPSDatedSitesExporter .
 
 samian:act_dating_1003782_0b86e2 a lado:DatingActivity,
@@ -599,9 +616,9 @@ samian:act_dating_1003782_0b86e2 a lado:DatingActivity,
     rdfs:label "Dating of Bregenz — Samian Hoard 1913"@en ;
     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;
     crm:P33_used_specific_technique samian:DatingModel_v1 ;
-    prov:endedAtTime "2026-07-28T15:06:02+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-08-20T09:55:40+00:00"^^xsd:dateTime ;
     prov:used samian:DatingModel_v1,
-        samian:dataset_sites_dating_v1_2026-07-28 ;
+        samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasAssociatedWith samian:IPSDatedSitesExporter .
 
 samian:act_dating_1003782_78e3f7 a lado:DatingActivity,
@@ -609,9 +626,19 @@ samian:act_dating_1003782_78e3f7 a lado:DatingActivity,
     rdfs:label "Dating of Bregenz — Böckleareal (period II)"@en ;
     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;
     crm:P33_used_specific_technique samian:DatingModel_v1 ;
-    prov:endedAtTime "2026-07-28T15:06:02+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-08-20T09:55:40+00:00"^^xsd:dateTime ;
     prov:used samian:DatingModel_v1,
-        samian:dataset_sites_dating_v1_2026-07-28 ;
+        samian:dataset_sites_dating_v1_2026-08-20 ;
+    prov:wasAssociatedWith samian:IPSDatedSitesExporter .
+
+samian:act_dating_1003782_8034d4 a lado:DatingActivity,
+        prov:Activity ;
+    rdfs:label "Dating of Bregenz — Böckleareal (destruction layer period II)"@en ;
+    crm:P14_carried_out_by samian:IPSDatedSitesExporter ;
+    crm:P33_used_specific_technique samian:DatingModel_v1 ;
+    prov:endedAtTime "2026-08-20T09:55:40+00:00"^^xsd:dateTime ;
+    prov:used samian:DatingModel_v1,
+        samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasAssociatedWith samian:IPSDatedSitesExporter .
 
 samian:act_dating_1003782_8d9001 a lado:DatingActivity,
@@ -619,19 +646,9 @@ samian:act_dating_1003782_8d9001 a lado:DatingActivity,
     rdfs:label "Dating of Bregenz — shop"@en ;
     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;
     crm:P33_used_specific_technique samian:DatingModel_v1 ;
-    prov:endedAtTime "2026-07-28T15:06:02+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-08-20T09:55:40+00:00"^^xsd:dateTime ;
     prov:used samian:DatingModel_v1,
-        samian:dataset_sites_dating_v1_2026-07-28 ;
-    prov:wasAssociatedWith samian:IPSDatedSitesExporter .
-
-samian:act_dating_1003782_9cdfb1 a lado:DatingActivity,
-        prov:Activity ;
-    rdfs:label "Dating of Bregenz — Böckleareal (descruction layer period II)"@en ;
-    crm:P14_carried_out_by samian:IPSDatedSitesExporter ;
-    crm:P33_used_specific_technique samian:DatingModel_v1 ;
-    prov:endedAtTime "2026-07-28T15:06:02+00:00"^^xsd:dateTime ;
-    prov:used samian:DatingModel_v1,
-        samian:dataset_sites_dating_v1_2026-07-28 ;
+        samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasAssociatedWith samian:IPSDatedSitesExporter .
 
 samian:act_dating_1003782_c9c8eb a lado:DatingActivity,
@@ -639,9 +656,9 @@ samian:act_dating_1003782_c9c8eb a lado:DatingActivity,
     rdfs:label "Dating of Bregenz — cellar"@en ;
     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;
     crm:P33_used_specific_technique samian:DatingModel_v1 ;
-    prov:endedAtTime "2026-07-28T15:06:02+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-08-20T09:55:40+00:00"^^xsd:dateTime ;
     prov:used samian:DatingModel_v1,
-        samian:dataset_sites_dating_v1_2026-07-28 ;
+        samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasAssociatedWith samian:IPSDatedSitesExporter .
 
 samian:act_dating_1003782_d60cc2 a lado:DatingActivity,
@@ -649,9 +666,9 @@ samian:act_dating_1003782_d60cc2 a lado:DatingActivity,
     rdfs:label "Dating of Bregenz — Böckleareal (period I)"@en ;
     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;
     crm:P33_used_specific_technique samian:DatingModel_v1 ;
-    prov:endedAtTime "2026-07-28T15:06:02+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-08-20T09:55:40+00:00"^^xsd:dateTime ;
     prov:used samian:DatingModel_v1,
-        samian:dataset_sites_dating_v1_2026-07-28 ;
+        samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasAssociatedWith samian:IPSDatedSitesExporter .
 
 samian:act_dating_1003870_32f514 a lado:DatingActivity,
@@ -659,9 +676,9 @@ samian:act_dating_1003870_32f514 a lado:DatingActivity,
     rdfs:label "Dating of Verulamium — Second Fire"@en ;
     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;
     crm:P33_used_specific_technique samian:DatingModel_v1 ;
-    prov:endedAtTime "2026-07-28T15:06:02+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-08-20T09:55:40+00:00"^^xsd:dateTime ;
     prov:used samian:DatingModel_v1,
-        samian:dataset_sites_dating_v1_2026-07-28 ;
+        samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasAssociatedWith samian:IPSDatedSitesExporter .
 
 samian:act_dating_1003896_fd8115 a lado:DatingActivity,
@@ -669,9 +686,9 @@ samian:act_dating_1003896_fd8115 a lado:DatingActivity,
     rdfs:label "Dating of Alcester — Pit"@en ;
     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;
     crm:P33_used_specific_technique samian:DatingModel_v1 ;
-    prov:endedAtTime "2026-07-28T15:06:02+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-08-20T09:55:40+00:00"^^xsd:dateTime ;
     prov:used samian:DatingModel_v1,
-        samian:dataset_sites_dating_v1_2026-07-28 ;
+        samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasAssociatedWith samian:IPSDatedSitesExporter .
 
 samian:act_dating_1003977_c4e861 a lado:DatingActivity,
@@ -679,9 +696,9 @@ samian:act_dating_1003977_c4e861 a lado:DatingActivity,
     rdfs:label "Dating of Pompeii — Hoard"@en ;
     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;
     crm:P33_used_specific_technique samian:DatingModel_v1 ;
-    prov:endedAtTime "2026-07-28T15:06:02+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-08-20T09:55:40+00:00"^^xsd:dateTime ;
     prov:used samian:DatingModel_v1,
-        samian:dataset_sites_dating_v1_2026-07-28 ;
+        samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasAssociatedWith samian:IPSDatedSitesExporter .
 
 samian:act_dating_1003978_969c47 a lado:DatingActivity,
@@ -689,9 +706,9 @@ samian:act_dating_1003978_969c47 a lado:DatingActivity,
     rdfs:label "Dating of Amiens — Sq. Bocquet pit 1973"@en ;
     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;
     crm:P33_used_specific_technique samian:DatingModel_v1 ;
-    prov:endedAtTime "2026-07-28T15:06:02+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-08-20T09:55:40+00:00"^^xsd:dateTime ;
     prov:used samian:DatingModel_v1,
-        samian:dataset_sites_dating_v1_2026-07-28 ;
+        samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasAssociatedWith samian:IPSDatedSitesExporter .
 
 samian:act_dating_1004149_402b80 a lado:DatingActivity,
@@ -699,9 +716,9 @@ samian:act_dating_1004149_402b80 a lado:DatingActivity,
     rdfs:label "Dating of Narbonne — les ports (La Nautique)"@en ;
     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;
     crm:P33_used_specific_technique samian:DatingModel_v1 ;
-    prov:endedAtTime "2026-07-28T15:06:02+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-08-20T09:55:40+00:00"^^xsd:dateTime ;
     prov:used samian:DatingModel_v1,
-        samian:dataset_sites_dating_v1_2026-07-28 ;
+        samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasAssociatedWith samian:IPSDatedSitesExporter .
 
 samian:act_dating_1004241_cc131f a lado:DatingActivity,
@@ -709,9 +726,9 @@ samian:act_dating_1004241_cc131f a lado:DatingActivity,
     rdfs:label "Dating of Cap de Creus — Cala Culip IV"@en ;
     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;
     crm:P33_used_specific_technique samian:DatingModel_v1 ;
-    prov:endedAtTime "2026-07-28T15:06:02+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-08-20T09:55:40+00:00"^^xsd:dateTime ;
     prov:used samian:DatingModel_v1,
-        samian:dataset_sites_dating_v1_2026-07-28 ;
+        samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasAssociatedWith samian:IPSDatedSitesExporter .
 
 samian:act_dating_1004709_ed615d a lado:DatingActivity,
@@ -719,9 +736,9 @@ samian:act_dating_1004709_ed615d a lado:DatingActivity,
     rdfs:label "Dating of Pecio del Guadiaro — Shipwreck"@en ;
     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;
     crm:P33_used_specific_technique samian:DatingModel_v1 ;
-    prov:endedAtTime "2026-07-28T15:06:02+00:00"^^xsd:dateTime ;
+    prov:endedAtTime "2026-08-20T09:55:40+00:00"^^xsd:dateTime ;
     prov:used samian:DatingModel_v1,
-        samian:dataset_sites_dating_v1_2026-07-28 ;
+        samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasAssociatedWith samian:IPSDatedSitesExporter .
 
 samian:loc_ds_1000442 rdfs:label "Berlingen"@en .
@@ -734,6 +751,9 @@ samian:loc_ds_1000737 rdfs:label "Saalburg"@en ;
     lado:pleiadesID pleiades:109297 .
 
 samian:loc_ds_1000853 rdfs:label "Wroxeter"@en .
+
+samian:loc_ds_1001015 rdfs:label "Reims"@en ;
+    lado:ancientName "Durocortorum" .
 
 samian:loc_ds_1001033 rdfs:label "Köln"@en ;
     lado:ancientName "Colonia Claudia Ara Agrippinensium" ;
@@ -855,6 +875,12 @@ samian:plotrow_1000853_e9031f a lado:PlotRow ;
     lado:uncEndYears 11 ;
     lado:uncIntervalYears 14 ;
     lado:uncStartYears 9 .
+
+samian:plotrow_1001015_ed9581 a lado:PlotRow ;
+    lado:renders samian:ts_1001015_ed9581 ;
+    lado:uncEndYears 9 ;
+    lado:uncIntervalYears 14 ;
+    lado:uncStartYears 10 .
 
 samian:plotrow_1001033_079251 a lado:PlotRow ;
     lado:renders samian:ts_1001033_079251 ;
@@ -982,17 +1008,17 @@ samian:plotrow_1003782_78e3f7 a lado:PlotRow ;
     lado:uncIntervalYears 17 ;
     lado:uncStartYears 12 .
 
+samian:plotrow_1003782_8034d4 a lado:PlotRow ;
+    lado:renders samian:ts_1003782_8034d4 ;
+    lado:uncEndYears 9 ;
+    lado:uncIntervalYears 12 ;
+    lado:uncStartYears 9 .
+
 samian:plotrow_1003782_8d9001 a lado:PlotRow ;
     lado:renders samian:ts_1003782_8d9001 ;
     lado:uncEndYears 12 ;
     lado:uncIntervalYears 16 ;
     lado:uncStartYears 11 .
-
-samian:plotrow_1003782_9cdfb1 a lado:PlotRow ;
-    lado:renders samian:ts_1003782_9cdfb1 ;
-    lado:uncEndYears 9 ;
-    lado:uncIntervalYears 12 ;
-    lado:uncStartYears 9 .
 
 samian:plotrow_1003782_c9c8eb a lado:PlotRow ;
     lado:renders samian:ts_1003782_c9c8eb ;
@@ -1227,6 +1253,26 @@ samian:ts_1000853_e9031f_end_pos a lado:DatingTimePosition,
         time:TimePosition ;
     time:hasTRS samian:trs_ips_year ;
     time:numericPosition 187.0 .
+
+samian:ts_1001015_ed9581_begin a lado:DatingInstant,
+        time:Instant ;
+    time:inTimePosition samian:ts_1001015_ed9581_begin_pos ;
+    time:inXSDgYear "0058"^^xsd:gYear .
+
+samian:ts_1001015_ed9581_begin_pos a lado:DatingTimePosition,
+        time:TimePosition ;
+    time:hasTRS samian:trs_ips_year ;
+    time:numericPosition 58.2 .
+
+samian:ts_1001015_ed9581_end a lado:DatingInstant,
+        time:Instant ;
+    time:inTimePosition samian:ts_1001015_ed9581_end_pos ;
+    time:inXSDgYear "0082"^^xsd:gYear .
+
+samian:ts_1001015_ed9581_end_pos a lado:DatingTimePosition,
+        time:TimePosition ;
+    time:hasTRS samian:trs_ips_year ;
+    time:numericPosition 81.8 .
 
 samian:ts_1001033_079251_begin a lado:DatingInstant,
         time:Instant ;
@@ -1648,6 +1694,26 @@ samian:ts_1003782_78e3f7_end_pos a lado:DatingTimePosition,
     time:hasTRS samian:trs_ips_year ;
     time:numericPosition 74.6 .
 
+samian:ts_1003782_8034d4_begin a lado:DatingInstant,
+        time:Instant ;
+    time:inTimePosition samian:ts_1003782_8034d4_begin_pos ;
+    time:inXSDgYear "0046"^^xsd:gYear .
+
+samian:ts_1003782_8034d4_begin_pos a lado:DatingTimePosition,
+        time:TimePosition ;
+    time:hasTRS samian:trs_ips_year ;
+    time:numericPosition 45.5 .
+
+samian:ts_1003782_8034d4_end a lado:DatingInstant,
+        time:Instant ;
+    time:inTimePosition samian:ts_1003782_8034d4_end_pos ;
+    time:inXSDgYear "0070"^^xsd:gYear .
+
+samian:ts_1003782_8034d4_end_pos a lado:DatingTimePosition,
+        time:TimePosition ;
+    time:hasTRS samian:trs_ips_year ;
+    time:numericPosition 70.0 .
+
 samian:ts_1003782_8d9001_begin a lado:DatingInstant,
         time:Instant ;
     time:inTimePosition samian:ts_1003782_8d9001_begin_pos ;
@@ -1667,26 +1733,6 @@ samian:ts_1003782_8d9001_end_pos a lado:DatingTimePosition,
         time:TimePosition ;
     time:hasTRS samian:trs_ips_year ;
     time:numericPosition 158.9 .
-
-samian:ts_1003782_9cdfb1_begin a lado:DatingInstant,
-        time:Instant ;
-    time:inTimePosition samian:ts_1003782_9cdfb1_begin_pos ;
-    time:inXSDgYear "0046"^^xsd:gYear .
-
-samian:ts_1003782_9cdfb1_begin_pos a lado:DatingTimePosition,
-        time:TimePosition ;
-    time:hasTRS samian:trs_ips_year ;
-    time:numericPosition 45.5 .
-
-samian:ts_1003782_9cdfb1_end a lado:DatingInstant,
-        time:Instant ;
-    time:inTimePosition samian:ts_1003782_9cdfb1_end_pos ;
-    time:inXSDgYear "0070"^^xsd:gYear .
-
-samian:ts_1003782_9cdfb1_end_pos a lado:DatingTimePosition,
-        time:TimePosition ;
-    time:hasTRS samian:trs_ips_year ;
-    time:numericPosition 70.0 .
 
 samian:ts_1003782_c9c8eb_begin a lado:DatingInstant,
         time:Instant ;
@@ -1906,7 +1952,7 @@ samian:ts_1000080_4e9d57 a lado:FindspotDating ;
     crm:P82b_end_of_the_end "0070"^^xsd:gYear ;
     time:hasBeginning samian:ts_1000080_4e9d57_begin ;
     time:hasEnd samian:ts_1000080_4e9d57_end ;
-    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-28 ;
+    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasGeneratedBy samian:act_dating_1000080_4e9d57 .
 
 samian:ts_1000080_e4a7d3 a lado:FindspotDating ;
@@ -1934,7 +1980,7 @@ samian:ts_1000080_e4a7d3 a lado:FindspotDating ;
     crm:P82b_end_of_the_end "0069"^^xsd:gYear ;
     time:hasBeginning samian:ts_1000080_e4a7d3_begin ;
     time:hasEnd samian:ts_1000080_e4a7d3_end ;
-    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-28 ;
+    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasGeneratedBy samian:act_dating_1000080_e4a7d3 .
 
 samian:ts_1000136_32f514 a lado:FindspotDating ;
@@ -1962,7 +2008,7 @@ samian:ts_1000136_32f514 a lado:FindspotDating ;
     crm:P82b_end_of_the_end "0124"^^xsd:gYear ;
     time:hasBeginning samian:ts_1000136_32f514_begin ;
     time:hasEnd samian:ts_1000136_32f514_end ;
-    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-28 ;
+    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasGeneratedBy samian:act_dating_1000136_32f514 .
 
 samian:ts_1000136_83ac45 a lado:FindspotDating ;
@@ -1990,7 +2036,7 @@ samian:ts_1000136_83ac45 a lado:FindspotDating ;
     crm:P82b_end_of_the_end "0192"^^xsd:gYear ;
     time:hasBeginning samian:ts_1000136_83ac45_begin ;
     time:hasEnd samian:ts_1000136_83ac45_end ;
-    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-28 ;
+    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasGeneratedBy samian:act_dating_1000136_83ac45 .
 
 samian:ts_1000442_d9517d a lado:FindspotDating ;
@@ -2018,7 +2064,7 @@ samian:ts_1000442_d9517d a lado:FindspotDating ;
     crm:P82b_end_of_the_end "0081"^^xsd:gYear ;
     time:hasBeginning samian:ts_1000442_d9517d_begin ;
     time:hasEnd samian:ts_1000442_d9517d_end ;
-    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-28 ;
+    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasGeneratedBy samian:act_dating_1000442_d9517d .
 
 samian:ts_1000535_d9517d a lado:FindspotDating ;
@@ -2046,7 +2092,7 @@ samian:ts_1000535_d9517d a lado:FindspotDating ;
     crm:P82b_end_of_the_end "0175"^^xsd:gYear ;
     time:hasBeginning samian:ts_1000535_d9517d_begin ;
     time:hasEnd samian:ts_1000535_d9517d_end ;
-    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-28 ;
+    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasGeneratedBy samian:act_dating_1000535_d9517d .
 
 samian:ts_1000593_5ced78 a lado:FindspotDating ;
@@ -2074,7 +2120,7 @@ samian:ts_1000593_5ced78 a lado:FindspotDating ;
     crm:P82b_end_of_the_end "0074"^^xsd:gYear ;
     time:hasBeginning samian:ts_1000593_5ced78_begin ;
     time:hasEnd samian:ts_1000593_5ced78_end ;
-    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-28 ;
+    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasGeneratedBy samian:act_dating_1000593_5ced78 .
 
 samian:ts_1000737_a532a0 a lado:FindspotDating ;
@@ -2102,7 +2148,7 @@ samian:ts_1000737_a532a0 a lado:FindspotDating ;
     crm:P82b_end_of_the_end "0147"^^xsd:gYear ;
     time:hasBeginning samian:ts_1000737_a532a0_begin ;
     time:hasEnd samian:ts_1000737_a532a0_end ;
-    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-28 ;
+    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasGeneratedBy samian:act_dating_1000737_a532a0 .
 
 samian:ts_1000853_e9031f a lado:FindspotDating ;
@@ -2130,8 +2176,36 @@ samian:ts_1000853_e9031f a lado:FindspotDating ;
     crm:P82b_end_of_the_end "0187"^^xsd:gYear ;
     time:hasBeginning samian:ts_1000853_e9031f_begin ;
     time:hasEnd samian:ts_1000853_e9031f_end ;
-    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-28 ;
+    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasGeneratedBy samian:act_dating_1000853_e9031f .
+
+samian:ts_1001015_ed9581 a lado:FindspotDating ;
+    rdfs:label "Reims — rue de l'Equerre: 58 to 82"@en ;
+    lado:avgDatemax 84 ;
+    lado:avgDatemin 56 ;
+    lado:dieRepetition 1.0 ;
+    lado:intervalLabel "56 to 84" ;
+    lado:kFactor 0.9493 ;
+    lado:kIsFallback false ;
+    lado:maxDatemax 100 ;
+    lado:maxDatemin 70 ;
+    lado:midpointYear 70.0 ;
+    lado:minDatemax 70 ;
+    lado:minDatemin 40 ;
+    lado:nDies 16 ;
+    lado:nStamps 16 ;
+    lado:nStampsWithDie 16 ;
+    lado:qEnd 0.646 ;
+    lado:qInterval 0.622 ;
+    lado:qRepetition 0.0 ;
+    lado:qStart 0.592 ;
+    lado:sigmaYears 12.412 ;
+    crm:P82a_begin_of_the_begin "0058"^^xsd:gYear ;
+    crm:P82b_end_of_the_end "0082"^^xsd:gYear ;
+    time:hasBeginning samian:ts_1001015_ed9581_begin ;
+    time:hasEnd samian:ts_1001015_ed9581_end ;
+    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-08-20 ;
+    prov:wasGeneratedBy samian:act_dating_1001015_ed9581 .
 
 samian:ts_1001033_079251 a lado:FindspotDating ;
     rdfs:label "Köln — Hafen: 74 to 85"@en ;
@@ -2158,7 +2232,7 @@ samian:ts_1001033_079251 a lado:FindspotDating ;
     crm:P82b_end_of_the_end "0085"^^xsd:gYear ;
     time:hasBeginning samian:ts_1001033_079251_begin ;
     time:hasEnd samian:ts_1001033_079251_end ;
-    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-28 ;
+    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasGeneratedBy samian:act_dating_1001033_079251 .
 
 samian:ts_1001099_8d9001 a lado:FindspotDating ;
@@ -2186,7 +2260,7 @@ samian:ts_1001099_8d9001 a lado:FindspotDating ;
     crm:P82b_end_of_the_end "0186"^^xsd:gYear ;
     time:hasBeginning samian:ts_1001099_8d9001_begin ;
     time:hasEnd samian:ts_1001099_8d9001_end ;
-    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-28 ;
+    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasGeneratedBy samian:act_dating_1001099_8d9001 .
 
 samian:ts_1001244_54bf01 a lado:FindspotDating ;
@@ -2214,7 +2288,7 @@ samian:ts_1001244_54bf01 a lado:FindspotDating ;
     crm:P82b_end_of_the_end "0007"^^xsd:gYear ;
     time:hasBeginning samian:ts_1001244_54bf01_begin ;
     time:hasEnd samian:ts_1001244_54bf01_end ;
-    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-28 ;
+    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasGeneratedBy samian:act_dating_1001244_54bf01 .
 
 samian:ts_1001320_520e5d a lado:FindspotDating ;
@@ -2242,7 +2316,7 @@ samian:ts_1001320_520e5d a lado:FindspotDating ;
     crm:P82b_end_of_the_end "0040"^^xsd:gYear ;
     time:hasBeginning samian:ts_1001320_520e5d_begin ;
     time:hasEnd samian:ts_1001320_520e5d_end ;
-    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-28 ;
+    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasGeneratedBy samian:act_dating_1001320_520e5d .
 
 samian:ts_1001320_f64b28 a lado:FindspotDating ;
@@ -2270,7 +2344,7 @@ samian:ts_1001320_f64b28 a lado:FindspotDating ;
     crm:P82b_end_of_the_end "0055"^^xsd:gYear ;
     time:hasBeginning samian:ts_1001320_f64b28_begin ;
     time:hasEnd samian:ts_1001320_f64b28_end ;
-    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-28 ;
+    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasGeneratedBy samian:act_dating_1001320_f64b28 .
 
 samian:ts_1001764_d7e65e a lado:FindspotDating ;
@@ -2298,7 +2372,7 @@ samian:ts_1001764_d7e65e a lado:FindspotDating ;
     crm:P82b_end_of_the_end "0063"^^xsd:gYear ;
     time:hasBeginning samian:ts_1001764_d7e65e_begin ;
     time:hasEnd samian:ts_1001764_d7e65e_end ;
-    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-28 ;
+    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasGeneratedBy samian:act_dating_1001764_d7e65e .
 
 samian:ts_1002124_2c219b a lado:FindspotDating ;
@@ -2326,7 +2400,7 @@ samian:ts_1002124_2c219b a lado:FindspotDating ;
     crm:P82b_end_of_the_end "0016"^^xsd:gYear ;
     time:hasBeginning samian:ts_1002124_2c219b_begin ;
     time:hasEnd samian:ts_1002124_2c219b_end ;
-    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-28 ;
+    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasGeneratedBy samian:act_dating_1002124_2c219b .
 
 samian:ts_1002124_bd7039 a lado:FindspotDating ;
@@ -2354,7 +2428,7 @@ samian:ts_1002124_bd7039 a lado:FindspotDating ;
     crm:P82b_end_of_the_end "0040"^^xsd:gYear ;
     time:hasBeginning samian:ts_1002124_bd7039_begin ;
     time:hasEnd samian:ts_1002124_bd7039_end ;
-    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-28 ;
+    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasGeneratedBy samian:act_dating_1002124_bd7039 .
 
 samian:ts_1002381_297861 a lado:FindspotDating ;
@@ -2382,7 +2456,7 @@ samian:ts_1002381_297861 a lado:FindspotDating ;
     crm:P82b_end_of_the_end "0086"^^xsd:gYear ;
     time:hasBeginning samian:ts_1002381_297861_begin ;
     time:hasEnd samian:ts_1002381_297861_end ;
-    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-28 ;
+    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasGeneratedBy samian:act_dating_1002381_297861 .
 
 samian:ts_1002387_d9517d a lado:FindspotDating ;
@@ -2410,7 +2484,7 @@ samian:ts_1002387_d9517d a lado:FindspotDating ;
     crm:P82b_end_of_the_end "0164"^^xsd:gYear ;
     time:hasBeginning samian:ts_1002387_d9517d_begin ;
     time:hasEnd samian:ts_1002387_d9517d_end ;
-    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-28 ;
+    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasGeneratedBy samian:act_dating_1002387_d9517d .
 
 samian:ts_1002513_2a2274 a lado:FindspotDating ;
@@ -2438,7 +2512,7 @@ samian:ts_1002513_2a2274 a lado:FindspotDating ;
     crm:P82b_end_of_the_end "0151"^^xsd:gYear ;
     time:hasBeginning samian:ts_1002513_2a2274_begin ;
     time:hasEnd samian:ts_1002513_2a2274_end ;
-    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-28 ;
+    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasGeneratedBy samian:act_dating_1002513_2a2274 .
 
 samian:ts_1002611_c2e54a a lado:FindspotDating ;
@@ -2466,7 +2540,7 @@ samian:ts_1002611_c2e54a a lado:FindspotDating ;
     crm:P82b_end_of_the_end "0000"^^xsd:gYear ;
     time:hasBeginning samian:ts_1002611_c2e54a_begin ;
     time:hasEnd samian:ts_1002611_c2e54a_end ;
-    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-28 ;
+    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasGeneratedBy samian:act_dating_1002611_c2e54a .
 
 samian:ts_1003076_824d80 a lado:FindspotDating ;
@@ -2494,7 +2568,7 @@ samian:ts_1003076_824d80 a lado:FindspotDating ;
     crm:P82b_end_of_the_end "0235"^^xsd:gYear ;
     time:hasBeginning samian:ts_1003076_824d80_begin ;
     time:hasEnd samian:ts_1003076_824d80_end ;
-    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-28 ;
+    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasGeneratedBy samian:act_dating_1003076_824d80 .
 
 samian:ts_1003365_0ca5ad a lado:FindspotDating ;
@@ -2522,7 +2596,7 @@ samian:ts_1003365_0ca5ad a lado:FindspotDating ;
     crm:P82b_end_of_the_end "0175"^^xsd:gYear ;
     time:hasBeginning samian:ts_1003365_0ca5ad_begin ;
     time:hasEnd samian:ts_1003365_0ca5ad_end ;
-    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-28 ;
+    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasGeneratedBy samian:act_dating_1003365_0ca5ad .
 
 samian:ts_1003421_a3fecc a lado:FindspotDating ;
@@ -2550,7 +2624,7 @@ samian:ts_1003421_a3fecc a lado:FindspotDating ;
     crm:P82b_end_of_the_end "0034"^^xsd:gYear ;
     time:hasBeginning samian:ts_1003421_a3fecc_begin ;
     time:hasEnd samian:ts_1003421_a3fecc_end ;
-    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-28 ;
+    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasGeneratedBy samian:act_dating_1003421_a3fecc .
 
 samian:ts_1003470_accf90 a lado:FindspotDating ;
@@ -2578,7 +2652,7 @@ samian:ts_1003470_accf90 a lado:FindspotDating ;
     crm:P82b_end_of_the_end "0099"^^xsd:gYear ;
     time:hasBeginning samian:ts_1003470_accf90_begin ;
     time:hasEnd samian:ts_1003470_accf90_end ;
-    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-28 ;
+    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasGeneratedBy samian:act_dating_1003470_accf90 .
 
 samian:ts_1003524_dd3cae a lado:FindspotDating ;
@@ -2606,7 +2680,7 @@ samian:ts_1003524_dd3cae a lado:FindspotDating ;
     crm:P82b_end_of_the_end "0096"^^xsd:gYear ;
     time:hasBeginning samian:ts_1003524_dd3cae_begin ;
     time:hasEnd samian:ts_1003524_dd3cae_end ;
-    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-28 ;
+    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasGeneratedBy samian:act_dating_1003524_dd3cae .
 
 samian:ts_1003531_5b6bc5 a lado:FindspotDating ;
@@ -2634,7 +2708,7 @@ samian:ts_1003531_5b6bc5 a lado:FindspotDating ;
     crm:P82b_end_of_the_end "0082"^^xsd:gYear ;
     time:hasBeginning samian:ts_1003531_5b6bc5_begin ;
     time:hasEnd samian:ts_1003531_5b6bc5_end ;
-    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-28 ;
+    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasGeneratedBy samian:act_dating_1003531_5b6bc5 .
 
 samian:ts_1003761_063e8c a lado:FindspotDating ;
@@ -2662,7 +2736,7 @@ samian:ts_1003761_063e8c a lado:FindspotDating ;
     crm:P82b_end_of_the_end "0009"^^xsd:gYear ;
     time:hasBeginning samian:ts_1003761_063e8c_begin ;
     time:hasEnd samian:ts_1003761_063e8c_end ;
-    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-28 ;
+    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasGeneratedBy samian:act_dating_1003761_063e8c .
 
 samian:ts_1003782_0b86e2 a lado:FindspotDating ;
@@ -2690,7 +2764,7 @@ samian:ts_1003782_0b86e2 a lado:FindspotDating ;
     crm:P82b_end_of_the_end "0044"^^xsd:gYear ;
     time:hasBeginning samian:ts_1003782_0b86e2_begin ;
     time:hasEnd samian:ts_1003782_0b86e2_end ;
-    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-28 ;
+    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasGeneratedBy samian:act_dating_1003782_0b86e2 .
 
 samian:ts_1003782_78e3f7 a lado:FindspotDating ;
@@ -2718,8 +2792,36 @@ samian:ts_1003782_78e3f7 a lado:FindspotDating ;
     crm:P82b_end_of_the_end "0075"^^xsd:gYear ;
     time:hasBeginning samian:ts_1003782_78e3f7_begin ;
     time:hasEnd samian:ts_1003782_78e3f7_end ;
-    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-28 ;
+    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasGeneratedBy samian:act_dating_1003782_78e3f7 .
+
+samian:ts_1003782_8034d4 a lado:FindspotDating ;
+    rdfs:label "Bregenz — Böckleareal (destruction layer period II): 46 to 70"@en ;
+    lado:avgDatemax 70 ;
+    lado:avgDatemin 46 ;
+    lado:dieRepetition 1.0 ;
+    lado:intervalLabel "46 to 70" ;
+    lado:kFactor 1.1065 ;
+    lado:kIsFallback false ;
+    lado:maxDatemax 85 ;
+    lado:maxDatemin 60 ;
+    lado:midpointYear 57.75 ;
+    lado:minDatemax 60 ;
+    lado:minDatemin 35 ;
+    lado:nDies 10 ;
+    lado:nStamps 10 ;
+    lado:nStampsWithDie 10 ;
+    lado:qEnd 0.643 ;
+    lado:qInterval 0.604 ;
+    lado:qRepetition 0.0 ;
+    lado:qStart 0.649 ;
+    lado:sigmaYears 11.087 ;
+    crm:P82a_begin_of_the_begin "0046"^^xsd:gYear ;
+    crm:P82b_end_of_the_end "0070"^^xsd:gYear ;
+    time:hasBeginning samian:ts_1003782_8034d4_begin ;
+    time:hasEnd samian:ts_1003782_8034d4_end ;
+    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-08-20 ;
+    prov:wasGeneratedBy samian:act_dating_1003782_8034d4 .
 
 samian:ts_1003782_8d9001 a lado:FindspotDating ;
     rdfs:label "Bregenz — shop: 126 to 159"@en ;
@@ -2746,36 +2848,8 @@ samian:ts_1003782_8d9001 a lado:FindspotDating ;
     crm:P82b_end_of_the_end "0159"^^xsd:gYear ;
     time:hasBeginning samian:ts_1003782_8d9001_begin ;
     time:hasEnd samian:ts_1003782_8d9001_end ;
-    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-28 ;
+    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasGeneratedBy samian:act_dating_1003782_8d9001 .
-
-samian:ts_1003782_9cdfb1 a lado:FindspotDating ;
-    rdfs:label "Bregenz — Böckleareal (descruction layer period II): 46 to 70"@en ;
-    lado:avgDatemax 70 ;
-    lado:avgDatemin 46 ;
-    lado:dieRepetition 1.0 ;
-    lado:intervalLabel "46 to 70" ;
-    lado:kFactor 1.1065 ;
-    lado:kIsFallback false ;
-    lado:maxDatemax 85 ;
-    lado:maxDatemin 60 ;
-    lado:midpointYear 57.75 ;
-    lado:minDatemax 60 ;
-    lado:minDatemin 35 ;
-    lado:nDies 10 ;
-    lado:nStamps 10 ;
-    lado:nStampsWithDie 10 ;
-    lado:qEnd 0.643 ;
-    lado:qInterval 0.604 ;
-    lado:qRepetition 0.0 ;
-    lado:qStart 0.649 ;
-    lado:sigmaYears 11.087 ;
-    crm:P82a_begin_of_the_begin "0046"^^xsd:gYear ;
-    crm:P82b_end_of_the_end "0070"^^xsd:gYear ;
-    time:hasBeginning samian:ts_1003782_9cdfb1_begin ;
-    time:hasEnd samian:ts_1003782_9cdfb1_end ;
-    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-28 ;
-    prov:wasGeneratedBy samian:act_dating_1003782_9cdfb1 .
 
 samian:ts_1003782_c9c8eb a lado:FindspotDating ;
     rdfs:label "Bregenz — cellar: 78 to 113"@en ;
@@ -2802,7 +2876,7 @@ samian:ts_1003782_c9c8eb a lado:FindspotDating ;
     crm:P82b_end_of_the_end "0113"^^xsd:gYear ;
     time:hasBeginning samian:ts_1003782_c9c8eb_begin ;
     time:hasEnd samian:ts_1003782_c9c8eb_end ;
-    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-28 ;
+    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasGeneratedBy samian:act_dating_1003782_c9c8eb .
 
 samian:ts_1003782_d60cc2 a lado:FindspotDating ;
@@ -2830,7 +2904,7 @@ samian:ts_1003782_d60cc2 a lado:FindspotDating ;
     crm:P82b_end_of_the_end "0058"^^xsd:gYear ;
     time:hasBeginning samian:ts_1003782_d60cc2_begin ;
     time:hasEnd samian:ts_1003782_d60cc2_end ;
-    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-28 ;
+    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasGeneratedBy samian:act_dating_1003782_d60cc2 .
 
 samian:ts_1003870_32f514 a lado:FindspotDating ;
@@ -2858,7 +2932,7 @@ samian:ts_1003870_32f514 a lado:FindspotDating ;
     crm:P82b_end_of_the_end "0163"^^xsd:gYear ;
     time:hasBeginning samian:ts_1003870_32f514_begin ;
     time:hasEnd samian:ts_1003870_32f514_end ;
-    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-28 ;
+    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasGeneratedBy samian:act_dating_1003870_32f514 .
 
 samian:ts_1003896_fd8115 a lado:FindspotDating ;
@@ -2886,7 +2960,7 @@ samian:ts_1003896_fd8115 a lado:FindspotDating ;
     crm:P82b_end_of_the_end "0170"^^xsd:gYear ;
     time:hasBeginning samian:ts_1003896_fd8115_begin ;
     time:hasEnd samian:ts_1003896_fd8115_end ;
-    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-28 ;
+    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasGeneratedBy samian:act_dating_1003896_fd8115 .
 
 samian:ts_1003977_c4e861 a lado:FindspotDating ;
@@ -2914,7 +2988,7 @@ samian:ts_1003977_c4e861 a lado:FindspotDating ;
     crm:P82b_end_of_the_end "0082"^^xsd:gYear ;
     time:hasBeginning samian:ts_1003977_c4e861_begin ;
     time:hasEnd samian:ts_1003977_c4e861_end ;
-    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-28 ;
+    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasGeneratedBy samian:act_dating_1003977_c4e861 .
 
 samian:ts_1003978_969c47 a lado:FindspotDating ;
@@ -2942,7 +3016,7 @@ samian:ts_1003978_969c47 a lado:FindspotDating ;
     crm:P82b_end_of_the_end "0000"^^xsd:gYear ;
     time:hasBeginning samian:ts_1003978_969c47_begin ;
     time:hasEnd samian:ts_1003978_969c47_end ;
-    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-28 ;
+    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasGeneratedBy samian:act_dating_1003978_969c47 .
 
 samian:ts_1004149_402b80 a lado:FindspotDating ;
@@ -2970,7 +3044,7 @@ samian:ts_1004149_402b80 a lado:FindspotDating ;
     crm:P82b_end_of_the_end "0060"^^xsd:gYear ;
     time:hasBeginning samian:ts_1004149_402b80_begin ;
     time:hasEnd samian:ts_1004149_402b80_end ;
-    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-28 ;
+    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasGeneratedBy samian:act_dating_1004149_402b80 .
 
 samian:ts_1004241_cc131f a lado:FindspotDating ;
@@ -2998,7 +3072,7 @@ samian:ts_1004241_cc131f a lado:FindspotDating ;
     crm:P82b_end_of_the_end "0076"^^xsd:gYear ;
     time:hasBeginning samian:ts_1004241_cc131f_begin ;
     time:hasEnd samian:ts_1004241_cc131f_end ;
-    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-28 ;
+    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasGeneratedBy samian:act_dating_1004241_cc131f .
 
 samian:ts_1004709_ed615d a lado:FindspotDating ;
@@ -3026,7 +3100,7 @@ samian:ts_1004709_ed615d a lado:FindspotDating ;
     crm:P82b_end_of_the_end "0091"^^xsd:gYear ;
     time:hasBeginning samian:ts_1004709_ed615d_begin ;
     time:hasEnd samian:ts_1004709_ed615d_end ;
-    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-07-28 ;
+    prov:wasDerivedFrom samian:dataset_sites_dating_v1_2026-08-20 ;
     prov:wasGeneratedBy samian:act_dating_1004709_ed615d .
 
 samian:loc_ds_1003782 rdfs:label "Bregenz"@en ;
@@ -3056,15 +3130,15 @@ samian:IPSDatedSitesExporter a crmdig:D14_Software,
         prov:SoftwareAgent ;
     rdfs:label "ips_rdf_export.py"@en .
 
-samian:dataset_sites_dating_v1_2026-07-28 a crmdig:D1_Digital_Object,
+samian:dataset_sites_dating_v1_2026-08-20 a crmdig:D1_Digital_Object,
         dcat:Dataset,
         prov:Entity ;
     lado:identifierScheme "sha256(NFC(trim(findspot)))[0:6], per discovery-site id" ;
-    dcterms:created "2026-07-28T15:06:02+00:00"^^xsd:dateTime ;
-    dcterms:issued "2026-07-28"^^xsd:date ;
+    dcterms:created "2026-08-20T09:55:40+00:00"^^xsd:dateTime ;
+    dcterms:issued "2026-08-20"^^xsd:date ;
     dcterms:source "Samian Research / IPS, tbldistribution + tblpotter + v_discoverysite" ;
     dcterms:title "Archaeological findspots dated by samian potters' stamps"@en ;
     rdfs:comment "Datierter Snapshot. Die Fundstellen- und Zeitspannen-URIs sind bewusst NICHT versioniert: sie bezeichnen dauerhaft dieselbe Fundstelle bzw. deren jeweils aktuelle Datierung. Aendern sich die Quelldaten, aendern sich die Werte unter derselben URI. Wer einen konkreten Stand zitieren will, zitiert diesen Datensatz."@de ;
-    owl:versionInfo "2026-07-28" ;
+    owl:versionInfo "2026-08-20" ;
     prov:wasAttributedTo samian:IPSDatedSitesExporter .
 

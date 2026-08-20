@@ -2,7 +2,7 @@
 IPS Dated Sites — main script
 =============================
 
-One call, seven steps:
+One call, nine steps:
 
     0. Verify the CSV against the model it claims to carry
     1. CSV from data/  ->  rdf/  (Turtle + JSON-LD + LADO extension)
@@ -10,7 +10,9 @@ One call, seven steps:
     3. Two figures to img/, SVG + JPG at 300 dpi each
     4. Round-trip check CSV -> RDF -> SPARQL, field by field
     5. Standalone bundle to rdf/IPSDatedSites-bundle.ttl
-    6. Documentation to docs/
+    6. Browser RDF emitter to webjs/, with a parity check
+    7. Query page to docs/sparql.html, from queries.yaml
+    8. Documentation to docs/
 
 Run from the REPOSITORY ROOT (Windows / VS Code):
 
@@ -28,9 +30,11 @@ import sys
 from pathlib import Path
 
 import ips_compat
+import build_sparql
 import make_bundle
 import verify as ips_verify
 import make_docs
+import make_webjs
 import ips_render
 import ips_sparql
 from ips_rdf_export import build_graph, build_ontology
@@ -88,6 +92,12 @@ def main() -> int:
     ap.add_argument("--skip-plots", action="store_true")
     ap.add_argument("--skip-docs", action="store_true")
     ap.add_argument("--skip-bundle", action="store_true")
+    ap.add_argument("--skip-webjs", action="store_true")
+    ap.add_argument("--skip-webjs-verify", action="store_true",
+                    help="build webjs/ but skip the parity check "
+                         "(for instance when node is unavailable)")
+    ap.add_argument("--webjs-out", type=Path, default=ROOT / "webjs")
+    ap.add_argument("--skip-sparql", action="store_true")
     ap.add_argument("--docs-out", type=Path, default=ROOT / "docs")
     args = ap.parse_args()
 
@@ -198,11 +208,32 @@ def main() -> int:
         for k, v in make_bundle.verify(bpath).items():
             print(f"    {k:<22} {v}")
 
-    # ---- 6. Documentation -------------------------------------------------
+    # ---- 6. Browser emitter -----------------------------------------------
+    # webjs/ is copied verbatim onto the ColdFusion server so that the CFM
+    # page can export the rows it is showing, live from the database. The
+    # tabular parts are injected from ips_rdf_export.py; the graph shape is
+    # hand-written and held in step by a parity check: both emitters build
+    # from the same CSV, N-Triples sorted, SHA-256 compared.
+    if not args.skip_webjs:
+        rule("6 · Browser emitter (webjs/)")
+        if make_webjs.run(args.webjs_out, csv, args.era,
+                          verify=not args.skip_webjs_verify) != 0:
+            ok = False
+
+    # ---- 7. Query page ----------------------------------------------------
+    # queries.yaml -> docs/sparql.html + .rq files + qmd/. Every example
+    # query runs against the real graph; an empty result fails the step,
+    # because SPARQL does not fail on a mistyped IRI, it stays silent.
+    if not args.skip_sparql:
+        rule("7 · Query page (queries.yaml)")
+        if build_sparql.run(args.docs_out) != 0:
+            ok = False
+
+    # ---- 8. Documentation -------------------------------------------------
     # Regenerated on every run so that it cannot drift away from the code.
     # The structure comes from the code, the prose from py/ips_docs_text.py.
     if not args.skip_docs:
-        rule("6 · Documentation")
+        rule("8 · Documentation")
         for pth in make_docs.build(args.docs_out, gr):
             print(f"  {pth.relative_to(ROOT)}")
 

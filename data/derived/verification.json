@@ -8,10 +8,10 @@
       "title": "column set"
     },
     {
-      "detail": "41 findspots, as expected.",
+      "detail": "42 findspots, expected 41. Not an error in itself — the database grows — but every figure quoted in the documentation was computed against a different corpus.",
       "key": "a",
       "offenders": [],
-      "status": "pass",
+      "status": "warn",
       "title": "row count"
     },
     {
@@ -50,14 +50,14 @@
       "title": "q_end = exp(-sigma / t0)"
     },
     {
-      "detail": "41 values, no inversion.",
+      "detail": "42 values, no inversion.",
       "key": "i",
       "offenders": [],
       "status": "pass",
       "title": "q_start decreases monotonically in sigma"
     },
     {
-      "detail": "41 values, no inversion.",
+      "detail": "42 values, no inversion.",
       "key": "i'",
       "offenders": [],
       "status": "pass",
@@ -85,7 +85,7 @@
       "title": "integer casts agree with exact columns"
     },
     {
-      "detail": "r(width, midpoint year) = +0.431; median width 19.8 years before AD 100 against 32.1 from AD 100. Later material is dated less sharply because the chronological framework thins out — this belongs in the width, and is the reason no epoch correction is applied to the colour.",
+      "detail": "r(width, midpoint year) = +0.431; median width 20.6 years before AD 100 against 32.1 from AD 100. Later material is dated less sharply because the chronological framework thins out — this belongs in the width, and is the reason no epoch correction is applied to the colour.",
       "key": "l",
       "offenders": [],
       "status": "info",
@@ -100,16 +100,16 @@
       "unusable_years": 25.0
     },
     "epoch_drift": {
-      "median_width_before_ad100": 19.75,
+      "median_width_before_ad100": 20.60000000000001,
       "median_width_from_ad100": 32.10000000000002,
-      "n_before_ad100": 28,
+      "n_before_ad100": 29,
       "n_from_ad100": 13,
-      "r_q_end_vs_year": 0.10326625133502758,
-      "r_q_start_vs_year": -0.4381738702395513,
-      "r_sigma_eff_vs_year": 0.39036976236297044,
-      "r_width_vs_year": 0.4310720949267335
+      "r_q_end_vs_year": 0.10187320759115981,
+      "r_q_start_vs_year": -0.4357176262227417,
+      "r_sigma_eff_vs_year": 0.3910647263587415,
+      "r_width_vs_year": 0.4313577591570013
     },
-    "n_findspots": 41,
+    "n_findspots": 42,
     "parameters": {
       "k_max": 1.5,
       "k_min": 0.5,
@@ -119,20 +119,20 @@
     },
     "q_spectrum": {
       "max": 1.0,
-      "median": 0.646,
+      "median": 0.645,
       "min": 0.161
     },
     "sigma_spectrum": {
       "max": 36.549931,
-      "median": 8.7397125,
+      "median": 8.775648,
       "min": 0.0,
-      "n": 82
+      "n": 84
     }
   },
-  "source": "C:\\git\\IPSDatedSites\\data\\data-1785242661572.csv",
+  "source": "C:\\git\\IPSDatedSites\\data\\data-1787218454884.csv",
   "summary": {
     "checks": 13,
     "failed": 0,
-    "warned": 0
+    "warned": 1
   }
 }

@@ -1,0 +1,31 @@
+# The figure, as a table
+# Every row of the box plot, in the order the figure draws them. The interval
+# bounds come out of OWL-Time rather than from a column: the time-span has a
+# beginning and an end, each of which is an instant holding a numeric position
+# on a named scale. That indirection is what lets the calendar reading and the
+# arithmetic position disagree about negative years without either being
+# wrong.
+
+PREFIX samian:  <http://data.archaeology.link/data/samian/>
+PREFIX lado:    <http://archaeology.link/ontology#>
+PREFIX crm:     <http://www.cidoc-crm.org/cidoc-crm/>
+PREFIX crmdig:  <http://www.ics.forth.gr/isl/CRMdig/>
+PREFIX time:    <http://www.w3.org/2006/time#>
+PREFIX prov:    <http://www.w3.org/ns/prov#>
+PREFIX dcat:    <http://www.w3.org/ns/dcat#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX skos:    <http://www.w3.org/2004/02/skos/core#>
+PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?site ?findspot ?from ?to ?span ?qInterval ?nStamps WHERE {
+  ?fs a lado:Findspot ; rdfs:label ?findspot ;
+      crm:P89_falls_within ?p ; crm:P4_has_time-span ?ts .
+  ?p rdfs:label ?site .
+  ?ts time:hasBeginning/time:inTimePosition/time:numericPosition ?from ;
+      time:hasEnd/time:inTimePosition/time:numericPosition ?to ;
+      lado:qInterval ?qInterval ; lado:nStamps ?nStamps ;
+      lado:avgDatemin ?order .
+  BIND(?to - ?from AS ?span)
+}
+ORDER BY ?order

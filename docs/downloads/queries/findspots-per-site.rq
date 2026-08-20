@@ -1,0 +1,28 @@
+# Sites with more than one findspot
+# Bregenz contributes six separately dated findspots, Colchester two. This is
+# why the dating hangs on the findspot rather than on the site, and why the
+# URI fragment is a hash of the findspot name taken per site: a site
+# identifier alone could not tell the six Bregenz contexts apart, and they are
+# dated differently.
+
+PREFIX samian:  <http://data.archaeology.link/data/samian/>
+PREFIX lado:    <http://archaeology.link/ontology#>
+PREFIX crm:     <http://www.cidoc-crm.org/cidoc-crm/>
+PREFIX crmdig:  <http://www.ics.forth.gr/isl/CRMdig/>
+PREFIX time:    <http://www.w3.org/2006/time#>
+PREFIX prov:    <http://www.w3.org/ns/prov#>
+PREFIX dcat:    <http://www.w3.org/ns/dcat#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX skos:    <http://www.w3.org/2004/02/skos/core#>
+PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?site (COUNT(DISTINCT ?fs) AS ?findspots)
+       (GROUP_CONCAT(?name; separator=" · ") AS ?names)
+WHERE {
+  ?fs a lado:Findspot ; rdfs:label ?name ; crm:P89_falls_within ?p .
+  ?p rdfs:label ?site .
+}
+GROUP BY ?site
+HAVING (COUNT(DISTINCT ?fs) > 1)
+ORDER BY DESC(?findspots) ?site

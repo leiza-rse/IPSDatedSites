@@ -1,0 +1,17 @@
+IPS Dated Sites — browser RDF emitter
+=====================================
+
+Copy the two .js files next to IPSDatedSites27.cfm on the
+ColdFusion server. No build step, no CDN, no network access at
+run time.
+
+In the CFM page:
+
+  <script src="ips_rdf.js"></script>
+  <script src="ips_rdf_button.js" defer></script>
+  <button id="downloadTtl">Download triples (.ttl)</button>
+
+GENERATED — do not edit. Regenerate with:
+  python py/make_webjs.py --verify
+
+Parity with ips_rdf_export.py: OK, sha256 f5df7ba2e38fc124 over 3492 triples (data-1787218454884.csv)

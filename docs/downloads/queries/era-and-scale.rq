@@ -1,0 +1,31 @@
+# Where the calendar and the arithmetic part company
+# The findspots whose interval begins before the year 1. Note that
+# numericPosition and inXSDgYear differ by one: xsd:gYear counts
+# astronomically, so 1 BC is the year 0, whereas the source database counts
+# historically and the arithmetic must stay on an unbroken number line. Rather
+# than silently picking one, the graph carries both and declares its own time
+# reference system for the number line.
+
+PREFIX samian:  <http://data.archaeology.link/data/samian/>
+PREFIX lado:    <http://archaeology.link/ontology#>
+PREFIX crm:     <http://www.cidoc-crm.org/cidoc-crm/>
+PREFIX crmdig:  <http://www.ics.forth.gr/isl/CRMdig/>
+PREFIX time:    <http://www.w3.org/2006/time#>
+PREFIX prov:    <http://www.w3.org/ns/prov#>
+PREFIX dcat:    <http://www.w3.org/ns/dcat#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX skos:    <http://www.w3.org/2004/02/skos/core#>
+PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?site ?findspot ?numeric ?calendar ?scale WHERE {
+  ?fs a lado:Findspot ; rdfs:label ?findspot ;
+      crm:P89_falls_within ?p ; crm:P4_has_time-span ?ts .
+  ?p rdfs:label ?site .
+  ?ts time:hasBeginning ?inst .
+  ?inst time:inXSDgYear ?calendar ; time:inTimePosition ?pos .
+  ?pos time:numericPosition ?numeric ; time:hasTRS ?trs .
+  ?trs rdfs:label ?scale .
+  FILTER(?numeric < 0)
+}
+ORDER BY ?numeric

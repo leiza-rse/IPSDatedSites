@@ -1,0 +1,31 @@
+# Sharply dated, but not a depot
+# Findspots that are tightly dated (qInterval above 0.55) while showing almost
+# no die repetition (qRepetition below 0.2) — each stamp occurs once or nearly
+# once. These are exactly the sites that a single combined quality score would
+# destroy: multiply the two and Rougham or the Keltengraben at Vindonissa drop
+# to zero, although their dating is among the sharpest in the set. The two
+# axes measure different things and are deliberately never merged.
+
+PREFIX samian:  <http://data.archaeology.link/data/samian/>
+PREFIX lado:    <http://archaeology.link/ontology#>
+PREFIX crm:     <http://www.cidoc-crm.org/cidoc-crm/>
+PREFIX crmdig:  <http://www.ics.forth.gr/isl/CRMdig/>
+PREFIX time:    <http://www.w3.org/2006/time#>
+PREFIX prov:    <http://www.w3.org/ns/prov#>
+PREFIX dcat:    <http://www.w3.org/ns/dcat#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX skos:    <http://www.w3.org/2004/02/skos/core#>
+PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?site ?findspot ?qInterval ?qRepetition ?nStamps ?nDies ?repetition
+WHERE {
+  ?fs a lado:Findspot ; rdfs:label ?findspot ;
+      crm:P89_falls_within ?p ; crm:P4_has_time-span ?ts .
+  ?p rdfs:label ?site .
+  ?ts lado:qInterval ?qInterval ; lado:qRepetition ?qRepetition ;
+      lado:nStamps ?nStamps ; lado:nDies ?nDies ;
+      lado:dieRepetition ?repetition .
+  FILTER(?qInterval > 0.55 && ?qRepetition < 0.2)
+}
+ORDER BY DESC(?qInterval)

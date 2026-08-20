@@ -1,0 +1,294 @@
+---
+title: "Querying the IPS dated sites graph"
+format: live-html
+engine: knitr
+pyodide:
+  packages:
+    - micropip
+---
+
+{{< include ../_extensions/r-wasm/live/_knitr.qmd >}}
+
+## About this notebook
+
+A browser notebook over the IPS dated sites graph: Roman findspots dated from samian potters' stamps, published as Linked Open Data. Nothing is installed and nothing is sent anywhere — the graph is fetched as a static file and queried locally with rdflib under Pyodide.
+
+## What this dataset is
+
+Each row is one findspot at one site, dated from the samian potters'
+stamps found there. A potter's production period is known from other
+evidence; a findspot that yields stamps of several potters can
+therefore be dated by combining them.
+
+The interval is deliberately **not** a confidence interval. It is a
+"virtual fuzzy year", `m ± k·σ`, where σ decomposes into the inner
+fuzziness of each potter's own date range and the scatter of those
+ranges' midpoints, and `k` shrinks as the number of stamps grows.
+Treating it as a statistical confidence bound would claim far more
+than the archaeology supports.
+
+## Two things worth noticing
+
+Dating sharpness (`lado:qInterval`) and depot character
+(`lado:qRepetition`) are kept as **separate axes** and never combined
+into a single score. Multiplying them would zero out well dated sites
+that happen to yield each stamp once.
+
+Negative years are handled in two places at once, on purpose. The
+arithmetic runs on a signed number line with its own declared time
+reference system (`samian:trs_ips_year`), which is never shifted; the
+calendar reading is attached separately as `time:inXSDgYear`. Shifting
+only the negative values would tear the scale apart at zero.
+
+
+## Step 1 — Set up and load the graph
+
+`rdflib` is not pre-bundled with Pyodide, so it is installed with `micropip`.
+HTTP has to go through `pyodide.http.pyfetch`: `requests` and `urllib.request`
+do not work in the browser.
+
+```{pyodide}
+#| autorun: false
+#| label: setup
+#| output: false
+import micropip
+await micropip.install("rdflib==7.1.1")
+
+from pyodide.http import pyfetch
+from rdflib import Graph
+
+GRAPH_URL = "https://leiza-rse.github.io/IPSDatedSites/bundle.ttl"
+
+_cache = {}
+
+async def load(url):
+    """Fetch a Turtle file and parse it into a Graph. Cached per URL."""
+    if url in _cache:
+        return _cache[url]
+    resp = await pyfetch(url)
+    if resp.status != 200:
+        raise RuntimeError(f"{url} -> HTTP {resp.status}")
+    g = Graph()
+    g.parse(data=await resp.string(), format="turtle")
+    _cache[url] = g
+    return g
+
+def show(graph, query):
+    """Run a query and return the rows as a list of dicts."""
+    res = graph.query(PREFIXES + query)
+    cols = [str(v) for v in res.vars]
+    return [{c: (None if r[i] is None else str(r[i])) for i, c in enumerate(cols)}
+            for r in res]
+
+PREFIXES = """
+PREFIX samian:  <http://data.archaeology.link/data/samian/>
+PREFIX lado:    <http://archaeology.link/ontology#>
+PREFIX crm:     <http://www.cidoc-crm.org/cidoc-crm/>
+PREFIX crmdig:  <http://www.ics.forth.gr/isl/CRMdig/>
+PREFIX time:    <http://www.w3.org/2006/time#>
+PREFIX prov:    <http://www.w3.org/ns/prov#>
+PREFIX dcat:    <http://www.w3.org/ns/dcat#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX skos:    <http://www.w3.org/2004/02/skos/core#>
+PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#>"""
+```
+
+Now fetch the graph. It is about 0.2 MB and holds the findspot
+datings, the full vocabulary, and the rdf:type triples materialised over
+`rdfs:subClassOf` — which is why the CIDOC CRM queries below resolve without a
+reasoner.
+
+```{pyodide}
+#| autorun: false
+#| label: load-graph
+base = await load(GRAPH_URL)
+print(f"{len(base)} triples loaded from {GRAPH_URL}")
+```
+
+## Step 2 — The figure, as a table
+
+Every row of the box plot, in the order the figure draws them. The interval bounds come out of OWL-Time rather than from a column: the time-span has a beginning and an end, each of which is an instant holding a numeric position on a named scale. That indirection is what lets the calendar reading and the arithmetic position disagree about negative years without either being wrong.
+
+```{pyodide}
+#| autorun: false
+#| label: query-dated-findspots
+assert "base" in dir(), "Run the 'load-graph' cell first."
+rows = show(base, """
+SELECT ?site ?findspot ?from ?to ?span ?qInterval ?nStamps WHERE {
+  ?fs a lado:Findspot ; rdfs:label ?findspot ;
+      crm:P89_falls_within ?p ; crm:P4_has_time-span ?ts .
+  ?p rdfs:label ?site .
+  ?ts time:hasBeginning/time:inTimePosition/time:numericPosition ?from ;
+      time:hasEnd/time:inTimePosition/time:numericPosition ?to ;
+      lado:qInterval ?qInterval ; lado:nStamps ?nStamps ;
+      lado:avgDatemin ?order .
+  BIND(?to - ?from AS ?span)
+}
+ORDER BY ?order
+""")
+print(f"{len(rows)} rows")
+for r in rows[:15]:
+    print(r)
+```
+
+## Step 3 — The same answer in CIDOC CRM alone
+
+No lado: and no time: term appears below, only CIDOC CRM — and it still returns all 41 findspots with their dates. That is the point of the materialised crosswalk: most triplestores perform no RDFS entailment, so the inferred rdf:type triples are written out explicitly rather than left to a reasoner that may never run. Load the vocabulary alone and this query returns nothing.
+
+```{pyodide}
+#| autorun: false
+#| label: query-crm-only
+assert "base" in dir(), "Run the 'load-graph' cell first."
+rows = show(base, """
+SELECT ?place ?findspot ?from ?to WHERE {
+  ?fs a crm:E53_Place ; rdfs:label ?findspot ;
+      crm:P89_falls_within ?p ; crm:P4_has_time-span ?ts .
+  ?p a crm:E53_Place ; rdfs:label ?place .
+  ?ts a crm:E52_Time-Span ;
+      crm:P82a_begin_of_the_begin ?from ;
+      crm:P82b_end_of_the_end ?to .
+}
+ORDER BY ?from
+""")
+print(f"{len(rows)} rows")
+for r in rows[:15]:
+    print(r)
+```
+
+## Step 4 — Where the calendar and the arithmetic part company
+
+The findspots whose interval begins before the year 1. Note that numericPosition and inXSDgYear differ by one: xsd:gYear counts astronomically, so 1 BC is the year 0, whereas the source database counts historically and the arithmetic must stay on an unbroken number line. Rather than silently picking one, the graph carries both and declares its own time reference system for the number line.
+
+```{pyodide}
+#| autorun: false
+#| label: query-era-and-scale
+assert "base" in dir(), "Run the 'load-graph' cell first."
+rows = show(base, """
+SELECT ?site ?findspot ?numeric ?calendar ?scale WHERE {
+  ?fs a lado:Findspot ; rdfs:label ?findspot ;
+      crm:P89_falls_within ?p ; crm:P4_has_time-span ?ts .
+  ?p rdfs:label ?site .
+  ?ts time:hasBeginning ?inst .
+  ?inst time:inXSDgYear ?calendar ; time:inTimePosition ?pos .
+  ?pos time:numericPosition ?numeric ; time:hasTRS ?trs .
+  ?trs rdfs:label ?scale .
+  FILTER(?numeric < 0)
+}
+ORDER BY ?numeric
+""")
+print(f"{len(rows)} rows")
+for r in rows[:15]:
+    print(r)
+```
+
+## Step 5 — Sharply dated, but not a depot
+
+Findspots that are tightly dated (qInterval above 0.55) while showing almost no die repetition (qRepetition below 0.2) — each stamp occurs once or nearly once. These are exactly the sites that a single combined quality score would destroy: multiply the two and Rougham or the Keltengraben at Vindonissa drop to zero, although their dating is among the sharpest in the set. The two axes measure different things and are deliberately never merged.
+
+```{pyodide}
+#| autorun: false
+#| label: query-two-quality-axes
+assert "base" in dir(), "Run the 'load-graph' cell first."
+rows = show(base, """
+SELECT ?site ?findspot ?qInterval ?qRepetition ?nStamps ?nDies ?repetition
+WHERE {
+  ?fs a lado:Findspot ; rdfs:label ?findspot ;
+      crm:P89_falls_within ?p ; crm:P4_has_time-span ?ts .
+  ?p rdfs:label ?site .
+  ?ts lado:qInterval ?qInterval ; lado:qRepetition ?qRepetition ;
+      lado:nStamps ?nStamps ; lado:nDies ?nDies ;
+      lado:dieRepetition ?repetition .
+  FILTER(?qInterval > 0.55 && ?qRepetition < 0.2)
+}
+ORDER BY DESC(?qInterval)
+""")
+print(f"{len(rows)} rows")
+for r in rows[:15]:
+    print(r)
+```
+
+## Step 6 — Sites with more than one findspot
+
+Bregenz contributes six separately dated findspots, Colchester two. This is why the dating hangs on the findspot rather than on the site, and why the URI fragment is a hash of the findspot name taken per site: a site identifier alone could not tell the six Bregenz contexts apart, and they are dated differently.
+
+```{pyodide}
+#| autorun: false
+#| label: query-findspots-per-site
+assert "base" in dir(), "Run the 'load-graph' cell first."
+rows = show(base, """
+SELECT ?site (COUNT(DISTINCT ?fs) AS ?findspots)
+       (GROUP_CONCAT(?name; separator=" · ") AS ?names)
+WHERE {
+  ?fs a lado:Findspot ; rdfs:label ?name ; crm:P89_falls_within ?p .
+  ?p rdfs:label ?site .
+}
+GROUP BY ?site
+HAVING (COUNT(DISTINCT ?fs) > 1)
+ORDER BY DESC(?findspots) ?site
+""")
+print(f"{len(rows)} rows")
+for r in rows[:15]:
+    print(r)
+```
+
+## Step 7 — What links out, and what does not
+
+Every site, with its ancient name and its Pleiades identifier where the source has one. The gaps are the interesting part: roughly a third of the sites carry no Pleiades link and most carry no Latin name. Absence here is recorded as absence — no placeholder is invented — so this query doubles as a worklist for the concordance.
+
+```{pyodide}
+#| autorun: false
+#| label: query-external-identifiers
+assert "base" in dir(), "Run the 'load-graph' cell first."
+rows = show(base, """
+SELECT ?site ?ancientName ?pleiades ?findspots WHERE {
+  { SELECT ?p (COUNT(DISTINCT ?fs) AS ?findspots) WHERE {
+      ?fs a lado:Findspot ; crm:P89_falls_within ?p .
+    } GROUP BY ?p }
+  ?p rdfs:label ?site .
+  OPTIONAL { ?p lado:ancientName ?ancientName }
+  OPTIONAL { ?p lado:pleiadesID  ?pleiades }
+}
+ORDER BY ?site
+""")
+print(f"{len(rows)} rows")
+for r in rows[:15]:
+    print(r)
+```
+
+## Step 8 — Which method produced these dates
+
+The parameters are in the graph, not only in the paper. Each dating is generated by an activity, and that activity records the plan it followed — so a consumer can ask what k, τ and the era convention were, and which datemax values the source query excluded, without reading any prose. The excluded values are an inherited filter whose justification is still open; publishing them is how that stays visible.
+
+```{pyodide}
+#| autorun: false
+#| label: query-provenance
+assert "base" in dir(), "Run the 'load-graph' cell first."
+rows = show(base, """
+SELECT ?software ?model ?kMin ?kMax ?tau ?w ?era
+       (GROUP_CONCAT(DISTINCT STR(?ex); separator=", ") AS ?excludedDatemax)
+       (COUNT(DISTINCT ?ts) AS ?datings)
+WHERE {
+  ?ts a lado:FindspotDating ; prov:wasGeneratedBy ?act .
+  ?act crm:P33_used_specific_technique ?m ;
+       crm:P14_carried_out_by ?agent .
+  ?agent rdfs:label ?software .
+  ?m rdfs:label ?model ; lado:kMin ?kMin ; lado:kMax ?kMax ;
+     lado:tau ?tau ; lado:volumeWeight ?w ; lado:eraConvention ?era ;
+     lado:excludedDatemax ?ex .
+}
+GROUP BY ?software ?model ?kMin ?kMax ?tau ?w ?era
+""")
+print(f"{len(rows)} rows")
+for r in rows[:15]:
+    print(r)
+```
+
+## Where this comes from
+
+Every query above is generated from `queries.yaml` in the
+[IPSDatedSites repository](https://github.com/leiza-rse/IPSDatedSites), which
+also produces the [browser query page](https://leiza-rse.github.io/IPSDatedSites/sparql.html)
+and the plain `.rq` files. One source, three products, so they cannot drift
+apart — and each query is executed against the real graph at build time, with
+an empty result failing the build.

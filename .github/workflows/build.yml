@@ -49,14 +49,23 @@ jobs:
         run: python py/main.py
 
       - name: Check the documentation is up to date
+        # docs/bundle.ttl is excluded: it is a copy of the published
+        # graph and carries prov:endedAtTime and dcterms:created, so it
+        # differs after every export whether or not anything changed. The
+        # same is already true of rdf/, which this check never covered.
+        # Its CONTENT is verified semantically by "Validate the RDF"
+        # below, which is the meaningful check for a graph anyway.
+        # docs/sparql.html and docs/downloads/queries/*.rq carry no
+        # timestamp and are byte-stable, so they stay in scope.
+        #
         # Pure text, generated from the code structures. Deterministic on
         # any platform and any library version, so a difference here means
         # somebody changed the code without re-running the pipeline.
         run: |
-          if ! git diff --quiet -- docs; then
+          if ! git diff --quiet -- docs ':!docs/bundle.ttl'; then
             echo "::error::docs/ is stale. Run 'python py/main.py' and commit the result."
-            git diff --stat -- docs
-            git diff -- docs | head -120
+            git diff --stat -- docs ':!docs/bundle.ttl'
+            git diff -- docs ':!docs/bundle.ttl' | head -120
             exit 1
           fi
           echo "docs/ and docs/diagrams/ match the code."

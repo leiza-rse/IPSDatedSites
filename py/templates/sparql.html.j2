@@ -1,0 +1,245 @@
+---
+layout: default
+title: [[ page.title ]]
+---
+[# Jinja2 runs with [% %] / [[ ]] here, so the {% raw %} below reaches
+   Jekyll verbatim and shields the JavaScript from Liquid. #]
+<style>
+  /* Query-page rules. The tokens are those of _layouts/default.html, so
+     this page reads as part of the same site. */
+  .status { display:flex; align-items:center; gap:.55rem;
+            border:1px solid var(--hair); border-radius:6px;
+            padding:.6rem .85rem; background:var(--band);
+            font-size:.9rem; color:var(--muted); margin:1.2rem 0; }
+  .dot { width:.6rem; height:.6rem; border-radius:50%;
+         background:var(--muted); flex:none; }
+  .dot.busy { background:#b07d00; }
+  .dot.ok   { background:#2e7d32; }
+  .dot.err  { background:#b3392b; }
+  .query { border-top:1px solid var(--hair); padding-top:1.2rem;
+           margin-top:1.8rem; }
+  .query h2 { margin-top:0; }
+  textarea.sparql { width:100%; font-family: ui-monospace, SFMono-Regular,
+                    Menlo, Consolas, monospace; font-size:12.5px;
+                    line-height:1.5; border:1px solid var(--hair);
+                    border-radius:6px; padding:.7rem .8rem;
+                    background:var(--band); color:var(--ink);
+                    resize:vertical; tab-size:2; }
+  textarea.sparql:focus { outline:2px solid #1f5fa8; outline-offset:-1px;
+                          background:#fff; }
+  .query-bar { display:flex; align-items:center; gap:.5rem; margin:.55rem 0 0; }
+  .query-bar button { font:inherit; font-size:.85rem; border-radius:5px;
+                      padding:.32rem .9rem; cursor:pointer;
+                      border:1px solid #1f5fa8; background:#1f5fa8;
+                      color:#fff; }
+  .query-bar button:hover:not(:disabled) { background:#17497f;
+                                           border-color:#17497f; }
+  .query-bar button:disabled { opacity:.45; cursor:default; }
+  .query-bar button.reset { background:#fff; color:var(--muted);
+                            border-color:var(--hair); }
+  .query-bar button.reset:hover { color:#1f5fa8; border-color:#1f5fa8;
+                                  background:#fff; }
+  .timing { font-size:.8rem; color:var(--muted); }
+  .table-scroll { overflow-x:auto; border:1px solid var(--hair);
+                  border-radius:6px; margin-top:.7rem; }
+  .table-scroll table { margin:0; }
+  .table-scroll td { white-space:nowrap; }
+  td.nil { color:#aab2ba; }
+  pre.error { border:1px solid #e0b7b0; border-left:3px solid #b3392b;
+              background:#fdf6f5; color:#8c2f22; white-space:pre-wrap; }
+  .note { color:var(--muted); font-size:.9rem; }
+</style>
+
+<h1>[[ page.title ]]</h1>
+
+<p>[[ page.intro ]]</p>
+
+<p class="note">
+  There is no SPARQL endpoint and no server. The graph is fetched as a
+  static file and parsed in your browser with <code>rdflib</code> under
+  Pyodide, so nothing you type leaves your machine and an archived copy of
+  this repository stays queryable without a service being kept alive for it.
+  The first visit downloads roughly 10 MB of Python runtime.
+</p>
+
+<div class="status" id="status">
+  <span class="dot" id="dot"></span>
+  <span id="status-text">Loading the Python runtime&hellip;</span>
+</div>
+
+<p class="note" id="graph-note" hidden></p>
+[% for q in queries %]
+<section class="query" id="q-[[ q.id ]]">
+  <h2>[[ loop.index ]]. [[ q.title ]]</h2>
+  <p>[[ q.intro ]]</p>
+  <textarea class="sparql" id="src-[[ q.id ]]" spellcheck="false"
+            rows="[[ q.rows ]]">[[ q.sparql ]]</textarea>
+  <div class="query-bar">
+    <button class="run" data-q="[[ q.id ]]" disabled>Run</button>
+    <button class="reset" data-q="[[ q.id ]]">Reset</button>
+    <span class="timing" id="time-[[ q.id ]]"></span>
+  </div>
+  <div class="result" id="out-[[ q.id ]]"></div>
+</section>
+[% endfor %]
+<p class="note">
+  [[ page.vocabulary_note ]]
+  [% if qmd_file %]A <a href="https://quarto.org">quarto-live</a> version of
+  this page, for reuse as teaching material, is in <code>qmd/</code>.[% endif %]
+</p>
+
+<script src="https://cdn.jsdelivr.net/pyodide/v[[ pyodide_version ]]/full/pyodide.js"></script>
+{% raw %}
+<script>
+/* Written from queries.yaml by py/build_sparql.py, so this page, the .rq
+   files and the quarto-live variant cannot drift apart. Wrapped in a Liquid
+   raw block: a query containing a doubled brace would otherwise be eaten by
+   Jekyll on the way to Pages, and only there. */
+{% endraw %}
+const PREFIXES = [[ prefixes_json ]];
+const QUERIES  = [[ queries_json ]];
+const GRAPH    = [[ graph_json ]];
+const MAX_ROWS = [[ max_rows ]];
+const RDFLIB   = "[[ rdflib_version ]]";
+</script>
+{% raw %}
+<script>
+const statusText = document.getElementById('status-text');
+const dot = document.getElementById('dot');
+let pyodide = null;
+
+function setStatus(text, state) {
+  statusText.textContent = text;
+  dot.className = 'dot ' + (state || '');
+}
+
+/* Escape once, centrally: cell values come from the graph and may contain
+   <, & or a stray quote, and building a table by string concatenation
+   without this is how an injection bug gets in. */
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
+function renderTable(cols, rows, elId, total) {
+  const out = document.getElementById(elId);
+  if (!rows.length) {
+    out.innerHTML = '<p class="note">No results. The query is valid but matched nothing.</p>';
+    return;
+  }
+  let h = '<div class="table-scroll"><table><thead><tr>';
+  h += cols.map(c => `<th>${esc(c)}</th>`).join('');
+  h += '</tr></thead><tbody>';
+  for (const r of rows) {
+    h += '<tr>' + cols.map(c => {
+      const v = r[c];
+      if (v === null || v === undefined) return '<td class="nil">&mdash;</td>';
+      const s = String(v);
+      return /^https?:\/\//.test(s)
+        ? `<td><a href="${esc(s)}" target="_blank" rel="noopener">${esc(s)}</a></td>`
+        : `<td>${esc(s)}</td>`;
+    }).join('') + '</tr>';
+  }
+  h += '</tbody></table></div>';
+  h += `<p class="note">${total > rows.length
+    ? `Showing the first ${rows.length} of ${total} rows.`
+    : `${rows.length} row${rows.length === 1 ? '' : 's'}.`}</p>`;
+  out.innerHTML = h;
+}
+
+async function boot() {
+  try {
+    pyodide = await loadPyodide();
+    setStatus('Installing rdflib\u2026', 'busy');
+    await pyodide.loadPackage('micropip');
+    pyodide.globals.set('_rdflib_version', RDFLIB);
+    await pyodide.runPythonAsync(`
+import micropip
+await micropip.install("rdflib==" + _rdflib_version)
+`);
+    setStatus('Loading the graph\u2026', 'busy');
+    pyodide.globals.set('_graph_url', GRAPH.url);
+    await pyodide.runPythonAsync(`
+from pyodide.http import pyfetch
+from rdflib import Graph
+
+_graphs = {}
+
+async def load(url, key):
+    """Fetch a Turtle file and parse it. Cached: a re-run must not refetch."""
+    if key in _graphs:
+        return _graphs[key]
+    resp = await pyfetch(url)
+    if resp.status != 200:
+        raise RuntimeError(f"{url} -> HTTP {resp.status}")
+    text = await resp.string()
+    g = Graph()
+    g.parse(data=text, format="turtle")
+    _graphs[key] = g
+    return g
+
+base = await load(_graph_url, "base")
+n_base = len(base)
+`);
+    const n = pyodide.globals.get('n_base');
+    const note = document.getElementById('graph-note');
+    note.hidden = false;
+    note.innerHTML = `Graph loaded: <strong>${n}</strong> triples from <code>${esc(GRAPH.file)}</code> (${esc(GRAPH.megabytes)} MB). <a href="${esc(GRAPH.url)}">Download the Turtle file</a>.`;
+    setStatus('Ready \u2014 edit a query and press Run.', 'ok');
+    document.querySelectorAll('button.run').forEach(b => (b.disabled = false));
+  } catch (err) {
+    setStatus('Could not start: ' + err.message, 'err');
+    console.error(err);
+  }
+}
+
+async function runQuery(id) {
+  const btn = document.querySelector(`button.run[data-q="${id}"]`);
+  const timing = document.getElementById('time-' + id);
+  const out = document.getElementById('out-' + id);
+  btn.disabled = true;
+  timing.textContent = 'running\u2026';
+  out.innerHTML = '';
+  const t0 = performance.now();
+  try {
+    const src = document.getElementById('src-' + id).value;
+    pyodide.globals.set('_q_src', PREFIXES + '\n' + src);
+    pyodide.globals.set('_max_rows', MAX_ROWS);
+    const json = await pyodide.runPythonAsync(`
+import json
+g = _graphs["base"]
+res = g.query(_q_src)
+cols = [str(v) for v in res.vars]
+_all = list(res)
+rows = [{c: (None if r[i] is None else str(r[i])) for i, c in enumerate(cols)}
+        for r in _all[:_max_rows]]
+json.dumps({"cols": cols, "rows": rows, "n": len(g), "total": len(_all)})
+`);
+    const data = JSON.parse(json);
+    renderTable(data.cols, data.rows, 'out-' + id, data.total);
+    const dt = ((performance.now() - t0) / 1000).toFixed(1);
+    timing.textContent = `${dt}s over ${data.n} triples`;
+  } catch (err) {
+    /* Show the real error. A malformed query is the normal case here —
+       people are meant to edit these — so the message has to be the
+       actual parse error. */
+    out.innerHTML = `<pre class="error">${esc(err.message)}</pre>`;
+    timing.textContent = '';
+  }
+  btn.disabled = false;
+}
+
+document.querySelectorAll('button.run').forEach(b =>
+  b.addEventListener('click', () => runQuery(b.dataset.q)));
+document.querySelectorAll('button.reset').forEach(b =>
+  b.addEventListener('click', () => {
+    const id = b.dataset.q;
+    document.getElementById('src-' + id).value = QUERIES[id];
+    document.getElementById('out-' + id).innerHTML = '';
+    document.getElementById('time-' + id).textContent = '';
+  }));
+
+boot();
+</script>
+{% endraw %}

@@ -1,0 +1,28 @@
+# What links out, and what does not
+# Every site, with its ancient name and its Pleiades identifier where the
+# source has one. The gaps are the interesting part: roughly a third of the
+# sites carry no Pleiades link and most carry no Latin name. Absence here is
+# recorded as absence — no placeholder is invented — so this query doubles as
+# a worklist for the concordance.
+
+PREFIX samian:  <http://data.archaeology.link/data/samian/>
+PREFIX lado:    <http://archaeology.link/ontology#>
+PREFIX crm:     <http://www.cidoc-crm.org/cidoc-crm/>
+PREFIX crmdig:  <http://www.ics.forth.gr/isl/CRMdig/>
+PREFIX time:    <http://www.w3.org/2006/time#>
+PREFIX prov:    <http://www.w3.org/ns/prov#>
+PREFIX dcat:    <http://www.w3.org/ns/dcat#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX skos:    <http://www.w3.org/2004/02/skos/core#>
+PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?site ?ancientName ?pleiades ?findspots WHERE {
+  { SELECT ?p (COUNT(DISTINCT ?fs) AS ?findspots) WHERE {
+      ?fs a lado:Findspot ; crm:P89_falls_within ?p .
+    } GROUP BY ?p }
+  ?p rdfs:label ?site .
+  OPTIONAL { ?p lado:ancientName ?ancientName }
+  OPTIONAL { ?p lado:pleiadesID  ?pleiades }
+}
+ORDER BY ?site

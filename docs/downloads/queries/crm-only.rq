@@ -1,0 +1,29 @@
+# The same answer in CIDOC CRM alone
+# No lado: and no time: term appears below, only CIDOC CRM — and it still
+# returns all 41 findspots with their dates. That is the point of the
+# materialised crosswalk: most triplestores perform no RDFS entailment, so the
+# inferred rdf:type triples are written out explicitly rather than left to a
+# reasoner that may never run. Load the vocabulary alone and this query
+# returns nothing.
+
+PREFIX samian:  <http://data.archaeology.link/data/samian/>
+PREFIX lado:    <http://archaeology.link/ontology#>
+PREFIX crm:     <http://www.cidoc-crm.org/cidoc-crm/>
+PREFIX crmdig:  <http://www.ics.forth.gr/isl/CRMdig/>
+PREFIX time:    <http://www.w3.org/2006/time#>
+PREFIX prov:    <http://www.w3.org/ns/prov#>
+PREFIX dcat:    <http://www.w3.org/ns/dcat#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX skos:    <http://www.w3.org/2004/02/skos/core#>
+PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?place ?findspot ?from ?to WHERE {
+  ?fs a crm:E53_Place ; rdfs:label ?findspot ;
+      crm:P89_falls_within ?p ; crm:P4_has_time-span ?ts .
+  ?p a crm:E53_Place ; rdfs:label ?place .
+  ?ts a crm:E52_Time-Span ;
+      crm:P82a_begin_of_the_begin ?from ;
+      crm:P82b_end_of_the_end ?to .
+}
+ORDER BY ?from
