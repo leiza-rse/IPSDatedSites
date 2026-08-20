@@ -277,8 +277,8 @@ lado:padYears a owl:DatatypeProperty ;
 
 lado:qEnd a owl:DatatypeProperty ;
     rdfs:label "q end"@en ;
-    rdfs:comment "Siehe qStart."@de,
-        "Sharpness of the end date. Subject to the same era-boundary distortion as qStart."@en ;
+    rdfs:comment "As qStart, for the end date."@de,
+        "Sharpness of the end date, on the same scale as qStart."@en ;
     rdfs:domain lado:DatedTimeSpan ;
     rdfs:isDefinedBy <http://archaeology.link/ontology> ;
     rdfs:range xsd:decimal .
@@ -286,7 +286,7 @@ lado:qEnd a owl:DatatypeProperty ;
 lado:qInterval a owl:DatatypeProperty ;
     rdfs:label "q interval"@en ;
     rdfs:comment "Datierungsschaerfe (= q_spread). Erste Qualitaetsachse."@de,
-        "The first quality axis, describing how tightly the contributing potter datings agree. Unlike qStart and qEnd it divides by the interval width rather than by a calendar value, so it is not distorted near the era boundary."@en ;
+        "The first quality axis, describing how tightly the contributing potter datings agree. It divides by the interval width, which is a difference and therefore carries no calendar origin."@en ;
     rdfs:domain lado:DatedTimeSpan ;
     rdfs:isDefinedBy <http://archaeology.link/ontology> ;
     rdfs:range xsd:decimal .
@@ -301,9 +301,17 @@ lado:qRepetition a owl:DatatypeProperty ;
 
 lado:qStart a owl:DatatypeProperty ;
     rdfs:label "q start"@en ;
-    rdfs:comment "Haengt am Kalender-Nullpunkt und benachteiligt augusteisches Material systematisch. Mit Vorsicht verwenden."@de,
-        "Sharpness of the start date. Use with care: the denominator is the mean calendar value, so material dated close to the era boundary is penalised for its position in the calendar rather than for any property of the evidence."@en ;
+    rdfs:comment "Sharpness of the start date, exp(-sigma / referenceLength). The denominator is a fixed length, not a calendar value, so the measure no longer depends on where in the calendar the material sits."@de,
+        "Sharpness of the start date, exp(-sigma / referenceLength). Earlier versions divided by the mean calendar value, which penalised material dated near the era boundary for its position in the calendar rather than for any property of the evidence; since v27c the denominator is a fixed length and the measure is independent of epoch. The earlier form is kept in the source query as q_start_legacy, for reconstructing published figures."@en ;
     rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:decimal .
+
+lado:referenceLength a owl:DatatypeProperty ;
+    rdfs:label "reference length"@en ;
+    rdfs:comment "Called t0 in sql/IPSDatedSites.sql. The common time scale against which qStart and qEnd are read: q = exp(-sigma / referenceLength). A fixed length rather than a calendar value, which is what makes the measure independent of where in the calendar the material sits. Anchored on expert thresholds: sigma = 5 years counts as a sharp dating, sigma = 25 years as an unusable one."@de,
+        "The common time scale on which qStart and qEnd are read, called t0 in the source query. Because it is a fixed length rather than a calendar value, the two edge measures no longer depend on the epoch of the material. Its value of 20 years is anchored on expert thresholds: a dispersion of 5 years counts as a sharp dating, one of 25 years as unusable, giving q of about 0.78 and 0.29 respectively. It shares its value with tau by coincidence, not by construction; the two are unrelated quantities."@en ;
+    rdfs:domain lado:DatingModel ;
     rdfs:isDefinedBy <http://archaeology.link/ontology> ;
     rdfs:range xsd:decimal .
 

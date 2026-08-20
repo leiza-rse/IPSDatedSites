@@ -20,7 +20,7 @@ substituting a default.
 | Page | Contents |
 |---|---|
 | [Model](model.md) | The three layers, URI strategy, and the treatment of missing values |
-| [Vocabulary](vocabulary.md) | The 12 classes and 44 properties minted here |
+| [Vocabulary](vocabulary.md) | The 12 classes and 45 properties minted here |
 | [Crosswalk](crosswalk.md) | Mapping to CIDOC CRM, OWL-Time, GeoSPARQL, PROV-O, DCAT and SKOS |
 | [Statistics](statistics.md) | The formulas behind the intervals, as implemented in SQL |
 | [Queries](queries.md) | The SPARQL used to rebuild the figure, and the round-trip check |
@@ -90,4 +90,4 @@ correct in the documentation and stale in the RDF. The generator refuses
 to run if a class or property in the code has no entry there.
 
 *Generated 2026-08-20 from 12 classes, 3 object
-properties and 41 datatype properties.*
+properties and 42 datatype properties.*

@@ -836,13 +836,26 @@ defects should be addressed when that happens; none was introduced here.
 - `foaf:homepage` holds a string containing angle brackets rather than a
   URI.
 
-## The edge quality measures
+## The edge quality measures (resolved)
 
-`lado:qStart` and `lado:qEnd` are distorted by proximity to the calendar
-origin. They are exported because they drive whisker colour in the
-published figure and removing them would break comparability with the web
-output, but they should not be presented as quality measures without that
-caveat. `lado:qInterval` is unaffected and is the measure to prefer.
+Resolved in SQL v27c. `lado:qStart` and `lado:qEnd` divided by the mean
+calendar value, which penalised material dated near the era boundary for
+where it sat in the calendar rather than for anything about the evidence.
+Both now read `exp(-sigma / referenceLength)` against a fixed length of
+20 years, so they no longer depend on epoch.
+
+Recorded here rather than deleted, because the published figure and the
+web output were produced with the earlier form. The source query keeps it
+as `q_start_legacy` / `q_end_legacy` for reconstructing those figures;
+neither is exported, so anything in the graph carries the current
+definition.
+
+A second correction was tried and discarded on the way: making `q_end`
+relative to the epoch made the drift worse rather than better, r rising
+from +0.103 to +0.335. What that showed is that the widening of later
+intervals is not an artefact of the quality measure at all — it belongs
+in the width of the box, which already carries it through each potter's
+own interval. See the epoch-drift check in `py/verify.py`.
 """
     return write(out, "open-questions.md", body)
 

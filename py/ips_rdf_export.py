@@ -390,10 +390,12 @@ DATA_PROPS = [
     (LADO.qInterval, LADO.DatedTimeSpan, XSD.decimal, "q interval",
      "Datierungsschaerfe (= q_spread). Erste Qualitaetsachse."),
     (LADO.qStart, LADO.DatedTimeSpan, XSD.decimal, "q start",
-     "Haengt am Kalender-Nullpunkt und benachteiligt augusteisches "
-     "Material systematisch. Mit Vorsicht verwenden."),
+     "Sharpness of the start date, exp(-sigma / referenceLength). The "
+     "denominator is a fixed length, not a calendar value, so the "
+     "measure no longer depends on where in the calendar the material "
+     "sits."),
     (LADO.qEnd, LADO.DatedTimeSpan, XSD.decimal, "q end",
-     "Siehe qStart."),
+     "As qStart, for the end date."),
     (LADO.sigmaYears, LADO.DatedTimeSpan, XSD.decimal, "sigma (years)",
      "sqrt( AVG(Breite^2/12) + VAR_SAMP(Mitten) ). Varianzzerlegung: "
      "innere Fuzziness plus Streuung der Intervallmitten."),
@@ -429,6 +431,14 @@ DATA_PROPS = [
      "Verschmaelerung erreicht."),
     (LADO.volumeWeight, LADO.DatingModel, XSD.decimal, "volume weight",
      "w = 1.0: k haengt rein am Volumen."),
+    (LADO.referenceLength, LADO.DatingModel, XSD.decimal,
+     "reference length",
+     "Called t0 in sql/IPSDatedSites.sql. The common time scale against "
+     "which qStart and qEnd are read: q = exp(-sigma / referenceLength). "
+     "A fixed length rather than a calendar value, which is what makes "
+     "the measure independent of where in the calendar the material "
+     "sits. Anchored on expert thresholds: sigma = 5 years counts as a "
+     "sharp dating, sigma = 25 years as an unusable one."),
     (LADO.fuzzinessDivisor, LADO.DatingModel, XSD.integer,
      "fuzziness divisor",
      "12 = Varianz der Gleichverteilung. Die Verteilungsannahme pro "
@@ -587,6 +597,7 @@ def build_graph(df: pd.DataFrame, era: str, figure_name: str,
     g.add((model, LADO.kMax, dec(r0.p_k_max)))
     g.add((model, LADO.tau, dec(r0.p_tau)))
     g.add((model, LADO.volumeWeight, dec(r0.p_w)))
+    g.add((model, LADO.referenceLength, dec(r0.p_t0)))
     g.add((model, LADO.fuzzinessDivisor, integer(12)))
     g.add((model, LADO.eraConvention, Literal(era)))
     for v in EXCLUDED_DATEMAX:

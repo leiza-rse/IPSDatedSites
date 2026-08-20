@@ -103,6 +103,7 @@ PLOTROW_MEASURES = [
 MODEL_PARAMS = [
     ("kMin", "p_k_min"), ("kMax", "p_k_max"),
     ("tau", "p_tau"), ("volumeWeight", "p_w"),
+    ("referenceLength", "p_t0"),
 ]
 
 

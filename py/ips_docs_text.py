@@ -141,17 +141,18 @@ TERM_DOCS: dict[str, str] = {
         "that.",
     "qInterval":
         "The first quality axis, describing how tightly the contributing "
-        "potter datings agree. Unlike qStart and qEnd it divides by the "
-        "interval width rather than by a calendar value, so it is not "
-        "distorted near the era boundary.",
+        "potter datings agree. It divides by the interval width, which is "
+        "a difference and therefore carries no calendar origin.",
     "qStart":
-        "Sharpness of the start date. Use with care: the denominator is "
-        "the mean calendar value, so material dated close to the era "
-        "boundary is penalised for its position in the calendar rather "
-        "than for any property of the evidence.",
+        "Sharpness of the start date, exp(-sigma / referenceLength). "
+        "Earlier versions divided by the mean calendar value, which "
+        "penalised material dated near the era boundary for its position "
+        "in the calendar rather than for any property of the evidence; "
+        "since v27c the denominator is a fixed length and the measure is "
+        "independent of epoch. The earlier form is kept in the source "
+        "query as q_start_legacy, for reconstructing published figures.",
     "qEnd":
-        "Sharpness of the end date. Subject to the same era-boundary "
-        "distortion as qStart.",
+        "Sharpness of the end date, on the same scale as qStart.",
     "sigmaYears":
         "The dispersion entering the interval width, obtained by variance "
         "decomposition: the internal fuzziness of each potter's range plus "
@@ -204,6 +205,15 @@ TERM_DOCS: dict[str, str] = {
     "tau":
         "The saturation constant of the k curve. At n = τ roughly 63 per "
         "cent of the available narrowing has been achieved.",
+    "referenceLength":
+        "The common time scale on which qStart and qEnd are read, called "
+        "t0 in the source query. Because it is a fixed length rather than "
+        "a calendar value, the two edge measures no longer depend on the "
+        "epoch of the material. Its value of 20 years is anchored on "
+        "expert thresholds: a dispersion of 5 years counts as a sharp "
+        "dating, one of 25 years as unusable, giving q of about 0.78 and "
+        "0.29 respectively. It shares its value with tau by coincidence, "
+        "not by construction; the two are unrelated quantities.",
     "volumeWeight":
         "Set to 1.0, recording that k depends on volume of evidence alone "
         "and on no other weighting.",
