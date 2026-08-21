@@ -507,8 +507,11 @@ GAUSS_SPAN = 3.2           # curve drawn out to this many sigma
 # The tallest curve stays just inside its own row. A ridgeline that
 # overlaps looks better on a poster, but here the curves carry a measured
 # quantity in their height, and two merged outlines cannot be read apart.
-GAUSS_PEAK_ROWS = 0.95
-GAUSS_ROW_H = 0.72         # inches per row; taller than v2 to fit the curve
+# Without the rail the curve has the row almost to itself. The limit
+# is the repetition bar of the row above, which sits 0.26 below its
+# own baseline, so a peak of 0.66 clears it and the row can shrink.
+GAUSS_PEAK_ROWS = 0.66
+GAUSS_ROW_H = 0.78         # inches per row
 
 # The rail below each baseline: the whole v2 box-and-whisker, slimmed. It
 # restores the two channels the curve alone cannot carry - q_start and
@@ -519,53 +522,51 @@ GAUSS_RAIL_H = 0.15        # box height on the rail
 
 
 def _spread_profile(r, np):
-    """The spread of the contributing potter datings, as a curve.
+    """The spread of the contributing potter datings, as a smooth curve.
 
-    Not a Gaussian, and better for it. Each contributing potter covers a
-    range [datemin, datemax]; the density at a year t is the share of
-    potters whose range contains t. The export publishes the extremes of
-    those ranges but not the ranges themselves, so the starts are taken as
-    spread evenly over [minDatemin, maxDatemin] and the ends over
-    [minDatemax, maxDatemax]. Then
+    Bounded by the extremes of the contributing potters - it rises from
+    zero at minDatemin and returns to zero at maxDatemax, the two values
+    the grey stubs mark in the other figures - and shaped by the model's
+    own midpoint and dispersion.
 
-        density(t) ~ P(start <= t) * P(end >= t)
+    Construction: a Beta density on [minDatemin, maxDatemax], with its two
+    shape parameters solved so that its mean is m and its standard
+    deviation is sigma. Moment matching, nothing more. The earlier version
+    multiplied two linear ramps, which was defensible but produced a
+    trapezoid with hard shoulders; a Beta keeps the same two properties
+    that matter - the support and the dispersion - without asserting that
+    potters enter and leave at a constant rate.
 
-    which is exactly zero at minDatemin and again at maxDatemax - the two
-    grey stubs on the rail below. The curve therefore begins and ends
-    where the evidence does, instead of trailing off into years no potter
-    reaches.
-
-    The shape is a plateau with ramped shoulders rather than a bell: flat
-    where every potter's range overlaps, sloping where they enter and
-    leave. That is what the dispersion actually looks like; a bell was
-    only ever a convenience.
+    Still not a probability distribution over the date. It is a picture of
+    how the contributing datings scatter, drawn on the range they cover.
     """
-    a0, a1 = float(r["minDatemin"]), float(r["maxDatemin"])
-    b0, b1 = float(r["minDatemax"]), float(r["maxDatemax"])
-    lo, hi = min(a0, b0), max(a1, b1)
-    if hi <= lo:
-        hi = lo + 1.0
-    xs = np.linspace(lo, hi, GAUSS_SAMPLES)
+    a = float(r["minDatemin"])
+    b = float(r["maxDatemax"])
+    if b <= a:
+        b = a + 1.0
+    m = (float(r["effStart"]) + float(r["effEnd"])) / 2.0
+    sd = max(float(r["sigma"]), 0.35)
 
-    def ramp(t, u, v, rising):
-        """Share of potters past u on the way to v. A step where u == v."""
-        if v <= u:
-            return (t >= u).astype(float) if rising else (t <= u).astype(float)
-        f = np.clip((t - u) / (v - u), 0.0, 1.0)
-        return f if rising else 1.0 - f
+    span = b - a
+    t = min(max((m - a) / span, 0.02), 0.98)      # mean, as a fraction
+    v = (sd / span) ** 2                           # variance, likewise
 
-    started = ramp(xs, a0, a1, True)      # potters already producing
-    running = ramp(xs, b0, b1, False)     # potters not yet finished
-    dens = started * running
+    # A Beta can only be this dispersed: beyond t(1-t) no shape exists.
+    # Cap rather than fail - a findspot whose sigma exceeds its own range
+    # is telling us something, but not something this curve can draw.
+    v = min(v, t * (1.0 - t) * 0.92)
+    k = t * (1.0 - t) / v - 1.0
+    alpha, beta = t * k, (1.0 - t) * k
 
-    # A light smoothing over the corners. The ramps meet at a point when
-    # the earliest end and the latest start coincide, and a bare triangle
-    # claims a precision the construction does not have. The kernel is
-    # narrow enough that the curve still reaches zero at both extremes,
-    # which is the property the whole profile exists for.
-    k = max(3, GAUSS_SAMPLES // 7) | 1           # odd, ~14 % of the span
-    win = np.hanning(k)
-    dens = np.convolve(dens, win / win.sum(), mode="same")
+    # Both shapes above 1 keep the density at zero on the boundary, which
+    # is the property the whole construction exists for.
+    alpha, beta = max(alpha, 1.06), max(beta, 1.06)
+
+    xs = np.linspace(a, b, GAUSS_SAMPLES)
+    u = np.clip((xs - a) / span, 1e-9, 1.0 - 1e-9)
+    log = (alpha - 1.0) * np.log(u) + (beta - 1.0) * np.log1p(-u)
+    dens = np.exp(log - log.max())
+    dens[0] = dens[-1] = 0.0
 
     area = float(np.trapezoid(dens, xs)) if hasattr(np, "trapezoid") \
         else float(np.trapz(dens, xs))
@@ -636,55 +637,30 @@ def render_gauss(fig_const: dict, rows: list[dict], era: str,
         ys = i - dens * peak_scale
 
         c = colour(r["qInterval"])
-        ax.fill_between(xs, ys, i, facecolor=c, alpha=0.88, zorder=10 + i,
+        ax.fill_between(xs, ys, i, facecolor=c, alpha=0.34, zorder=10 + i,
                         linewidth=0)
         ax.plot(xs, ys, color=INK, linewidth=0.9, zorder=10 + i)
         ax.plot([xs[0], xs[-1]], [i, i], color=INK, linewidth=0.9,
                 zorder=10 + i)
 
-        # ---- the rail: everything the curve cannot say -------------------
-        z = 10 + i + 0.5
-        ry = i + GAUSS_RAIL_DY
-        rh = GAUSS_RAIL_H
-        us, ue = r["uncStart"], r["uncEnd"]
-
-        # Full range, grey, with caps. The extremes of the contributing
-        # potters - the widest the evidence could possibly be read.
-        ax.plot([r["minDatemin"], min(r["minDatemin"] + stub, r["effStart"])],
-                [ry, ry], color=FAINT, linewidth=1.0, zorder=z)
-        ax.plot([max(r["maxDatemax"] - stub, r["effEnd"]), r["maxDatemax"]],
-                [ry, ry], color=FAINT, linewidth=1.0, zorder=z)
-        for xv in (r["minDatemin"], r["maxDatemax"]):
-            ax.plot([xv, xv], [ry - rh * 0.62, ry + rh * 0.62],
-                    color=FAINT, linewidth=1.0, zorder=z)
-
-        # Whiskers, coloured by q_start and q_end. These are the two
-        # channels the curve has no room for: the curve is one width, the
-        # edges have two qualities.
-        for xa, xb, q in ((r["effStart"], r["effStart"] - us, r["qStart"]),
-                          (r["effEnd"], r["effEnd"] + ue, r["qEnd"])):
-            if xa == xb:
-                continue
-            wc = colour(q)
-            ax.plot([xa, xb], [ry, ry], color=PAPER, linewidth=4.2, zorder=z)
-            ax.plot([xa, xb], [ry, ry], color=wc, linewidth=2.6, zorder=z)
-            ax.plot([xb, xb], [ry - rh * 0.75, ry + rh * 0.75], color=wc,
-                    linewidth=2.6, zorder=z)
-
-        # The published interval m +- k*sigma, as a slim box.
-        ax.add_patch(Rectangle((r["effStart"], ry - rh / 2),
-                               r["effEnd"] - r["effStart"], rh,
-                               facecolor=c, edgecolor=INK, linewidth=0.9,
-                               zorder=z + 0.1))
-
-        # Two hairlines tying the box to the curve above it, so the reader
-        # sees which part of the curve the published interval covers.
+        # No rail under the curve. q_start and q_end live in the value
+        # table on the right, and the extremes now bound the curve itself
+        # rather than needing their own line - the curve starts and stops
+        # where the grey stubs used to sit.
+        #
+        # The published interval is shown by shading: the stretch of the
+        # curve between eff_start and eff_end is filled solid, the rest
+        # pale. The reading is in the picture without a second object
+        # competing with it.
+        inside = (xs >= r["effStart"]) & (xs <= r["effEnd"])
+        ax.fill_between(xs, ys, i, where=inside, facecolor=c, alpha=0.92,
+                        zorder=10 + i + 0.2, linewidth=0, interpolate=True)
         for xv in (r["effStart"], r["effEnd"]):
-            ax.plot([xv, xv], [i, ry - rh / 2], color=INK, linewidth=0.7,
-                    alpha=0.45, zorder=z)
+            j = int(np.argmin(np.abs(xs - xv)))
+            ax.plot([xv, xv], [i, ys[j]], color=INK, linewidth=0.7,
+                    alpha=0.35, zorder=10 + i + 0.3)
 
-        # Row units, not inches: the taller gauss rows would otherwise pull
-        # the two label lines apart until they stopped reading as one name.
+
         ax.text(m_label_x, i - 0.26, r["site"], transform=tf, ha="right",
                 va="center", fontsize=10.5, color=INK)
         ax.text(m_label_x, i - 0.04, r["findspot"], transform=tf,
