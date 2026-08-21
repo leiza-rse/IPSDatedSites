@@ -104,10 +104,10 @@
       "median_width_from_ad100": 24.19999999999999,
       "n_before_ad100": 25,
       "n_from_ad100": 12,
-      "r_q_end_vs_year": 0.146978332827572,
-      "r_q_start_vs_year": -0.4158883146292407,
+      "r_q_end_vs_year": 0.14697833282757192,
+      "r_q_start_vs_year": -0.4158883146292406,
       "r_sigma_eff_vs_year": 0.4695609416479841,
-      "r_width_vs_year": 0.46982716378968337
+      "r_width_vs_year": 0.4698271637896833
     },
     "n_findspots": 37,
     "parameters": {
