@@ -54,6 +54,13 @@ REPETITION_BAR_PX = 48          # width, in figure pixels of the left margin
 REPETITION_BAR_HEIGHT = 0.19    # height, in row units
 REPETITION_COLOUR = "#4a6b96"
 
+# How much wider the v1 time axis is than the web original. See the note
+# in render_classic.
+CLASSIC_AXIS_FACTOR = 2.0
+
+# Height of the strip below the axis: tick labels plus the colour bar.
+CLASSIC_FOOT_PX = 118
+
 
 def colour(q):
     """Quality -> colour. None is a state of its own, not a failure."""
@@ -96,15 +103,29 @@ def render_classic(fig_const: dict, rows: list[dict], era: str,
     stub = fig_const["extremeStubYears"]
     band = 1 - fig_const["bandPadding"]
 
-    px_w = fig_const["svgWidth"]
-    px_h = (n * fig_const["rowHeight"] + fig_const["marginTop"]
-            + fig_const["marginBottom"] + 80)
+    # The web figure is 1200 px wide because that suits a browser column.
+    # In print the whisker value labels collided with the boxes, so the
+    # TIME AXIS is widened by this factor while the margins stay as they
+    # are: the labels then have room without the left column moving.
+    #
+    # A deliberate departure from the web original, and the only one in
+    # v1. lado:svgWidth in the graph continues to describe the web figure,
+    # which is what it was recorded from.
+    plot_px = (fig_const["svgWidth"] - fig_const["marginLeft"]
+               - fig_const["marginRight"])
+    px_w = (fig_const["svgWidth"]
+            + plot_px * (CLASSIC_AXIS_FACTOR - 1.0))
+    # The web figure reserves 120 px below the axis for its own layout and
+    # this reproduction then added 80 more for the legend, which left a
+    # hand's width of nothing between the last row and the colour bar.
+    # In print the foot only has to hold the tick labels and the bar.
+    px_h = n * fig_const["rowHeight"] + fig_const["marginTop"] + CLASSIC_FOOT_PX
     fig = plt.figure(figsize=(px_w / 100, px_h / 100), dpi=100,
                      facecolor="white")
 
     left = fig_const["marginLeft"] / px_w
     right = 1 - fig_const["marginRight"] / px_w
-    bottom = (fig_const["marginBottom"] + 80) / px_h
+    bottom = CLASSIC_FOOT_PX / px_h
     top = 1 - fig_const["marginTop"] / px_h
     ax = fig.add_axes((left, bottom, right - left, top - bottom))
 
@@ -196,19 +217,27 @@ def render_classic(fig_const: dict, rows: list[dict], era: str,
                     linestyle=(0, (4, 2)) if u > 0 else "-", zorder=4)
 
         # Whisker-Beschriftung
+        # A white plate under each label. The grey full-range stub runs
+        # along the same y as the text, and without this it strikes
+        # through the digits - the wider axis moved the labels apart but
+        # did not move them off the stub.
+        plate = dict(boxstyle="round,pad=0.18", facecolor="white",
+                     edgecolor="none", alpha=0.92)
         if us > 0:
             q = f'{r["qStart"]:.2f}' if r["qStart"] is not None else "–"
             ax.annotate(f'{int(us)} (q={q})', (r["effStart"] - us, cy),
-                        xytext=(-4, 0), textcoords="offset points",
-                        ha="right", va="center", fontsize=9)
+                        xytext=(-6, 0), textcoords="offset points",
+                        ha="right", va="center", fontsize=9, bbox=plate,
+                        zorder=8)
         if ue > 0:
             q = f'{r["qEnd"]:.2f}' if r["qEnd"] is not None else "–"
             ax.annotate(f'{int(ue)} (q={q})', (r["effEnd"] + ue, cy),
-                        xytext=(4, 0), textcoords="offset points",
-                        ha="left", va="center", fontsize=9)
+                        xytext=(6, 0), textcoords="offset points",
+                        ha="left", va="center", fontsize=9, bbox=plate,
+                        zorder=8)
 
     # Gradientenlegende
-    lax = fig.add_axes((left + (right - left - 0.21) / 2, 24 / px_h,
+    lax = fig.add_axes((left + (right - left - 0.21) / 2, 46 / px_h,
                         0.21, 12 / px_h))
     lax.imshow([[i / 255 for i in range(256)]], aspect="auto", cmap=CMAP,
                extent=(0, 1, 0, 1))
@@ -226,8 +255,6 @@ def render_classic(fig_const: dict, rows: list[dict], era: str,
                 ha="center", va="bottom", fontsize=8, color="#5d6a78",
                 linespacing=1.2, clip_on=False)
 
-    fig.suptitle("Archaeological sites dated by potters", fontsize=14,
-                 x=left, ha="left", y=1 - 6 / px_h)
     return _save(fig, out_dir, stem)
 
 
@@ -442,6 +469,278 @@ def render_modern(fig_const: dict, rows: list[dict], era: str,
     cb = fig.colorbar(ScalarMappable(norm=NORM, cmap=CMAP), cax=cax)
     cb.outline.set_visible(False)
     cb.ax.tick_params(labelsize=8.2, colors=MUTED, length=0)
+    cb.set_label("quality  q   (0 = low, 1 = high)", fontsize=8.8,
+                 color=MUTED, labelpad=9)
+    return _save(fig, out_dir, stem)
+
+# ==========================================================================
+# v2 gauss — the same rows as a ridgeline
+# ==========================================================================
+# The left-hand side is identical to v2: labels, repetition bar, value
+# table. Only the drawing area changes — instead of a box with whiskers,
+# each row carries a curve of width sigma centred on the midpoint.
+#
+# WHAT THE CURVE IS, AND WHAT IT IS NOT
+# -------------------------------------
+# It is NOT a probability distribution over the true date. The model says
+# so explicitly and this figure must not quietly say otherwise: the
+# interval is a "virtual fuzzy year", not a confidence interval, and no
+# claim is made about where within it the date lies.
+#
+# What the curve does show is the dispersion of the contributing potter
+# datings, drawn to the scale sigma was measured on. Each potter
+# contributes a uniform range; sigma decomposes into the mean internal
+# width of those ranges plus the scatter of their midpoints. For a
+# findspot with many stamps their sum approaches a bell shape, which is
+# why a normal curve is a fair rendering of it — and for a findspot with
+# three stamps it is a convenience, not a result.
+#
+# Areas are equal, not peak heights. A sharply dated findspot therefore
+# gets a tall narrow curve and a vague one a low broad curve, so the
+# height IS the sharpness rather than a decoration. Scaling every curve
+# to the same height would have thrown away exactly the quantity the
+# figure exists to show.
+
+GAUSS_SAMPLES = 400        # points per curve
+GAUSS_SPAN = 3.2           # curve drawn out to this many sigma
+
+# The tallest curve stays just inside its own row. A ridgeline that
+# overlaps looks better on a poster, but here the curves carry a measured
+# quantity in their height, and two merged outlines cannot be read apart.
+GAUSS_PEAK_ROWS = 0.95
+GAUSS_ROW_H = 0.72         # inches per row; taller than v2 to fit the curve
+
+# The rail below each baseline: the whole v2 box-and-whisker, slimmed. It
+# restores the two channels the curve alone cannot carry - q_start and
+# q_end in the whisker colours, and the grey full-range stubs.
+GAUSS_RAIL_DY = 0.30       # rail centre, in row units below the baseline
+GAUSS_RAIL_H = 0.15        # box height on the rail
+
+
+
+def _spread_profile(r, np):
+    """The spread of the contributing potter datings, as a curve.
+
+    Not a Gaussian, and better for it. Each contributing potter covers a
+    range [datemin, datemax]; the density at a year t is the share of
+    potters whose range contains t. The export publishes the extremes of
+    those ranges but not the ranges themselves, so the starts are taken as
+    spread evenly over [minDatemin, maxDatemin] and the ends over
+    [minDatemax, maxDatemax]. Then
+
+        density(t) ~ P(start <= t) * P(end >= t)
+
+    which is exactly zero at minDatemin and again at maxDatemax - the two
+    grey stubs on the rail below. The curve therefore begins and ends
+    where the evidence does, instead of trailing off into years no potter
+    reaches.
+
+    The shape is a plateau with ramped shoulders rather than a bell: flat
+    where every potter's range overlaps, sloping where they enter and
+    leave. That is what the dispersion actually looks like; a bell was
+    only ever a convenience.
+    """
+    a0, a1 = float(r["minDatemin"]), float(r["maxDatemin"])
+    b0, b1 = float(r["minDatemax"]), float(r["maxDatemax"])
+    lo, hi = min(a0, b0), max(a1, b1)
+    if hi <= lo:
+        hi = lo + 1.0
+    xs = np.linspace(lo, hi, GAUSS_SAMPLES)
+
+    def ramp(t, u, v, rising):
+        """Share of potters past u on the way to v. A step where u == v."""
+        if v <= u:
+            return (t >= u).astype(float) if rising else (t <= u).astype(float)
+        f = np.clip((t - u) / (v - u), 0.0, 1.0)
+        return f if rising else 1.0 - f
+
+    started = ramp(xs, a0, a1, True)      # potters already producing
+    running = ramp(xs, b0, b1, False)     # potters not yet finished
+    dens = started * running
+
+    # A light smoothing over the corners. The ramps meet at a point when
+    # the earliest end and the latest start coincide, and a bare triangle
+    # claims a precision the construction does not have. The kernel is
+    # narrow enough that the curve still reaches zero at both extremes,
+    # which is the property the whole profile exists for.
+    k = max(3, GAUSS_SAMPLES // 7) | 1           # odd, ~14 % of the span
+    win = np.hanning(k)
+    dens = np.convolve(dens, win / win.sum(), mode="same")
+
+    area = float(np.trapezoid(dens, xs)) if hasattr(np, "trapezoid") \
+        else float(np.trapz(dens, xs))
+    if area > 0:
+        dens = dens / area                # equal areas across rows
+    return xs, dens
+
+
+def render_gauss(fig_const: dict, rows: list[dict], era: str,
+                 out_dir: Path, model: dict | None = None,
+                 stem: str = "plot_v2_gauss") -> list[Path]:
+    import numpy as np
+
+    n = len(rows)
+    pad = fig_const["padYears"]
+    stub = fig_const["extremeStubYears"]
+
+    row_h = GAUSS_ROW_H
+    fig = plt.figure(figsize=(17.0, 1.6 + n * row_h), dpi=100,
+                     facecolor=PAPER)
+    ax = fig.add_axes((0.100, 0.062, 0.400, 0.895))
+    ax.set_facecolor(PAPER)
+
+    # The axis has to hold the curve tails, not just the intervals: a
+    # clipped tail looks like a truncated distribution, which is a claim
+    # the figure is not making.
+    # The profile is bounded by the extremes of the contributing potters,
+    # so the axis only has to hold those - there are no tails to allow for.
+    lo = min(float(r["minDatemin"]) for r in rows) - pad * 0.25
+    hi = max(float(r["maxDatemax"]) for r in rows) + pad * 0.25
+    ax.set_xlim(lo, hi)
+    # Room above the top row for its curve to rise into. Only the top row
+    # needs it, so the allowance is its own peak and not the global one.
+    ax.set_ylim(n - 0.5, -(0.5 + GAUSS_PEAK_ROWS + 0.50))
+
+    ax.grid(axis="x", color=HAIR, linewidth=0.8, zorder=1)
+    ax.set_axisbelow(True)
+    if lo <= 0 <= hi:
+        ax.axvline(0, color=FAINT, linewidth=1.0, linestyle=(0, (3, 3)),
+                   zorder=2)
+    for sp in ("top", "right", "left"):
+        ax.spines[sp].set_visible(False)
+    ax.spines["bottom"].set_color(HAIR)
+    ax.set_yticks([])
+    ax.tick_params(axis="x", colors=MUTED, labelsize=9.5, length=0, pad=6)
+    ticks = [t for t in ax.get_xticks() if lo <= t <= hi]
+    ax.set_xticks(ticks)
+    ax.set_xticklabels([year_label(t, era) for t in ticks])
+
+    tf = ax.get_yaxis_transform()
+    m_have_rep = any(r.get("qRepetition") is not None for r in rows)
+    m_bar_w = REPETITION_BAR_PX / (17.0 * 100 * 0.400)
+    m_bar_x = -0.012 - m_bar_w - 0.008
+    m_label_x = m_bar_x - 0.010
+    if not m_have_rep:
+        m_bar_x = m_label_x = -0.012
+
+    # One scale for every curve, so heights stay comparable across rows.
+    # The sharpest profile sets the tallest peak.
+    profiles = [_spread_profile(r, np) for r in rows]
+    peak_scale = GAUSS_PEAK_ROWS / max(float(d.max()) for _x, d in profiles)
+
+    # Back to front: a lower row's curve must not paint over the row above
+    # it, which is what gives the ridgeline its depth.
+    for i in range(n - 1, -1, -1):
+        r = rows[i]
+        xs, dens = profiles[i]
+        ys = i - dens * peak_scale
+
+        c = colour(r["qInterval"])
+        ax.fill_between(xs, ys, i, facecolor=c, alpha=0.88, zorder=10 + i,
+                        linewidth=0)
+        ax.plot(xs, ys, color=INK, linewidth=0.9, zorder=10 + i)
+        ax.plot([xs[0], xs[-1]], [i, i], color=INK, linewidth=0.9,
+                zorder=10 + i)
+
+        # ---- the rail: everything the curve cannot say -------------------
+        z = 10 + i + 0.5
+        ry = i + GAUSS_RAIL_DY
+        rh = GAUSS_RAIL_H
+        us, ue = r["uncStart"], r["uncEnd"]
+
+        # Full range, grey, with caps. The extremes of the contributing
+        # potters - the widest the evidence could possibly be read.
+        ax.plot([r["minDatemin"], min(r["minDatemin"] + stub, r["effStart"])],
+                [ry, ry], color=FAINT, linewidth=1.0, zorder=z)
+        ax.plot([max(r["maxDatemax"] - stub, r["effEnd"]), r["maxDatemax"]],
+                [ry, ry], color=FAINT, linewidth=1.0, zorder=z)
+        for xv in (r["minDatemin"], r["maxDatemax"]):
+            ax.plot([xv, xv], [ry - rh * 0.62, ry + rh * 0.62],
+                    color=FAINT, linewidth=1.0, zorder=z)
+
+        # Whiskers, coloured by q_start and q_end. These are the two
+        # channels the curve has no room for: the curve is one width, the
+        # edges have two qualities.
+        for xa, xb, q in ((r["effStart"], r["effStart"] - us, r["qStart"]),
+                          (r["effEnd"], r["effEnd"] + ue, r["qEnd"])):
+            if xa == xb:
+                continue
+            wc = colour(q)
+            ax.plot([xa, xb], [ry, ry], color=PAPER, linewidth=4.2, zorder=z)
+            ax.plot([xa, xb], [ry, ry], color=wc, linewidth=2.6, zorder=z)
+            ax.plot([xb, xb], [ry - rh * 0.75, ry + rh * 0.75], color=wc,
+                    linewidth=2.6, zorder=z)
+
+        # The published interval m +- k*sigma, as a slim box.
+        ax.add_patch(Rectangle((r["effStart"], ry - rh / 2),
+                               r["effEnd"] - r["effStart"], rh,
+                               facecolor=c, edgecolor=INK, linewidth=0.9,
+                               zorder=z + 0.1))
+
+        # Two hairlines tying the box to the curve above it, so the reader
+        # sees which part of the curve the published interval covers.
+        for xv in (r["effStart"], r["effEnd"]):
+            ax.plot([xv, xv], [i, ry - rh / 2], color=INK, linewidth=0.7,
+                    alpha=0.45, zorder=z)
+
+        # Row units, not inches: the taller gauss rows would otherwise pull
+        # the two label lines apart until they stopped reading as one name.
+        ax.text(m_label_x, i - 0.26, r["site"], transform=tf, ha="right",
+                va="center", fontsize=10.5, color=INK)
+        ax.text(m_label_x, i - 0.04, r["findspot"], transform=tf,
+                ha="right", va="center", fontsize=8.4, color=MUTED)
+
+        # The repetition bar sits on the rail line, so every small mark in
+        # the row shares one baseline instead of floating between the
+        # label lines.
+        qr = r.get("qRepetition")
+        if qr is not None:
+            h = REPETITION_BAR_HEIGHT * 0.65
+            by = i + GAUSS_RAIL_DY
+            ax.add_patch(Rectangle((m_bar_x, by - h / 2), m_bar_w, h,
+                                   transform=tf, facecolor=BAND,
+                                   edgecolor="none", clip_on=False,
+                                   zorder=3))
+            ax.add_patch(Rectangle((m_bar_x, by - h / 2), m_bar_w * qr, h,
+                                   transform=tf, facecolor=REPETITION_COLOUR,
+                                   edgecolor="none", clip_on=False,
+                                   zorder=4))
+            ax.plot([m_bar_x + m_bar_w / 2] * 2, [by - h / 2, by + h / 2],
+                    transform=tf, color=HAIR, linewidth=0.7,
+                    clip_on=False, zorder=5)
+
+    # ---- value table, unchanged from v2 ------------------------------
+    # Just above the tallest possible curve, not a fixed row above it.
+    head_y = -(0.5 + GAUSS_PEAK_ROWS + 0.30)
+    if m_have_rep:
+        ax.text(m_bar_x + m_bar_w / 2, head_y, "repetition", transform=tf,
+                ha="center", va="center", fontsize=8.2, color=FAINT,
+                clip_on=False)
+    for x, ha, head, _ in TABLE_COLUMNS:
+        ax.text(x, head_y, head, transform=tf, ha=ha, va="center",
+                fontsize=8.2, color=FAINT, clip_on=False)
+    ax.plot([TAB_L, TAB_R], [head_y + 0.23, head_y + 0.23], transform=tf,
+            color=HAIR, linewidth=0.9, clip_on=False, zorder=1)
+    for i, r in enumerate(rows):
+        if i % 2:
+            ax.add_patch(Rectangle((TAB_L, i - 0.5), TAB_R - TAB_L, 1,
+                                   transform=tf, facecolor=BAND,
+                                   edgecolor="none", clip_on=False, zorder=0))
+        for x, ha, _, fn in TABLE_COLUMNS:
+            ax.text(x, i - 0.15, fn(r, era), transform=tf, ha=ha,
+                    va="center", fontsize=9, color=INK, clip_on=False)
+
+    # No title and no caption in the image. What the curve is - and above
+    # all what it is NOT - now has to be carried by the caption of
+    # whatever publishes the figure. The warning matters more than the
+    # title did: a bell curve read as a probability distribution says
+    # something the model explicitly refuses to say.
+
+    cax = fig.add_axes((0.945, 0.30, 0.010, 0.40))
+    cb = fig.colorbar(ScalarMappable(norm=Normalize(0, 1), cmap=CMAP),
+                      cax=cax)
+    cb.outline.set_edgecolor(HAIR)
+    cb.ax.tick_params(labelsize=8.5, colors=MUTED, length=0)
     cb.set_label("quality  q   (0 = low, 1 = high)", fontsize=8.8,
                  color=MUTED, labelpad=9)
     return _save(fig, out_dir, stem)

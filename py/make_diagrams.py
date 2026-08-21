@@ -94,7 +94,7 @@ def diagram_architecture(**_) -> str:
     outs = {
         "rdf": ["ips_sites_dating_v1.ttl", "ips_sites_dating_v1.jsonld",
                 "lado_dating_extension.ttl", "IPSDatedSites-bundle.ttl"],
-        "img": ["plot_v1_classic", "plot_v2_modern"],
+        "img": ["plot_v1_classic", "plot_v2_modern", "plot_v2_gauss"],
     }
     rdf_list = "<br/>".join(outs["rdf"])
     img_list = "<br/>".join(outs["img"])

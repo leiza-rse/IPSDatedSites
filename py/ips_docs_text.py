@@ -227,8 +227,9 @@ TERM_DOCS: dict[str, str] = {
         "epoch of the material. Its value of 20 years is anchored on "
         "expert thresholds: a dispersion of 5 years counts as a sharp "
         "dating, one of 25 years as unusable, giving q of about 0.78 and "
-        "0.29 respectively. It shares its value with tau by coincidence, "
-        "not by construction; the two are unrelated quantities.",
+        "0.29 respectively. Until the calibration of tau it happened to "
+        "carry the same value, which invited the two to be read as one "
+        "constant; they are unrelated, and now they differ.",
     "volumeWeight":
         "Set to 1.0, recording that k depends on volume of evidence alone "
         "and on no other weighting.",

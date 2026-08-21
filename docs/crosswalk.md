@@ -137,7 +137,7 @@ flowchart LR
     end
 
     AL["archaeology.link<br/><i>loc_discoverysite_1.ttl</i><br/>the sites are referenced,<br/>not re-asserted"]
-    PL["Pleiades<br/>20 sites carry<br/>an ancient-place URI"]
+    PL["Pleiades<br/>28 sites carry<br/>an ancient-place URI"]
     N4O["NFDI4Objects<br/>knowledge graph<br/><i>target for the bundle</i>"]
 
     DSITE ==>|same URI| AL

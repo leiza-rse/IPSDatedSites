@@ -52,7 +52,8 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 SELECT ?site ?findspot ?effStart ?effEnd
        ?qInterval ?qStart ?qEnd ?qRepetition
        ?uncStart ?uncEnd ?uncInterval
-       ?minDatemin ?maxDatemax ?nStamps ?nDies
+       ?minDatemin ?maxDatemax ?maxDatemin ?minDatemax
+       ?nStamps ?nDies
        ?avgDatemin ?avgDatemax ?sigma ?k
 WHERE {
   ?row  a lado:PlotRow ; lado:renders ?ts .
@@ -64,6 +65,7 @@ WHERE {
   ?ts time:hasEnd/time:inTimePosition/time:numericPosition       ?effEnd .
 
   ?ts lado:minDatemin ?minDatemin ; lado:maxDatemax ?maxDatemax ;
+      lado:maxDatemin ?maxDatemin ; lado:minDatemax ?minDatemax ;
       lado:nStamps ?nStamps ; lado:nDies ?nDies ;
       lado:avgDatemin ?avgDatemin ; lado:avgDatemax ?avgDatemax ;
       lado:sigmaYears ?sigma ; lado:kFactor ?k .
@@ -151,6 +153,10 @@ def rows(g: Graph) -> list[dict]:
             "uncStart": num(b.uncStart, 0), "uncEnd": num(b.uncEnd, 0),
             "uncInterval": num(b.uncInterval, 0),
             "minDatemin": num(b.minDatemin), "maxDatemax": num(b.maxDatemax),
+            # The inner extremes: where the earliest start ends and the
+            # latest end begins. The spread profile in the gauss figure is
+            # built from them, so they now travel with the rest.
+            "maxDatemin": num(b.maxDatemin), "minDatemax": num(b.minDatemax),
             "nStamps": num(b.nStamps), "nDies": num(b.nDies),
             "avgDatemin": num(b.avgDatemin), "avgDatemax": num(b.avgDatemax),
             "sigma": num(b.sigma), "k": num(b.k),
@@ -166,6 +172,7 @@ FIELD_PAIRS = [
     ("uncStart", "unc_start_years"), ("uncEnd", "unc_end_years"),
     ("uncInterval", "unc_interval_years"),
     ("minDatemin", "min_datemin"), ("maxDatemax", "max_datemax"),
+    ("maxDatemin", "max_datemin"), ("minDatemax", "min_datemax"),
     ("nStamps", "count_stamps"), ("nDies", "n_dies"),
     ("avgDatemin", "avg_datemin"), ("avgDatemax", "avg_datemax"),
     ("sigma", "sigma_eff"), ("k", "k_eff"),

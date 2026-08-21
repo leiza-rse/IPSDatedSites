@@ -42,7 +42,8 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 SELECT ?site ?findspot ?effStart ?effEnd
        ?qInterval ?qStart ?qEnd ?qRepetition
        ?uncStart ?uncEnd ?uncInterval
-       ?minDatemin ?maxDatemax ?nStamps ?nDies
+       ?minDatemin ?maxDatemax ?maxDatemin ?minDatemax
+       ?nStamps ?nDies
        ?avgDatemin ?avgDatemax ?sigma ?k
 WHERE {
   ?row  a lado:PlotRow ; lado:renders ?ts .
@@ -54,6 +55,7 @@ WHERE {
   ?ts time:hasEnd/time:inTimePosition/time:numericPosition       ?effEnd .
 
   ?ts lado:minDatemin ?minDatemin ; lado:maxDatemax ?maxDatemax ;
+      lado:maxDatemin ?maxDatemin ; lado:minDatemax ?minDatemax ;
       lado:nStamps ?nStamps ; lado:nDies ?nDies ;
       lado:avgDatemin ?avgDatemin ; lado:avgDatemax ?avgDatemax ;
       lado:sigmaYears ?sigma ; lado:kFactor ?k .
@@ -119,6 +121,8 @@ than on position:
 | `uncInterval` | `unc_interval_years` |
 | `minDatemin` | `min_datemin` |
 | `maxDatemax` | `max_datemax` |
+| `maxDatemin` | `max_datemin` |
+| `minDatemax` | `min_datemax` |
 | `nStamps` | `count_stamps` |
 | `nDies` | `n_dies` |
 | `avgDatemin` | `avg_datemin` |

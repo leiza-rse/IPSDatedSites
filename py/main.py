@@ -186,6 +186,7 @@ def main() -> int:
         for label, fn, kw in (
             ("v1 classic", ips_render.render_classic, {}),
             ("v2 modern", ips_render.render_modern, {"model": model}),
+            ("v2 gauss", ips_render.render_gauss, {"model": model}),
         ):
             paths = fn(fig_const, rows, era, img, **kw)
             names = ", ".join(p.name for p in paths)

@@ -1,7 +1,7 @@
 {
   "checks": [
     {
-      "detail": "40 columns, all 22 required ones present.",
+      "detail": "38 columns, all 22 required ones present.",
       "key": "k",
       "offenders": [],
       "status": "pass",
@@ -15,35 +15,35 @@
       "title": "row count"
     },
     {
-      "detail": "k_min=0.5, k_max=1.5, tau=20, w=1, t0=20",
+      "detail": "k_min=0.5, k_max=1.5, tau=6, w=1, t0=6",
       "key": "p",
       "offenders": [],
       "status": "pass",
       "title": "parameter columns constant"
     },
     {
-      "detail": "worst deviation 4.82e-05, within the numeric(10,4) cast.",
+      "detail": "worst deviation 4.38e-05, within the numeric(10,4) cast.",
       "key": "c",
       "offenders": [],
       "status": "pass",
       "title": "k_eff from n_stamps_die"
     },
     {
-      "detail": "worst deviation 0.093 years, within the numeric(10,1) casts.",
+      "detail": "worst deviation 0.098 years, within the numeric(10,1) casts.",
       "key": "d",
       "offenders": [],
       "status": "pass",
       "title": "interval width = 2 k sigma"
     },
     {
-      "detail": "exact in all rows (t0 = 20 years).",
+      "detail": "exact in all rows (t0 = 6 years).",
       "key": "h",
       "offenders": [],
       "status": "pass",
       "title": "q_start = exp(-sigma / t0)"
     },
     {
-      "detail": "exact in all rows (t0 = 20 years).",
+      "detail": "exact in all rows (t0 = 6 years).",
       "key": "h'",
       "offenders": [],
       "status": "pass",
@@ -85,7 +85,7 @@
       "title": "integer casts agree with exact columns"
     },
     {
-      "detail": "r(width, midpoint year) = +0.485; median width 17.7 years before AD 100 against 30.7 from AD 100. Later material is dated less sharply because the chronological framework thins out — this belongs in the width, and is the reason no epoch correction is applied to the colour.",
+      "detail": "r(width, midpoint year) = +0.470; median width 12.2 years before AD 100 against 24.2 from AD 100. Later material is dated less sharply because the chronological framework thins out — this belongs in the width, and is the reason no epoch correction is applied to the colour.",
       "key": "l",
       "offenders": [],
       "status": "info",
@@ -94,33 +94,33 @@
   ],
   "facts": {
     "anchors": {
-      "q_at_sharp": 0.779,
-      "q_at_unusable": 0.287,
+      "q_at_sharp": 0.435,
+      "q_at_unusable": 0.016,
       "sharp_years": 5.0,
       "unusable_years": 25.0
     },
     "epoch_drift": {
-      "median_width_before_ad100": 17.7,
-      "median_width_from_ad100": 30.700000000000003,
+      "median_width_before_ad100": 12.2,
+      "median_width_from_ad100": 24.19999999999999,
       "n_before_ad100": 25,
       "n_from_ad100": 12,
-      "r_q_end_vs_year": 0.09521488287060294,
-      "r_q_start_vs_year": -0.49981694410554894,
+      "r_q_end_vs_year": 0.146978332827572,
+      "r_q_start_vs_year": -0.4158883146292407,
       "r_sigma_eff_vs_year": 0.4695609416479841,
-      "r_width_vs_year": 0.4845314535882021
+      "r_width_vs_year": 0.46982716378968337
     },
     "n_findspots": 37,
     "parameters": {
       "k_max": 1.5,
       "k_min": 0.5,
-      "t0": 20.0,
-      "tau": 20.0,
+      "t0": 6.0,
+      "tau": 6.0,
       "w": 1.0
     },
     "q_spectrum": {
       "max": 1.0,
-      "median": 0.649,
-      "min": 0.161
+      "median": 0.236,
+      "min": 0.002
     },
     "sigma_spectrum": {
       "max": 36.549931,
@@ -129,7 +129,7 @@
       "n": 74
     }
   },
-  "source": "C:\\git\\IPSDatedSites\\data\\data-1787228084684.csv",
+  "source": "C:\\git\\IPSDatedSites\\data\\data-1787323977355.csv",
   "summary": {
     "checks": 13,
     "failed": 0,
