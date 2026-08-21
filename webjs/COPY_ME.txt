@@ -14,4 +14,4 @@ In the CFM page:
 GENERATED — do not edit. Regenerate with:
   python py/make_webjs.py --verify
 
-Parity with ips_rdf_export.py: OK, sha256 351dbac434000a67 over 3493 triples (data-1787218454884.csv)
+Parity with ips_rdf_export.py: OK, sha256 7f39f61c4b4cddbd over 3113 triples (data-1787228084684.csv)

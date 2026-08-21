@@ -205,6 +205,8 @@ function buildTriples(rows, opts) {
     if (!isNA(v)) g.add(model, S('lado', prop), Dec(v));
   });
   g.add(model, S('lado', 'fuzzinessDivisor'), Int(GEN.FUZZINESS_DIVISOR));
+  g.add(model, S('lado', 'calibrationBasis'),
+        Lit(GEN.CALIBRATION_BASIS, null, 'en'));
   g.add(model, S('lado', 'eraConvention'), Lit(era));
   GEN.EXCLUDED_DATEMAX.forEach(v => g.add(model, S('lado', 'excludedDatemax'), Int(v)));
 
@@ -216,6 +218,11 @@ function buildTriples(rows, opts) {
   g.add(dataset, S('dcterms', 'created'), nowLit);
   g.add(dataset, S('prov', 'wasAttributedTo'), agent);
   g.add(dataset, S('dcterms', 'source'), Lit(GEN.DATASET_SOURCE));
+  g.add(dataset, S('dcterms', 'license'), U(GEN.DATA_LICENCE));
+  g.add(dataset, S('dcterms', 'rights'), Lit(GEN.DATA_RIGHTS, null, 'en'));
+  g.add(dataset, S('dcterms', 'creator'), Lit(GEN.DATA_CREATOR));
+  g.add(dataset, S('dcterms', 'publisher'), Lit(GEN.DATA_PUBLISHER));
+  g.add(dataset, S('dcat', 'contactPoint'), Lit(GEN.DATA_CONTACT));
   g.add(dataset, S('dcterms', 'issued'), Lit(snapshot, xsd + 'date'));
   g.add(dataset, S('owl', 'versionInfo'), Lit(snapshot));
   g.add(dataset, S('lado', 'identifierScheme'), Lit(GEN.KEY_ALGORITHM));
@@ -332,6 +339,22 @@ function buildTriples(rows, opts) {
     g.add(act, S('crm', 'P33_used_specific_technique'), model);
     g.add(act, S('crm', 'P14_carried_out_by'), agent);
     g.add(ts, S('prov', 'wasDerivedFrom'), dataset);
+  });
+
+  /* Calibration references, resolved to findspot URIs the same way the
+     rows were. Emitted after the loop because the key depends on the row. */
+  GEN.CALIBRATION_REFERENCES.forEach(([site, findspot]) => {
+    for (const r of rows) {
+      if (String(field(r, 'the_site')) === site &&
+          String(field(r, 'the_findspot')) === findspot) {
+        const sid = Math.trunc(num(field(r, 'the_id')));
+        const frag = GEN.KEY_MODE === 'hash' ? findspotHash(findspot)
+                                             : slug(findspot);
+        g.add(model, S('lado', 'calibratedAgainst'),
+              S('samian', 'fs_' + sid + '_' + frag));
+        break;
+      }
+    }
   });
 
   /* discovery sites are typed here, as in make_bundle.py: standalone, an

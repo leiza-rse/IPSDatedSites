@@ -34,6 +34,7 @@ IPSDatedSites/
 ├── .gitignore
 ├── CITATION.cff
 ├── LICENSE
+├── LICENSE-DATA
 ├── README.md
 └── requirements.txt
 ```
@@ -408,21 +409,30 @@ whose diff is always red is a file whose diff nobody reads.
 
 ## Licence and citation
 
-Code under **MIT**, see `LICENSE`. The citation metadata is in
-`CITATION.cff`; GitHub and Zenodo read the file directly.
+Two licences, on purpose:
 
-**The data are independent of that.** They come from Samian Research / IPS
-and not from our own collection — the MIT licence covers the code only. How
-the database is to be cited and under which licence it may be reused should
-be settled before publication; `CITATION.cff` holds a `references` block
-ready for it.
+| | Licence | File |
+|---|---|---|
+| Code | MIT | `LICENSE` |
+| Data — `data/`, `rdf/`, `docs/bundle.ttl`, `img/` | CC BY 4.0 | `LICENSE-DATA` |
 
-Seven places are still open and marked `TODO`: the ORCID of the subject
-author, the release date, the repository URL, the Zenodo DOI, and the
-publisher and URL of the source database. Plus one decision that is not mine
-to take: **Allard Mees** is currently entered as subject author because he
-is the point of contact in this project — if somebody else belongs there,
-that is the line to change.
+A permissive code licence says nothing about who may reuse the
+archaeological record the code processes, and a reader of the graph should
+not have to infer the terms of the one from the terms of the other. The
+data licence is also machine-readable, on the dataset node itself:
+`dcterms:license`, `dcterms:creator`, `dcterms:publisher` and
+`dcat:contactPoint`, so an aggregator can read the terms off the graph.
+
+Attribution goes to the **Samian Research Community**; the point of contact
+is **Dr. Allard W. Mees** (LEIZA). Citation metadata is in `CITATION.cff`,
+which GitHub and Zenodo read directly.
+
+Cite the dated snapshot, not an individual findspot: findspot and time-span
+URIs are deliberately not versioned, and their values change when the source
+data are improved.
+
+Still open: the release date and the Zenodo DOI, both marked `TODO` in
+`CITATION.cff`, and the publisher and URL of the source database.
 
 The house template of the `wdt-*` repositories lists Fiona Schenk as subject
 author by default. That is deliberately **not** carried over here: she

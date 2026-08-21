@@ -78,7 +78,8 @@ REQUIRED_COLUMNS = (
 
 PARAMETER_COLUMNS = ("p_k_min", "p_k_max", "p_tau", "p_w", "p_t0")
 
-EXPECTED_ROWS = 41        # IPSDatedSites27c, current database state
+EXPECTED_ROWS = 37        # IPSDatedSites28, pairwise placeholder filter,
+                          # Bregenz withheld pending review (6 findspots)
 
 # Allard Mees: a scatter of about +/- 5 years counts as sharply dated for
 # samian ware, about +/- 25 years as chronologically unusable. These two

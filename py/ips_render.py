@@ -47,6 +47,14 @@ GREY = "#999999"
 JPG_DPI = 300
 
 
+# ---- second quality axis (lado:qRepetition) ------------------------------
+# Half the height of the label band and twice the width of the first sketch:
+# wide enough to read a difference, flat enough not to compete with the box.
+REPETITION_BAR_PX = 48          # width, in figure pixels of the left margin
+REPETITION_BAR_HEIGHT = 0.19    # height, in row units
+REPETITION_COLOUR = "#4a6b96"
+
+
 def colour(q):
     """Quality -> colour. None is a state of its own, not a failure."""
     return GREY if q is None else CMAP(NORM(q))
@@ -116,16 +124,46 @@ def render_classic(fig_const: dict, rows: list[dict], era: str,
     ax.tick_params(axis="x", labelsize=10)
 
     tf = ax.get_yaxis_transform()
+
+    # ---- second quality axis: die repetition, as a marginal bar ----------
+    # qInterval already owns the box fill and qStart/qEnd own the whiskers,
+    # so a third colour would compete with both. Length in the left margin
+    # is the one channel still free. The bar says "hoard character", not
+    # "better dated": Cologne harbour stands out because its stamps repeat,
+    # not because its dating is sharper.
+    bar_w = REPETITION_BAR_PX / (px_w * (right - left))
+    bar_x = -0.012 - bar_w - 0.010
+    label_x = bar_x - 0.012
+    have_rep = any(r.get("qRepetition") is not None for r in rows)
+    if not have_rep:
+        bar_x = label_x = -0.012
+
     for i, r in enumerate(rows):
         cy = i + 0.5
         y0, y1 = cy - band / 2, cy + band / 2
         us, ue = r["uncStart"], r["uncEnd"]
 
         # Labels on the left: discovery site, findspot underneath
-        ax.text(-0.012, cy - 0.12, r["site"], transform=tf, ha="right",
+        ax.text(label_x, cy - 0.12, r["site"], transform=tf, ha="right",
                 va="center", fontsize=11, color="black")
-        ax.text(-0.012, cy + 0.22, r["findspot"], transform=tf, ha="right",
+        ax.text(label_x, cy + 0.22, r["findspot"], transform=tf, ha="right",
                 va="center", fontsize=9, color="#555555")
+
+        # Repetition bar. The track is drawn even at zero, so an empty bar
+        # reads as "no repetition" rather than as missing data, and the
+        # half mark gives a short bar something to be short against.
+        qr = r.get("qRepetition")
+        if qr is not None:
+            h = REPETITION_BAR_HEIGHT
+            ax.add_patch(Rectangle((bar_x, cy - h / 2), bar_w, h,
+                                   transform=tf, facecolor="#eef1f5",
+                                   edgecolor="none", clip_on=False, zorder=2))
+            ax.add_patch(Rectangle((bar_x, cy - h / 2), bar_w * qr, h,
+                                   transform=tf, facecolor=REPETITION_COLOUR,
+                                   edgecolor="none", clip_on=False, zorder=3))
+            ax.plot([bar_x + bar_w / 2] * 2, [cy - h / 2, cy + h / 2],
+                    transform=tf, color="#c4ccd6", linewidth=0.6,
+                    clip_on=False, zorder=4)
 
         # Extreme-value stubs with caps
         ax.plot([r["minDatemin"], min(r["minDatemin"] + stub, r["effStart"])],
@@ -180,6 +218,13 @@ def render_classic(fig_const: dict, rows: list[dict], era: str,
     for s in lax.spines.values():
         s.set_edgecolor("black")
     lax.set_xlabel("Quality (0 = low, 1 = high)", fontsize=11, labelpad=6)
+
+    # A heading over the bar column. Without it the strip is a decoration;
+    # with it, it is a second reading of the same row.
+    if have_rep:
+        ax.text(bar_x + bar_w / 2, -0.35, "die\nrepetition", transform=tf,
+                ha="center", va="bottom", fontsize=8, color="#5d6a78",
+                linespacing=1.2, clip_on=False)
 
     fig.suptitle("Archaeological sites dated by potters", fontsize=14,
                  x=left, ha="left", y=1 - 6 / px_h)
@@ -292,6 +337,16 @@ def render_modern(fig_const: dict, rows: list[dict], era: str,
     bh = 0.30                          # Box height in row units
     tf = ax.get_yaxis_transform()
 
+    # Repetition bar: same 48 px as v1, converted through this figure's
+    # own axes width so it comes out the same size on paper rather than
+    # the same size in axes fractions.
+    m_have_rep = any(r.get("qRepetition") is not None for r in rows)
+    m_bar_w = REPETITION_BAR_PX / (17.0 * 100 * 0.400)
+    m_bar_x = -0.012 - m_bar_w - 0.008
+    m_label_x = m_bar_x - 0.010
+    if not m_have_rep:
+        m_bar_x = m_label_x = -0.012
+
     for i, r in enumerate(rows):
         y0, y1 = i - bh / 2, i + bh / 2
         us, ue = r["uncStart"], r["uncEnd"]
@@ -336,15 +391,37 @@ def render_modern(fig_const: dict, rows: list[dict], era: str,
             ax.plot([xv, xv], [y0, y1], color=INK, linewidth=0.9,
                     linestyle=(0, (3, 2)) if u > 0 else "-", zorder=6)
 
-        # --- Beschriftung links ---
-        ax.text(-0.012, i - 0.19, r["site"], transform=tf, ha="right",
+        # --- Beschriftung links, hinter dem Wiederholungsbalken ---
+        ax.text(m_label_x, i - 0.19, r["site"], transform=tf, ha="right",
                 va="center", fontsize=10.5, color=INK)
-        ax.text(-0.012, i + 0.20, r["findspot"], transform=tf, ha="right",
+        ax.text(m_label_x, i + 0.20, r["findspot"], transform=tf, ha="right",
                 va="center", fontsize=8.4, color=MUTED)
+
+        # --- Zweite Qualitaetsachse, wie in v1 ---
+        # Same channel and same colour as the classic figure, so a reader
+        # moving between the two does not have to relearn the mark. The
+        # track is drawn at zero as well: an empty bar has to read as "no
+        # repetition" rather than as a value that failed to arrive.
+        qr = r.get("qRepetition")
+        if qr is not None:
+            h = REPETITION_BAR_HEIGHT * 0.65   # v2 rows are airier
+            ax.add_patch(Rectangle((m_bar_x, i - h / 2), m_bar_w, h,
+                                   transform=tf, facecolor=BAND,
+                                   edgecolor="none", clip_on=False, zorder=3))
+            ax.add_patch(Rectangle((m_bar_x, i - h / 2), m_bar_w * qr, h,
+                                   transform=tf, facecolor=REPETITION_COLOUR,
+                                   edgecolor="none", clip_on=False, zorder=4))
+            ax.plot([m_bar_x + m_bar_w / 2] * 2, [i - h / 2, i + h / 2],
+                    transform=tf, color=HAIR, linewidth=0.7,
+                    clip_on=False, zorder=5)
 
     # ----------------------------------------------------------------
     # Wertetabelle
     # ----------------------------------------------------------------
+    if m_have_rep:
+        ax.text(m_bar_x + m_bar_w / 2, -0.95, "repetition", transform=tf,
+                ha="center", va="center", fontsize=8.2, color=FAINT,
+                clip_on=False)
     for x, ha, head, _ in TABLE_COLUMNS:
         ax.text(x, -0.95, head, transform=tf, ha=ha, va="center",
                 fontsize=8.2, color=FAINT, clip_on=False)

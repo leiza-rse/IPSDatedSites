@@ -1,0 +1,54 @@
+Licence for the data
+====================
+
+The SOFTWARE in this repository is under the MIT licence; see LICENSE.
+
+The DATA it produces — the CSV export in `data/`, the RDF in `rdf/`, the
+published graph at `docs/bundle.ttl`, and the figures in `img/` — are made
+available under
+
+    Creative Commons Attribution 4.0 International (CC BY 4.0)
+    https://creativecommons.org/licenses/by/4.0/
+
+Two licences rather than one, on purpose: a permissive code licence says
+nothing about who may reuse the archaeological record that the code
+processes, and a reader of the graph should not have to infer the terms
+from the terms on the software.
+
+Attribution
+-----------
+
+    Samian Research Community (year): Archaeological findspots dated by
+    samian potters' stamps. Leibniz-Zentrum für Archäologie (LEIZA).
+    https://github.com/leiza-rse/IPSDatedSites
+
+Cite the dated snapshot, not an individual findspot. Findspot and
+time-span URIs are deliberately not versioned: they denote the same
+findspot permanently, and their values change when the source data are
+improved. The dataset node carries `dcterms:issued` and `owl:versionInfo`
+for exactly this purpose.
+
+Machine-readable
+----------------
+
+The same statement is in the graph itself, on the dataset node:
+
+    dcterms:license   <https://creativecommons.org/licenses/by/4.0/>
+    dcterms:creator   "Samian Research Community"
+    dcterms:publisher "Leibniz-Zentrum fuer Archaeologie (LEIZA)"
+    dcat:contactPoint "Dr. Allard W. Mees, ..."
+
+so an aggregator can read the terms off the data without consulting this
+file.
+
+Source data
+-----------
+
+Derived from the Samian Research / Index Professionum Signorum (IPS)
+database. Rights in the source database are held by its publishers and are
+independent of both licences above.
+
+Contact
+-------
+
+Dr. Allard W. Mees, Leibniz-Zentrum für Archäologie (LEIZA).

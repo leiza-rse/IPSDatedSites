@@ -16,13 +16,19 @@ authors:
     given-names: Florian
     orcid: "https://orcid.org/0000-0002-3246-3531"
     affiliation: "Leibniz-Zentrum für Archäologie (LEIZA)"
-  # TODO: confirm the domain author and their ORCID before release.
-  # Allard Mees is assumed here as the Samian Research / IPS lead; correct
-  # if someone else should be credited, and remove this comment.
   - family-names: Mees
     given-names: Allard
-    orcid: "https://orcid.org/0000-0000-0000-0000"  # TODO: insert ORCID
+    name-suffix: "Dr."
     affiliation: "Leibniz-Zentrum für Archäologie (LEIZA)"
+    # No ORCID on file; confirmed as intentional, not as an omission.
+contact:
+  - family-names: Mees
+    given-names: Allard
+    name-suffix: "Dr."
+    affiliation: "Leibniz-Zentrum für Archäologie (LEIZA)"
+# The code is MIT; the data it produces are CC BY 4.0. Two licences,
+# because a permissive code licence says nothing about who may reuse the
+# archaeological record the code processes. See LICENSE and LICENSE-DATA.
 license: MIT
 version: "1.0.0"
 date-released: "2026-01-01"  # TODO: confirm release date
@@ -49,5 +55,5 @@ references:
       The rights in the data are held by the database publishers and are
       independent of the MIT licence covering this software.
     authors:
-      - name: "Leibniz-Zentrum für Archäologie (LEIZA)"  # TODO: confirm
+      - name: "Samian Research Community"
     url: "https://www.rgzm.de/samian"  # TODO: confirm current URL

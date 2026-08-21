@@ -40,13 +40,6 @@ lado:DiscoverySite a owl:Class ;
     rdfs:isDefinedBy <http://archaeology.link/ontology> ;
     rdfs:subClassOf lado:Location .
 
-lado:Findspot a owl:Class ;
-    rdfs:label "Findspot"@en ;
-    rdfs:comment "Benannte Fundstelle innerhalb eines Fundplatzes. Faellt ueber crm:P89_falls_within in die DiscoverySite. Ein Fundplatz kann mehrere Fundstellen tragen (Bregenz: sechs)."@de,
-        "A named context within a discovery site, such as a pit, a ditch or a destruction layer. It falls within its site via crm:P89_falls_within. A site may carry several findspots — Bregenz has six — which is why the dating hangs on the findspot and not on the site."@en ;
-    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
-    rdfs:subClassOf lado:Location .
-
 lado:FindspotDating a owl:Class ;
     rdfs:label "Findspot dating"@en ;
     rdfs:comment "Datierung einer Fundstelle aus Toepferstempeln. Das Intervall ist ein 'virtual fuzzy year' m +/- k*sigma, KEIN Konfidenzintervall."@de,
@@ -82,6 +75,22 @@ lado:bandPadding a owl:DatatypeProperty ;
     rdfs:domain lado:Figure ;
     rdfs:isDefinedBy <http://archaeology.link/ontology> ;
     rdfs:range xsd:decimal .
+
+lado:calibratedAgainst a owl:ObjectProperty ;
+    rdfs:label "calibrated against"@en ;
+    rdfs:comment "A findspot whose date is known independently of samian ware, used to fix the coverage factor. Naming them in the graph is the point: a calibration whose reference set is not published cannot be checked."@de,
+        "A findspot whose date rests on dendrochronology, coins or a historical event rather than on samian ware. Naming them in the graph is the point: a calibration whose reference set is not published cannot be checked, and one calibrated against samian-dated ensembles would be circular. Two candidates were dropped for exactly that reason."@en ;
+    rdfs:domain lado:DatingModel ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range lado:Findspot .
+
+lado:calibrationBasis a owl:DatatypeProperty ;
+    rdfs:label "calibration basis"@en ;
+    rdfs:comment "How the coverage factor was obtained. A plain-language statement, not a machine-readable procedure: it says which criterion was applied so that a reader can judge the number rather than take it on trust."@de,
+        "How the coverage factor was arrived at, in words. The value of tau was not chosen for elegance: it is the smallest value at which every reference findspot's terminus ante quem still falls inside its interval. k_min and k_max remain set conventions, because five reference ensembles cannot separate three parameters — attempting it produced 2 424 parameter combinations that fit the data equally well."@en ;
+    rdfs:domain lado:DatingModel ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:string .
 
 lado:colourRamp a owl:DatatypeProperty ;
     rdfs:label "colour ramp"@en ;
@@ -402,6 +411,13 @@ lado:volumeWeight a owl:DatatypeProperty ;
     rdfs:range xsd:decimal .
 
 crmdig:D14_Software rdfs:subClassOf crmdig:D1_Digital_Object .
+
+lado:Findspot a owl:Class ;
+    rdfs:label "Findspot"@en ;
+    rdfs:comment "Benannte Fundstelle innerhalb eines Fundplatzes. Faellt ueber crm:P89_falls_within in die DiscoverySite. Ein Fundplatz kann mehrere Fundstellen tragen (Bregenz: sechs)."@de,
+        "A named context within a discovery site, such as a pit, a ditch or a destruction layer. It falls within its site via crm:P89_falls_within. A site may carry several findspots — Bregenz has six — which is why the dating hangs on the findspot and not on the site."@en ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:subClassOf lado:Location .
 
 crm:E11_Modification rdfs:subClassOf crm:E7_Activity .
 

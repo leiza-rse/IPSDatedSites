@@ -205,6 +205,21 @@ TERM_DOCS: dict[str, str] = {
     "tau":
         "The saturation constant of the k curve. At n = τ roughly 63 per "
         "cent of the available narrowing has been achieved.",
+    "calibrationBasis":
+        "How the coverage factor was arrived at, in words. The value of tau "
+        "was not chosen for elegance: it is the smallest value at which "
+        "every reference findspot's terminus ante quem still falls inside "
+        "its interval. k_min and k_max remain set conventions, because five "
+        "reference ensembles cannot separate three parameters — attempting "
+        "it produced 2 424 parameter combinations that fit the data equally "
+        "well.",
+    "calibratedAgainst":
+        "A findspot whose date rests on dendrochronology, coins or a "
+        "historical event rather than on samian ware. Naming them in the "
+        "graph is the point: a calibration whose reference set is not "
+        "published cannot be checked, and one calibrated against "
+        "samian-dated ensembles would be circular. Two candidates were "
+        "dropped for exactly that reason.",
     "referenceLength":
         "The common time scale on which qStart and qEnd are read, called "
         "t0 in the source query. Because it is a fixed length rather than "

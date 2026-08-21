@@ -147,6 +147,35 @@ LAYER_LABELS = {
 # --------------------------------------------------------------------------
 # Figure constants (from IPSDatedSites27.cfm)
 # --------------------------------------------------------------------------
+# Rights on the published data, as settled with A. Mees. The code is MIT
+# (see LICENSE); the data are CC BY 4.0 (see LICENSE-DATA). The two are
+# deliberately separate: a permissive code licence says nothing about who
+# may reuse the archaeological record it processes.
+DATA_LICENCE = URIRef("https://creativecommons.org/licenses/by/4.0/")
+DATA_RIGHTS = (
+    "Creative Commons Attribution 4.0 International (CC BY 4.0). Derived "
+    "from the Samian Research / IPS database."
+)
+DATA_CREATOR = "Samian Research Community"
+DATA_PUBLISHER = "Leibniz-Zentrum fuer Archaeologie (LEIZA)"
+DATA_CONTACT = "Dr. Allard W. Mees, Leibniz-Zentrum fuer Archaeologie (LEIZA)"
+
+CALIBRATION_BASIS = (
+    "tau chosen as the smallest value at which every reference findspot's "
+    "terminus ante quem falls inside its interval. k_min and k_max are set "
+    "conventions, not calibrated: five reference ensembles cannot separate "
+    "three parameters."
+)
+
+# (discovery-site id, findspot, terminus, why it is independent of samian)
+CALIBRATION_REFERENCES = [
+    ("Dangstetten", "Military camp", -8, "coin-dated, 15 to 8 BC"),
+    ("Oberaden", "Military camp", -7, "dendrochronology, ending 7 BC"),
+    ("Velsen", "Velsen I", 30, "historically dated occupation"),
+    ("Pompeii", "Hoard", 79, "eruption of Vesuvius"),
+    ("Inchtuthil", "Gutter", 87, "historically dated abandonment"),
+]
+
 FIGURE_CONSTANTS = {
     "padYears": (60, XSD.integer),            # Z. 373
     "extremeStubYears": (10, XSD.integer),    # Z. 472
@@ -431,6 +460,18 @@ DATA_PROPS = [
      "Verschmaelerung erreicht."),
     (LADO.volumeWeight, LADO.DatingModel, XSD.decimal, "volume weight",
      "w = 1.0: k haengt rein am Volumen."),
+    (LADO.calibrationBasis, LADO.DatingModel, XSD.string,
+     "calibration basis",
+     "How the coverage factor was obtained. A plain-language statement, "
+     "not a machine-readable procedure: it says which criterion was "
+     "applied so that a reader can judge the number rather than take it "
+     "on trust."),
+    (LADO.calibratedAgainst, LADO.DatingModel, LADO.Findspot,
+     "calibrated against",
+     "A findspot whose date is known independently of samian ware, used "
+     "to fix the coverage factor. Naming them in the graph is the point: "
+     "a calibration whose reference set is not published cannot be "
+     "checked."),
     (LADO.referenceLength, LADO.DatingModel, XSD.decimal,
      "reference length",
      "Called t0 in sql/IPSDatedSites.sql. The common time scale against "
@@ -535,7 +576,12 @@ def build_ontology() -> Graph:
         _describe(g, prop)
 
     for prop, dom, rng, label, comment in DATA_PROPS:
-        g.add((prop, RDF.type, OWL.DatatypeProperty))
+        # A range outside the XSD namespace means the property points at a
+        # resource, not a value; declaring it as a DatatypeProperty would
+        # make the vocabulary contradict the data it describes.
+        is_object = not str(rng).startswith(str(XSD))
+        g.add((prop, RDF.type,
+               OWL.ObjectProperty if is_object else OWL.DatatypeProperty))
         g.add((prop, RDFS.domain, dom))
         g.add((prop, RDFS.range, rng))
         g.add((prop, RDFS.label, Literal(label, lang="en")))
@@ -603,6 +649,19 @@ def build_graph(df: pd.DataFrame, era: str, figure_name: str,
     for v in EXCLUDED_DATEMAX:
         g.add((model, LADO.excludedDatemax, integer(v)))
 
+    # Where the coverage factor comes from. Emitted whether or not the
+    # reference findspots are in this export: naming them is the claim, and
+    # a reader has to be able to see it even from a partial extract.
+    g.add((model, LADO.calibrationBasis, Literal(CALIBRATION_BASIS, lang="en")))
+    for site, findspot, _terminus, _why in CALIBRATION_REFERENCES:
+        for _, row in df.iterrows():
+            if str(row.the_site) == site and str(row.the_findspot) == findspot:
+                sid = int(row.the_id)
+                frag = keys[(sid, str(row.the_findspot))]
+                g.add((model, LADO.calibratedAgainst,
+                       SAMIAN[f"fs_{sid}_{frag}"]))
+                break
+
     # The time-span URIs stay stable; their VALUE changes with the data.
     # What is citable is therefore the dated snapshot, not the individual
     # time-span.
@@ -618,6 +677,14 @@ def build_graph(df: pd.DataFrame, era: str, figure_name: str,
     g.add((dataset, DCTERMS.source, Literal(
         "Samian Research / IPS, tbldistribution + tblpotter + "
         "v_discoverysite")))
+    # Rights. Without an explicit licence a published graph is not reusable,
+    # whatever the intention behind it - NFDI4Objects and every other
+    # aggregator has to be able to read the terms off the data itself.
+    g.add((dataset, DCTERMS.license, DATA_LICENCE))
+    g.add((dataset, DCTERMS.rights, Literal(DATA_RIGHTS, lang="en")))
+    g.add((dataset, DCTERMS.creator, Literal(DATA_CREATOR)))
+    g.add((dataset, DCTERMS.publisher, Literal(DATA_PUBLISHER)))
+    g.add((dataset, DCAT.contactPoint, Literal(DATA_CONTACT)))
     g.add((dataset, DCTERMS.issued, Literal(snapshot, datatype=XSD.date)))
     g.add((dataset, OWL.versionInfo, Literal(snapshot)))
     g.add((dataset, LADO.identifierScheme, Literal(KEY_ALGORITHM)))

@@ -150,6 +150,17 @@ def build_js(onto: Graph) -> str:
         "FIGURE_CONSTANTS": figure_constants(),
         "FIGURE_NAME": "sites_dating_v1",
         "EXCLUDED_DATEMAX": X.EXCLUDED_DATEMAX,
+        # Rights and calibration provenance. Injected rather than retyped:
+        # a licence that differs between the published graph and a live
+        # browser export is worse than none, because both look official.
+        "DATA_LICENCE": str(X.DATA_LICENCE),
+        "DATA_RIGHTS": X.DATA_RIGHTS,
+        "DATA_CREATOR": X.DATA_CREATOR,
+        "DATA_PUBLISHER": X.DATA_PUBLISHER,
+        "DATA_CONTACT": X.DATA_CONTACT,
+        "CALIBRATION_BASIS": X.CALIBRATION_BASIS,
+        "CALIBRATION_REFERENCES": [[a, b] for a, b, _c, _d
+                                   in X.CALIBRATION_REFERENCES],
         "FUZZINESS_DIVISOR": 12,
         "KEY_ALGORITHM": X.KEY_ALGORITHM,
         "KEY_MODE": "hash",
