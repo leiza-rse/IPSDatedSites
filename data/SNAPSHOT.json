@@ -5,18 +5,20 @@
     "datedsites": {
       "endpoint": "https://www1.rgzm.de/rest/samianresearch/datedsites",
       "file": "datedsites.json",
-      "bytes": 145816,
-      "sha256": "688bb54cf1f7e01697cfe8af7449a864fd7fccd72d82bc2ae91d065f2a2c60e0",
-      "records": 1358
+      "bytes": 149758,
+      "sha256": "5098a48949b639aebbb2e6a76b472bd102ecc6504a7a99756aec4faf3678aa4c",
+      "records": 1391
     },
     "datedsitesstatistics": {
       "endpoint": "https://www1.rgzm.de/rest/samianresearch/datedsitesstatistics",
       "file": "datedsitesstatistics.csv",
-      "bytes": 8309,
-      "sha256": "b7501f96820d58da350de0c4ce8245d90d84b4b20b3af587d3b8a013b0bf8bca"
+      "bytes": 10543,
+      "sha256": "9a49e5229d2c48e6ba5f88e8c88d02e9c6837710dc54e0ab0894712b21845d6b"
     }
   },
-  "findspots": 37,
+  "origin": "live",
+  "crosscheck": "agrees on 40 findspots",
+  "findspots": 40,
   "model": {
     "k_min": 0.5,
     "k_max": 1.5,

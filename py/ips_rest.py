@@ -13,9 +13,12 @@ published inputs, without database access.
         that sql/v_ips_dated_stamps.sql delivers.
 
     https://www1.rgzm.de/rest/samianresearch/datedsitesstatistics
-        Pipe-delimited CSV. One row per findspot, everything aggregated.
-        This is the OUTPUT of the model, computed in the database. It is
-        what py/ips_model.py is checked against.
+        One row per findspot, everything aggregated. This is the OUTPUT of
+        the model, computed in the database, and what py/ips_model.py is
+        checked against. The format is NOT fixed: it has been seen as
+        pipe-delimited CSV and, from the live endpoint, as ColdFusion query
+        serialisation like its sibling. load_statistics() accepts either,
+        plus a plain JSON array, and says what it received when it cannot.
 
     https://www1.rgzm.de/ips/lod/ips_stamps.csv
         Pipe-delimited CSV, the stamp list without the potter dates.
@@ -68,6 +71,7 @@ from __future__ import annotations
 
 import csv
 import hashlib
+import io
 import json
 from datetime import date
 from pathlib import Path
@@ -229,22 +233,101 @@ def load_datedsites_json(path: Path) -> list[dict]:
     return rows
 
 
-def load_statistics_csv(path: Path) -> list[dict]:
-    """The findspot-level reference, from /datedsitesstatistics.
+def _preview(raw: bytes, n: int = 240) -> str:
+    """The first bytes of a payload, printable, for a diagnostic message.
 
-    Pipe-delimited; empty fields become None so that a missing value is not
+    When a loader fails, the single most useful thing it can say is what it
+    actually received. Without it every format surprise costs a round trip
+    to whoever can see the server.
+    """
+    text = raw[:n].decode("utf-8", errors="replace")
+    return " ".join(text.split())
+
+
+def load_statistics(path: Path) -> list[dict]:
+    """The findspot-level reference, whatever shape it arrives in.
+
+    /datedsitesstatistics has been seen as pipe-delimited CSV, and the
+    sibling endpoint /datedsites answers with ColdFusion's query
+    serialisation. Which of the two a given deployment returns is not
+    something this repository gets to decide, so both are accepted, along
+    with a plain JSON array of objects and the usual delimiters.
+
+    Keys are lower-cased: the CSV form spells them lower, the JSON form
+    upper, and everything downstream expects lower.
+
+    Values that are empty become None, so that a missing number is not
     silently read as the string "".
     """
-    with path.open(encoding="utf-8-sig", newline="") as fh:
-        sample = fh.readline()
-        fh.seek(0)
-        delimiter = "|" if sample.count("|") > sample.count(",") else ","
-        rows = [{k: (v if (v or "").strip() != "" else None)
-                 for k, v in r.items()}
-                for r in csv.DictReader(fh, delimiter=delimiter)]
+    raw = path.read_bytes()
+    text = raw.decode("utf-8-sig", errors="replace")
+    head = text.lstrip()[:1]
+
+    def clean(record: dict) -> dict:
+        out = {}
+        for key, value in record.items():
+            if key is None:
+                continue
+            if isinstance(value, str) and value.strip() == "":
+                value = None
+            out[str(key).strip().lower()] = value
+        return out
+
+    rows: list[dict] = []
+
+    if head in ("{", "["):
+        try:
+            payload = json.loads(text)
+        except json.JSONDecodeError as exc:
+            raise SystemExit(
+                f"  !!  {path.name} looks like JSON but will not parse: "
+                f"{exc}\n      Starts: {_preview(raw)}")
+
+        # ColdFusion query serialisation, at either nesting depth.
+        block = payload
+        if isinstance(block, dict) and "data" in block:
+            block = block["data"]
+        if isinstance(block, dict) and "COLUMNS" in block and "DATA" in block:
+            names = [str(c).lower() for c in block["COLUMNS"]]
+            rows = [clean(dict(zip(names, r))) for r in block["DATA"]]
+        elif isinstance(payload, list):
+            rows = [clean(r) for r in payload if isinstance(r, dict)]
+        elif isinstance(block, list):
+            rows = [clean(r) for r in block if isinstance(r, dict)]
+        else:
+            raise SystemExit(
+                f"  !!  {path.name} is JSON of an unfamiliar shape.\n"
+                f"      Expected COLUMNS/DATA or an array of objects.\n"
+                f"      Starts: {_preview(raw)}")
+    else:
+        # Delimited text. Sniff over the header line rather than the whole
+        # file: a stray pipe inside a findspot name should not outvote the
+        # actual separator.
+        header = text.splitlines()[0] if text.splitlines() else ""
+        delimiter = max(("|", ";", "\t", ","), key=header.count)
+        if header.count(delimiter) == 0:
+            raise SystemExit(
+                f"  !!  {path.name}: no delimiter found in the header line.\n"
+                f"      Starts: {_preview(raw)}")
+        rows = [clean(r) for r in
+                csv.DictReader(io.StringIO(text), delimiter=delimiter)]
+
     if not rows:
-        raise SystemExit(f"  !!  {path.name} is empty.")
+        raise SystemExit(
+            f"  !!  {path.name} parsed to zero rows ({len(raw)} bytes read).\n"
+            f"      Starts: {_preview(raw)}")
+
+    if "the_site" not in rows[0] or "the_findspot" not in rows[0]:
+        raise SystemExit(
+            f"  !!  {path.name} lacks the_site / the_findspot.\n"
+            f"      Columns found: {', '.join(sorted(rows[0])[:12])}\n"
+            "      Is this the statistics resource?")
     return rows
+
+
+# The old name, kept because it reads well at the call sites and because
+# the format is no longer necessarily CSV.
+load_statistics_csv = load_statistics
 
 
 def stamps_to_csv(rows: list[dict], path: Path) -> None:

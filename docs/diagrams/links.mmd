@@ -1,13 +1,13 @@
 flowchart LR
     subgraph ours["this repository"]
         direction TB
-        FS["lado:Findspot<br/>37 findspots<br/><i>URI = sha256(name)[0:6]</i>"]
+        FS["lado:Findspot<br/>40 findspots<br/><i>URI = sha256(name)[0:6]</i>"]
         DSITE["lado:DiscoverySite<br/>0 sites"]
         FS -->|crm:P89_falls_within| DSITE
     end
 
     AL["archaeology.link<br/><i>loc_discoverysite_1.ttl</i><br/>the sites are referenced,<br/>not re-asserted"]
-    PL["Pleiades<br/>28 sites carry<br/>an ancient-place URI"]
+    PL["Pleiades<br/>29 sites carry<br/>an ancient-place URI"]
     N4O["NFDI4Objects<br/>knowledge graph<br/><i>target for the bundle</i>"]
 
     DSITE ==>|same URI| AL

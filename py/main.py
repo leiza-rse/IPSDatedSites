@@ -80,17 +80,33 @@ def build_from_rest(offline: bool, timeout: float) -> tuple[Path, str, list]:
     print(f"  Source            : {origin}  "
           f"({len(stamps)} stamps, {len(rows)} findspots)")
 
-    reference = ips_rest.load_statistics_csv(paths["datedsitesstatistics"])
-    deviations = ips_model.compare(rows, paths["datedsitesstatistics"])
-    if deviations:
-        raise SystemExit(
-            "  !!  the recomputation disagrees with the database's own "
-            "aggregation of the same stamps.\n"
-            "      One of the two has moved. Do not build on this: check "
-            "sql/IPSDatedSites.sql against py/ips_model.py before "
-            "continuing, or pass --csv to use an existing export.")
-    print(f"  Cross-check       : agrees with the database on all "
-          f"{len(reference)} findspots")
+    # The cross-check corroborates; it does not produce the corpus. So a
+    # DISAGREEMENT is fatal — one of the two implementations has moved and
+    # the difference would be published unnoticed — while a reference that
+    # cannot be read at all is not. Blocking every build because the
+    # secondary resource changed format would be the tail wagging the dog,
+    # and the recomputation is a complete implementation in its own right,
+    # every row of which check 0 still verifies internally.
+    crosscheck = "unavailable"
+    try:
+        reference = ips_rest.load_statistics(paths["datedsitesstatistics"])
+    except SystemExit as exc:
+        print(f"{exc}")
+        print("  !!  Cross-check skipped: the reference could not be read.")
+        print("      Building on the recomputation alone. It is an "
+              "independent implementation and internally verified, but "
+              "nothing is confirming it against the database on this run.")
+    else:
+        if ips_model.compare(rows, paths["datedsitesstatistics"]):
+            raise SystemExit(
+                "  !!  the recomputation disagrees with the database's own "
+                "aggregation of the same stamps.\n"
+                "      One of the two has moved. Do not build on this: check "
+                "sql/IPSDatedSites.sql against py/ips_model.py before "
+                "continuing, or pass --csv to use an existing export.")
+        crosscheck = f"agrees on {len(reference)} findspots"
+        print(f"  Cross-check       : agrees with the database on all "
+              f"{len(reference)} findspots")
 
     # One CSV in data/, named for the day it was pulled. Written after the
     # cross-check, never before: a file in data/ is taken by everything
@@ -105,6 +121,7 @@ def build_from_rest(offline: bool, timeout: float) -> tuple[Path, str, list]:
 
     snapshot = ips_rest.snapshot(paths, retrieved=stamp)
     snapshot["origin"] = origin
+    snapshot["crosscheck"] = crosscheck
     snapshot["findspots"] = len(rows)
     snapshot["sources"]["datedsites"]["records"] = len(stamps)
     snapshot["model"] = ips_model.DEFAULTS
