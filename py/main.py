@@ -198,6 +198,10 @@ def main() -> int:
                     help="recompute from the cached payloads in data/source/ "
                          "without attempting the network.")
     ap.add_argument("--rest-timeout", type=float, default=20.0)
+    ap.add_argument("--report-out", type=Path, default=ROOT / "docs",
+                    help="where the build report goes. Two files: "
+                         "run-report.html and run-report.txt.")
+    ap.add_argument("--no-report", action="store_true")
     args = ap.parse_args()
 
     import pandas as pd
@@ -399,5 +403,47 @@ def main() -> int:
     return 0 if ok else 2
 
 
+def run() -> int:
+    """main() with everything it prints captured for the report.
+
+    The capture wraps main() rather than living inside it, so that a run
+    that stops — whether by SystemExit or by an unhandled exception — still
+    produces a report. That is the run whose report is worth the most: the
+    log ends exactly where the trouble was, and the last known state is on
+    disk beside it.
+    """
+    import run_report
+
+    stdout, stderr = sys.stdout, sys.stderr
+    tee = run_report.Tee(stdout)
+    sys.stdout = tee
+    sys.stderr = run_report.Tee(stderr) if stderr is not stdout else tee
+
+    code = 0
+    try:
+        code = main()
+    except SystemExit as exc:
+        code = exc.code if isinstance(exc.code, int) else 1
+        if exc.code:
+            print(f"{exc}")
+    except Exception:
+        import traceback
+        traceback.print_exc(file=tee)
+        code = 1
+    finally:
+        log = tee.text
+        sys.stdout, sys.stderr = stdout, stderr
+
+        argv = sys.argv[1:]
+        if "--no-report" not in argv:
+            out = ROOT / "docs"
+            if "--report-out" in argv:
+                out = Path(argv[argv.index("--report-out") + 1])
+            written = run_report.write(log, out, ok=(code == 0))
+            for path in written:
+                print(f"  Report            : {path.relative_to(ROOT)}")
+    return code
+
+
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(run())

@@ -168,6 +168,7 @@ substituting a default.
 | [Queries](queries.md) | The SPARQL used to rebuild the figure, and the round-trip check |
 | [Bundle](bundle.md) | The standalone file for a triplestore, and why the crosswalk is materialised |
 | [Open questions](open-questions.md) | What remains unresolved and why it matters |
+| [Build report](run-report.html) | The last run: sources, checks, artefacts, and the terminal output verbatim |
 
 {diagram("architecture", "The pipeline. Everything after the export reads from the graph, never from the CSV — apart from the round-trip check, which compares the two.")}
 ## The shape of it in one paragraph
