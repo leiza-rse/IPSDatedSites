@@ -52,7 +52,22 @@ jobs:
         # standalone bundle, documentation and diagrams. The round-trip
         # check is inside main.py and exits non-zero on any mismatch, so
         # a broken export fails here without extra assertions.
-        run: python py/main.py
+        #
+        # --offline is not a convenience here, it is the point of the job.
+        # Since the 2026-08-25 rewrite main.py reads the REST endpoints by
+        # default, which is right on a workstation: a build should not
+        # silently model last month's database. It is wrong here. This job
+        # asks one question — does the committed tree still follow from the
+        # committed inputs and the current code? A live fetch makes the
+        # answer depend on whether Samian Research happened to change since
+        # the commit, and on whether this runner can reach it at all. The
+        # job would then go red for something nobody in the pull request
+        # did, and green or red by network luck.
+        #
+        # --offline pins the inputs to data/source/, which is committed.
+        # Whether the CORPUS is current is a separate question, answered by
+        # data/SNAPSHOT.json and by whoever runs the pipeline for real.
+        run: python py/main.py --offline
 
       - name: Check the documentation is up to date
         # docs/bundle.ttl is excluded: it is a copy of the published
@@ -74,7 +89,7 @@ jobs:
         # somebody changed the code without re-running the pipeline.
         run: |
           if ! git diff --quiet -- docs ':!docs/bundle.ttl' ':!docs/run-report.*'; then
-            echo "::error::docs/ is stale. Run 'python py/main.py' and commit the result."
+            echo "::error::docs/ is stale. Run 'python py/main.py' locally and commit the result. If it differs only because the corpus moved, that is a data change and belongs in its own commit together with data/."
             git diff --stat -- docs ':!docs/bundle.ttl' ':!docs/run-report.*'
             git diff -- docs ':!docs/bundle.ttl' ':!docs/run-report.*' | head -120
             exit 1
@@ -100,7 +115,7 @@ jobs:
         # not the model changed.
         run: |
           if ! git diff --quiet -- img ':!img/diagrams' ':!img/graphs'; then
-            echo "::error::img/ differs. Check the library versions above against your local ones, then run 'python py/main.py' and commit."
+            echo "::error::img/ differs. Check the library versions above against your local ones, then run 'python py/main.py' and commit. A changed corpus will also do this — see data/SNAPSHOT.json."
             git diff --stat -- img ':!img/diagrams' ':!img/graphs'
             git diff -- img ':!img/diagrams' ':!img/graphs' \
               | grep -E '^[-+].*(Matplotlib v|clip-path)' | head -20
