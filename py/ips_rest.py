@@ -43,12 +43,25 @@ THREE THINGS ABOUT THE PAYLOADS
     but a comparison that assumes the two column sets match will report
     dozens of spurious differences.
 
-OFFLINE BY DEFAULT
-------------------
-Nothing here fetches over the network unless asked. The pipeline runs from
-files in data/, so that a build is reproducible from the archive alone and
-does not depend on a server being up. Pass a URL explicitly, or download
-once and point at the file.
+LIVE FIRST, ARCHIVE AS FALLBACK
+-------------------------------
+`resolve()` tries the endpoints and falls back to the copies in data/source/
+when they cannot be reached. That order is deliberate. A stale CSV in data/
+is the failure mode this project has actually suffered: the whole corpus was
+once rebuilt from an export carrying the wrong t0, and the Boeckleareal
+findspots went missing for a week without anyone noticing. Reading live means
+the build cannot silently model last month's database.
+
+Reproducibility is preserved rather than traded away: what was fetched is
+written into data/source/ and stamped into data/SNAPSHOT.json with date,
+sizes and checksums. A build from the archive alone still works and still
+produces the same figures — it just says which of the two it did.
+
+    resolve(cache)                 live, falling back to the archive
+    resolve(cache, offline=True)   archive only, no network attempt
+
+Fetching uses urllib from the standard library: no new dependency, and
+nothing here needs to know about credentials, since the endpoints are public.
 """
 
 from __future__ import annotations
@@ -82,6 +95,99 @@ STAMP_COLUMNS = {
     "DATEMIN": "datemin",
     "DATEMAX": "datemax",
 }
+
+
+# --------------------------------------------------------------------------
+# Fetching
+# --------------------------------------------------------------------------
+class Unreachable(Exception):
+    """The endpoint could not be read. Carries the reason for the log."""
+
+
+def fetch(name: str, timeout: float = 20.0) -> bytes:
+    """Read one endpoint. Raises Unreachable rather than a stack trace.
+
+    Every failure mode here — server down, DNS, proxy, timeout, an HTML
+    error page served with status 200 — has the same consequence for the
+    caller, which is to fall back. Distinguishing them in the message is
+    useful; distinguishing them in the control flow is not.
+    """
+    import urllib.error
+    import urllib.request
+
+    url = ENDPOINTS.get(name)
+    if url is None:
+        raise Unreachable(f"no endpoint named {name!r}")
+
+    request = urllib.request.Request(
+        url, headers={"User-Agent": "IPSDatedSites/1.0 (LEIZA; RSE)"})
+    try:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
+            if response.status != 200:
+                raise Unreachable(f"{name}: HTTP {response.status}")
+            payload = response.read()
+    except urllib.error.HTTPError as exc:
+        raise Unreachable(f"{name}: HTTP {exc.code}") from exc
+    except urllib.error.URLError as exc:
+        raise Unreachable(f"{name}: {exc.reason}") from exc
+    except OSError as exc:
+        raise Unreachable(f"{name}: {exc}") from exc
+
+    if not payload.strip():
+        raise Unreachable(f"{name}: empty response")
+
+    # A login page or an error page arrives with status 200 and would
+    # otherwise be written into data/source/ as though it were data.
+    head = payload.lstrip()[:200].lower()
+    if head.startswith(b"<!doctype html") or head.startswith(b"<html"):
+        raise Unreachable(f"{name}: served HTML, not data")
+
+    return payload
+
+
+def resolve(cache_dir: Path, offline: bool = False,
+            timeout: float = 20.0) -> tuple[dict, str, list]:
+    """Get both payloads, live if possible, from the archive if not.
+
+    Returns the paths, which source was used ("live" or "archive"), and any
+    notes worth printing. Live payloads are written into cache_dir, so a
+    successful run leaves the archive holding exactly what it was built
+    from.
+
+    Partial success counts as failure: if only one of the two arrives, both
+    come from the archive. Recomputing from a fresh stamp list and checking
+    it against a stale reference would be worse than either, because the
+    disagreement would be read as a defect in the model.
+    """
+    targets = {
+        "datedsites": cache_dir / "datedsites.json",
+        "datedsitesstatistics": cache_dir / "datedsitesstatistics.csv",
+    }
+    notes = []
+
+    if not offline:
+        payloads, failure = {}, None
+        for name in targets:
+            try:
+                payloads[name] = fetch(name, timeout=timeout)
+            except Unreachable as exc:
+                failure = str(exc)
+                break
+        if failure is None:
+            cache_dir.mkdir(parents=True, exist_ok=True)
+            for name, path in targets.items():
+                path.write_bytes(payloads[name])
+            return targets, "live", notes
+        notes.append(f"endpoint unreachable ({failure}); using data/source/")
+
+    missing = [p.name for p in targets.values() if not p.exists()]
+    if missing:
+        raise SystemExit(
+            "  !!  no data: the endpoints could not be read and "
+            f"data/source/ lacks {', '.join(missing)}.\n"
+            "      Fetch them once in a browser and save them there, or pass "
+            "--csv to build from an existing export.")
+    return targets, "archive", notes
 
 
 # --------------------------------------------------------------------------

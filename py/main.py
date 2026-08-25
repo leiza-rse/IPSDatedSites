@@ -27,6 +27,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from datetime import date
 from pathlib import Path
 
 import ips_compat
@@ -43,14 +44,84 @@ from ips_rdf_export import build_graph, build_ontology
 ROOT = Path(__file__).resolve().parent.parent
 
 
+def build_from_rest(offline: bool, timeout: float) -> tuple[Path, str, list]:
+    """Get the corpus from the endpoints, recomputed and cross-checked.
+
+    Three steps, and the middle one is the point of the exercise:
+
+      1. /datedsites gives the stamps, one row per stamp with its potter's
+         date range and, unlike the published statistics, the_id.
+      2. py/ips_model.py recomputes the findspot table from them.
+      3. /datedsitesstatistics gives the database's own aggregation of the
+         same stamps. The two are compared column by column.
+
+    Step 3 is what makes reading live safe rather than merely convenient.
+    The recomputation is an independent implementation of the SQL; if it
+    and the database agree to the last decimal on every column, the table
+    the pipeline goes on to use is confirmed twice over. If they disagree,
+    something has changed in the query that the Python has not followed,
+    and building on it would publish the difference without noticing.
+
+    Two columns are recomputed rather than read, because the statistics
+    endpoint does not publish them: the_id, which comes from the stamp
+    resource, and q_repetition.
+    """
+    import ips_model
+    import ips_rest
+
+    cache = ROOT / "data" / "source"
+    paths, origin, notes = ips_rest.resolve(cache, offline=offline,
+                                            timeout=timeout)
+    for note in notes:
+        print(f"  {note}")
+
+    stamps = ips_model.load_stamps(paths["datedsites"])
+    rows = ips_model.build(stamps, ips_model.DEFAULTS, [], 1)
+    print(f"  Source            : {origin}  "
+          f"({len(stamps)} stamps, {len(rows)} findspots)")
+
+    reference = ips_rest.load_statistics_csv(paths["datedsitesstatistics"])
+    deviations = ips_model.compare(rows, paths["datedsitesstatistics"])
+    if deviations:
+        raise SystemExit(
+            "  !!  the recomputation disagrees with the database's own "
+            "aggregation of the same stamps.\n"
+            "      One of the two has moved. Do not build on this: check "
+            "sql/IPSDatedSites.sql against py/ips_model.py before "
+            "continuing, or pass --csv to use an existing export.")
+    print(f"  Cross-check       : agrees with the database on all "
+          f"{len(reference)} findspots")
+
+    # One CSV in data/, named for the day it was pulled. Written after the
+    # cross-check, never before: a file in data/ is taken by everything
+    # downstream as the corpus, and one that failed its check has no
+    # business being there.
+    stamp = date.today().isoformat()
+    target = ROOT / "data" / f"ips_dated_sites_{stamp}.csv"
+    for stale in (ROOT / "data").glob("ips_dated_sites_*.csv"):
+        if stale != target:
+            stale.unlink()
+    ips_model.write_csv(rows, target)
+
+    snapshot = ips_rest.snapshot(paths, retrieved=stamp)
+    snapshot["origin"] = origin
+    snapshot["findspots"] = len(rows)
+    snapshot["sources"]["datedsites"]["records"] = len(stamps)
+    snapshot["model"] = ips_model.DEFAULTS
+    ips_rest.write_snapshot(snapshot, ROOT / "data" / "SNAPSHOT.json")
+
+    return target, origin, notes
+
+
 def find_csv(explicit: Path | None) -> Path:
     if explicit:
         return explicit
     candidates = sorted((ROOT / "data").glob("*.csv"))
     if not candidates:
         raise SystemExit(
-            "No CSV found in data/. Put the result of "
-            "sql/IPSDatedSites.sql there, or pass --csv.")
+            "No CSV in data/ and --no-rest was given. Drop --no-rest to "
+            "read from the endpoints, put an export of "
+            "sql/IPSDatedSites.sql in data/, or pass --csv.")
     if len(candidates) > 1:
         names = ", ".join(c.name for c in candidates)
         raise SystemExit(
@@ -103,11 +174,31 @@ def main() -> int:
     ap.add_argument("--graphs-out", type=Path,
                     default=ROOT / "img" / "graphs")
     ap.add_argument("--docs-out", type=Path, default=ROOT / "docs")
+    ap.add_argument("--no-rest", action="store_true",
+                    help="do not read the endpoints; use the CSV in data/ "
+                         "as it stands. Reproduces an older build exactly.")
+    ap.add_argument("--offline", action="store_true",
+                    help="recompute from the cached payloads in data/source/ "
+                         "without attempting the network.")
+    ap.add_argument("--rest-timeout", type=float, default=20.0)
     args = ap.parse_args()
 
     import pandas as pd
 
-    csv = find_csv(args.csv)
+    # The corpus comes from the endpoints unless told otherwise. An explicit
+    # --csv still wins: reproducing an older build is a legitimate thing to
+    # want, and it should not require the server to be up.
+    if args.csv:
+        csv = args.csv
+        print(f"  Source            : {csv} (given explicitly)")
+    elif args.no_rest:
+        csv = find_csv(None)
+        print(f"  Source            : {csv.name} (--no-rest; age unchecked)")
+    else:
+        rule("REST  Samian Research")
+        csv, _origin, _notes = build_from_rest(args.offline,
+                                               args.rest_timeout)
+        print()
     out = args.rdf_out
     img = args.img_out
     out.mkdir(parents=True, exist_ok=True)
