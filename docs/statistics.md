@@ -47,14 +47,14 @@ SQRT( AVG(POWER(p.datemax - p.datemin, 2) / 12.0)
 k = k_max − (k_max − k_min) · (1 − exp(−n / τ))
 ```
 
-The multiplier falls from k_max towards k_min as evidence accumulates, so that a well-attested findspot receives a narrower interval. Note that n here is nStampsWithDie, counting only stamps with a die attribution, and not the total stamp count.
+The multiplier falls from k_max towards k_min as evidence accumulates, so that a well-attested findspot receives a narrower interval. n is the stamp count of the findspot. Until revision 30a it was the number of stamps carrying a die attribution, which tied the width of the box to how completely the die record happened to be filled in; where no die was recorded at all, k fell back to k_max and the interval widened for a reason unconnected with the material. The two counts agree throughout the present corpus, so the correction moves no number — it removes a failure mode.
 
 As implemented:
 
 ```sql
 ( (SELECT k_max FROM params)
   - ((SELECT k_max FROM params) - (SELECT k_min FROM params))
-    * (1 - EXP(-SUM(stamps_pp)::numeric / (SELECT tau FROM params))) )
+    * (1 - EXP(-COUNT(di.number)::numeric / (SELECT tau FROM params))) )
 ```
 
 ## Effective interval
@@ -69,7 +69,7 @@ As implemented:
 
 ```sql
 ( (AVG(p.datemin)+AVG(p.datemax))/2.0
-  ± COALESCE(MIN(k.k_eff), (SELECT k_max FROM params))
+  ± k_eff
     * SQRT( AVG(POWER(p.datemax - p.datemin, 2)/12.0)
             + COALESCE(VAR_SAMP((p.datemin+p.datemax)/2.0), 0) ) )
 ```

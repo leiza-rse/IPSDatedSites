@@ -169,14 +169,6 @@ lado:kFactor a owl:DatatypeProperty ;
     rdfs:isDefinedBy <http://archaeology.link/ontology> ;
     rdfs:range xsd:decimal .
 
-lado:kIsFallback a owl:DatatypeProperty ;
-    rdfs:label "k is fallback"@en ;
-    rdfs:comment "true = keine Die-Angabe, k wurde auf k_max gesetzt. Modellverhalten, kein Messwert."@de,
-        "True where no die attribution exists at all and k was therefore set to k_max. This is model behaviour rather than a measurement, and it widens the interval for a reason unconnected with the material."@en ;
-    rdfs:domain lado:DatedTimeSpan ;
-    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
-    rdfs:range xsd:boolean .
-
 lado:kMax a owl:DatatypeProperty ;
     rdfs:label "k max"@en ;
     rdfs:comment "Upper bound of the k factor, applied when evidence is thin or absent."@en ;
@@ -190,6 +182,14 @@ lado:kMin a owl:DatatypeProperty ;
     rdfs:domain lado:DatingModel ;
     rdfs:isDefinedBy <http://archaeology.link/ontology> ;
     rdfs:range xsd:decimal .
+
+lado:kNoDieRecord a owl:DatatypeProperty ;
+    rdfs:label "k no die record"@en ;
+    rdfs:comment "true = fuer diese Fundstelle liegt keine Stempeltyp-Erfassung vor. Seit 30a ohne Wirkung auf das Intervall: ein Hinweis auf eine Luecke im Datenbestand, kein Modellzustand."@de,
+        "True where no die attribution exists at all for the findspot. Up to revision 30a this condition set k to k_max and widened the interval for a reason unconnected with the material; it now has no effect on the dating and records a gap in the die record instead."@en ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:boolean .
 
 lado:marginBottom a owl:DatatypeProperty ;
     rdfs:label "margin bottom"@en ;

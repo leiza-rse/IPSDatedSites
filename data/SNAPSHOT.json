@@ -1,0 +1,27 @@
+{
+  "retrieved": "2026-08-25",
+  "note": "Samian Research is a live database. This snapshot is what the published figures rest on; cite it as the data state rather than asserting a fixed number of findspots.",
+  "sources": {
+    "datedsites": {
+      "endpoint": "https://www1.rgzm.de/rest/samianresearch/datedsites",
+      "file": "datedsites.json",
+      "bytes": 145816,
+      "sha256": "688bb54cf1f7e01697cfe8af7449a864fd7fccd72d82bc2ae91d065f2a2c60e0",
+      "records": 1358
+    },
+    "datedsitesstatistics": {
+      "endpoint": "https://www1.rgzm.de/rest/samianresearch/datedsitesstatistics",
+      "file": "datedsitesstatistics.csv",
+      "bytes": 8309,
+      "sha256": "b7501f96820d58da350de0c4ce8245d90d84b4b20b3af587d3b8a013b0bf8bca"
+    }
+  },
+  "findspots": 37,
+  "model": {
+    "k_min": 0.5,
+    "k_max": 1.5,
+    "tau": 6.0,
+    "w": 1.0,
+    "t0": 20.0
+  }
+}

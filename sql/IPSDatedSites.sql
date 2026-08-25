@@ -25,6 +25,51 @@
 --   * midpoint_year jetzt numeric(10,3) statt (10,1) — Praezisionslehre
 --     aus Kontrolle (k), siehe dort.
 --   * t0 = 20 und die absolute Lesart von q_start/q_end bleiben.
+--
+-- 30a gegenueber 27c — DIESE DATEI IST DER GOLDSTANDARD
+--   Sie ist die einzige autoritative Fassung des Modells. Die Fassung im
+--   ColdFusion-Template und die Reimplementierung in py/ips_model.py werden
+--   an ihr gemessen, nicht umgekehrt. Der ColdFusion-Drop-in wird aus dieser
+--   Datei erzeugt:  python py/make_sql.py
+--   Der einzige Unterschied ist :min_stamps, das dort zum <cfqueryparam> wird.
+--
+--   * tau = 6 statt 20. Empirisch kalibriert an fuenf keramikunabhaengig
+--     datierten Referenzfundstellen (Dangstetten, Oberaden, Velsen I,
+--     Pompeii, Inchtuthil). Allard hat diese Herleitung am 2026-08-25
+--     bestaetigt und ihre Offenlegung in der Publikation verlangt: nur
+--     diese fuenf Fundorte sind wirklich keramikunabhaengig datiert.
+--   * t0 bleibt 20. tau und t0 sind verschiedene Groessen und tragen seit
+--     der Kalibrierung verschiedene Werte; sie waren nur zufaellig einmal
+--     gleich. Der Zwischenstand, in dem beide auf 6 standen, ist ein
+--     Fehler und in keinem Export mehr enthalten.
+--   * k kommt aus COUNT(di.number), nicht mehr aus SUM(stamps_pp) der
+--     kfactor-CTE. Damit haengt die Geometrie nicht mehr an der
+--     Vollstaendigkeit der Stempeltyp-Erfassung, und der COALESCE-Fallback
+--     auf k_max entfaellt strukturell: COUNT(*) kann nicht NULL werden.
+--     Vorher konnte eine Fundstelle ohne Die-Angabe die breiteste
+--     zulaessige Box bekommen, obwohl ihre Datierung nichts dafuer hergab
+--     (Pompeii/Hoard: 9.2 a -> 25.4 a).
+--   * k_is_fallback -> k_no_dierecord. Reine Warnlampe fuer fehlende
+--     Stempeltyp-Erfassung, ohne Geometriewirkung.
+--   * Die elf Platzhalter-Datierungspaare ersetzen den alten Filter
+--     datemax NOT IN (260,120,150). Paarlogik statt AND-Logik.
+--   * Griechische Marker durchgehend als U&-Escape.
+--   * kfactor-Join getrimmt und case-insensitiv.
+--   * n_stamps_wide / n_potters_wide / max_potter_span als Waechter am
+--     Ende der Spaltenliste. Schwelle 100 Jahre, von Allard am 2026-08-25
+--     ausdruecklich bestaetigt: Toepfer wie Calvus i haben in mehreren
+--     Produktionszentren gearbeitet, und ohne chemisch-mineralogische
+--     Untersuchung laesst sich Verschleppung, Vater/Sohn, Einzelperson
+--     und Werkstatt nicht trennen. Die Schwelle markiert die Grenze der
+--     moeglichen Genauigkeit und wird deshalb NICHT enger gesetzt.
+--   * Der Bregenz-Ausschluss ist entfallen. Samian Research ist eine
+--     Live-Datenbank; ungeprüfte Fundstellen wird es immer geben und neue
+--     kommen laufend hinzu. Einzelne Orte im SQL auszuschliessen ist dafuer
+--     das falsche Mittel. Stattdessen wird der Abzugsstand festgehalten
+--     (data/SNAPSHOT.json) und in der Publikation als "Stand Datum x"
+--     genannt. Wer dennoch ausschliessen will, tut das als Parameter:
+--     py/ips_model.py --exclude-site NAME.
+--
 -- Eine Ausgabezeile = ein Findspot.
 -- =====================================================================
 --
@@ -195,15 +240,19 @@
 --   keine Gesetze. Sie tragen die Entscheidung, KEINE Korrektur
 --   einzubauen — fuer den umgekehrten Schluss waeren sie zu duenn.
 --
--- STELLSCHRAUBEN: k_min = 0.5, k_max = 1.5, tau = 20, w = 1.0
+-- STELLSCHRAUBEN: k_min = 0.5, k_max = 1.5, tau = 6, w = 1.0, t0 = 20
 -- SKALENKONSTANTE: t0 = 20 (Farbskala, verankert, siehe (5))
 -- KEINE EPOCHENKORREKTUR — bewusst, siehe (6)
 -- =====================================================================
 
+-- :min_stamps
+--   Mindestzahl Stempel je Fundensemble; editorische Anzeigeschwelle, kein
+--   Datenfilter. In psql:  \set min_stamps 1   bzw. python py/make_sql.py
+--   setzt fuer den psql-Lauf 1 ein und fuer ColdFusion den cfqueryparam.
 WITH params AS (
     SELECT 0.5::numeric AS k_min,
            1.5::numeric AS k_max,
-          20.0::numeric AS tau,
+          6.0::numeric AS tau,		-- war 20.0, empirisch kalibriert
            1.0::numeric AS w,       -- reines Volumen
           20.0::numeric AS t0       -- (5) verankert an Allards 5 / 25 a
 ),
@@ -216,8 +265,13 @@ diecounts AS (
         COUNT(*)               AS stamps_pp
     FROM tbldistribution AS di
     LEFT JOIN tblpotter p ON lower(trim(di.pottername)) = lower(trim(p.pottername))
-    WHERE di.isdate = 'Θ' AND sitecharacter = 'Σ' AND findspot IS NOT NULL
-      AND (p.datemin <> 0 AND p.datemax NOT IN (260,120,150))
+    -- 30a (3): U&-Escape statt UTF-8-Literal, wie im aeusseren WHERE
+    WHERE di.isdate = U&'\0398' AND di.sitecharacter = U&'\03A3'
+      AND di.findspot IS NOT NULL
+      AND (p.datemin, p.datemax) NOT IN (
+          (-30,150), (0,100), (0,120), (0,130), (0,150),
+          (0,180), (0,270), (100,200), (150,270),
+          (160,260), (165,270) )
       AND di.die IS NOT NULL
     GROUP BY di.site, di.findspot, di.pottername
 ),
@@ -258,15 +312,6 @@ SELECT
     ROUND(EXP(-(STDDEV_SAMP(p.datemin) / (SELECT t0 FROM params))), 3) AS q_start,
     ROUND(EXP(-(STDDEV_SAMP(p.datemax) / (SELECT t0 FROM params))), 3) AS q_end,
 
-    -- (5) NEU: Altwerte, nur zur Rekonstruktion aelterer Abbildungen.
-    --     NICHT plotten — das ist die Formel mit dem Kalender-Nullpunkt.
-    ROUND(CASE WHEN AVG(p.datemin) = 0 THEN NULL
-          ELSE EXP(-(STDDEV_SAMP(p.datemin) / ABS(AVG(p.datemin)))) END, 3)
-                                             AS q_start_legacy,
-    ROUND(CASE WHEN AVG(p.datemax) = 0 THEN NULL
-          ELSE EXP(-(STDDEV_SAMP(p.datemax) / ABS(AVG(p.datemax)))) END, 3)
-                                             AS q_end_legacy,
-
 
     -- q_interval  ==  q_spread  (Datierungsqualitaet, Achse 1)
     -- unveraendert: Nenner ist eine Differenz, also translationsinvariant
@@ -304,10 +349,22 @@ SELECT
                                              AS midpoint_year,
 
     -- (1) PROV: die Groessen, aus denen eff_* entsteht
+    -- 30a (1): n_stamps_die bleibt deskriptiv (nur Stempel mit
+    --          Typzuweisung) und geht NICHT mehr in k ein.
     MIN(k.n_stamps_die)                      AS n_stamps_die,
-    COALESCE(MIN(k.k_eff), (SELECT k_max FROM params))::numeric(10,4)
-                                             AS k_eff,
-    (MIN(k.k_eff) IS NULL)                   AS k_is_fallback,
+
+    -- 30a (1): k allein aus dem Stempelvolumen der Fundstelle.
+    --          k = k_max - (k_max - k_min) * (1 - exp(-n / tau))
+    --          Kein COALESCE mehr noetig: COUNT(*) ist nie NULL.
+    ( (SELECT k_max FROM params)
+      - ((SELECT k_max FROM params) - (SELECT k_min FROM params))
+        * (1 - EXP(-COUNT(di.number)::numeric / (SELECT tau FROM params)))
+    )::numeric(10,4)                         AS k_eff,
+
+    -- 30a (2): Waechter ohne Geometriewirkung. TRUE = fuer diese
+    --          Fundstelle liegt keine Stempeltyp-Erfassung vor,
+    --          n_dies/die_repetition/q_repetition sind dann NULL.
+    (MIN(k.k_eff) IS NULL)                   AS k_no_dierecord,
     SQRT( AVG(POWER(p.datemax - p.datemin, 2) / 12.0)
           + COALESCE(VAR_SAMP((p.datemin + p.datemax) / 2.0), 0)
     )::numeric(10,3)                         AS sigma_eff,
@@ -320,26 +377,48 @@ SELECT
     (SELECT t0    FROM params)::numeric(10,3) AS p_t0,
 
     -- eff: Mitte +/- k(findspot) * sigma_eff ,  k = reines Volumen (w = 1.0)
+    -- 30a (1): identischer k-Ausdruck wie oben, kein Fallback mehr.
     ( (AVG(p.datemin) + AVG(p.datemax)) / 2.0
-      - COALESCE(MIN(k.k_eff), (SELECT k_max FROM params))
+      - ( (SELECT k_max FROM params)
+          - ((SELECT k_max FROM params) - (SELECT k_min FROM params))
+            * (1 - EXP(-COUNT(di.number)::numeric / (SELECT tau FROM params))) )
         * SQRT( AVG(POWER(p.datemax - p.datemin, 2) / 12.0)
                 + COALESCE(VAR_SAMP((p.datemin + p.datemax) / 2.0), 0) )
     )::numeric(10,1)                         AS eff_start,
     ( (AVG(p.datemin) + AVG(p.datemax)) / 2.0
-      + COALESCE(MIN(k.k_eff), (SELECT k_max FROM params))
+      + ( (SELECT k_max FROM params)
+          - ((SELECT k_max FROM params) - (SELECT k_min FROM params))
+            * (1 - EXP(-COUNT(di.number)::numeric / (SELECT tau FROM params))) )
         * SQRT( AVG(POWER(p.datemax - p.datemin, 2) / 12.0)
                 + COALESCE(VAR_SAMP((p.datemin + p.datemax) / 2.0), 0) )
-    )::numeric(10,1)                         AS eff_end
+    )::numeric(10,1)                         AS eff_end,
+
+    -- 30a (6): Waechterspalten ans Ende, Spaltenreihenfolge 29 bleibt
+    --          als Praefix erhalten. Breit datierte Toepfer,
+    --          fundstellengenau: nach dem Filtern sollten das nur noch
+    --          die geprueften Faelle sein; taucht hier etwas Neues auf,
+    --          gehoert es angesehen.
+    COUNT(di.number) FILTER (
+        WHERE p.datemax - p.datemin >= 100)  AS n_stamps_wide,
+    COUNT(DISTINCT p.pottername) FILTER (
+        WHERE p.datemax - p.datemin >= 100)  AS n_potters_wide,
+    MAX(p.datemax - p.datemin)               AS max_potter_span
 
 FROM tbldistribution AS di
 LEFT JOIN tblpotter        p   ON lower(trim(di.pottername)) = lower(trim(p.pottername))
 LEFT JOIN v_discoverysite  vds ON di.site = vds.label
-LEFT JOIN kfactor          k   ON k.the_site     = di.site
-                              AND k.the_findspot = di.findspot
-WHERE di.isdate = 'Θ' AND sitecharacter = 'Σ' AND findspot IS NOT NULL
-  AND (p.datemin <> 0 AND p.datemax NOT IN (260,120,150))
+-- 30a (4): getrimmt und case-insensitiv, analog zum Toepfer-Join
+LEFT JOIN kfactor          k   ON lower(trim(k.the_site))     = lower(trim(di.site))
+                              AND lower(trim(k.the_findspot)) = lower(trim(di.findspot))
+WHERE di.isdate = U&'\0398' AND di.sitecharacter = U&'\03A3' AND findspot IS NOT NULL
+AND (p.datemin, p.datemax) NOT IN (
+      (-30,150), (0,100), (0,120), (0,130), (0,150),
+      (0,180), (0,270), (100,200), (150,270),
+      (160,260), (165,270) )
 GROUP BY vds.id, di.site, di.findspot, di.siteancientname,
          di.coordinate1, di.coordinate2, di.pleiades
+HAVING COUNT(di.number) >= :min_stamps
+
 ORDER BY avg_datemin ASC;
 
 -- =====================================================================
@@ -358,13 +437,19 @@ ORDER BY avg_datemin ASC;
 --   b) eff_start / eff_end unveraendert gegenueber 26? (erwartet: ja —
 --        (5) fasst die Boxen nicht an)
 --   c) k_eff = p_k_max - (p_k_max - p_k_min)
---              * (1 - exp(-n_stamps_die / p_tau))      (erwartet: exakt)
+--              * (1 - exp(-count_stamps / p_tau))      (erwartet: exakt)
+--        30a: count_stamps, NICHT n_stamps_die. Der Unterschied ist auf
+--        dem Korpus vom 2026-08 null, weil beide Zahlen ueberall gleich
+--        sind; er wird sichtbar, sobald Stempel ohne Typzuweisung
+--        auftreten.
 --   d) eff_end - eff_start = 2 * k_eff * sigma_eff     (erwartet: exakt,
 --        bis auf die Rundung auf numeric(10,1))
 --   e) NULL in q_* / unc_*: dieselben Zeilen wie in 26? (erwartet: ja —
 --        q_start/q_end sind weiterhin genau dann NULL, wenn
 --        STDDEV_SAMP NULL ist, also bei n = 1)
---   f) k_is_fallback = true irgendwo? Dann Findspot ohne Die-Angabe.
+--   f) k_no_dierecord = true irgendwo? Dann Findspot ohne Stempeltyp-
+--        Erfassung. Seit 30a ohne Wirkung auf eff_start/eff_end; die
+--        Spalte ist Datenpflege-Hinweis, kein Modellzustand.
 --   g) the_id NULL irgendwo? Dann Fundplatz ohne LOD-Knoten.
 --
 --   (5)-spezifisch:
@@ -383,12 +468,12 @@ ORDER BY avg_datemin ASC;
 --        Nijmegen, Barbarossastraat  sigma  0.00/ 0.00 -> 1.000 / 1.000
 --        Koeln, Hafen                sigma  2.26/ 1.96 -> 0.893 / 0.907
 --        Amiens, Sq. Bocquet         sigma  7.05/14.58 -> 0.703 / 0.482
---        Bregenz, cellar             sigma 25.40/29.29 -> 0.281 / 0.231
 --        Langenhain, store           sigma 36.55/ 3.30 -> 0.161 / 0.848
 --
 --   (6)-spezifisch:
 --   k) sigma_expected / q_*_relative / p_sigma_* NICHT mehr vorhanden?
---        (erwartet: 40 Spalten, Satz identisch mit 27a)
+--        (erwartet: 41 Spalten — 27a-Satz plus die drei Waechter, mit
+--         k_no_dierecord an der Stelle des frueheren k_is_fallback)
 --   l) Boxbreite (eff_end - eff_start) gegen midpoint_year:
 --        r ~ +0.43, Median vor AD 100 ~19.8 a, ab AD 100 ~32.1 a.
 --        DAS ist die Epochendrift — sie steht in der Breite, nicht in

@@ -24,6 +24,14 @@ Thumbs.db
 # --- Note ---
 # data/, img/, rdf/ and docs/ are part of the reproducible archive.
 
+# --- Generated SQL drop-ins ---
+# sql/IPSDatedSites.sql IS the goldstandard and is tracked: it is what gets
+# cited, diffed and blamed. What lands here is derived from it by
+# py/make_sql.py — the ColdFusion drop-in and the psql form. Committing them
+# would create a second copy of the model that can drift without anyone
+# noticing which one produced a given export.
+sql/generated/
+
 # --- This repository ---
 # rdf/, img/ and docs/ are generated but ARE part of the archive:
 # they are the deliverable and must be diffable. Do not ignore them.

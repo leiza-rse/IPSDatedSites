@@ -162,11 +162,11 @@ TERM_DOCS: dict[str, str] = {
         "The volume-based multiplier applied to sigmaYears. It falls from "
         "k_max towards k_min as evidence accumulates, so a findspot with "
         "many stamps receives a narrower interval than one with few.",
-    "kIsFallback":
-        "True where no die attribution exists at all and k was therefore "
-        "set to k_max. This is model behaviour rather than a measurement, "
-        "and it widens the interval for a reason unconnected with the "
-        "material.",
+    "kNoDieRecord":
+        "True where no die attribution exists at all for the findspot. Up "
+        "to revision 30a this condition set k to k_max and widened the "
+        "interval for a reason unconnected with the material; it now has no "
+        "effect on the dating and records a gap in the die record instead.",
     "midpointYear":
         "The centre of the averaged interval, the m in m ± k·σ.",
     "avgDatemin": "Mean of the contributing potters' start dates.",
@@ -309,16 +309,21 @@ FORMULAS: list[tuple[str, str, str, str]] = [
      "k = k_max − (k_max − k_min) · (1 − exp(−n / τ))",
      "( (SELECT k_max FROM params)\n"
      "  - ((SELECT k_max FROM params) - (SELECT k_min FROM params))\n"
-     "    * (1 - EXP(-SUM(stamps_pp)::numeric / (SELECT tau FROM params))) )",
+     "    * (1 - EXP(-COUNT(di.number)::numeric / (SELECT tau FROM params))) )",
      "The multiplier falls from k_max towards k_min as evidence "
      "accumulates, so that a well-attested findspot receives a narrower "
-     "interval. Note that n here is nStampsWithDie, counting only stamps "
-     "with a die attribution, and not the total stamp count."),
+     "interval. n is the stamp count of the findspot. Until revision 30a "
+     "it was the number of stamps carrying a die attribution, which tied "
+     "the width of the box to how completely the die record happened to be "
+     "filled in; where no die was recorded at all, k fell back to k_max "
+     "and the interval widened for a reason unconnected with the material. "
+     "The two counts agree throughout the present corpus, so the "
+     "correction moves no number — it removes a failure mode."),
 
     ("Effective interval",
      "eff_start = m − k·σ    eff_end = m + k·σ",
      "( (AVG(p.datemin)+AVG(p.datemax))/2.0\n"
-     "  ± COALESCE(MIN(k.k_eff), (SELECT k_max FROM params))\n"
+     "  ± k_eff\n"
      "    * SQRT( AVG(POWER(p.datemax - p.datemin, 2)/12.0)\n"
      "            + COALESCE(VAR_SAMP((p.datemin+p.datemax)/2.0), 0) ) )",
      "The interval drawn as the box. It is an archaeologically motivated "
@@ -475,7 +480,7 @@ COLUMN_MAP: list[tuple[str, str, str]] = [
     ("q_start, q_end",     "samian:ts_<id>_<hash>", "lado:qStart / lado:qEnd"),
     ("sigma_eff",          "samian:ts_<id>_<hash>", "lado:sigmaYears"),
     ("k_eff",              "samian:ts_<id>_<hash>", "lado:kFactor"),
-    ("k_is_fallback",      "samian:ts_<id>_<hash>", "lado:kIsFallback"),
+    ("k_no_dierecord",    "samian:ts_<id>_<hash>", "lado:kNoDieRecord"),
     ("midpoint_year",      "samian:ts_<id>_<hash>", "lado:midpointYear"),
     ("avg_datemin, avg_datemax", "samian:ts_<id>_<hash>",
      "lado:avgDatemin / lado:avgDatemax"),

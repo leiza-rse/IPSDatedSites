@@ -11,7 +11,7 @@ The checks are the control points from the query header, carried over
 verbatim so that the letters match:
 
     (a)  row count
-    (c)  k_eff from n_stamps_die and the k parameters
+    (c)  k_eff from count_stamps and the k parameters
     (d)  interval width equals 2 * k_eff * sigma_eff
     (h)  q_start / q_end from unc_*_years_exact and t0
     (i)  q monotonically decreasing in sigma
@@ -71,7 +71,7 @@ REQUIRED_COLUMNS = (
     "q_start", "q_end", "q_interval",
     "unc_start_years", "unc_end_years",
     "unc_start_years_exact", "unc_end_years_exact",
-    "midpoint_year", "n_stamps_die", "k_eff", "k_is_fallback", "sigma_eff",
+    "midpoint_year", "n_stamps_die", "k_eff", "k_no_dierecord", "sigma_eff",
     "p_k_min", "p_k_max", "p_tau", "p_w", "p_t0",
     "eff_start", "eff_end",
 )
@@ -272,18 +272,21 @@ def read_parameters(report: Report, rows: list[dict[str, str]]) -> dict[str, flo
 
 
 def check_k_eff(report: Report, rows, params) -> None:
+    """k must follow from count_stamps alone.
+
+    Before 30a this read n_stamps_die and allowed a k_max fallback where the
+    die record was empty, so a wrong k could pass as "documented model
+    behaviour". There is no fallback branch any more: every row must satisfy
+    the formula exactly, and a row that does not is a defect.
+    """
     k_min, k_max, tau = params["p_k_min"], params["p_k_max"], params["p_tau"]
     worst, offenders = 0.0, []
     for row in rows:
-        n = num(row["n_stamps_die"])
+        n = num(row["count_stamps"])
         k = num(row["k_eff"])
-        fallback = flag(row["k_is_fallback"])
-        if k is None:
+        if k is None or n is None:
             continue
-        if fallback or n is None:
-            expected = k_max          # documented model behaviour, not a measurement
-        else:
-            expected = k_max - (k_max - k_min) * (1.0 - math.exp(-n / tau))
+        expected = k_max - (k_max - k_min) * (1.0 - math.exp(-n / tau))
         deviation = abs(k - expected)
         worst = max(worst, deviation)
         if deviation > TOL_K_EFF:
@@ -292,11 +295,11 @@ def check_k_eff(report: Report, rows, params) -> None:
                 "expected": round(expected, 6), "deviation": round(deviation, 6),
             })
     if offenders:
-        report.add(Check("c", "k_eff from n_stamps_die", "fail",
+        report.add(Check("c", "k_eff from count_stamps", "fail",
                          f"{len(offenders)} row(s) beyond {TOL_K_EFF:g}; worst {worst:.2e}.",
                          offenders))
     else:
-        report.add(Check("c", "k_eff from n_stamps_die", "pass",
+        report.add(Check("c", "k_eff from count_stamps", "pass",
                          f"worst deviation {worst:.2e}, within the numeric(10,4) cast."))
 
 

@@ -110,47 +110,67 @@ def stddev_samp(values):
 # Reading the raw stamps
 # --------------------------------------------------------------------------
 def load_stamps(path: Path) -> list[dict]:
+    """The stamp-level input, from CSV or from a saved /datedsites response.
+
+    The JSON form is what the REST endpoint returns; the CSV form is the
+    export of sql/v_ips_dated_stamps.sql. Same rows either way.
+    """
     def num(v):
-        v = (v or "").strip()
+        v = (v or "").strip() if isinstance(v, str) else v
         return None if v == "" else v
 
+    if path.suffix.lower() == ".json":
+        import ips_rest
+        raw = ips_rest.load_datedsites_json(path)
+    else:
+        with path.open(encoding="utf-8-sig", newline="") as fh:
+            head = fh.readline()
+            fh.seek(0)
+            # The published statistics are pipe-delimited; a stamp export
+            # sniffed as comma-delimited would yield one giant column and a
+            # KeyError three frames down.
+            delim = "|" if head.count("|") > head.count(",") else ","
+            raw = list(csv.DictReader(fh, delimiter=delim))
+
     rows = []
-    with path.open(encoding="utf-8-sig", newline="") as fh:
-        for r in csv.DictReader(fh):
-            try:
-                datemin = int(float(r["datemin"]))
-                datemax = int(float(r["datemax"]))
-            except (TypeError, ValueError, KeyError):
-                # A stamp without potter dates cannot contribute. The view
-                # already drops these; belt and braces.
-                continue
-            rows.append({
-                "the_id": num(r.get("the_id")),
-                "the_site": r["the_site"],
-                "the_findspot": r["the_findspot"],
-                "latinsitename": num(r.get("latinsitename")),
-                "long": num(r.get("long")),
-                "lat": num(r.get("lat")),
-                "pleiades": num(r.get("pleiades")),
-                "stamp_number": num(r.get("stamp_number")),
-                "pottername": r.get("pottername") or "",
-                "die": num(r.get("die")),
-                "datemin": datemin,
-                "datemax": datemax,
-            })
+    for r in raw:
+        try:
+            datemin = int(float(r["datemin"]))
+            datemax = int(float(r["datemax"]))
+        except (TypeError, ValueError, KeyError):
+            # A stamp without potter dates cannot contribute. The view
+            # already drops these; belt and braces. If EVERY row lands
+            # here the caller is holding ips_stamps.csv, which carries
+            # no dates at all — see py/ips_rest.py.
+            continue
+        rows.append({
+            "the_id": num(r.get("the_id")),
+            "the_site": r["the_site"],
+            "the_findspot": r["the_findspot"],
+            "latinsitename": num(r.get("latinsitename")),
+            "long": num(r.get("long")),
+            "lat": num(r.get("lat")),
+            "pleiades": num(r.get("pleiades")),
+            "stamp_number": num(r.get("stamp_number")),
+            "pottername": r.get("pottername") or "",
+            "die": num(r.get("die")),
+            "datemin": datemin,
+            "datemax": datemax,
+        })
     return rows
 
 
 # --------------------------------------------------------------------------
 # The model
 # --------------------------------------------------------------------------
-def k_factor(stamps: list[dict], p: dict):
-    """The volume-based coverage factor, from the stamps that carry a die.
+def die_counts(stamps: list[dict]):
+    """The die statistics. Descriptive only — since revision 30a these do
+    NOT enter the geometry.
 
-    Mirrors the diecounts and kfactor CTEs. Two details that are easy to
-    get wrong: dies are counted DISTINCT WITHIN A POTTER, so the same die
-    code under two potters counts twice; and the sum that drives k is the
-    number of stamps with a die, not the number of stamps.
+    One detail that is easy to get wrong: dies are counted DISTINCT WITHIN
+    A POTTER, so the same die code under two potters counts twice. Counting
+    globally distinct dies gives 47 instead of 131 at London / New Fresh
+    Wharf, which is how this was found.
     """
     per_potter: dict[str, set] = {}
     stamps_with_die = 0
@@ -161,16 +181,30 @@ def k_factor(stamps: list[dict], p: dict):
         stamps_with_die += 1
 
     if not per_potter:
-        # No die anywhere. k falls back to k_max, which widens the interval
-        # for a reason that has nothing to do with the material - hence the
-        # flag, so a consumer can tell the two cases apart.
-        return None, None, None, True
+        # No die attribution anywhere at this findspot. Reported, because it
+        # is a gap in the record worth closing, but without consequence for
+        # the dating.
+        return None, None, True
 
     n_dies = sum(len(d) for d in per_potter.values())
-    rep = pg_round(stamps_with_die / n_dies, 3) if n_dies else None
-    k = p["k_max"] - (p["k_max"] - p["k_min"]) * (
-        1 - math.exp(-stamps_with_die / p["tau"]))
-    return n_dies, stamps_with_die, pg_round(k, 4), False
+    return n_dies, stamps_with_die, False
+
+
+def k_factor(n_stamps: int, p: dict) -> float:
+    """The volume-based coverage factor.
+
+    k = k_max - (k_max - k_min) * (1 - exp(-n / tau))
+
+    n is the stamp count of the findspot, and nothing else. Before 30a it
+    was the number of stamps CARRYING A DIE, taken from the kfactor CTE,
+    which coupled the width of the box to how completely the die record
+    happened to be filled in; where that CTE returned no row at all, k fell
+    back to k_max and the interval widened for a reason that had nothing to
+    do with the material. On the August 2026 corpus the two counts agree
+    everywhere, so the change moves no number — it removes a failure mode.
+    """
+    return p["k_max"] - (p["k_max"] - p["k_min"]) * (
+        1 - math.exp(-n_stamps / p["tau"]))
 
 
 def dating(stamps: list[dict], p: dict) -> dict:
@@ -179,8 +213,11 @@ def dating(stamps: list[dict], p: dict) -> dict:
     dmax = [s["datemax"] for s in stamps]
 
     avg_min, avg_max = frac(dmin), frac(dmax)
-    n_dies, n_stamps_die, k_eff, k_fallback = k_factor(stamps, p)
-    k_used = p["k_max"] if k_eff is None else k_eff
+    n_dies, n_stamps_die, no_dierecord = die_counts(stamps)
+
+    # COUNT(di.number): the stamps of this findspot, which is what k reads.
+    count_stamps = sum(1 for s in stamps if s["stamp_number"] is not None)
+    k_used = k_factor(count_stamps, p)
 
     # sigma: the inner fuzziness of each potter's own range, plus the
     # scatter of those ranges' midpoints. VAR_SAMP is NULL for a single
@@ -211,7 +248,7 @@ def dating(stamps: list[dict], p: dict) -> dict:
         "lat": first["lat"],
         "pleiades": first["pleiades"],
 
-        "count_stamps": sum(1 for s in stamps if s["stamp_number"] is not None),
+        "count_stamps": count_stamps,
 
         "avg_datemin": pg_int(float(avg_min)),
         "avg_datemax": pg_int(float(avg_max)),
@@ -244,7 +281,9 @@ def dating(stamps: list[dict], p: dict) -> dict:
         "midpoint_year": pg_round(mid, 3),
         "n_stamps_die": n_stamps_die,
         "k_eff": pg_round(k_used, 4),
-        "k_is_fallback": k_fallback,
+        # Renamed in 30a, and it now means something else: a gap in the die
+        # record, not a substituted k. It no longer moves eff_start/eff_end.
+        "k_no_dierecord": no_dierecord,
         "sigma_eff": pg_round(sigma, 3),
 
         "p_k_min": pg_round(p["k_min"], 3), "p_k_max": pg_round(p["k_max"], 3),
@@ -256,6 +295,19 @@ def dating(stamps: list[dict], p: dict) -> dict:
         # year, which is visible in the figure.
         "eff_start": pg_round(mid - k_used * sigma, 1),
         "eff_end": pg_round(mid + k_used * sigma, 1),
+
+        # The watchdogs, added in 30a and deliberately last so that the
+        # earlier column order survives as a prefix. The 100-year threshold
+        # is not a tuning knob: Allard confirmed on 2026-08-25 that potters
+        # such as Calvus i worked in more than one production centre and
+        # took part of their punches with them, so without
+        # chemical-mineralogical analysis a long span cannot be separated
+        # into displacement, father and son, one person or a workshop. The
+        # threshold marks the limit of attainable precision.
+        "n_stamps_wide": sum(1 for a, b in zip(dmin, dmax) if b - a >= 100),
+        "n_potters_wide": len({s["pottername"] for s in stamps
+                               if s["datemax"] - s["datemin"] >= 100}),
+        "max_potter_span": max(b - a for a, b in zip(dmin, dmax)),
     }
 
 
@@ -296,13 +348,19 @@ NUMERIC = [
     "unc_start_years", "unc_end_years", "unc_interval_years",
     "unc_start_years_exact", "unc_end_years_exact", "midpoint_year",
     "n_stamps_die", "k_eff", "sigma_eff", "eff_start", "eff_end",
+    "n_stamps_wide", "n_potters_wide", "max_potter_span",
 ]
+
+# The REST statistics endpoint does not publish these two: the_id is only in
+# the stamp-level resource, q_repetition is not exported at all. Absent from
+# the reference is not a disagreement; absent from BOTH would be.
+OPTIONAL = {"the_id", "q_repetition"}
 
 
 def compare(rows: list[dict], csv_path: Path) -> int:
-    with csv_path.open(encoding="utf-8-sig", newline="") as fh:
-        ref = {(r["the_site"], r["the_findspot"]): r
-               for r in csv.DictReader(fh)}
+    import ips_rest
+    ref = {(r["the_site"], r["the_findspot"]): r
+           for r in ips_rest.load_statistics_csv(csv_path)}
     mine = {(r["the_site"], r["the_findspot"]): r for r in rows}
 
     only_db = sorted(set(ref) - set(mine))
@@ -321,6 +379,9 @@ def compare(rows: list[dict], csv_path: Path) -> int:
     bad = 0
     print()
     for col in NUMERIC:
+        if col in OPTIONAL and all(ref[k].get(col) is None for k in shared):
+            print(f"  -- {col:<24} not published by this reference")
+            continue
         worst, where = 0.0, None
         nulls = 0
         for key in shared:
@@ -373,20 +434,21 @@ def main() -> int:
     ap.add_argument("--against", type=Path, default=None,
                     help="compare against a database export of the "
                          "aggregate query")
-    # NOT default=["Bregenz"]: argparse APPENDS to a list default instead
-    # of replacing it, so the default could never be switched off. None,
-    # then fill in below, and --exclude-site "" clears it.
-    ap.add_argument("--exclude-site", action="append", default=None,
-                    help="site to leave out; repeatable, default Bregenz. "
-                         'Pass --exclude-site "" to keep everything. '
+    # No default exclusion since 2026-08-25. Samian Research is a live
+    # database: unchecked findspots will always exist and new ones are
+    # declared usable as work proceeds, so naming individual sites in the
+    # code is the wrong instrument. What is pinned instead is the retrieval
+    # date — see data/SNAPSHOT.json. Still available as a parameter for a
+    # deliberate, documented exclusion.
+    ap.add_argument("--exclude-site", action="append", default=[],
+                    help="site to leave out; repeatable, empty by default. "
                          "Editorial, not a data filter — see the view.")
     ap.add_argument("--min-stamps", type=int, default=1)
     for name, val in DEFAULTS.items():
         ap.add_argument(f"--{name.replace('_', '-')}", type=float, default=val)
     args = ap.parse_args()
 
-    exclude = ["Bregenz"] if args.exclude_site is None else [
-        x for x in args.exclude_site if x.strip()]
+    exclude = [x for x in args.exclude_site if x.strip()]
     p = {k: getattr(args, k) for k in DEFAULTS}
     stamps = load_stamps(args.raw)
     if not stamps:

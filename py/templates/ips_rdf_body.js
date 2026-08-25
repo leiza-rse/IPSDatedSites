@@ -312,8 +312,8 @@ function buildTriples(rows, opts) {
 
     const ivl = field(r, 'avg_interval');
     if (!isNA(ivl)) g.add(ts, S('lado', 'intervalLabel'), Lit(String(ivl)));
-    const kfb = field(r, 'k_is_fallback');
-    g.add(ts, S('lado', 'kIsFallback'),
+    const kfb = field(r, 'k_no_dierecord');
+    g.add(ts, S('lado', 'kNoDieRecord'),
           Lit(/^(true|1|yes)$/i.test(String(kfb)) ? 'true' : 'false',
               xsd + 'boolean'));
 

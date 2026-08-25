@@ -868,6 +868,51 @@ XSD 1.1 but not under XSD 1.0. A validator working to the older
 specification will object, and the affected literal is the rounded
 calendar label rather than the authoritative numeric position.
 
+## Resolved by the domain expert, 25 August 2026
+
+Five questions were put to Allard Mees in writing; the answers are recorded
+here because each one now constrains the code.
+
+**The provenance of tau.** Its empirical derivation is to be published in
+full, not introduced as a convention. The five reference findspots are the
+only ones dated independently of ceramics, and that is precisely what makes
+them the right basis. `lado:calibrationBasis` and `lado:calibratedAgainst`
+carry this in the graph.
+
+**A fixed number of findspots.** There is not going to be one. Samian
+Research is a live database: unchecked ensembles will always exist, and
+existing ones are declared usable as work proceeds. The publication states
+the data as at a given date rather than asserting a count. The Bregenz
+exclusion has accordingly been removed from the query, and the retrieval is
+pinned in `data/SNAPSHOT.json` instead. Deliberate exclusions remain
+possible as a parameter of `py/ips_model.py`.
+
+**The 100-year threshold for wide-dated potters.** It stays. Narrowing it
+was rejected on archaeological grounds: potters such as Calvus i worked in
+more than one production centre — he appears to have moved from La
+Graufesenque to Banassac, taking part of his punches with him — and without
+chemical-mineralogical analysis a long span cannot be resolved into
+displaced vessels, father and son, a single person, or a workshop. The
+threshold marks the limit of attainable precision rather than a tuning
+knob.
+
+**Arretine chronology against dendrochronology.** To be mentioned as an
+observation and left there. No explanation is currently available, the
+offset amounts to very few years, and the potter datings are not precise
+enough for it to carry the weight of a criticism.
+
+**Why later intervals are wider.** In Allard's words: the absence of
+ceramic-independent dated assemblages with stamped samian in the second and
+third centuries has led to speculation about late impressions — moulds used
+for a very long time in the production of decorated ware (see the
+publications of Huld-Zetsche). Such an assumption would call the
+possibility of a samian chronology into question altogether. Genuinely
+closed assemblages do exist for the second and third centuries, such as the
+finds from the Pudding Pan Rock wreck, but they cannot be dated
+independently of the ceramics. That absence also makes residuality very
+hard to assess for the period; in the first century it appears not to play
+a significant role.
+
 ## Defects in the published discovery-site data (2019 release)
 
 The published file dates from 2019 and is due for regeneration. Three

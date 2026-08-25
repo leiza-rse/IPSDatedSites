@@ -430,9 +430,10 @@ DATA_PROPS = [
      "innere Fuzziness plus Streuung der Intervallmitten."),
     (LADO.kFactor, LADO.DatedTimeSpan, XSD.decimal, "k factor",
      "k = k_max - (k_max-k_min)*(1-exp(-n/tau)), rein volumenbasiert."),
-    (LADO.kIsFallback, LADO.DatedTimeSpan, XSD.boolean, "k is fallback",
-     "true = keine Die-Angabe, k wurde auf k_max gesetzt. Modell"
-     "verhalten, kein Messwert."),
+    (LADO.kNoDieRecord, LADO.DatedTimeSpan, XSD.boolean, "k no die record",
+     "true = fuer diese Fundstelle liegt keine Stempeltyp-Erfassung vor. "
+     "Seit 30a ohne Wirkung auf das Intervall: ein Hinweis auf eine Luecke "
+     "im Datenbestand, kein Modellzustand."),
     (LADO.midpointYear, LADO.DatedTimeSpan, XSD.decimal, "midpoint year", ""),
     (LADO.avgDatemin, LADO.DatedTimeSpan, XSD.integer, "average datemin", ""),
     (LADO.avgDatemax, LADO.DatedTimeSpan, XSD.integer, "average datemax", ""),
@@ -804,8 +805,8 @@ def build_graph(df: pd.DataFrame, era: str, figure_name: str,
 
         if not isna(r.avg_interval):
             g.add((ts, LADO.intervalLabel, Literal(str(r.avg_interval))))
-        g.add((ts, LADO.kIsFallback,
-               Literal(bool(r.k_is_fallback), datatype=XSD.boolean)))
+        g.add((ts, LADO.kNoDieRecord,
+               Literal(bool(r.k_no_dierecord), datatype=XSD.boolean)))
 
         # --- Darstellungsschicht ---
         g.add((row, RDF.type, LADO.PlotRow))

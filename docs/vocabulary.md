@@ -117,7 +117,7 @@ The presentation layer of a single dating. It deliberately carries the uncertain
 | `lado:qEnd` | `xsd:decimal` | Sharpness of the end date, on the same scale as qStart. |
 | `lado:sigmaYears` | `xsd:decimal` | The dispersion entering the interval width, obtained by variance decomposition: the internal fuzziness of each potter's range plus the scatter of the range midpoints. Together with kFactor it determines the width of the box, which is 2·k·σ. |
 | `lado:kFactor` | `xsd:decimal` | The volume-based multiplier applied to sigmaYears. It falls from k_max towards k_min as evidence accumulates, so a findspot with many stamps receives a narrower interval than one with few. |
-| `lado:kIsFallback` | `xsd:boolean` | True where no die attribution exists at all and k was therefore set to k_max. This is model behaviour rather than a measurement, and it widens the interval for a reason unconnected with the material. |
+| `lado:kNoDieRecord` | `xsd:boolean` | True where no die attribution exists at all for the findspot. Up to revision 30a this condition set k to k_max and widened the interval for a reason unconnected with the material; it now has no effect on the dating and records a gap in the die record instead. |
 | `lado:midpointYear` | `xsd:decimal` | The centre of the averaged interval, the m in m ± k·σ. |
 | `lado:avgDatemin` | `xsd:integer` | Mean of the contributing potters' start dates. |
 | `lado:avgDatemax` | `xsd:integer` | Mean of the contributing potters' end dates. |

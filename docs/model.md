@@ -144,7 +144,7 @@ flowchart LR
 | `q_start, q_end` | `samian:ts_<id>_<hash>` | `lado:qStart / lado:qEnd` |
 | `sigma_eff` | `samian:ts_<id>_<hash>` | `lado:sigmaYears` |
 | `k_eff` | `samian:ts_<id>_<hash>` | `lado:kFactor` |
-| `k_is_fallback` | `samian:ts_<id>_<hash>` | `lado:kIsFallback` |
+| `k_no_dierecord` | `samian:ts_<id>_<hash>` | `lado:kNoDieRecord` |
 | `midpoint_year` | `samian:ts_<id>_<hash>` | `lado:midpointYear` |
 | `avg_datemin, avg_datemax` | `samian:ts_<id>_<hash>` | `lado:avgDatemin / lado:avgDatemax` |
 | `min_datemin, max_datemin` | `samian:ts_<id>_<hash>` | `lado:minDatemin / lado:maxDatemin` |
