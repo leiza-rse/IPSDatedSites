@@ -78,8 +78,23 @@ REQUIRED_COLUMNS = (
 
 PARAMETER_COLUMNS = ("p_k_min", "p_k_max", "p_tau", "p_w", "p_t0")
 
-EXPECTED_ROWS = 37        # IPSDatedSites28, pairwise placeholder filter,
-                          # Bregenz withheld pending review (6 findspots)
+# Findspots the query lets through by name rather than by marker. The
+# clause that admits them matches on exact strings, so a corrected spelling
+# in the database makes it match nothing — and the findspots then vanish
+# exactly as if they had never been admitted, which is how they were lost
+# the first time. Check (e) exists to make that loud.
+EDITORIAL_INCLUSIONS = [
+    ("Bregenz", "B\u00f6ckleareal (period I)"),
+    ("Bregenz", "B\u00f6ckleareal (period II)"),
+    ("Bregenz", "B\u00f6ckleareal (destruction layer period II)"),
+]
+
+EXPECTED_ROWS = 40        # 2026-08-25: 37 plus the three Boeckleareal
+                          # findspots at Bregenz, admitted by name once
+                          # Allard confirmed them as checked. The rest of
+                          # Bregenz remains unreviewed and stays out.
+                          # A live database, so this is a landmark rather
+                          # than a contract: check (a) warns, never fails.
 
 # Allard Mees: a scatter of about +/- 5 years counts as sharply dated for
 # samian ware, about +/- 25 years as chronologically unusable. These two
@@ -240,6 +255,49 @@ def check_row_count(report: Report, rows: list[dict[str, str]]) -> None:
             f"{n} findspots, expected {EXPECTED_ROWS}. Not an error in itself — "
             "the database grows — but every figure quoted in the documentation "
             "was computed against a different corpus.",
+        ))
+
+
+def check_editorial_inclusions(report: Report, rows) -> None:
+    """Do the findspots admitted by name actually arrive?
+
+    Not a pass/fail on the corpus: the database is live and a findspot may
+    legitimately be withdrawn. What must not happen silently is the clause
+    matching NOTHING, because that is indistinguishable in the output from
+    the findspots never having been admitted at all.
+    """
+    present = {(r["the_site"], r["the_findspot"]) for r in rows}
+    found = [f for f in EDITORIAL_INCLUSIONS if f in present]
+    missing = [f for f in EDITORIAL_INCLUSIONS if f not in present]
+
+    if not found:
+        report.add(Check(
+            "e", "editorial inclusions arrive", "warn",
+            f"None of the {len(EDITORIAL_INCLUSIONS)} findspots admitted by "
+            "name is in the output. Three possibilities, in order of "
+            "likelihood: the export predates the inclusion clause of "
+            "2026-08-25 and was produced by a query that still excluded the "
+            "site wholesale; a spelling in the database no longer matches the "
+            "clause, which matches on exact strings; or the records do not "
+            "carry the isdate/sitecharacter markers and were never in the "
+            "base set at all — in which case no WHERE clause will bring them "
+            "back and they need marking instead. A warning rather than a "
+            "failure because the corpus is live, but not silence, because "
+            "silence is how these findspots were lost the first time.",
+            {"expected": [f"{a} / {b}" for a, b in EDITORIAL_INCLUSIONS]},
+        ))
+    elif missing:
+        report.add(Check(
+            "e", "editorial inclusions arrive", "warn",
+            f"{len(found)} of {len(EDITORIAL_INCLUSIONS)} present. The "
+            "clause works, so the absent ones are a spelling mismatch or a "
+            "withdrawal rather than a broken query.",
+            {"missing": [f"{a} / {b}" for a, b in missing]},
+        ))
+    else:
+        report.add(Check(
+            "e", "editorial inclusions arrive", "pass",
+            f"all {len(found)} present.",
         ))
 
 
@@ -535,6 +593,7 @@ def verify(path: Path) -> Report:
         return report
 
     check_row_count(report, rows)
+    check_editorial_inclusions(report, rows)
     params = read_parameters(report, rows)
     if len(params) != len(PARAMETER_COLUMNS):
         return report

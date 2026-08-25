@@ -26,6 +26,7 @@ Run via  python py/main.py  (step 5), or on its own:
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from datetime import date
 from pathlib import Path
@@ -168,7 +169,6 @@ substituting a default.
 | [Queries](queries.md) | The SPARQL used to rebuild the figure, and the round-trip check |
 | [Bundle](bundle.md) | The standalone file for a triplestore, and why the crosswalk is materialised |
 | [Open questions](open-questions.md) | What remains unresolved and why it matters |
-| [Build report](run-report.html) | The last run: sources, checks, artefacts, and the terminal output verbatim |
 
 {diagram("architecture", "The pipeline. Everything after the export reads from the graph, never from the CSV — apart from the round-trip check, which compares the two.")}
 ## The shape of it in one paragraph
@@ -830,6 +830,46 @@ asserted.
     return write(out, "bundle.md", body)
 
 
+def _verification_facts() -> dict:
+    """The facts block, if a verification report is on disk."""
+    path = ROOT / "data" / "derived" / "verification.json"
+    try:
+        return json.loads(path.read_text(encoding="utf-8")).get("facts", {})
+    except (OSError, json.JSONDecodeError, AttributeError):
+        return {}
+
+
+def epoch_drift_sentence() -> str:
+    """The drift figures, read from the run rather than typed in.
+
+    They were written out by hand once and were stale within a fortnight:
+    three findspots joined the corpus, the early median moved from 12.2 to
+    13.5 years, and the published prose went on saying twelve. Anything a
+    check already computes should be read from the check.
+    """
+    drift = (_verification_facts() or {}).get("epoch_drift")
+    if not drift:
+        return ("The size of the effect is reported by check (l) of "
+                "`py/verify.py` on every run.")
+
+    before = drift["median_width_before_ad100"]
+    after = drift["median_width_from_ad100"]
+    ratio = after / before if before else 0.0
+    return (
+        "The size of the effect may be stated plainly. The median interval "
+        f"is {before:.1f} years before AD 100 against {after:.1f} years from "
+        f"AD 100, a ratio of about one to {ratio:.1f}, on "
+        f"{drift['n_before_ad100']} and {drift['n_from_ad100']} findspots "
+        f"respectively (Pearson r = {drift['r_width_vs_year']:+.3f} between "
+        "interval width and midpoint year). Allard confirmed on 25 August "
+        "2026 that naming the ratio is welcome: the imprecision of second- "
+        "and third-century dating relative to the first is an unstudied "
+        "area, and any quantification of it is worth having. These figures "
+        "come from check (l) of the run that produced this page, so they "
+        "cannot fall behind the corpus."
+    )
+
+
 def page_open(out: Path) -> Path:
     body = f"""# Open questions
 
@@ -970,12 +1010,7 @@ independently of the ceramics. That absence also makes residuality very
 hard to assess for the period; in the first century it appears not to play
 a significant role.
 
-The size of the effect may be stated plainly. The median interval is about
-twelve years before AD 100 and about twenty-three years after it — roughly one
-to two between the first century and the second and third. Allard confirmed on
-25 August 2026 that naming the ratio is welcome: the imprecision of second- and
-third-century dating relative to the first is an unstudied area, and any
-quantification of it is worth having.
+{epoch_drift_sentence()}
 
 ## Defects in the published discovery-site data (2019 release)
 

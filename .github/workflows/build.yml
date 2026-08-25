@@ -64,14 +64,19 @@ jobs:
         # docs/sparql.html and docs/downloads/queries/*.rq carry no
         # timestamp and are byte-stable, so they stay in scope.
         #
+        # docs/run-report.* is excluded and also gitignored: it records one
+        # run on one machine — file inventory, installed tools, path
+        # separators — and cannot match between a Windows checkout and this
+        # runner. The exclusion is insurance in case one is ever force-added.
+        #
         # Pure text, generated from the code structures. Deterministic on
         # any platform and any library version, so a difference here means
         # somebody changed the code without re-running the pipeline.
         run: |
-          if ! git diff --quiet -- docs ':!docs/bundle.ttl'; then
+          if ! git diff --quiet -- docs ':!docs/bundle.ttl' ':!docs/run-report.*'; then
             echo "::error::docs/ is stale. Run 'python py/main.py' and commit the result."
-            git diff --stat -- docs ':!docs/bundle.ttl'
-            git diff -- docs ':!docs/bundle.ttl' | head -120
+            git diff --stat -- docs ':!docs/bundle.ttl' ':!docs/run-report.*'
+            git diff -- docs ':!docs/bundle.ttl' ':!docs/run-report.*' | head -120
             exit 1
           fi
           echo "docs/ and docs/diagrams/ match the code."

@@ -62,7 +62,17 @@
 --     Untersuchung laesst sich Verschleppung, Vater/Sohn, Einzelperson
 --     und Werkstatt nicht trennen. Die Schwelle markiert die Grenze der
 --     moeglichen Genauigkeit und wird deshalb NICHT enger gesetzt.
---   * Der Bregenz-Ausschluss ist entfallen. Samian Research ist eine
+--   * Bregenz, zweite Fassung (2026-08-25). Der pauschale Ausschluss ist
+--     entfallen und durch eine gezielte Einschlussklausel ersetzt: die
+--     drei geprueften Boeckleareal-Fundkomplexe bleiben, die uebrigen,
+--     noch ungepruefteten Records des Ortes nicht. Das ist eine
+--     editorische Uebergangsloesung und keine Dauerform -- richtig waere,
+--     geprueft und ungeprueft in der Datenbank zu markieren und den
+--     regulaeren Filter entscheiden zu lassen, statt einen Ortsnamen im
+--     SQL zu fuehren. Kontrolle (e) in py/verify.py schlaegt an, wenn die
+--     Klausel ins Leere greift, weil sich eine Schreibweise geaendert hat.
+--     Urspruengliche Begruendung fuer den Wegfall des Pauschalausschlusses:
+--     Samian Research ist eine
 --     Live-Datenbank; ungeprüfte Fundstellen wird es immer geben und neue
 --     kommen laufend hinzu. Einzelne Orte im SQL auszuschliessen ist dafuer
 --     das falsche Mittel. Stattdessen wird der Abzugsstand festgehalten
@@ -272,6 +282,19 @@ diecounts AS (
           (-30,150), (0,100), (0,120), (0,130), (0,150),
           (0,180), (0,270), (100,200), (150,270),
           (160,260), (165,270) )
+      -- Bregenz: die drei geprueften Boeckleareal-Fundkomplexe bleiben
+      -- drin, die uebrigen, noch ungepruefteten Records des Ortes nicht.
+      -- Formuliert von Allard Mees am 2026-08-25. U&-Escape statt rohem
+      -- Umlaut aus demselben Grund wie bei Theta und Sigma: das Statement
+      -- bleibt reines ASCII und haengt nicht daran, welche Kodierung die
+      -- Verbindung gerade meint.
+      AND (
+            di.site NOT ILIKE '%Bregenz%'
+         OR btrim(di.findspot) IN (
+                U&'B\00F6ckleareal (period I)',
+                U&'B\00F6ckleareal (period II)',
+                U&'B\00F6ckleareal (destruction layer period II)')
+          )
       AND di.die IS NOT NULL
     GROUP BY di.site, di.findspot, di.pottername
 ),
@@ -415,6 +438,19 @@ AND (p.datemin, p.datemax) NOT IN (
       (-30,150), (0,100), (0,120), (0,130), (0,150),
       (0,180), (0,270), (100,200), (150,270),
       (160,260), (165,270) )
+  -- Bregenz: die drei geprueften Boeckleareal-Fundkomplexe bleiben
+  -- drin, die uebrigen, noch ungepruefteten Records des Ortes nicht.
+  -- Formuliert von Allard Mees am 2026-08-25. U&-Escape statt rohem
+  -- Umlaut aus demselben Grund wie bei Theta und Sigma: das Statement
+  -- bleibt reines ASCII und haengt nicht daran, welche Kodierung die
+  -- Verbindung gerade meint.
+  AND (
+    di.site NOT ILIKE '%Bregenz%'
+     OR btrim(di.findspot) IN (
+        U&'B\00F6ckleareal (period I)',
+        U&'B\00F6ckleareal (period II)',
+        U&'B\00F6ckleareal (destruction layer period II)')
+      )
 GROUP BY vds.id, di.site, di.findspot, di.siteancientname,
          di.coordinate1, di.coordinate2, di.pleiades
 HAVING COUNT(di.number) >= :min_stamps

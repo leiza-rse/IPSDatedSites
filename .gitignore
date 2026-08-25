@@ -39,3 +39,21 @@ sql/generated/
 # rebuild without a content change leaves git status clean.
 
 README-PATCH.md
+
+# --- The build report ---
+# docs/run-report.* is a record of ONE run on ONE machine, not a derived
+# artefact of the data. It contains the file inventory of the working tree,
+# the tools that happened to be installed (GraphViz present or absent
+# changes the log itself) and the platform's path separators. It therefore
+# cannot be byte-identical between a Windows checkout and a Linux runner,
+# and demanding that it be is a category error: the report's whole purpose
+# is to say what happened here, this time.
+#
+# Everything else in docs/ is generated from the code and the data alone
+# and is deterministic on any platform, which is what makes the staleness
+# check in CI meaningful. Keeping the report out preserves that.
+#
+# To publish one deliberately — for a release, say — write it elsewhere:
+#   python py/main.py --report-out docs/releases/2026-08
+docs/run-report.html
+docs/run-report.txt

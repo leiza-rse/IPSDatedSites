@@ -83,6 +83,27 @@ class Tee(io.TextIOBase):
         return "".join(self._buffer)
 
 
+# Repository-relative paths as they appear in the log. Windows prints them
+# with backslashes, Linux with forward slashes, and the two reports are then
+# undiffable for the one purpose a pair of reports has — finding out why a
+# run went differently on two machines.
+_WINPATH = re.compile(
+    r"\b(data|docs|img|rdf|webjs|py|sql|qmd)((?:\\[\w.\-]+)+)")
+
+
+def normalise_paths(log: str) -> str:
+    """Repository paths to forward slashes, whatever printed them.
+
+    Deliberately narrow: only tokens that begin with a known top-level
+    directory of this repository and continue without spaces. A backslash in
+    prose, in a SPARQL escape or in a Windows path outside the repository is
+    left alone, because guessing there would corrupt the record rather than
+    tidy it.
+    """
+    return _WINPATH.sub(
+        lambda m: m.group(1) + m.group(2).replace("\\", "/"), log)
+
+
 def _read_json(path: Path) -> dict:
     try:
         return json.loads(path.read_text(encoding="utf-8"))
@@ -290,6 +311,8 @@ def write(log: str, out_dir: Path, ok: bool) -> list[Path]:
             "Browser emitter": ROOT / "webjs",
             "Data": ROOT / "data",
         })
+
+        log = normalise_paths(log)
 
         txt = out_dir / "run-report.txt"
         txt.write_text(log, encoding="utf-8", newline="\n")

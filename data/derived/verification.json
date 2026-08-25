@@ -8,11 +8,18 @@
       "title": "column set"
     },
     {
-      "detail": "40 findspots, expected 37. Not an error in itself — the database grows — but every figure quoted in the documentation was computed against a different corpus.",
+      "detail": "40 findspots, as expected.",
       "key": "a",
       "offenders": [],
-      "status": "warn",
+      "status": "pass",
       "title": "row count"
+    },
+    {
+      "detail": "all 3 present.",
+      "key": "e",
+      "offenders": [],
+      "status": "pass",
+      "title": "editorial inclusions arrive"
     },
     {
       "detail": "k_min=0.5, k_max=1.5, tau=6, w=1, t0=20",
@@ -131,8 +138,8 @@
   },
   "source": "C:\\git\\IPSDatedSites\\data\\ips_dated_sites_2026-08-25.csv",
   "summary": {
-    "checks": 13,
+    "checks": 14,
     "failed": 0,
-    "warned": 1
+    "warned": 0
   }
 }
