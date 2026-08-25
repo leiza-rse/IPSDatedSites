@@ -173,7 +173,7 @@ counts back in. One output row is one findspot.</p>
     <path d="M95 82 L95 140 L810 140 L810 96" fill="none" stroke="#b07d31"
           stroke-dasharray="4,3" marker-end="url(#a1)"/>
     <text x="450" y="134" text-anchor="middle" font-family="Public Sans" font-size="11" fill="#b07d31">
-      k_max also serves as the fallback where no die is recorded</text>
+      k is driven by count_stamps alone; the die counts stay descriptive</text>
 
     <g font-family="Public Sans" font-size="11" fill="#46525f">
       <text x="95" y="172" text-anchor="middle">constants</text>
@@ -272,6 +272,9 @@ counts back in. One output row is one findspot.</p>
       \[ D = \sum \text{dies\_pp} \qquad
          n_{\text{die}} = \sum \text{stamps\_pp} \qquad
          r = \frac{n_{\text{die}}}{D} \]
+      <p style="margin:.6rem 0 0; font-size:.86rem">Since revision 30a this CTE no
+      longer feeds \(k\): it supplies \(D\) and \(r\) only. \(k\) is computed in the
+      main query from <code>count_stamps</code>.</p>
     </div>
     <div class="means">
       <b>n_dies</b> is the number of distinct potter–die pairs, <b>rep</b> the mean number
@@ -369,10 +372,10 @@ wide, and different potters point to different years.</p>
 <div class="unit">
   <div class="name">k_eff <em>— coverage factor, from the assemblage size</em></div>
   <div class="body">
-<pre>k_max - (k_max - k_min) * (1 - <span class="k">EXP</span>(-n_stamps_die / tau))
-<span class="c">-- k_min = 0.5   k_max = 1.5   tau = 20</span></pre>
+<pre>k_max - (k_max - k_min) * (1 - <span class="k">EXP</span>(-count_stamps / tau))
+<span class="c">-- k_min = 0.5   k_max = 1.5   tau = 6   (calibrated, see the method page)</span></pre>
     <div class="eq">
-      \[ k = k_{\max} - (k_{\max}-k_{\min})\left(1 - e^{-n_{\text{die}}/\tau}\right) \]
+      \[ k = k_{\max} - (k_{\max}-k_{\min})\left(1 - e^{-n/\tau}\right) \]
     </div>
     <div class="means">
       The more stamps a findspot yields, the tighter the interval that may reasonably be
@@ -497,16 +500,18 @@ questions, and a findspot may score high on one and low on the other.</p>
 <div class="unit">
   <div class="name">q_start · q_end <em>— endpoint sharpness, whisker colour</em></div>
   <div class="body">
-<pre><span class="k">ROUND</span>(<span class="k">COALESCE</span>(<span class="k">CASE WHEN</span> <span class="k">AVG</span>(p.datemin) = 0 <span class="k">THEN NULL</span>
-  <span class="k">ELSE EXP</span>(-(<span class="k">STDDEV_SAMP</span>(p.datemin) / <span class="k">ABS</span>(<span class="k">AVG</span>(p.datemin)))) <span class="k">END</span>, 0.5), 3) <span class="k">AS</span> q_start
-<span class="c">-- q_end identical, on datemax</span></pre>
+<pre><span class="k">ROUND</span>(<span class="k">EXP</span>(-(<span class="k">STDDEV_SAMP</span>(p.datemin) / (<span class="k">SELECT</span> t0 <span class="k">FROM</span> params))), 3) <span class="k">AS</span> q_start
+<span class="c">-- q_end identical, on datemax.  t0 = 20 years, a fixed reference length.</span></pre>
     <div class="eq">
-      \[ q_{\text{start}} = \exp\!\left(-\frac{s_a}{|\overline{a}|}\right) \qquad
-         q_{\text{end}} = \exp\!\left(-\frac{s_b}{|\overline{b}|}\right) \]
+      \[ q_{\text{start}} = \exp\!\left(-\frac{s_a}{t_0}\right) \qquad
+         q_{\text{end}} = \exp\!\left(-\frac{s_b}{t_0}\right) \]
     </div>
     <div class="means">
-      Scatter of the start and end dates separately, normalised against the mean year.
-      Used only to colour the whiskers.
+      Scatter of the start and end dates separately, read against a fixed length of
+      20 years rather than against the mean year. Until v27c the divisor was
+      \(|\overline{a}|\), which measured a findspot's quality by where it sat in the
+      calendar; with \(t_0\) the two measures no longer depend on epoch. Used only to
+      colour the whiskers.
     </div>
   </div>
 </div>
@@ -543,14 +548,23 @@ questions, and a findspot may score high on one and low on the other.</p>
   <thead><tr><th>Name</th><th class="v">Value</th><th>Effect</th></tr></thead>
   <tbody>
     <tr><td><code>k_min</code></td><td class="v">0.5</td><td>narrowest interval, richly attested findspots</td></tr>
-    <tr><td><code>k_max</code></td><td class="v">1.5</td><td>widest interval; also the fallback where no die is recorded</td></tr>
-    <tr><td><code>tau</code></td><td class="v">20</td><td>assemblage size at which ~63 % of the narrowing is reached</td></tr>
+    <tr><td><code>k_max</code></td><td class="v">1.5</td><td>widest interval, thinly attested findspots</td></tr>
+    <tr><td><code>tau</code></td><td class="v">6</td><td>assemblage size, in <em>stamps</em>, at which ~63 % of the narrowing is reached; calibrated against five ceramic-independent ensembles</td></tr>
+    <tr><td><code>t0</code></td><td class="v">20</td><td>reference length, in <em>years</em>, against which the edge dispersions are read; a stated convention, not a calibrated value</td></tr>
+    <tr><td><code>w</code></td><td class="v">1.0</td><td>weight of volume against repetition in \(k\); 1.0 = volume only</td></tr>
     <tr><td>within-stamp variance</td><td class="v">\(w^2/12\)</td><td>uniform distribution across each potter's range</td></tr>
   </tbody>
 </table>
 
 <div class="note">
-  All three named parameters live in the <code>params</code> CTE at the top of the query
+  <strong><code>tau</code> and <code>t0</code> are not the same quantity.</strong> One is
+  counted in stamps and drives the width of the box; the other is counted in years and
+  drives the whisker colours. They carried the same value until <code>tau</code> was
+  calibrated, and during development both were once set to 6 at the same time — every
+  check passed, every figure looked plausible, and every whisker colour in the corpus
+  was wrong. Both are exported on every row, as <code>p_tau</code> and <code>p_t0</code>,
+  so that any output can be checked against the parameters that produced it.
+  All named parameters live in the <code>params</code> CTE at the top of the query
   and are referenced from there, so a change takes effect in one place.
 </div>
 
@@ -571,7 +585,7 @@ questions, and a findspot may score high on one and low on the other.</p>
     <tr><td class="v">n_dies</td><td>\(D\)</td><td>distinct potter–die pairs</td></tr>
     <tr><td class="v">die_repetition</td><td>\(r = n_{\text{die}}/D\)</td><td>attestations per die</td></tr>
     <tr><td class="v">q_repetition</td><td>\(1 - 1/r\)</td><td>hoard character</td></tr>
-    <tr><td class="v">q_start · q_end</td><td>\(e^{-s/|\overline{\cdot}|}\)</td><td>whisker colour</td></tr>
+    <tr><td class="v">q_start · q_end</td><td>\(e^{-s/t_0}\)</td><td>whisker colour</td></tr>
     <tr><td class="v">unc_*_years</td><td>\(s_a\), \(s_b\), \(\sqrt{s^2_a+s^2_b}\)</td><td>whisker lengths, graphical only</td></tr>
     <tr><td class="v">avg_interval</td><td>—</td><td>display string</td></tr>
   </tbody>

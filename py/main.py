@@ -7,7 +7,7 @@ One call, nine steps:
     0. Verify the CSV against the model it claims to carry
     1. CSV from data/  ->  rdf/  (Turtle + JSON-LD + LADO extension)
     2. Load the graph, retrieve everything by SPARQL
-    3. Two figures to img/, SVG + JPG at 300 dpi each
+    3. Figures to img/, SVG + JPG at 300 dpi each, incl. the panel sheets
     4. Round-trip check CSV -> RDF -> SPARQL, field by field
     5. Standalone bundle to rdf/IPSDatedSites-bundle.ttl
     6. Browser RDF emitter to webjs/, with a parity check
@@ -191,6 +191,31 @@ def main() -> int:
             paths = fn(fig_const, rows, era, img, **kw)
             names = ", ".join(p.name for p in paths)
             print(f"  {label:<12}: {names}")
+
+        # The two panel sheets. They read the CSV directly rather than the
+        # SPARQL rows, because the calibration argument has to be checkable
+        # against the source table without a graph in between.
+        import make_calibration_panels as panels
+        sel = panels.select(panels.load_rows(csv))
+        for group, stem, title in (
+            ("reference", "plot_v3_calibration",
+             "The calibration set — five ceramic-independent reference "
+             "ensembles"),
+            ("comparison", "plot_v3_findspots",
+             "Five further findspots, across the range of the corpus"),
+        ):
+            sheet = [r for r in sel if r["_role"] == group]
+            names = ", ".join(
+                q.name for q in panels.render(sheet, img, era, stem, title))
+            print(f"  {stem:<12}: {names}")
+
+        inside = sum(1 for r in sel if r["_terminus"] is not None
+                     and panels.num(r["eff_start"]) <= r["_terminus"]
+                     <= panels.num(r["eff_end"]))
+        total = sum(1 for r in sel if r["_terminus"] is not None)
+        flag = "OK" if inside == total else "!!"
+        print(f"  {flag} terminus inside the modelled interval: "
+              f"{inside} of {total}")
 
     # ---- 4. Round trip ---------------------------------------------------
     rule("4 · Round trip  CSV -> RDF -> SPARQL")

@@ -853,6 +853,16 @@ currently contain *Böckleareal (descruction layer period II)* — a typo for
 publication or it is left permanently untouched; both are defensible, but
 the decision cannot be deferred past the first publication of the URIs.
 
+Confirmed by the domain expert on 25 August 2026: there is at present no
+stable key at findspot level. One is implicit in the selection criteria
+`isdate` and `sitecharacter`, but those are not really the right criteria for
+this purpose — a column of its own would be. Two things follow. The findspot
+label, not the site, is the unit that matters: a site can carry many entries
+with no findspot designation at all, and parallel evaluation routines in
+Samian Research work at findspot level too. And the request for a dedicated
+column should be made explicitly rather than worked around here, because every
+workaround mints URIs that a later column would invalidate.
+
 ## Era convention
 
 Confirmed as historical: −40 in the database means 40 BC, and the derived
@@ -887,6 +897,11 @@ exclusion has accordingly been removed from the query, and the retrieval is
 pinned in `data/SNAPSHOT.json` instead. Deliberate exclusions remain
 possible as a parameter of `py/ips_model.py`.
 
+**Die attribution.** Not a risk: the stamp type is a compulsory field on
+data entry in Samian Research, so findspots without one are not expected to
+occur. The `k_no_dierecord` watchdog therefore stays as a check on that
+expectation rather than as a handler for an anticipated case.
+
 **The 100-year threshold for wide-dated potters.** It stays. Narrowing it
 was rejected on archaeological grounds: potters such as Calvus i worked in
 more than one production centre — he appears to have moved from La
@@ -912,6 +927,13 @@ finds from the Pudding Pan Rock wreck, but they cannot be dated
 independently of the ceramics. That absence also makes residuality very
 hard to assess for the period; in the first century it appears not to play
 a significant role.
+
+The size of the effect may be stated plainly. The median interval is about
+twelve years before AD 100 and about twenty-three years after it — roughly one
+to two between the first century and the second and third. Allard confirmed on
+25 August 2026 that naming the ratio is welcome: the imprecision of second- and
+third-century dating relative to the first is an unstudied area, and any
+quantification of it is worth having.
 
 ## Defects in the published discovery-site data (2019 release)
 

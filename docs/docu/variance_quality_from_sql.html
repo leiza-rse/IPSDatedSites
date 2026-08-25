@@ -237,6 +237,7 @@ footer .fi{max-width:1080px; margin:0 auto}
     <li><a href="#central">Central tendency</a></li>
     <li><a href="#dispersion">Dispersion: the aoristic \(\sigma\)</a></li>
     <li><a href="#kfactor">The coverage factor \(k\)</a></li>
+    <li><a href="#constants">The two constants: \(\tau\) and \(t_0\)</a></li>
     <li><a href="#fuzzy">The virtual fuzzy year</a></li>
     <li><a href="#qspread">Quality axis I: dating sharpness</a></li>
     <li><a href="#qrep">Quality axis II: die repetition</a></li>
@@ -356,8 +357,11 @@ footer .fi{max-width:1080px; margin:0 auto}
       <tr><td>\(b_i\)</td><td>latest production year of stamp \(i\)'s potter</td><td><code>p.datemax</code></td></tr>
       <tr><td>\(w_i = b_i - a_i\)</td><td>width of that potter's range</td><td>—</td></tr>
       <tr><td>\(c_i = \tfrac{a_i + b_i}{2}\)</td><td>midpoint of that potter's range</td><td>—</td></tr>
-      <tr><td>\(n_{\text{die}}\)</td><td>stamps with a recorded die</td><td><code>n_stamps_die</code></td></tr>
+      <tr><td>\(n\)</td><td>stamps at the findspot; the quantity that drives \(k\)</td><td><code>count_stamps</code></td></tr>
+      <tr><td>\(n_{\text{die}}\)</td><td>stamps with a recorded die; descriptive only</td><td><code>n_stamps_die</code></td></tr>
       <tr><td>\(D\)</td><td>distinct \((\text{potter}, \text{die})\) pairs</td><td><code>n_dies</code></td></tr>
+      <tr><td>\(\tau\)</td><td>saturation constant of the \(k\) curve, in <em>stamps</em></td><td><code>p_tau</code></td></tr>
+      <tr><td>\(t_0\)</td><td>reference length for the edge measures, in <em>years</em></td><td><code>p_t0</code></td></tr>
     </tbody>
   </table>
 
@@ -485,9 +489,11 @@ footer .fi{max-width:1080px; margin:0 auto}
   it is driven by the quantity of that evidence.</p>
 
   <div class="formula">
-    \[ k \;=\; k_{\max} \;-\; \big(k_{\max} - k_{\min}\big)\Big(1 - e^{-\,n_{\text{die}}/\tau}\Big) \]
+    \[ k \;=\; k_{\max} \;-\; \big(k_{\max} - k_{\min}\big)\Big(1 - e^{-\,n/\tau}\Big) \]
     <div class="why">
-      With \(k_{\min} = 0.5\), \(k_{\max} = 1.5\), \(\tau = 20\). A findspot with no
+      With \(k_{\min} = 0.5\), \(k_{\max} = 1.5\), \(\tau = 6\). \(n\) is the number
+      of stamps at the findspot — not the subset carrying a die attribution, which is
+      what it was until revision 30a. A findspot with no
       attestations would receive \(k_{\max}\); as attestations accumulate, \(k\)
       decreases towards \(k_{\min}\), so the reported interval narrows. Saturation is
       exponential: the difference between two and twelve stamps matters far more than
@@ -507,8 +513,8 @@ footer .fi{max-width:1080px; margin:0 auto}
       <g font-family="IBM Plex Mono, monospace" font-size="10" fill="#46525f">
         <text x="62" y="44" text-anchor="end">1.5</text>
         <text x="62" y="164" text-anchor="end">0.5</text>
-        <text x="188" y="186" text-anchor="middle" fill="#b07d31">τ = 20</text>
-        <text x="660" y="186" text-anchor="end">stamps with a die →</text>
+        <text x="188" y="186" text-anchor="middle" fill="#b07d31">τ = 6</text>
+        <text x="660" y="186" text-anchor="end">stamps →</text>
       </g>
       <g font-family="Public Sans" font-size="11">
         <text x="600" y="34" text-anchor="end" fill="#9e3b26">k_max · thinly attested</text>
@@ -522,7 +528,7 @@ footer .fi{max-width:1080px; margin:0 auto}
 
   <div class="note">
     <strong>Volume only.</strong> Die repetition was tested as a second driver of \(k\)
-    and rejected: across the current selection it changed the ordering of findspots
+    and rejected: across the selection then current it changed the ordering of findspots
     only marginally, and a single-signal model is easier to state and to defend. Die
     repetition is retained in full, but as a descriptive measure
     (<a href="#qrep">§10</a>) rather than as a component of the interval width.
@@ -539,6 +545,150 @@ footer .fi{max-width:1080px; margin:0 auto}
   </div>
 </section>
 
+<!-- ============ 7a ============ -->
+<section id="constants">
+  <h2><svg class="ansa" width="42" height="22" viewBox="0 0 42 22" aria-hidden="true"><g fill="none" stroke="#9e3b26" stroke-width="1.3"><path d="M9 3 L33 3 L33 19 L9 19 Z"/><path d="M9 3 L1 7 L1 15 L9 19"/><path d="M33 3 L41 7 L41 15 L33 19"/></g><text x="21" y="15" text-anchor="middle" fill="#9e3b26" font-family="IBM Plex Mono, monospace" font-size="10">7a</text></svg>The two constants: \(\tau\) and \(t_0\)</h2>
+  <p class="sub">Two numbers that are not the same number, and one that is not Student's&nbsp;\(t\).</p>
+
+  <p>The model carries two constants whose symbols invite confusion. They govern
+  different quantities, they are measured in different units, and they are arrived at
+  by different means. Until the calibration described below they happened to carry the
+  same value, which made the confusion cost-free — and therefore invisible.</p>
+
+  <table>
+    <thead><tr><th></th><th>\(\tau\)</th><th>\(t_0\)</th></tr></thead>
+    <tbody>
+      <tr><td>Governs</td><td>the coverage factor \(k\), and through it the width of the box</td><td>the edge measures \(q_{\text{start}}\) and \(q_{\text{end}}\), and through them the whisker colours</td></tr>
+      <tr><td>Unit</td><td>stamps</td><td>years</td></tr>
+      <tr><td>Value</td><td class="num">6</td><td class="num">20</td></tr>
+      <tr><td>Arrived at by</td><td>empirical calibration against ceramic-independent reference ensembles</td><td>anchoring on stated expert thresholds for sharp and unusable datings</td></tr>
+      <tr><td>Enters as</td><td>\(e^{-n/\tau}\)</td><td>\(e^{-\sigma/t_0}\)</td></tr>
+    </tbody>
+  </table>
+
+  <div class="warn">
+    <strong>Neither is Student's \(t\).</strong> Nothing in this model is a confidence
+    interval, no distribution is assumed for the findspot date, and no significance is
+    tested. \(k\) is a stated convention about how much of the observed scatter to
+    show; \(t_0\) is a yardstick against which a dispersion is read. A reader who
+    imports the vocabulary of frequentist inference will draw conclusions the data do
+    not support.
+  </div>
+
+  <h3>\(\tau\): where 6 comes from</h3>
+
+  <p>\(\tau\) is the assemblage size at which roughly 63 % of the available narrowing
+  has been achieved. Setting it high makes the model cautious — even well-attested
+  findspots keep a wide box; setting it low makes it confident, and a handful of
+  stamps is then enough to claim a narrow date.</p>
+
+  <p>It was fixed empirically. Five findspots in the corpus are dated by evidence
+  that does not depend on samian ware at all:</p>
+
+  <table>
+    <thead><tr><th>Findspot</th><th>Independent evidence</th></tr></thead>
+    <tbody>
+      <tr><td>Dangstetten, Military camp</td><td>coin-dated, 15 to 8 BC</td></tr>
+      <tr><td>Oberaden, Military camp</td><td>dendrochronology, ending 7 BC</td></tr>
+      <tr><td>Velsen, Velsen I</td><td>historically dated occupation</td></tr>
+      <tr><td>Pompeii, Hoard</td><td>eruption of Vesuvius, AD 79</td></tr>
+      <tr><td>Inchtuthil, Gutter</td><td>historically dated abandonment</td></tr>
+    </tbody>
+  </table>
+
+  <figure>
+    <img src="../../img/plot_v3_calibration.jpg" alt="Five panels, one per
+    reference ensemble, each showing the modelled interval and the independent
+    terminus as a vertical line." style="width:100%; height:auto">
+    <figcaption>The calibration set. Each panel shows what the model computes from
+    the stamps alone — box, whiskers, full range of contributing potter dates — with
+    the independent terminus drawn across it. The criterion is simply that the line
+    falls inside the box in all five cases; the figure is generated by
+    <code>py/make_calibration_panels.py</code>, which recomputes that and fails
+    loudly if it stops holding.</figcaption>
+  </figure>
+
+  <p>\(\tau\) is the <em>smallest</em> value at which every one of these termini still
+  falls inside the interval the model computes from the stamps alone. Smaller, and the
+  model starts contradicting evidence it cannot see; larger, and it is being more
+  cautious than the data require. That value is 6, down from the 20 used until the
+  calibration.</p>
+
+  <div class="note">
+    <strong>Why the reference set is exactly these five.</strong> They are the only
+    ensembles in the corpus whose date rests on something other than ceramics.
+    Calibrating against samian-dated assemblages would be circular: the model would be
+    tuned to agree with the chronology it is supposed to test. Two further candidates
+    were dropped for precisely that reason. The set is published as
+    <code>lado:calibratedAgainst</code> in the RDF, because a calibration whose
+    reference set is not named cannot be checked.
+  </div>
+
+  <div class="note">
+    <strong>Why \(k_{\min}\) and \(k_{\max}\) were not calibrated with it.</strong>
+    Five reference ensembles cannot separate three parameters. Fitting all three
+    produced 2 424 combinations that satisfied the criterion equally well, which is
+    not a result but a symptom of an underdetermined problem. \(k_{\min}\) and
+    \(k_{\max}\) therefore remain stated conventions, and only \(\tau\) is claimed as
+    calibrated.
+  </div>
+
+  <h3>\(t_0\): where 20 comes from</h3>
+
+  <p>The edge measures answer a different question from \(k\): not how wide to draw the
+  box, but how much to trust each of its two edges. Both read</p>
+
+  <div class="formula">
+    \[ q_{\text{start}} = \exp\!\left(-\frac{s_a}{t_0}\right)
+       \qquad\qquad
+       q_{\text{end}}   = \exp\!\left(-\frac{s_b}{t_0}\right) \]
+    <div class="why">
+      \(s_a\) and \(s_b\) are the sample standard deviations of the contributing
+      potters' start and end dates. \(t_0\) is the length against which that
+      dispersion is read.
+    </div>
+  </div>
+
+  <p>Its value is anchored on two thresholds stated by the domain expert: a dispersion
+  of about 5 years counts as a sharply dated edge, one of about 25 years as
+  chronologically unusable. Setting \(t_0 = 20\) puts those two at</p>
+
+  <table>
+    <thead><tr><th>Dispersion</th><th>Reading</th><th class="num">\(q\)</th></tr></thead>
+    <tbody>
+      <tr><td>5 years</td><td>sharply dated</td><td class="num">0.78</td></tr>
+      <tr><td>20 years</td><td>\(q = e^{-1}\), by construction</td><td class="num">0.37</td></tr>
+      <tr><td>25 years</td><td>chronologically unusable</td><td class="num">0.29</td></tr>
+    </tbody>
+  </table>
+
+  <p>The value is therefore a convention, but a <em>traceable</em> one: it is not
+  chosen for elegance, and changing the two thresholds changes it in a stated way.</p>
+
+  <div class="note">
+    <strong>Why a fixed length and not the mean year.</strong> Earlier versions divided
+    the dispersion by the mean calendar year, which made the measure a coefficient of
+    variation about year zero. That penalised Augustan material for sitting near the
+    era boundary rather than for anything about its evidence: a findspot averaging
+    AD 5 received a near-zero quality for a scatter that would pass unremarked at
+    AD 150. A fixed reference length removes the dependence on epoch entirely, and the
+    two measures became comparable across the corpus for the first time.
+    <a href="#superseded">§13</a>
+  </div>
+
+  <div class="warn">
+    <strong>An incident worth recording.</strong> During development both constants
+    were set to 6 at the same time. The pipeline ran, every internal check passed, and
+    the figures looked plausible — but every whisker colour in the corpus was wrong:
+    Amiens, for instance, showed a quality of 0.31 where the correct value is 0.70. The
+    ranking of findspots was unaffected, which is exactly why it survived several
+    review passes. Nothing in the arithmetic can catch this, because both values are
+    individually legal. The safeguards are therefore procedural: the two constants are
+    exported separately as <code>p_tau</code> and <code>p_t0</code> on every row, and
+    the query generator warns when they are equal.
+  </div>
+</section>
+
 <!-- ============ 8 ============ -->
 <section id="fuzzy">
   <h2><svg class="ansa" width="34" height="22" viewBox="0 0 34 22" aria-hidden="true"><g fill="none" stroke="#9e3b26" stroke-width="1.3"><path d="M7 3 L27 3 L27 19 L7 19 Z"/><path d="M7 3 L1 7 L1 15 L7 19"/><path d="M27 3 L33 7 L33 15 L27 19"/></g><text x="17" y="15" text-anchor="middle" fill="#9e3b26" font-family="IBM Plex Mono, monospace" font-size="10">8</text></svg>The virtual fuzzy year</h2>
@@ -546,9 +696,11 @@ footer .fi{max-width:1080px; margin:0 auto}
 
   <div class="formula">
     \[ \text{eff\_start} = m - k\sigma \qquad\qquad \text{eff\_end} = m + k\sigma \]
-    <div class="why">Symmetric about the midpoint by construction. Where the die-based
-    counts are unavailable, \(k\) falls back to \(k_{\max}\), producing the widest
-    interval the model allows rather than an arbitrary value.</div>
+    <div class="why">Symmetric about the midpoint by construction. \(k\) is always defined, because \(n\)
+    counts rows and cannot be missing. Until revision 30a it was read from the stamps
+    carrying a die attribution and fell back to \(k_{\max}\) wherever none was
+    recorded — which widened the interval for a reason having nothing to do with the
+    material. See <a href="#constants">§7a</a>.</div>
   </div>
 
   <figure>
@@ -596,25 +748,26 @@ footer .fi{max-width:1080px; margin:0 auto}
     more widely than the span itself.</div>
   </div>
 
-  <p>The endpoint measures follow the same shape but normalise against the mean year
-  rather than the interval length:</p>
+  <p>The endpoint measures follow the same shape but read the dispersion against
+  a fixed reference length \(t_0 = 20\) years rather than against anything derived
+  from the material:</p>
 
   <div class="formula">
-    \[ q_{\text{start}} = \exp\!\left(-\frac{s_a}{\left|\overline{a}\right|}\right)
+    \[ q_{\text{start}} = \exp\!\left(-\frac{s_a}{t_0}\right)
        \qquad
-       q_{\text{end}} = \exp\!\left(-\frac{s_b}{\left|\overline{b}\right|}\right) \]
+       q_{\text{end}} = \exp\!\left(-\frac{s_b}{t_0}\right) \]
     <div class="why">These drive the whisker colours in the plot.</div>
   </div>
 
   <div class="warn">
-    <strong>\(q_{\text{start}}\) and \(q_{\text{end}}\) depend on the calendar origin.</strong>
-    Dividing by \(|\overline{a}|\) makes the measure a coefficient of variation about
-    year zero, which has no archaeological meaning: a findspot averaging AD 5 receives a
-    near-zero quality for a scatter that would be unremarkable at AD 150, and Augustan
-    and Antonine material are treated on incomparable scales. The <code>CASE WHEN
-    AVG(datemin) = 0</code> guard prevents the division by zero but not the underlying
-    distortion. <code>q_interval</code>, normalised against the interval length, does
-    not have this problem and should be preferred wherever one measure must be chosen.
+    <strong>Resolved in v27c: they no longer depend on the calendar origin.</strong>
+    Until then both divided by the mean year, which made them coefficients of variation
+    about year zero — a findspot averaging AD 5 received a near-zero quality for a
+    scatter that would pass unremarked at AD 150, and Augustan and Antonine material
+    were read on incomparable scales. The <code>CASE WHEN AVG(datemin) = 0</code> guard
+    prevented the division by zero but not the distortion. With a fixed \(t_0\) the
+    three quality measures are finally on comparable footing.
+    <a href="#constants">§7a</a>
   </div>
 
   <div class="open">
@@ -782,14 +935,19 @@ footer .fi{max-width:1080px; margin:0 auto}
 
     <li><strong>Fabricated fallbacks.</strong> <code>COALESCE(..., 0.5)</code> on the quality
     measures and <code>COALESCE(..., 0)</code> on the uncertainties turn "undefined" into
-    a number. Tolerable in a plot, false in RDF. <a href="#qspread">§9</a></li>
+    a number. Tolerable in a plot, false in RDF, and the export omits the triple
+    instead. The fallback on \(k\) itself was removed in revision 30a.
+    <a href="#qspread">§9</a></li>
 
     <li><strong>Occurrence weighting.</strong> Averages are weighted by stamp count, not by
     potter. Defensible, but it must be stated. <a href="#central">§5</a></li>
 
-    <li><strong>Calendar-origin dependence of \(q_{\text{start}}\) and \(q_{\text{end}}\).</strong>
-    Normalising by the mean year makes early material look systematically worse.
-    <a href="#qspread">§9</a></li>
+    <li><strong>Later material is dated less sharply, and this is real.</strong>
+    Intervals widen with the calendar: the median box width is about twelve years
+    before AD 100 and about twenty-three years after it, a ratio of roughly one to two
+    between the first century and the second and third. The cause is archaeological,
+    not a defect of the model — see the note below — and no epoch correction is
+    applied. One was tried in v27b and made the drift worse.</li>
 
     <li><strong>Uniformity assumption.</strong> Each potter's range is treated as uniform.
     If production is better modelled as rising and falling, the \(w^2/12\) term would
@@ -798,10 +956,26 @@ footer .fi{max-width:1080px; margin:0 auto}
     <li><strong>External dates are invisible.</strong> Historically fixed contexts receive no
     benefit from that fact. <a href="#kfactor">§7</a></li>
 
-    <li><strong>Parameters are conventions, not estimates.</strong> \(k_{\min}\), \(k_{\max}\)
-    and \(\tau\) were chosen by inspection against known assemblages. They must travel
-    with the data as provenance, or the intervals cannot be reproduced.</li>
+    <li><strong>\(k_{\min}\) and \(k_{\max}\) are conventions, not estimates.</strong>
+    Only \(\tau\) is calibrated; the two bounds were set by inspection, because five
+    reference ensembles cannot separate three parameters. All five parameters travel
+    with every row as provenance, or the intervals cannot be reproduced.
+    <a href="#constants">§7a</a></li>
   </ol>
+
+  <div class="note">
+    <strong>Why the second and third centuries are dated less sharply.</strong> In the
+    words of the excavator of the reference material: the absence of
+    ceramic-independent dated assemblages containing stamped samian in the second and
+    third centuries has led to speculation about late impressions — moulds used over a
+    very long period in the production of decorated ware (see the publications of
+    Huld-Zetsche). Such an assumption would call the possibility of a samian chronology
+    into question altogether. Genuinely closed assemblages do exist for the period, the
+    finds from the Pudding Pan Rock wreck among them, but they cannot be dated
+    independently of the ceramics. That absence also makes residuality very hard to
+    assess for these centuries; in the first century it appears not to play a
+    significant role.
+  </div>
 </section>
 
 <!-- ============ 15 ============ -->
@@ -813,15 +987,16 @@ footer .fi{max-width:1080px; margin:0 auto}
     <thead><tr><th>Parameter</th><th class="num">Value</th><th>Effect</th><th>Set in</th></tr></thead>
     <tbody>
       <tr><td>\(k_{\min}\)</td><td class="num">0.5</td><td>narrowest interval, richly attested findspots</td><td><code>params</code> CTE</td></tr>
-      <tr><td>\(k_{\max}\)</td><td class="num">1.5</td><td>widest interval; also the fallback where dies are unrecorded</td><td><code>params</code> CTE</td></tr>
-      <tr><td>\(\tau\)</td><td class="num">20</td><td>assemblage size at which ~63 % of the narrowing is reached</td><td><code>params</code> CTE</td></tr>
+      <tr><td>\(k_{\max}\)</td><td class="num">1.5</td><td>widest interval, thinly attested findspots</td><td><code>params</code> CTE</td></tr>
+      <tr><td>\(\tau\)</td><td class="num">6</td><td>assemblage size, in stamps, at which ~63 % of the narrowing is reached; calibrated, <a href="#constants">§7a</a></td><td><code>params</code> CTE</td></tr>
+      <tr><td>\(t_0\)</td><td class="num">20</td><td>reference length, in years, for \(q_{\text{start}}\) and \(q_{\text{end}}\); a convention, <a href="#constants">§7a</a></td><td><code>params</code> CTE</td></tr>
       <tr><td>\(w\)</td><td class="num">1.0</td><td>weight of volume against repetition in \(k\); 1.0 = volume only</td><td>fixed, not exposed</td></tr>
       <tr><td>within-stamp variance</td><td class="num">\(w^2/12\)</td><td>uniform distribution across each potter's range</td><td>hard-coded</td></tr>
     </tbody>
   </table>
 
   <div class="note">
-    <strong>For RDF export.</strong> All five belong on the time-span as provenance,
+    <strong>For RDF export.</strong> All six belong on the time-span as provenance,
     together with \(\sigma\), \(k\), \(n\), \(D\) and \(r\). Without them the reported
     interval is a bare pair of years that cannot be checked, recomputed, or compared
     against a run with different conventions.
@@ -842,7 +1017,7 @@ footer .fi{max-width:1080px; margin:0 auto}
       <tr><td><code>count_stamps</code></td><td>qualifying stamp occurrences (all)</td><td>—</td></tr>
       <tr><td><code>avg_datemin</code>, <code>avg_datemax</code></td><td>\(\overline{a}\), \(\overline{b}\)</td><td>reference</td></tr>
       <tr><td><code>min_datemin</code> … <code>max_datemax</code></td><td>extremes; plotted as stubs</td><td>reference</td></tr>
-      <tr><td><code>q_start</code>, <code>q_end</code></td><td>endpoint sharpness; whisker colour</td><td><span class="pill legacy">caveat §9</span></td></tr>
+      <tr><td><code>q_start</code>, <code>q_end</code></td><td>endpoint sharpness, \(e^{-s/t_0}\); whisker colour</td><td><span class="pill keep">model</span></td></tr>
       <tr><td><code>q_interval</code></td><td>dating sharpness — quality axis I</td><td><span class="pill keep">model</span></td></tr>
       <tr><td><code>n_dies</code></td><td>\(D\), distinct potter–die pairs</td><td><span class="pill keep">model</span></td></tr>
       <tr><td><code>die_repetition</code></td><td>\(r\), attestations per die</td><td><span class="pill keep">model</span></td></tr>
@@ -850,6 +1025,11 @@ footer .fi{max-width:1080px; margin:0 auto}
       <tr><td><code>avg_interval</code></td><td>display string of \(\overline{a}\) to \(\overline{b}\)</td><td>display</td></tr>
       <tr><td><code>unc_start_years</code>, <code>unc_end_years</code>, <code>unc_interval_years</code></td><td>whisker lengths</td><td><span class="pill legacy">visual only</span></td></tr>
       <tr><td><code>midpoint_year</code></td><td>\(m\)</td><td><span class="pill keep">model</span></td></tr>
+      <tr><td><code>n_stamps_die</code></td><td>\(n_{\text{die}}\); descriptive since 30a, no longer an input to \(k\)</td><td><span class="pill keep">model</span></td></tr>
+      <tr><td><code>k_eff</code>, <code>sigma_eff</code></td><td>\(k\) and \(\sigma\), the two factors of the half-width</td><td><span class="pill keep">model</span></td></tr>
+      <tr><td><code>k_no_dierecord</code></td><td>true where no die is recorded at all; a gap in the record, with no effect on the interval</td><td><span class="pill keep">model</span></td></tr>
+      <tr><td><code>p_k_min</code> … <code>p_t0</code></td><td>the five model parameters, carried on every row as provenance</td><td><span class="pill keep">model</span></td></tr>
+      <tr><td><code>n_stamps_wide</code>, <code>n_potters_wide</code>, <code>max_potter_span</code></td><td>watchdogs for potters dated across 100 years or more</td><td>—</td></tr>
       <tr><td><code>eff_start</code>, <code>eff_end</code></td><td>the virtual fuzzy year</td><td><span class="pill keep">primary</span></td></tr>
     </tbody>
   </table>

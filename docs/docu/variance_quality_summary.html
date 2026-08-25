@@ -165,9 +165,9 @@ footer a{color:var(--slip)}
   <p class="lead">The more stamps a findspot yields, the tighter the interval that may
   reasonably be claimed. \(k\) falls from 1.5 to 0.5 as the material accumulates.</p>
   <div class="eq">
-    \[ k = 1.5 - 1.0\left(1 - e^{-n/20}\right) \]
+    \[ k = 1.5 - 1.0\left(1 - e^{-n/\tau}\right) \qquad \tau = 6 \]
   </div>
-  <p class="out">→ \(k \approx 1.4\) for a handful of stamps · \(k \approx 0.6\) for fifty or more</p>
+  <p class="out">→ \(k \approx 1.2\) for two stamps · \(k \approx 0.54\) for twenty · \(k \to 0.5\) beyond about forty</p>
 </div>
 
 <div class="step">
@@ -178,6 +178,26 @@ footer a{color:var(--slip)}
   </div>
   <p class="out">→ <code>eff_start</code>, <code>eff_end</code> — the box in the plot</p>
 </div>
+
+<h2 class="band">Two constants, easily confused</h2>
+<p>The model carries two numbers whose symbols look alike and whose values are not
+alike. They are unrelated, and mixing them up has already cost this project one full
+set of figures.</p>
+
+<table>
+  <thead><tr><th></th><th>\(\tau\) = 6</th><th>\(t_0\) = 20</th></tr></thead>
+  <tbody>
+    <tr><td>counted in</td><td>stamps</td><td>years</td></tr>
+    <tr><td>controls</td><td>how wide the box is drawn</td><td>what colour the whiskers are</td></tr>
+    <tr><td>comes from</td><td>calibration against five findspots dated without ceramics — Dangstetten, Oberaden, Velsen I, Pompeii, Inchtuthil</td><td>the expert thresholds: about 5 years' scatter is a sharp date, about 25 is unusable</td></tr>
+  </tbody>
+</table>
+
+<p>Neither of them is Student's \(t\). Nothing here is a confidence interval, and
+nothing is being tested for significance. Both values travel with every row of output,
+as <code>p_tau</code> and <code>p_t0</code>, so any figure can be checked against the
+parameters that produced it. The long version is on the
+<a href="variance_quality_from_sql.html#constants">method page</a>.</p>
 
 <h2 class="band">What the date means</h2>
 <p>The interval is a <strong>virtual fuzzy year</strong>: the central region of the date
