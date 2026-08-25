@@ -159,7 +159,12 @@ def build_js(onto: Graph) -> str:
         "DATA_PUBLISHER": X.DATA_PUBLISHER,
         "DATA_CONTACT": X.DATA_CONTACT,
         "CALIBRATION_BASIS": X.CALIBRATION_BASIS,
-        "CALIBRATION_REFERENCES": [[a, b] for a, b, _c, _d
+        # Contested references are carried into the graph as well: the RDF
+        # states which ensembles the model was checked against, and omitting
+        # one here would make the browser emitter disagree with the Python
+        # one. Whether a reference binds the criterion is a question for
+        # py/calibrate_tau.py, not for the vocabulary.
+        "CALIBRATION_REFERENCES": [[a, b] for a, b, _c, _d, _e
                                    in X.CALIBRATION_REFERENCES],
         "FUZZINESS_DIVISOR": 12,
         "KEY_ALGORITHM": X.KEY_ALGORITHM,

@@ -583,14 +583,15 @@ footer .fi{max-width:1080px; margin:0 auto}
   stamps is then enough to claim a narrow date.</p>
 
   <p>It was fixed empirically. Five findspots in the corpus are dated by evidence
-  that does not depend on samian ware at all:</p>
+  that does not depend on samian ware at all — though only four of them carry the
+  criterion:</p>
 
   <table>
     <thead><tr><th>Findspot</th><th>Independent evidence</th></tr></thead>
     <tbody>
       <tr><td>Dangstetten, Military camp</td><td>coin-dated, 15 to 8 BC</td></tr>
       <tr><td>Oberaden, Military camp</td><td>dendrochronology, ending 7 BC</td></tr>
-      <tr><td>Velsen, Velsen I</td><td>historically dated occupation</td></tr>
+      <tr><td>Velsen, Velsen I</td><td>military base in operation, abandoned about AD 28 — <em>contested, see below</em></td></tr>
       <tr><td>Pompeii, Hoard</td><td>eruption of Vesuvius, AD 79</td></tr>
       <tr><td>Inchtuthil, Gutter</td><td>historically dated abandonment</td></tr>
     </tbody>
@@ -614,6 +615,48 @@ footer .fi{max-width:1080px; margin:0 auto}
   cautious than the data require. That value is 6, down from the 20 used until the
   calibration.</p>
 
+  <h3>What the number actually rests on</h3>
+
+  <p>A criterion of this shape invites a question that is rarely asked of published
+  calibrations: <em>which</em> of the references sets the value? Removing each in turn
+  and recomputing the floor answers it.</p>
+
+  <table>
+    <thead><tr><th>Reference removed</th><th class="num">Smallest admissible \(\tau\)</th><th>Verdict</th></tr></thead>
+    <tbody>
+      <tr><td>none</td><td class="num">4.78</td><td>—</td></tr>
+      <tr><td>Dangstetten</td><td class="num">4.78</td><td>not binding</td></tr>
+      <tr><td>Oberaden</td><td class="num">4.78</td><td>not binding</td></tr>
+      <tr><td>Velsen I</td><td class="num">4.78</td><td>not binding</td></tr>
+      <tr><td>Pompeii</td><td class="num">1.23</td><td><strong>binding</strong></td></tr>
+      <tr><td>Inchtuthil</td><td class="num">4.78</td><td>not binding</td></tr>
+    </tbody>
+  </table>
+
+  <p>Only Pompeii binds. The remaining four are contained comfortably by any \(\tau\)
+  the others already require, and contribute nothing to the number. Stated plainly:
+  arithmetically this is a one-ensemble calibration, and the four non-binding
+  references are what makes the published \(\tau = 6\) a value with 1.22 of headroom
+  above the floor rather than a value sitting on it.</p>
+
+  <p>The margins at \(\tau = 6\) show the same thing from the other side. Pompeii's
+  terminus falls 0.2 years inside its interval; Inchtuthil's, computed from three
+  stamps, 6.2 years inside.</p>
+
+  <div class="warn">
+    <strong>Velsen I is shown but excluded.</strong> Its terminus was corrected from
+    AD 30 to AD 28 on 25 August 2026. More importantly, its independence is not clean:
+    the military base was in operation until about AD 28, but activity continued on the
+    site until about AD 40, and admixture from that later material cannot be ruled out.
+    A terminus that may bound the camp rather than the assemblage should not fix a
+    published parameter. It is therefore drawn in the figure — the reader should see
+    the case — but kept out of the criterion. Because it does not bind, the exclusion
+    changes nothing: the floor stays at 4.78 and \(\tau\) stays at 6. Its modelled
+    interval, AD 12 to AD 32, does not reach the later activity, which is consistent
+    with an assemblage not visibly pulled later — though not evidence that no
+    admixture occurred.
+  </div>
+
   <div class="note">
     <strong>Why the reference set is exactly these five.</strong> They are the only
     ensembles in the corpus whose date rests on something other than ceramics.
@@ -621,7 +664,9 @@ footer .fi{max-width:1080px; margin:0 auto}
     tuned to agree with the chronology it is supposed to test. Two further candidates
     were dropped for precisely that reason. The set is published as
     <code>lado:calibratedAgainst</code> in the RDF, because a calibration whose
-    reference set is not named cannot be checked.
+    reference set is not named cannot be checked. The sweep, the leave-one-out table
+    and the margins above are produced by <code>py/calibrate_tau.py</code> and can be
+    recomputed whenever the data move.
   </div>
 
   <div class="note">

@@ -167,13 +167,31 @@ CALIBRATION_BASIS = (
     "three parameters."
 )
 
-# (discovery-site id, findspot, terminus, why it is independent of samian)
+# (discovery-site id, findspot, terminus, why it is independent of samian,
+#  contested)
+#
+# `contested` marks a reference kept in the figures but excluded from the
+# calibration criterion. Removing such an entry outright would hide the
+# reason it was ever a candidate; leaving it in the criterion would let a
+# disputed terminus set a published parameter.
 CALIBRATION_REFERENCES = [
-    ("Dangstetten", "Military camp", -8, "coin-dated, 15 to 8 BC"),
-    ("Oberaden", "Military camp", -7, "dendrochronology, ending 7 BC"),
-    ("Velsen", "Velsen I", 30, "historically dated occupation"),
-    ("Pompeii", "Hoard", 79, "eruption of Vesuvius"),
-    ("Inchtuthil", "Gutter", 87, "historically dated abandonment"),
+    ("Dangstetten", "Military camp", -8,
+     "coin-dated, 15 to 8 BC", False),
+    ("Oberaden", "Military camp", -7,
+     "dendrochronology, ending 7 BC", False),
+    # AD 28, not AD 30: corrected by Allard Mees on 2026-08-25, the earlier
+    # value having been his own slip. Contested because activity continued
+    # on the site until about AD 40 and admixture from it cannot be ruled
+    # out, which would make the terminus an upper bound on the camp rather
+    # than on the assemblage. py/calibrate_tau.py shows that excluding it
+    # leaves tau_min unchanged, so nothing published depends on the
+    # decision.
+    ("Velsen", "Velsen I", 28,
+     "military base in operation, abandoned about AD 28", True),
+    ("Pompeii", "Hoard", 79,
+     "eruption of Vesuvius", False),
+    ("Inchtuthil", "Gutter", 87,
+     "historically dated abandonment", False),
 ]
 
 FIGURE_CONSTANTS = {
@@ -654,7 +672,7 @@ def build_graph(df: pd.DataFrame, era: str, figure_name: str,
     # reference findspots are in this export: naming them is the claim, and
     # a reader has to be able to see it even from a partial extract.
     g.add((model, LADO.calibrationBasis, Literal(CALIBRATION_BASIS, lang="en")))
-    for site, findspot, _terminus, _why in CALIBRATION_REFERENCES:
+    for site, findspot, _terminus, _why, _contested in CALIBRATION_REFERENCES:
         for _, row in df.iterrows():
             if str(row.the_site) == site and str(row.the_findspot) == findspot:
                 sid = int(row.the_id)

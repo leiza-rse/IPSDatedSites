@@ -25,15 +25,23 @@ currently contain *Böckleareal (descruction layer period II)* — a typo for
 publication or it is left permanently untouched; both are defensible, but
 the decision cannot be deferred past the first publication of the URIs.
 
-Confirmed by the domain expert on 25 August 2026: there is at present no
-stable key at findspot level. One is implicit in the selection criteria
-`isdate` and `sitecharacter`, but those are not really the right criteria for
-this purpose — a column of its own would be. Two things follow. The findspot
-label, not the site, is the unit that matters: a site can carry many entries
-with no findspot designation at all, and parallel evaluation routines in
-Samian Research work at findspot level too. And the request for a dedicated
-column should be made explicitly rather than worked around here, because every
-workaround mints URIs that a later column would invalidate.
+Confirmed by the domain expert on 25 August 2026, with one correction to the
+worry stated here. There is at present no key at findspot level: the relevant
+records are selected through `isdate` and `sitecharacter`, and in future
+probably through a column better suited to the purpose than those two markers.
+
+That change does **not** put the URIs at risk, as was feared above. What would
+move is the *filter*, not the *labels*: the designations of the find
+assemblages themselves — *Fosse Gallicanus*, *Hoard* — stay exactly as they
+are. URIs derived from the findspot label are therefore stable across the
+change, and the request for a dedicated column is a data-modelling improvement
+rather than a precondition for publishing them.
+
+What does remain true is that the findspot label, not the site, is the unit
+that matters. A site can carry many entries with no findspot designation at
+all, and parallel evaluation routines in Samian Research work at findspot level
+too. The typo case above is unaffected: correcting a label still breaks its
+URI, and that decision is still owed before first publication.
 
 ## Era convention
 
@@ -56,10 +64,43 @@ Five questions were put to Allard Mees in writing; the answers are recorded
 here because each one now constrains the code.
 
 **The provenance of tau.** Its empirical derivation is to be published in
-full, not introduced as a convention. The five reference findspots are the
-only ones dated independently of ceramics, and that is precisely what makes
-them the right basis. `lado:calibrationBasis` and `lado:calibratedAgainst`
-carry this in the graph.
+full, not introduced as a convention. The reference findspots are the only
+ones dated independently of ceramics, and that is precisely what makes them
+the right basis. `lado:calibrationBasis` and `lado:calibratedAgainst` carry
+this in the graph.
+
+**Velsen I, and what the calibration actually rests on.** The terminus was
+corrected from AD 30 to AD 28 on 25 August 2026. Velsen I is also the one
+reference whose independence is not clean: the military base was in operation
+until about AD 28, but activity continued on the site until about AD 40, and
+admixture from it cannot be ruled out. It is therefore marked contested —
+still drawn in the figure, because the reader should see the case, but
+excluded from the criterion that fixes tau.
+
+Nothing published depends on that decision. `py/calibrate_tau.py` recomputes
+the floor and reports which references set it:
+
+| reference removed | smallest admissible tau |
+| --- | --- |
+| none | 4.78 |
+| Dangstetten | 4.78 |
+| Oberaden | 4.78 |
+| Velsen I | 4.78 |
+| Pompeii | **1.23** |
+| Inchtuthil | 4.78 |
+
+Only Pompeii binds. The other four are carried by the rest of the set and
+contribute nothing to the number, so removing Velsen I leaves the floor at
+4.78 and the published tau at 6 exactly where they were. This is worth stating
+plainly rather than leaving implicit: a basis of five ensembles of which four
+are non-binding is, arithmetically, a one-ensemble calibration, and the
+headroom of 1.22 between the floor and the published value is what the other
+four buy. Pompeii's terminus sits 0.2 years inside its interval at tau = 6;
+Inchtuthil's, with three stamps, 6.2 years inside.
+
+Velsen I's modelled interval runs AD 12 to AD 32 and does not reach the later
+activity at AD 40. That is consistent with an assemblage not visibly pulled
+later by admixture, though it is not evidence that none occurred.
 
 **A fixed number of findspots.** There is not going to be one. Samian
 Research is a live database: unchecked ensembles will always exist, and

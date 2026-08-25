@@ -199,8 +199,7 @@ def main() -> int:
         sel = panels.select(panels.load_rows(csv))
         for group, stem, title in (
             ("reference", "plot_v3_calibration",
-             "The calibration set — five ceramic-independent reference "
-             "ensembles"),
+             panels.calibration_title()),
             ("comparison", "plot_v3_findspots",
              "Five further findspots, across the range of the corpus"),
         ):
@@ -209,10 +208,15 @@ def main() -> int:
                 q.name for q in panels.render(sheet, img, era, stem, title))
             print(f"  {stem:<12}: {names}")
 
-        inside = sum(1 for r in sel if r["_terminus"] is not None
-                     and panels.num(r["eff_start"]) <= r["_terminus"]
+        # Contested references are drawn but do not count: the criterion
+        # that fixes tau must not be reported as met or missed by a
+        # terminus deliberately kept out of it.
+        binding = [r for r in sel if r["_terminus"] is not None
+                   and not r.get("_contested")]
+        inside = sum(1 for r in binding
+                     if panels.num(r["eff_start"]) <= r["_terminus"]
                      <= panels.num(r["eff_end"]))
-        total = sum(1 for r in sel if r["_terminus"] is not None)
+        total = len(binding)
         flag = "OK" if inside == total else "!!"
         print(f"  {flag} terminus inside the modelled interval: "
               f"{inside} of {total}")

@@ -105,6 +105,22 @@ COMPARISON = [
 PROPOSED = {("Wroxeter", "gutter")}
 
 
+def calibration_title() -> str:
+    """Title that states the size of the calibration basis honestly.
+
+    "Five reference ensembles" was true until one of them was set aside; a
+    title that keeps saying five while the criterion uses four is the kind of
+    small untruth that survives into a caption and then into a citation.
+    """
+    n = len(CALIBRATION_REFERENCES)
+    contested = sum(1 for r in CALIBRATION_REFERENCES if r[4])
+    if not contested:
+        return (f"The calibration set — {n} ceramic-independent reference "
+                "ensembles")
+    return (f"The calibration set — {n - contested} references the criterion "
+            f"rests on, and {contested} shown but excluded")
+
+
 def load_rows(path: Path) -> list[dict]:
     with path.open(encoding="utf-8-sig", newline="") as fh:
         return list(csv.DictReader(fh))
@@ -131,21 +147,21 @@ def select(rows: list[dict]) -> list[dict]:
     index = {(r["the_site"], r["the_findspot"]): r for r in rows}
 
     chosen, missing = [], []
-    for site, findspot, terminus, why in CALIBRATION_REFERENCES:
+    for site, findspot, terminus, why, contested in CALIBRATION_REFERENCES:
         row = index.get((site, findspot))
         if row is None:
             missing.append(f"{site} — {findspot}")
             continue
-        chosen.append({**row, "_role": "reference",
-                       "_terminus": terminus, "_why": why})
+        chosen.append({**row, "_role": "reference", "_terminus": terminus,
+                       "_why": why, "_contested": contested})
 
     for site, findspot in COMPARISON:
         row = index.get((site, findspot))
         if row is None:
             missing.append(f"{site} — {findspot}")
             continue
-        chosen.append({**row, "_role": "comparison",
-                       "_terminus": None, "_why": None})
+        chosen.append({**row, "_role": "comparison", "_terminus": None,
+                       "_why": None, "_contested": False})
 
     if missing:
         # Loudly, not silently: a panel figure that quietly drops a
@@ -205,7 +221,12 @@ def draw_panel(ax, r: dict, era: str) -> None:
     # the independent terminus, for the five references
     if terminus is not None:
         inside = eff_start <= terminus <= eff_end
-        ax.axvline(terminus, color=SLIP, lw=1.6, zorder=4,
+        contested = r.get("_contested", False)
+        # A contested terminus is drawn thinner and paler: still shown,
+        # because the reader should see the case, but visibly not carrying
+        # the same weight as one the calibration criterion rests on.
+        ax.axvline(terminus, color=SLIP, lw=1.0 if contested else 1.6,
+                   alpha=0.55 if contested else 1.0, zorder=4,
                    ls="-" if inside else (0, (3, 2)))
         # In the clear band between the box and the axis: above the box it
         # collides with the header at the early findspots, below it with the
@@ -230,8 +251,12 @@ def draw_panel(ax, r: dict, era: str) -> None:
             fontsize=7.6, color=INK_SOFT, family="monospace")
 
     if role == "reference":
-        ax.text(1.0, 1.30, r["_why"], transform=ax.transAxes, ha="right",
-                va="top", fontsize=7.4, color=SLIP, style="italic")
+        why = r["_why"]
+        if r.get("_contested"):
+            why += "  ·  excluded from the calibration"
+        ax.text(1.0, 1.30, why, transform=ax.transAxes, ha="right",
+                va="top", fontsize=7.4, color=SLIP, style="italic",
+                alpha=0.7 if r.get("_contested") else 1.0)
 
     # Calendar labels on the axis too. Bare numbers next to a header that
     # reads "12 BC – 3 BC" invite the reader to mistake -12 for a year.
@@ -259,7 +284,13 @@ def render(rows: list[dict], out_dir: Path, era: str, stem: str,
     # more than half as tall, and a fractional reserve shrinks with it: the
     # title then sits on the first panel's header and the legend on the last
     # panel's tick labels.
-    TOP_IN, BOTTOM_IN = 0.80, 1.00
+    # The legend band grows with the number of entries. A contested
+    # reference adds a fourth line, which at the old fixed reserve landed on
+    # the last panel's tick labels.
+    n_legend = 1 + (2 if any(r["_terminus"] is not None for r in rows) else 0) \
+                 + (1 if any(r.get("_contested") for r in rows) else 0)
+    TOP_IN = 0.80
+    BOTTOM_IN = 0.55 + 0.18 * n_legend
     gs = fig.add_gridspec(n, 1, hspace=1.05, left=0.055, right=0.975,
                           top=1 - TOP_IN / height,
                           bottom=BOTTOM_IN / height)
@@ -277,6 +308,12 @@ def render(rows: list[dict], out_dir: Path, era: str, stem: str,
                    label="independent terminus, inside the modelled interval"),
             Line2D([], [], color=SLIP, lw=1.6, ls=(0, (3, 2)),
                    label="independent terminus, outside it"),
+        ]
+        if any(r.get("_contested") for r in rows):
+            handles += [
+                Line2D([], [], color=SLIP, lw=1.0, alpha=0.55,
+                       label="contested terminus, shown but excluded from "
+                             "the calibration criterion"),
         ]
     handles.append(
         Line2D([], [], color="#555555", lw=0.9, alpha=0.5,
@@ -324,8 +361,7 @@ def main() -> int:
     comparison = [r for r in rows if r["_role"] == "comparison"]
 
     sheets = [
-        (references, "plot_v3_calibration",
-         "The calibration set — five ceramic-independent reference ensembles"),
+        (references, "plot_v3_calibration", calibration_title()),
         (comparison, "plot_v3_findspots",
          "Five further findspots, across the range of the corpus"),
     ]
@@ -343,10 +379,12 @@ def main() -> int:
 
     # The calibration claim, restated as a number so that a silent failure
     # cannot hide behind a figure that still looks plausible.
-    inside = sum(1 for r in references
+    binding = [r for r in references if not r.get("_contested")]
+    inside = sum(1 for r in binding
                  if num(r["eff_start"]) <= r["_terminus"] <= num(r["eff_end"]))
-    print(f"  Terminus inside   : {inside} of {len(references)}")
-    if inside < len(references):
+    print(f"  Terminus inside   : {inside} of {len(binding)}"
+          f"  ({len(references) - len(binding)} contested, not counted)")
+    if inside < len(binding):
         print("  !!  A reference terminus falls outside its modelled "
               "interval. tau was calibrated as the smallest value at which "
               "none does — this needs looking at before publication.")
