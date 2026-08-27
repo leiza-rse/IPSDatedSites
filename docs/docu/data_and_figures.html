@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data &amp; figures — the endpoints, and the plots built from them</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;600&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --ink:#1b2430; --ink-soft:#46525f;
+  --paper:#fbfaf7; --paper-2:#f2efe8; --rule:#d9d3c6;
+  --slip:#9e3b26; --ochre:#b07d31; --sage:#40655c;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:"Public Sans",system-ui,sans-serif; font-size:16px; line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+
+.tabs{position:sticky; top:0; z-index:50; background:var(--ink); border-bottom:3px solid var(--slip)}
+.tabs-inner{max-width:1000px; margin:0 auto; display:flex; gap:2px; padding:0 24px}
+.tab{
+  display:flex; align-items:center; gap:.5rem; padding:.85rem 1.2rem; text-decoration:none;
+  font-size:.79rem; font-weight:600; letter-spacing:.06em; text-transform:uppercase;
+  color:#9aa7b4; border-bottom:3px solid transparent; margin-bottom:-3px; white-space:nowrap;
+}
+.tab:hover{color:#e7e3da; background:rgba(255,255,255,.05)}
+.tab[aria-current="page"]{color:var(--paper); border-bottom-color:var(--slip); background:rgba(158,59,38,.18)}
+.tab .num{font-family:"IBM Plex Mono",monospace; font-size:.69rem; opacity:.65; font-weight:400}
+
+header.mast{background:var(--ink); color:var(--paper); padding:2.6rem 24px 2.3rem}
+.mast-inner{max-width:1000px; margin:0 auto}
+.mast .kicker{font-family:"IBM Plex Mono",monospace; font-size:.73rem; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--ochre); margin:0 0 .8rem}
+.mast h1{font-family:Spectral,Georgia,serif; font-weight:600;
+  font-size:clamp(1.7rem,3.6vw,2.4rem); margin:0 0 .6rem}
+.mast p{margin:0; max-width:60ch; color:#c3cbd3}
+
+main{max-width:1000px; margin:0 auto; padding:0 24px 5rem}
+
+h2.band{
+  font-family:Spectral,Georgia,serif; font-weight:600; font-size:1.35rem;
+  margin:3rem 0 .3rem; padding-bottom:.4rem; border-bottom:2px solid var(--ink);
+  display:flex; align-items:baseline; gap:.8rem;
+}
+h2.band .tag{
+  font-family:"IBM Plex Mono",monospace; font-size:.72rem; letter-spacing:.08em;
+  color:var(--slip); border:1px solid var(--slip); padding:.1em .5em; text-transform:uppercase;
+}
+h2.band + p.intro{margin:.7rem 0 0; color:var(--ink-soft); max-width:74ch}
+h3{font-family:Spectral,Georgia,serif; font-weight:600; font-size:1.05rem; margin:2rem 0 .4rem}
+
+.unit{border:1px solid var(--rule); background:#fff; margin:1.5rem 0}
+.unit > .name{
+  background:var(--paper-2); border-bottom:1px solid var(--rule);
+  padding:.5rem .9rem; font-family:"IBM Plex Mono",monospace;
+  font-size:.85rem; font-weight:500; color:var(--ink); word-break:break-all;
+}
+.unit > .name em{color:var(--ink-soft); font-style:normal; font-weight:400; font-size:.92em}
+.unit .body{padding:.2rem 1.1rem 1rem}
+.unit pre{margin:1rem 0 .6rem}
+.unit .means{
+  font-size:.94rem; border-top:1px dashed var(--rule); padding-top:.75rem; margin-top:.6rem;
+}
+.unit .means b{color:var(--sage); font-weight:600}
+
+pre{
+  background:var(--ink); color:#dfe5ea; padding:1rem 1.2rem; overflow-x:auto;
+  font-family:"IBM Plex Mono",monospace; font-size:.81rem; line-height:1.6;
+  border-left:3px solid var(--ochre);
+}
+pre .c{color:#8d9aa6; font-style:italic}
+pre .k{color:#e0a06a}
+pre .s{color:#a8c8a0}
+
+code{font-family:"IBM Plex Mono",monospace; font-size:.88em;
+  background:var(--paper-2); padding:.1em .38em; border-radius:2px}
+p{max-width:74ch}
+a{color:var(--slip)}
+
+figure{margin:2rem 0}
+figure img{
+  max-width:100%; height:auto; display:block;
+  background:#fff; border:1px solid var(--rule);
+}
+figcaption{font-size:.85rem; color:var(--ink-soft); margin-top:.6rem;
+  border-top:1px solid var(--rule); padding-top:.5rem; max-width:74ch}
+figcaption .files{
+  font-family:"IBM Plex Mono",monospace; font-size:.92em; display:block; margin-top:.4rem;
+}
+
+table{border-collapse:collapse; width:100%; margin:1.2rem 0; font-size:.9rem}
+th,td{border-bottom:1px solid var(--rule); padding:.5rem .7rem; text-align:left; vertical-align:top}
+thead th{background:var(--paper-2); border-bottom:2px solid var(--ink);
+  font-size:.72rem; letter-spacing:.07em; text-transform:uppercase; font-weight:600}
+td.v{font-family:"IBM Plex Mono",monospace; white-space:nowrap; width:1%}
+
+.note{background:#e6efeb; border-left:3px solid var(--sage);
+  padding:.85rem 1.15rem; margin:1.3rem 0; font-size:.94rem}
+.warn{background:#f6ece4; border-left:3px solid var(--slip);
+  padding:.85rem 1.15rem; margin:1.3rem 0; font-size:.94rem}
+
+footer{border-top:3px solid var(--ink); margin-top:3.5rem; padding:1.6rem 24px 3rem;
+  font-size:.85rem; color:var(--ink-soft)}
+footer div{max-width:1000px; margin:0 auto}
+
+@media (max-width:760px){ .tabs-inner{overflow-x:auto} }
+</style>
+</head>
+<body>
+
+<div class="tabs">
+  <div class="tabs-inner">
+    <a class="tab" href="IPSDatedSites.cfm"><span class="num">01</span> Interactive query</a>
+    <a class="tab" href="variance_quality_from_sql.html"><span class="num">02</span> Method &amp; formulae</a>
+    <a class="tab" href="variance_quality_summary.html"><span class="num">03</span> At a glance</a>
+    <a class="tab" href="variance_quality_sql.html"><span class="num">04</span> SQL walkthrough</a>
+    <a class="tab" href="data_and_figures.html" aria-current="page"><span class="num">05</span> Data &amp; figures</a>
+  </div>
+</div>
+
+<header class="mast">
+  <div class="mast-inner">
+    <p class="kicker">Samian Research · IPS · data access</p>
+    <h1>The endpoints, and the plots built from them</h1>
+    <p>Where the numbers come from, how to fetch them without a database account,
+    and how to reuse the figures the Python pipeline generates.</p>
+  </div>
+</header>
+
+<main>
+
+<!-- ================= A ================= -->
+<h2 class="band"><span class="tag">A</span> Three REST resources</h2>
+<p class="intro">Since August 2026 the source data are published as REST resources rather
+than reached only through a PostgreSQL connection. They are public: no key, no account,
+no VPN. That is what makes the datings reproducible by someone outside the project.</p>
+
+<div class="unit">
+  <div class="name">https://www1.rgzm.de/rest/samianresearch/datedsites <em>— the input</em></div>
+  <div class="body">
+    <div class="means">
+      One record per dated stamp: findspot, potter, die, and the potter's date range.
+      These are the same rows <code>sql/v_ips_dated_stamps.sql</code> delivers, and the
+      model is computed <b>from</b> them. Currently 1391 records.
+    </div>
+  </div>
+</div>
+
+<div class="unit">
+  <div class="name">https://www1.rgzm.de/rest/samianresearch/datedsitesstatistics <em>— the output</em></div>
+  <div class="body">
+    <div class="means">
+      One row per findspot, everything already aggregated: the interval, both quality
+      axes, σ, k and the model parameters. This is the model's <b>result</b>, computed in
+      the database, and it is what <code>py/ips_model.py</code> is measured against.
+      Currently 40 rows and 41 columns.
+    </div>
+  </div>
+</div>
+
+<div class="unit">
+  <div class="name">https://www1.rgzm.de/ips/lod/ips_stamps.csv <em>— a listing, not an input</em></div>
+  <div class="body">
+    <div class="means">
+      Pipe-delimited CSV of the stamp list: site, findspot, potter, die, stamp number —
+      and <b>no dates</b>. Useful for looking things up, unusable as model input, because
+      the model needs <code>datemin</code> and <code>datemax</code> per stamp. This was
+      tried first and produced an empty model in silence, which is why it is written
+      down rather than discovered again.
+    </div>
+  </div>
+</div>
+
+<h3>What the payloads actually look like</h3>
+
+<p>Both REST resources answer with ColdFusion's query serialisation: a
+<code>COLUMNS</code> list and a <code>DATA</code> list of positional rows — not a list
+of objects. Column names are upper case; everything else in the project uses lower case.</p>
+
+<pre>{ <span class="k">"records"</span>: 1391,
+  <span class="k">"success"</span>: true,
+  <span class="k">"data"</span>: {
+    <span class="k">"COLUMNS"</span>: [<span class="s">"THE_ID"</span>, <span class="s">"THE_SITE"</span>, <span class="s">"THE_FINDSPOT"</span>, …, <span class="s">"DATEMIN"</span>, <span class="s">"DATEMAX"</span>],
+    <span class="k">"DATA"</span>: [ [1000136, <span class="s">"London"</span>, <span class="s">"New Fresh Wharf: quay"</span>, …, 200, 260],
+               … ] } }</pre>
+
+<div class="warn">
+  <strong>The statistics format is not fixed.</strong> It has been served as
+  pipe-delimited CSV and, from the live endpoint, as the ColdFusion serialisation above.
+  <code>load_statistics()</code> in <code>py/ips_rest.py</code> accepts either, plus a
+  plain JSON array, and reports what it received when it can make sense of none of them.
+  The pipe-delimited variant also renders SQL <code>NULL</code> as an empty field —
+  indistinguishable from an empty string — and omitted two columns the database query
+  produces, <code>the_id</code> and <code>q_repetition</code>. A comparison that assumes
+  the two column sets match will report dozens of differences that are not there.
+</div>
+
+<!-- ================= B ================= -->
+<h2 class="band"><span class="tag">B</span> Fetching them</h2>
+<p class="intro">Nothing beyond a browser is needed to look; the pipeline uses
+<code>urllib</code> from the standard library, so there is no dependency and no
+credential anywhere in the code.</p>
+
+<pre><span class="c"># look at it</span>
+curl -s https://www1.rgzm.de/rest/samianresearch/datedsites | head -c 400
+
+<span class="c"># save both payloads where the pipeline expects them</span>
+curl -s -o data/source/datedsites.json \
+     https://www1.rgzm.de/rest/samianresearch/datedsites
+curl -s -o data/source/datedsitesstatistics.csv \
+     https://www1.rgzm.de/rest/samianresearch/datedsitesstatistics</pre>
+
+<pre><span class="c"># or from Python, through the project's own reader</span>
+<span class="k">import</span> sys; sys.path.insert(0, <span class="s">"py"</span>)
+<span class="k">import</span> ips_rest
+<span class="k">from</span> pathlib <span class="k">import</span> Path
+
+paths, origin, notes = ips_rest.resolve(Path(<span class="s">"data/source"</span>))
+rows = ips_rest.load_datedsites_json(paths[<span class="s">"datedsites"</span>])
+print(origin, len(rows))        <span class="c"># -> live 1391</span></pre>
+
+<div class="note">
+  <strong>Live first, archive as fallback.</strong> <code>resolve()</code> tries the
+  endpoints and falls back to the copies in <code>data/source/</code> only when they
+  cannot be reached. That order is deliberate: a stale export is the failure this project
+  has actually suffered — the whole corpus was once rebuilt from a file carrying the
+  wrong <code>t0</code>, and the Böckleareal findspots went missing for a week without
+  anyone noticing. Partial success counts as failure: if only one of the two payloads
+  arrives, both are read from the archive, because checking a fresh stamp list against a
+  stale reference would make the disagreement look like a defect in the model.
+</div>
+
+<p>Reproducibility is preserved rather than traded away. What was fetched is written
+into <code>data/source/</code> and stamped into <code>data/SNAPSHOT.json</code> with the
+date, byte sizes and SHA-256 of each payload, the record counts and the model
+parameters in force. A build from the archive alone produces the same figures — it just
+says which of the two it did. Cite the snapshot as the data state rather than asserting
+a fixed number of findspots: Samian Research is a live database.</p>
+
+<table>
+  <thead><tr><th>Invocation</th><th>Reads</th></tr></thead>
+  <tbody>
+    <tr><td class="v">python py/main.py</td><td>the endpoints, falling back to <code>data/source/</code></td></tr>
+    <tr><td class="v">python py/main.py --offline</td><td><code>data/source/</code> only, no network attempt — what CI runs</td></tr>
+    <tr><td class="v">python py/main.py --no-rest</td><td>the CSV in <code>data/</code> as it stands; reproduces an older build exactly</td></tr>
+    <tr><td class="v">python py/main.py --csv data/other.csv</td><td>a named export instead</td></tr>
+  </tbody>
+</table>
+
+<!-- ================= C ================= -->
+<h2 class="band"><span class="tag">C</span> The figures</h2>
+<p class="intro">Five sheets, all written by <code>python py/main.py</code> into
+<code>img/</code>, each as SVG and as JPG at 300 dpi. They are generated from the same
+rows as the interactive plot, so a figure cannot disagree with the table beside it.</p>
+
+<figure>
+  <img loading="lazy"
+       src="https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/plot_v2_modern.svg"
+       alt="All findspots as horizontal intervals, ordered chronologically, with coloured
+            whiskers and a repetition bar in the left margin">
+  <figcaption>
+    <strong>v2 · modern.</strong> The main figure. Every findspot as one row: the box is
+    the dated interval coloured by <code>q_interval</code>, the whiskers carry
+    <code>q_start</code> and <code>q_end</code> in their own colours, the thin line
+    behind is the full range of the contributing potters, and the bar in the left margin
+    is the second quality axis, <code>q_repetition</code>. The encoding is identical to
+    the web plot; only the setting is different — typography, a quieter grid, a BC/AD
+    axis, a value table.
+    <span class="files">
+      <a href="https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/plot_v2_modern.svg">SVG, 376 kB</a> ·
+      <a href="https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/plot_v2_modern.jpg">JPG, 300 dpi, 1.8 MB</a>
+    </span>
+  </figcaption>
+</figure>
+
+<figure>
+  <img loading="lazy"
+       src="https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/plot_v1_classic.svg"
+       alt="The same intervals in the layout of the original D3 web figure">
+  <figcaption>
+    <strong>v1 · classic.</strong> The D3 web figure one to one: capped whiskers,
+    extreme-value stubs, box edges dashed where an uncertainty exists, the RdYlGn ramp
+    and the gradient legend. Deliberately left untouched so that the web output and the
+    print version stay comparable.
+    <span class="files">
+      <a href="https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/plot_v1_classic.svg">SVG, 309 kB</a> ·
+      <a href="https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/plot_v1_classic.jpg">JPG, 300 dpi, 1.4 MB</a>
+    </span>
+  </figcaption>
+</figure>
+
+<figure>
+  <img loading="lazy"
+       src="https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/plot_v2_gauss.svg"
+       alt="One density curve per findspot, stacked chronologically">
+  <figcaption>
+    <strong>v2 · gauss.</strong> The same findspots as distributions rather than as
+    boxes: each row is the date distribution its stamps imply, with the areas normalised
+    equal across rows so that the shapes can be compared. The curves are bounded by the
+    extremes of the contributing potters — there are no tails to clip, and none is drawn,
+    because a tail would be a claim the figure is not making.
+    <span class="files">
+      <a href="https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/plot_v2_gauss.svg">SVG, 1.4 MB</a> ·
+      <a href="https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/plot_v2_gauss.jpg">JPG, 300 dpi, 2.3 MB</a>
+    </span>
+  </figcaption>
+</figure>
+
+<figure>
+  <img loading="lazy"
+       src="https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/plot_v3_calibration.svg"
+       alt="Five panels, one per reference ensemble, each with a vertical terminus line">
+  <figcaption>
+    <strong>v3 · calibration.</strong> The five ceramic-independent reference ensembles —
+    Dangstetten, Oberaden, Velsen I, Pompeii, Inchtuthil — one panel each, with the
+    independent terminus drawn as a vertical line across the modelled interval. This is
+    the whole calibration argument for τ, made visible rather than asserted: the reader
+    can see for himself whether the line falls inside the box. Each panel carries its own
+    axis, because a shared one would compress Dangstetten's nine-year interval into
+    something narrower than the line drawn for it.
+    <span class="files">
+      <a href="https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/plot_v3_calibration.svg">SVG, 150 kB</a> ·
+      <a href="https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/plot_v3_calibration.jpg">JPG, 300 dpi, 700 kB</a> ·
+      <a href="variance_quality_from_sql.html#constants">what it rests on, §7a</a>
+    </span>
+  </figcaption>
+</figure>
+
+<figure>
+  <img loading="lazy"
+       src="https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/plot_v3_findspots.svg"
+       alt="Five further findspots in the same panel layout, without terminus lines">
+  <figcaption>
+    <strong>v3 · findspots.</strong> Five further findspots of archaeological interest,
+    spanning the rest of the range, in the same idiom. No terminus is drawn: these are
+    findspots the model <em>dates</em>, not findspots that <em>test</em> it. They are kept
+    on their own sheet for that reason — side by side with the references, the five
+    reference panels would read as five ordinary examples among ten and the calibration
+    argument would stop being the point of the figure.
+    <span class="files">
+      <a href="https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/plot_v3_findspots.svg">SVG, 116 kB</a> ·
+      <a href="https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/plot_v3_findspots.jpg">JPG, 300 dpi, 562 kB</a>
+    </span>
+  </figcaption>
+</figure>
+
+<!-- ================= D ================= -->
+<h2 class="band"><span class="tag">D</span> Embedding them elsewhere</h2>
+<p class="intro">The figures on this page are not copies. Each
+<code>&lt;img&gt;</code> points straight at the file in the repository, so a rebuild that
+changes a figure changes what this page shows, and there is no second version to keep in
+step.</p>
+
+<pre>&lt;img src=<span class="s">"https://raw.githubusercontent.com/leiza-rse/IPSDatedSites/main/img/plot_v2_modern.svg"</span>
+     alt=<span class="s">"Findspot datings from samian potters' stamps"</span> loading=<span class="s">"lazy"</span>&gt;</pre>
+
+<p>Replace the file name with any of the five. <code>raw.githubusercontent.com</code>
+serves <code>.svg</code> as <code>image/svg+xml</code> and <code>.jpg</code> as
+<code>image/jpeg</code>, so both work in an ordinary <code>&lt;img&gt;</code> tag; the
+path pattern is <code>…/<b>main</b>/img/<b>name</b>.<b>svg|jpg</b></code>, and pinning a
+commit hash instead of <code>main</code> freezes the figure at a known state.</p>
+
+<table>
+  <thead><tr><th>Use</th><th>Take</th><th>Why</th></tr></thead>
+  <tbody>
+    <tr><td>web page, this application</td><td class="v">.svg</td><td>text stays selectable and the figure stays sharp at any zoom</td></tr>
+    <tr><td>print, a submitted manuscript</td><td class="v">.jpg</td><td>300 dpi, and no dependency on how a renderer treats fonts in SVG</td></tr>
+    <tr><td>a slide</td><td class="v">.jpg</td><td>the large SVGs carry tens of thousands of elements; some presentation software will not thank you</td></tr>
+  </tbody>
+</table>
+
+<div class="note">
+  <strong>The SVGs are byte-stable.</strong> <code>SOURCE_DATE_EPOCH</code> and a fixed
+  <code>svg.hashsalt</code> are set before matplotlib is imported, so a rebuild that
+  changes nothing produces an identical file. Without that, matplotlib writes a fresh
+  timestamp and freshly randomised element identifiers every run, every figure appears
+  modified in <code>git</code> for ever, and a real change to a published figure goes
+  unnoticed among the noise. It also means a figure you embedded and one rebuilt six
+  months later can be compared with <code>cmp</code>.
+</div>
+
+<div class="warn">
+  <strong>Do not edit the files in <code>img/</code>.</strong> They are build output and
+  the next run overwrites them. Everything the figures show — margins, row height, sort
+  order, colour ramp — is read from the graph and the model parameters, so a change
+  belongs in <code>py/ips_render.py</code> or in the parameters, not in the SVG.
+</div>
+
+<h3>Rebuilding them</h3>
+
+<pre>python py/main.py                       <span class="c"># everything, figures included</span>
+python py/main.py --skip-plots          <span class="c"># everything except the figures</span>
+python py/main.py --img-out /tmp/figs   <span class="c"># write them somewhere else</span>
+python py/make_calibration_panels.py    <span class="c"># the two v3 panel sheets alone</span></pre>
+
+<p>The panel sheets read the CSV directly rather than the graph, because the calibration
+argument has to be checkable against the source table without a graph in between. The
+termini are not restated in the plotting code either: they are read from
+<code>CALIBRATION_REFERENCES</code> in <code>py/ips_rdf_export.py</code>, which is also
+what the RDF export publishes as <code>lado:calibratedAgainst</code>. One list, one place
+to correct.</p>
+
+</main>
+
+<footer>
+  <div>
+    <p style="margin:0">Method and derivations:
+    <a href="variance_quality_from_sql.html">Method &amp; formulae</a> ·
+    the query itself: <a href="variance_quality_sql.html">SQL walkthrough</a> ·
+    repository: <a href="https://github.com/leiza-rse/IPSDatedSites">leiza-rse/IPSDatedSites</a>.
+    Figures and data CC BY 4.0.</p>
+  </div>
+</footer>
+
+</body>
+</html>

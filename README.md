@@ -278,10 +278,17 @@ added → exit code 0, and the text then appears in `docs/vocabulary.md`
 | [`queries.md`](docs/queries.md) | the SPARQL queries and the round trip |
 | [`open-questions.md`](docs/open-questions.md) | what remains open |
 
-`docs/docu/` is different in kind: three hand-built pages that accompany the
-CFM application — method and formulae, an at-a-glance summary, and a
-walkthrough of the query. They are **not** generated and are currently
-behind the model; bringing them up to date is the next piece of work.
+`docs/docu/` is different in kind: four hand-built pages that accompany the
+CFM application — method and formulae, an at-a-glance summary, a walkthrough
+of the query, and a data-and-figures page covering the REST endpoints and the
+generated plots. They are **not** generated, and nothing in `py/` writes to
+that directory, so they have to be corrected by hand when the model moves.
+They were brought level with revision 30a on 27 August 2026.
+
+The figures on the data-and-figures page are embedded by raw URL from `img/`
+in this repository rather than copied, so a rebuild that changes a figure
+changes what the page shows. `raw.githubusercontent.com` serves `.svg` as
+`image/svg+xml`, which is what makes that work in a plain `<img>` tag.
 
 ## GitHub Pages and the diagrams
 
