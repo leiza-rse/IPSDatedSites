@@ -45,6 +45,7 @@ matplotlib.rcParams["svg.hashsalt"] = "ips-dated-sites"
 from matplotlib.figure import Figure  # noqa: E402
 from matplotlib.font_manager import FontProperties  # noqa: E402
 from matplotlib.patches import Ellipse, FancyArrowPatch, FancyBboxPatch  # noqa: E402
+from matplotlib.path import Path  # noqa: E402
 
 # Points. The whole layout is computed in typographic points and the
 # figure is sized to match, so a font size here means the same thing in
@@ -55,6 +56,7 @@ RANK_SEP = 96.0                 # between ranks, leaves room for edge labels
 MARGIN = 26.0
 LINE_H = 1.32                   # line spacing, multiples of the font size
 LABEL_T = (0.34, 0.46, 0.26, 0.58, 0.40, 0.20, 0.66, 0.52, 0.72)
+DUMMY_H = 10.0                  # the space a waypoint reserves in its rank
 
 FONT_NODE = 9.0
 FONT_EDGE = 7.6
@@ -86,11 +88,14 @@ class Edge:
     dst: str
     label: str = ""
     dashed: bool = False
+    via: list[str] = field(default_factory=list)   # dummy nodes, see _route
 
 
 @dataclass
 class DiGraph:
-    title: str = ""
+    # No title. A caption belongs beside the figure, in talk/captions.yaml,
+    # not burnt into the picture: a slide has its own heading, and a heading
+    # inside the image competes with it and cannot be translated.
     rankdir: str = "LR"             # "LR" | "TB"
     nodes: dict[str, Node] = field(default_factory=dict)
     edges: list[Edge] = field(default_factory=list)
@@ -182,6 +187,43 @@ def _rank(g: DiGraph) -> None:
         g.nodes[k].rank = r
 
 
+def _route(g: DiGraph) -> None:
+    """Give every long edge a waypoint in each rank it crosses.
+
+    Without this an edge from rank 0 to rank 4 is drawn as one straight
+    line across four columns of nodes, and it goes through whatever stands
+    in the way. The waypoints are ordinary nodes as far as the layout is
+    concerned — they take part in the barycentre sweeps and so get pushed
+    into the gaps between real nodes — but they are never drawn. This is
+    the one step that separates a readable layered drawing from a pile of
+    diagonals, and it is why GraphViz output looks the way it does.
+    """
+    made = 0
+    for e in g.edges:
+        if e.src not in g.nodes or e.dst not in g.nodes:
+            continue
+        r0, r1 = g.nodes[e.src].rank, g.nodes[e.dst].rank
+        if r1 - r0 <= 1:
+            continue
+        for r in range(r0 + 1, r1):
+            key = f"__via{made}"
+            made += 1
+            g.nodes[key] = Node(key=key, lines=[], shape="dummy",
+                                w=1.0, h=DUMMY_H, rank=r)
+            e.via.append(key)
+
+
+def _segments(g: DiGraph) -> list[tuple[str, str]]:
+    """Edges as they look to the layout: broken at every waypoint."""
+    out = []
+    for e in g.edges:
+        if e.src not in g.nodes or e.dst not in g.nodes:
+            continue
+        chain = [e.src] + e.via + [e.dst]
+        out += list(zip(chain, chain[1:]))
+    return out
+
+
 def _order_within_ranks(g: DiGraph, sweeps: int = 14) -> dict[int, list[str]]:
     ranks: dict[int, list[str]] = {}
     for k, n in g.nodes.items():
@@ -190,10 +232,9 @@ def _order_within_ranks(g: DiGraph, sweeps: int = 14) -> dict[int, list[str]]:
     pos = {k: float(i) for r in ranks for i, k in enumerate(ranks[r])}
     pred: dict[str, list[str]] = {k: [] for k in g.nodes}
     succ: dict[str, list[str]] = {k: [] for k in g.nodes}
-    for e in g.edges:
-        if e.src in g.nodes and e.dst in g.nodes:
-            pred[e.dst].append(e.src)
-            succ[e.src].append(e.dst)
+    for a, b in _segments(g):
+        pred[b].append(a)
+        succ[a].append(b)
 
     for s in range(sweeps):
         neigh = pred if s % 2 == 0 else succ
@@ -285,53 +326,60 @@ def _boundary(n: Node, towards: tuple[float, float]) -> tuple[float, float]:
 def render(g: DiGraph, svg_path, jpg_path, dpi: int = 300) -> list:
     _size_nodes(g)
     _rank(g)
+    _route(g)
     ranks = _order_within_ranks(g)
     width, height = _place(g, ranks)
 
-    title_h = 34.0 if g.title else 0.0
-    if g.title:
-        # A narrow graph with a long title would otherwise have the title
-        # run off the canvas: the figure is sized from the layout, and the
-        # layout knows nothing about the caption above it.
-        tw, _th = _measure(g.title, FONT_TITLE)
-        width = max(width, tw + 2 * MARGIN)
-    fig = Figure(figsize=((width) / 72.0, (height + title_h) / 72.0), dpi=100)
+    fig = Figure(figsize=(width / 72.0, height / 72.0), dpi=100)
     fig.patch.set_facecolor("white")
     ax = fig.add_axes((0, 0, 1, 1))
     ax.set_xlim(0, width)
-    ax.set_ylim(0, height + title_h)
+    ax.set_ylim(0, height)
     ax.axis("off")
-
-    if g.title:
-        ax.text(MARGIN, height + title_h / 2.0, g.title,
-                fontsize=FONT_TITLE, color=INK, va="center", ha="left")
 
     # Edges first, so a node always sits on top of its own arrows.
     segments = []
     for e in g.edges:
         if e.src not in g.nodes or e.dst not in g.nodes:
             continue
-        a, b = g.nodes[e.src], g.nodes[e.dst]
-        p1 = _boundary(a, (b.x, b.y))
-        p2 = _boundary(b, (a.x, a.y))
+        chain = [g.nodes[k] for k in ([e.src] + e.via + [e.dst])]
+        pts = [(n.x, n.y) for n in chain]
+        pts[0] = _boundary(chain[0], pts[1])
+        pts[-1] = _boundary(chain[-1], pts[-2])
+
+        if len(pts) == 2:
+            path = Path(pts, [Path.MOVETO, Path.LINETO])
+        else:
+            # A quadratic through each waypoint, with the control points at
+            # the waypoints themselves and the joins at their midpoints:
+            # the curve then passes smoothly through the corridor the
+            # layout opened for it instead of turning corners in it.
+            verts = [pts[0]]
+            codes = [Path.MOVETO]
+            for i in range(1, len(pts) - 1):
+                nxt = pts[i + 1]
+                mid = ((pts[i][0] + nxt[0]) / 2.0, (pts[i][1] + nxt[1]) / 2.0)
+                end = nxt if i == len(pts) - 2 else mid
+                verts += [pts[i], end]
+                codes += [Path.CURVE3, Path.CURVE3]
+            path = Path(verts, codes)
+
         ax.add_patch(FancyArrowPatch(
-            p1, p2, arrowstyle="-|>", mutation_scale=9,
-            linewidth=0.9, color=EDGE_COLOUR,
-            linestyle="--" if e.dashed else "-",
-            shrinkA=0, shrinkB=0, zorder=1))
+            path=path, arrowstyle="-|>", mutation_scale=9,
+            linewidth=0.9, edgecolor=EDGE_COLOUR, facecolor="none",
+            linestyle="--" if e.dashed else "-", zorder=1))
         if e.label:
-            segments.append((e.label, p1, p2))
+            segments.append((e.label, pts[0], pts[1]))
 
     # Edge labels, placed so they do not sit on top of one another. A label
-    # may slide anywhere along its own edge, which moves it without making
-    # it point at the wrong arrow; the first position that is clear wins,
-    # and the candidates are tried in a fixed order, so the result is the
-    # same on every run.
-    # Nodes are drawn on top of labels, so a label that lands on a node is
-    # simply invisible. They therefore count as occupied from the start.
+    # rides the FIRST segment of its edge — nearest the subject, which is
+    # what the reader is following — sliding along it and stepping sideways
+    # if that is crowded. Node boxes count as occupied from the start,
+    # because a node is drawn on top and a label under one is invisible
+    # rather than merely ugly. Waypoints do not: nothing is drawn there.
     placed: list[tuple[float, float, float, float]] = [
         (n.x - n.w / 2, n.y - n.h / 2, n.x + n.w / 2, n.y + n.h / 2)
-        for n in g.nodes.values()
+        for n in g.nodes.values() if n.shape != "dummy"
     ]
 
     def _overlap(box) -> float:
@@ -353,10 +401,6 @@ def render(g: DiGraph, svg_path, jpg_path, dpi: int = 300) -> list:
         h += 4.0
         ux, uy = p2[0] - p1[0], p2[1] - p1[1]
         norm = math.hypot(ux, uy) or 1.0
-        # Unit normal, for nudging a label off its own edge when every
-        # position along the edge is taken. Short edges in a dense corner
-        # need this: sliding along a 40-point edge does not move a label
-        # far enough to escape its neighbour.
         nx, ny = -uy / norm, ux / norm
 
         best, best_cost = None, None
@@ -373,8 +417,7 @@ def render(g: DiGraph, svg_path, jpg_path, dpi: int = 300) -> list:
                     best, best_cost = (cx, cy, box), cost
             if best_cost == 0.0:
                 break
-        chosen = best
-        cx, cy, box = chosen
+        cx, cy, box = best
         placed.append(box)
         ax.text(cx, cy, label, fontsize=FONT_EDGE, color=EDGE_TEXT,
                 ha="center", va="center", zorder=2,
@@ -382,6 +425,8 @@ def render(g: DiGraph, svg_path, jpg_path, dpi: int = 300) -> list:
                           edgecolor="none", alpha=0.92))
 
     for n in g.nodes.values():
+        if n.shape == "dummy":
+            continue
         if n.shape == "ellipse":
             ax.add_patch(Ellipse((n.x, n.y), n.w, n.h, facecolor=n.fill,
                                  edgecolor=n.line, linewidth=0.9, zorder=3))

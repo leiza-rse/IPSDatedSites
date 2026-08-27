@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IPS dated sites &mdash; closed groups, queried live</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+</head>
+<body>
+<div class="container">
+
+  <header class="page-head">
+    <h1>Closed groups that are also sharply dated</h1>
+    <p class="intro">
+      The same figure as <code>talk/img/talk-closed-groups.svg</code>, except
+      that it is not a figure: the query below runs against the published graph
+      in this browser, and the plot is whatever it returned. Move a threshold
+      and the selection changes in front of you.
+    </p>
+    <p class="note">
+      There is no SPARQL endpoint and no server. The bundle is fetched as a
+      static file and parsed with <code>rdflib</code> under Pyodide. That is
+      deliberate: an archived copy of this repository stays queryable without a
+      service having to be kept alive for it.
+    </p>
+  </header>
+
+  <div class="status" id="status">
+    <span class="dot" id="dot"></span>
+    <span id="status-text">Loading the Python runtime (~10 MB on first visit)&hellip;</span>
+  </div>
+
+  <p class="note" id="graph-note" hidden></p>
+
+  <div class="dials">
+    <div class="dial">
+      <label for="d-rep">q<sub>repetition</sub> at least <output id="o-rep">0.30</output></label>
+      <span class="why">the same dies recur &mdash; a hoard, a consignment, a store</span>
+      <input type="range" id="d-rep" min="0" max="0.9" step="0.05" value="0.30">
+    </div>
+    <div class="dial">
+      <label for="d-int">q<sub>interval</sub> at least <output id="o-int">0.60</output></label>
+      <span class="why">the potters agree, relative to the span they describe</span>
+      <input type="range" id="d-int" min="0" max="0.95" step="0.05" value="0.60">
+    </div>
+    <div class="dial">
+      <label for="d-n">n<sub>stamps</sub> at least <output id="o-n">10</output></label>
+      <span class="why">enough material for k to have come off its maximum</span>
+      <input type="range" id="d-n" min="1" max="60" step="1" value="10">
+    </div>
+  </div>
+  <p class="note">
+    The two quality axes are never multiplied into one score. Asking for both
+    at once in a query is how they are combined: the threshold stays visible,
+    it is stated per axis, and you can disagree with it by dragging it.
+  </p>
+
+  <section class="query">
+    <h2>The query</h2>
+    <p class="intro">
+      Editable. The sliders rewrite the <code>FILTER</code> line; anything else
+      you type stays. The plot needs
+      <code>?site ?findspot ?from ?to ?midpoint ?qInterval ?qRepetition</code>
+      &mdash; drop one and you get the table without the chart.
+    </p>
+    <textarea class="sparql" id="src" spellcheck="false" rows="22"></textarea>
+    <div class="query-bar">
+      <button id="run" disabled>Run</button>
+      <button class="reset" id="reset">Reset</button>
+      <a class="rq" href="closed-groups-sharply-dated.rq" download>.rq</a>
+      <span class="timing" id="timing"></span>
+    </div>
+    <div id="err"></div>
+  </section>
+
+  <div class="chart-wrap">
+    <div id="chart"><p class="empty">Press Run.</p></div>
+    <div class="legend">
+      <span><span class="ramp"></span> q<sub>interval</sub> &mdash; box fill, red to green</span>
+      <span><span class="rep"></span> q<sub>repetition</sub> &mdash; bar in the left margin</span>
+      <span>| midpoint</span>
+    </div>
+  </div>
+
+  <div id="table"></div>
+
+  <footer class="page-foot">
+    <p>
+      Graph: <code>rdf/IPSDatedSites-bundle.ttl</code> &mdash; data, the full
+      LADO vocabulary and a materialised CIDOC CRM crosswalk in one file.
+      The query is <code>talk/closed-groups-sharply-dated.rq</code>, the same
+      file <code>py/make_talk_figures.py</code> reads to draw the static
+      version. Serve the repository root over HTTP
+      (<code>python -m http.server</code>) &mdash; a browser will not fetch the
+      graph from a <code>file://</code> page.
+    </p>
+  </footer>
+</div>
+
+<script>
+const GRAPH_URL = '../rdf/IPSDatedSites-bundle.ttl';
+const MAX_ROWS  = 400;
+
+const TEMPLATE = `PREFIX samian: <http://data.archaeology.link/data/samian/>
+PREFIX lado:   <http://archaeology.link/ontology#>
+PREFIX crm:    <http://www.cidoc-crm.org/cidoc-crm/>
+PREFIX rdfs:   <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?site ?findspot ?from ?to ?midpoint ?sigma ?k ?qInterval ?qRepetition
+       ?nStamps ?nDies
+WHERE {
+  ?fs  a lado:Findspot ;
+       rdfs:label ?findspot ;
+       crm:P89_falls_within ?place ;
+       crm:P4_has_time-span ?ts .
+  ?place rdfs:label ?site .
+
+  ?ts  lado:qInterval    ?qInterval ;
+       lado:qRepetition  ?qRepetition ;
+       lado:nStamps      ?nStamps ;
+       lado:nDies        ?nDies ;
+       lado:sigmaYears   ?sigma ;
+       lado:kFactor      ?k ;
+       lado:midpointYear ?midpoint ;
+       crm:P82a_begin_of_the_begin ?from ;
+       crm:P82b_end_of_the_end     ?to .
+
+  FILTER( ?qRepetition >= §REP§ && ?qInterval >= §INT§ && ?nStamps >= §N§ )
+}
+ORDER BY ?from`;
+
+const $ = id => document.getElementById(id);
+const statusText = $('status-text'), dot = $('dot');
+let pyodide = null;
+
+function setStatus(text, state) {
+  statusText.textContent = text;
+  dot.className = 'dot ' + (state || '');
+}
+
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
+/* ---- the sliders write the FILTER line, and only that line -------------- */
+function currentQuery() {
+  return TEMPLATE
+    .replace('§REP§', Number($('d-rep').value).toFixed(2))
+    .replace('§INT§', Number($('d-int').value).toFixed(2))
+    .replace('§N§',   String($('d-n').value));
+}
+
+function syncDials(rewrite) {
+  $('o-rep').textContent = Number($('d-rep').value).toFixed(2);
+  $('o-int').textContent = Number($('d-int').value).toFixed(2);
+  $('o-n').textContent   = $('d-n').value;
+  if (!rewrite) return;
+  /* Replace the FILTER line in place, so an edit elsewhere in the query
+     survives a drag of the slider. If the line has been renamed beyond
+     recognition the template is restored wholesale, which is the honest
+     thing: the sliders can only drive a filter they can find. */
+  const src = $('src').value;
+  const line = `  FILTER( ?qRepetition >= ${Number($('d-rep').value).toFixed(2)}` +
+               ` && ?qInterval >= ${Number($('d-int').value).toFixed(2)}` +
+               ` && ?nStamps >= ${$('d-n').value} )`;
+  $('src').value = /^\s*FILTER\(.*\)\s*$/m.test(src)
+    ? src.replace(/^\s*FILTER\(.*\)\s*$/m, line)
+    : currentQuery();
+}
+
+/* ---- RdYlGn, the same ramp the static figures use ----------------------- */
+const RAMP = [
+  [0.000, [165,  0, 38]], [0.125, [215, 48, 39]], [0.250, [244,109, 67]],
+  [0.375, [253,174, 97]], [0.500, [254,224,139]], [0.625, [217,239,139]],
+  [0.750, [166,217,106]], [0.875, [102,189, 99]], [1.000, [ 26,152, 80]]
+];
+function ramp(t) {
+  t = Math.max(0, Math.min(1, t));
+  for (let i = 1; i < RAMP.length; i++) {
+    if (t <= RAMP[i][0]) {
+      const [t0, c0] = RAMP[i - 1], [t1, c1] = RAMP[i];
+      const f = (t - t0) / (t1 - t0);
+      const c = c0.map((v, j) => Math.round(v + f * (c1[j] - v)));
+      return `rgb(${c[0]},${c[1]},${c[2]})`;
+    }
+  }
+  return 'rgb(26,152,80)';
+}
+
+/* ---- the plot, as SVG -------------------------------------------------- */
+function drawChart(rows) {
+  const host = $('chart');
+  const need = ['site', 'findspot', 'from', 'to', 'midpoint',
+                'qInterval', 'qRepetition'];
+  if (!rows.length) {
+    host.innerHTML = '<p class="empty">Nothing matched. Loosen a threshold.</p>';
+    return;
+  }
+  if (!need.every(k => k in rows[0])) {
+    host.innerHTML = '<p class="empty">The result has no ' +
+      esc(need.find(k => !(k in rows[0]))) +
+      ' column, so there is nothing to plot. The table is below.</p>';
+    return;
+  }
+
+  const R = 34, LABEL_W = 250, BAR_W = 62, PAD_R = 78, TOP = 26, BOT = 44;
+  const plotW = 620;
+  const W = LABEL_W + BAR_W + plotW + PAD_R;
+  const H = TOP + rows.length * R + BOT;
+
+  const lo = Math.min(...rows.map(r => +r.from));
+  const hi = Math.max(...rows.map(r => +r.to));
+  const padY = Math.max(8, (hi - lo) * 0.06);
+  const x0 = lo - padY, x1 = hi + padY;
+  const X = v => LABEL_W + BAR_W + ((v - x0) / (x1 - x0)) * plotW;
+
+  const ticks = [];
+  const step = (x1 - x0) > 260 ? 50 : 25;
+  for (let v = Math.ceil(x0 / step) * step; v <= x1; v += step) ticks.push(v);
+
+  let s = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" ` +
+          `xmlns="http://www.w3.org/2000/svg" font-family="inherit">`;
+  s += `<rect width="${W}" height="${H}" fill="#fff"/>`;
+
+  for (const v of ticks) {
+    s += `<line x1="${X(v).toFixed(1)}" y1="${TOP - 6}" x2="${X(v).toFixed(1)}" ` +
+         `y2="${TOP + rows.length * R}" stroke="#e2e6eb" stroke-width="1"/>` +
+         `<text x="${X(v).toFixed(1)}" y="${TOP + rows.length * R + 16}" ` +
+         `text-anchor="middle" font-size="10" fill="#5b6470">${v}</text>`;
+  }
+  s += `<text x="${(LABEL_W + BAR_W + plotW / 2).toFixed(1)}" ` +
+       `y="${H - 10}" text-anchor="middle" font-size="10" fill="#5b6470">year AD</text>`;
+
+  rows.forEach((r, i) => {
+    const y = TOP + i * R + R / 2;
+    s += `<text x="${LABEL_W - 12}" y="${y - 2}" text-anchor="end" ` +
+         `font-size="11" fill="#1a1a1a">${esc(r.site)}</text>`;
+    s += `<text x="${LABEL_W - 12}" y="${y + 10}" text-anchor="end" ` +
+         `font-size="10" fill="#5b6470">${esc(r.findspot)}</text>`;
+
+    const rep = Math.max(0, Math.min(1, +r.qRepetition));
+    /* The bar is scaled to leave room for its own number: at qRepetition
+       0.85 a bar drawn across the whole margin runs under the label. */
+    s += `<rect x="${LABEL_W}" y="${y - 5}" width="${(rep * (BAR_W - 42)).toFixed(1)}" ` +
+         `height="10" fill="#4a6b96" opacity="0.85"/>`;
+    s += `<text x="${LABEL_W + BAR_W - 6}" y="${y + 4}" text-anchor="end" ` +
+         `font-size="9" fill="#4a6b96">${rep.toFixed(2)}</text>`;
+
+    const bx = X(+r.from), bw = Math.max(2, X(+r.to) - X(+r.from));
+    s += `<rect x="${bx.toFixed(1)}" y="${y - 9}" width="${bw.toFixed(1)}" height="18" ` +
+         `fill="${ramp(+r.qInterval)}" stroke="#1b2430" stroke-width="0.8"/>`;
+    const mx = X(+r.midpoint);
+    s += `<line x1="${mx.toFixed(1)}" y1="${y - 7}" x2="${mx.toFixed(1)}" ` +
+         `y2="${y + 7}" stroke="#1b2430" stroke-width="1.2"/>`;
+    s += `<text x="${(X(+r.to) + 6).toFixed(1)}" y="${y + 4}" font-size="9.5" ` +
+         `fill="#5b6470">${esc(r.from)}\u2013${esc(r.to)}</text>`;
+  });
+
+  s += '</svg>';
+  host.innerHTML = s;
+}
+
+function drawTable(cols, rows, total) {
+  const host = $('table');
+  if (!rows.length) { host.innerHTML = ''; return; }
+  const num = new Set(['from', 'to', 'midpoint', 'sigma', 'k', 'qInterval',
+                       'qRepetition', 'nStamps', 'nDies']);
+  let h = '<div class="table-scroll"><table class="layer-table"><thead><tr>';
+  h += cols.map(c => `<th>${esc(c)}</th>`).join('') + '</tr></thead><tbody>';
+  for (const r of rows) {
+    h += '<tr>' + cols.map(c => {
+      const v = r[c];
+      if (v === null || v === undefined) return '<td>&mdash;</td>';
+      return num.has(c) ? `<td class="num">${esc(v)}</td>` : `<td>${esc(v)}</td>`;
+    }).join('') + '</tr>';
+  }
+  h += `</tbody></table></div><p class="note">${
+    total > rows.length ? `Showing the first ${rows.length} of ${total} rows.`
+                        : `${rows.length} findspot${rows.length === 1 ? '' : 's'}.`}</p>`;
+  host.innerHTML = h;
+}
+
+/* ---- boot -------------------------------------------------------------- */
+async function boot() {
+  try {
+    pyodide = await loadPyodide();
+    setStatus('Installing rdflib\u2026', 'busy');
+    await pyodide.loadPackage('micropip');
+    await pyodide.runPythonAsync(`
+import micropip
+await micropip.install("rdflib==7.1.1")
+`);
+    setStatus('Loading the graph\u2026', 'busy');
+    pyodide.globals.set('_graph_url', GRAPH_URL);
+    await pyodide.runPythonAsync(`
+import warnings
+warnings.filterwarnings("ignore")
+
+from pyodide.http import pyfetch
+from rdflib import Graph
+
+async def _load(url):
+    resp = await pyfetch(url)
+    if resp.status != 200:
+        raise RuntimeError(f"{url} -> HTTP {resp.status}")
+    g = Graph()
+    g.parse(data=await resp.string(), format="turtle")
+    return g
+
+_g = await _load(_graph_url)
+n_triples = len(_g)
+`);
+    const n = pyodide.globals.get('n_triples');
+    const note = $('graph-note');
+    note.hidden = false;
+    note.innerHTML = `Graph loaded: <strong>${n}</strong> triples from ` +
+      `<code>${esc(GRAPH_URL)}</code>.`;
+    setStatus('Ready \u2014 drag a threshold, or edit the query, then Run.', 'ok');
+    $('run').disabled = false;
+  } catch (err) {
+    setStatus('Could not start: ' + err.message, 'err');
+    console.error(err);
+  }
+}
+
+async function run() {
+  const btn = $('run');
+  btn.disabled = true;
+  $('timing').textContent = 'running\u2026';
+  $('err').innerHTML = '';
+  const t0 = performance.now();
+  try {
+    pyodide.globals.set('_q', $('src').value);
+    const json = await pyodide.runPythonAsync(`
+import json
+res = _g.query(_q)
+cols = [str(v) for v in res.vars]
+_all = list(res)
+rows = [{c: (None if r[i] is None else str(r[i])) for i, c in enumerate(cols)}
+        for r in _all[:${MAX_ROWS}]]
+json.dumps({"cols": cols, "rows": rows, "total": len(_all)})
+`);
+    const data = JSON.parse(json);
+    /* gYear literals arrive zero-padded: "0070". Numbers are wanted. */
+    for (const r of data.rows) {
+      for (const k of ['from', 'to']) {
+        if (r[k] !== null && r[k] !== undefined) r[k] = String(parseInt(r[k], 10));
+      }
+    }
+    drawChart(data.rows);
+    drawTable(data.cols, data.rows, data.total);
+    $('timing').textContent =
+      `${((performance.now() - t0) / 1000).toFixed(1)}s \u00b7 ${data.total} findspots`;
+  } catch (err) {
+    $('err').innerHTML = `<pre class="error">${esc(err.message)}</pre>`;
+    $('timing').textContent = '';
+    $('chart').innerHTML = '<p class="empty">The query did not run.</p>';
+  }
+  btn.disabled = false;
+}
+
+['d-rep', 'd-int', 'd-n'].forEach(id =>
+  $(id).addEventListener('input', () => syncDials(true)));
+$('run').addEventListener('click', run);
+$('reset').addEventListener('click', () => {
+  $('d-rep').value = 0.30; $('d-int').value = 0.60; $('d-n').value = 10;
+  $('src').value = currentQuery();
+  syncDials(false);
+  $('chart').innerHTML = '<p class="empty">Press Run.</p>';
+  $('table').innerHTML = '';
+  $('err').innerHTML = '';
+  $('timing').textContent = '';
+});
+
+$('src').value = currentQuery();
+syncDials(false);
+boot();
+</script>
+</body>
+</html>

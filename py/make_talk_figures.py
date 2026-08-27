@@ -146,6 +146,17 @@ CONSTRUCT {
 # from there rather than restated, so the slide and the file cannot drift.
 CRITERION = ROOT / "talk" / "closed-groups-sharply-dated.rq"
 
+# The figures carry no heading. The words that go with them live here, one
+# entry per file, and a figure without an entry is an error rather than an
+# untitled picture nobody can place six months later.
+CAPTIONS = ROOT / "talk" / "captions.yaml"
+
+
+def captioned() -> set[str]:
+    import yaml
+    data = yaml.safe_load(CAPTIONS.read_text(encoding="utf-8")) or {}
+    return set((data.get("figures") or {}).keys())
+
 
 def findspot_by_label(g: Graph, site: str, findspot: str) -> URIRef:
     """Resolve a findspot by its labels rather than by its URI hash.
@@ -177,10 +188,9 @@ def vocabulary_figure(g: Graph, out: Path,
 
     Every edge here is rdfs:subClassOf, so labelling each one eighteen
     times adds no information and costs the figure half its width. The
-    predicate is said once, in the title.
+    predicate is said once, in the caption.
     """
-    dg = L.DiGraph(title="Twelve local classes, and where each is anchored. "
-                         "Every edge is rdfs:subClassOf.")
+    dg = L.DiGraph()
     for s_, _p, o in sorted(g, key=lambda t: (str(t[0]), str(t[2]))):
         for term in (s_, o):
             q = G.qname(term)
@@ -212,8 +222,7 @@ def pipeline_figure(n_rows: int, out: Path,
     Same palette as the others, but boxes rather than ellipses, because
     nothing here is a resource.
     """
-    dg = L.DiGraph(title="From the published graph to a plot, "
-                         "without leaving the notebook", rankdir="TB")
+    dg = L.DiGraph(rankdir="TB")
     steps = [
         ("bundle", ["rdf/IPSDatedSites-bundle.ttl",
                     "data + vocabulary +",
@@ -250,7 +259,7 @@ def pipeline_figure(n_rows: int, out: Path,
 
 
 # --------------------------------------------------------------------------
-def rdf_figure(sub: Graph, title: str, fold_types: bool,
+def rdf_figure(sub: Graph, fold_types: bool,
                stem: str, out: Path) -> list[Path]:
     """One RDF subgraph, drawn with py/graph_layout.py.
 
@@ -260,7 +269,7 @@ def rdf_figure(sub: Graph, title: str, fold_types: bool,
     """
     from rdflib import RDF
 
-    dg = L.DiGraph(title=title)
+    dg = L.DiGraph()
     types: dict = {}
     if fold_types:
         for s_, o in sub.subject_objects(RDF.type):
@@ -429,25 +438,30 @@ def run_criterion(g: Graph) -> list[dict]:
 
 
 def build(graph_path: Path, out: Path) -> list[Path]:
+    known = captioned()
     g = Graph()
     g.parse(graph_path, format="turtle")
     out.mkdir(parents=True, exist_ok=True)
     written: list[Path] = []
 
+    def check(stem: str) -> str:
+        if stem not in known:
+            raise SystemExit(
+                f"  !!  '{stem}' has no entry in talk/captions.yaml. Add one "
+                f"before drawing it: a figure whose caption lives only in "
+                f"somebody's head is a figure that cannot be reused.")
+        return stem
+
     pompeii = findspot_by_label(g, "Pompeii", "Hoard")
     langenhain = findspot_by_label(g, "Langenhain", "store")
 
     figures = [
-        ("talk-process", "The computation itself, as triples",
-         CUT_PROCESS, pompeii, True),
-        ("talk-pompeii", "Pompeii \u2014 Hoard: one box, one subgraph",
-         CUT_FINDSPOT, pompeii, True),
-        ("talk-langenhain",
-         "Langenhain \u2014 store: the same shape, a different story",
-         CUT_FINDSPOT, langenhain, True),
+        ("talk-process", CUT_PROCESS, pompeii, True),
+        ("talk-pompeii", CUT_FINDSPOT, pompeii, True),
+        ("talk-langenhain", CUT_FINDSPOT, langenhain, True),
     ]
 
-    for stem, title, query, fs, fold in figures:
+    for stem, query, fs, fold in figures:
         sub = Graph()
         for triple in g.query(PFX + query, initBindings={"fs": fs}):
             sub.add(triple)
@@ -456,19 +470,19 @@ def build(graph_path: Path, out: Path) -> list[Path]:
                 f"  !!  '{stem}' selected no triples. The CONSTRUCT no longer "
                 f"matches the graph — fix it rather than shipping an empty "
                 f"figure.")
-        written += rdf_figure(sub, title, fold, stem, out)
+        written += rdf_figure(sub, fold, check(stem), out)
         print(f"  {stem:<22} {len(sub):>3} triples")
 
     voc = vocabulary_graph()
-    written += vocabulary_figure(voc, out)
+    written += vocabulary_figure(voc, out, check("talk-vocabularies"))
     print(f"  {'talk-vocabularies':<22} {len(voc):>3} subclass axioms")
 
     rows = run_criterion(g)
     if not rows:
         raise SystemExit("  !!  the criterion selected no findspots.")
-    written += pipeline_figure(len(rows), out)
+    written += pipeline_figure(len(rows), out, check("talk-pipeline"))
     print(f"  {'talk-pipeline':<22}")
-    written += closed_groups_plot(rows, out)
+    written += closed_groups_plot(rows, out, check("talk-closed-groups"))
     print(f"  {'talk-closed-groups':<22} {len(rows):>3} findspots "
           f"({rows[0]['from']} to {rows[-1]['to']})")
 

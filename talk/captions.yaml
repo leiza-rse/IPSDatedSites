@@ -1,0 +1,103 @@
+# Captions for the figures in talk/img/.
+#
+# The figures carry no heading of their own. A slide has its own title, and a
+# title inside the image competes with it, cannot be restyled and cannot be
+# translated without regenerating the picture. So the words live here and the
+# images stay wordless apart from the data.
+#
+# py/make_talk_figures.py reads this file and refuses to run if a figure it is
+# about to draw has no entry, so a new figure cannot arrive uncaptioned.
+#
+# title    one line, for the slide
+# caption  what to say about it, or to print beneath it in a handout
+# source   where the content comes from, so a reader can check it
+# note     anything worth knowing when showing it
+
+figures:
+
+  talk-process:
+    title: The computation itself, as triples
+    caption: >-
+      The dating carries the quantities it was computed from: sigmaYears, the
+      dispersion of the material, and kFactor, the coverage the model applies
+      to it. The run that produced it is a lado:DatingActivity, the
+      parameterisation a lado:DatingModel with tau, t0 and the rest on it. The
+      point is that the numbers behind the box are in the graph, not only
+      behind it: any interval here can be recomputed from what is published.
+    source: >-
+      CONSTRUCT over rdf/IPSDatedSites-bundle.ttl, pinned to Pompeii — Hoard.
+      23 triples.
+    note: >-
+      Say the word provenance once and move on. The audience will see PROV-O
+      and CRMdig doing the work without being told what they are.
+
+  talk-vocabularies:
+    title: Twelve local classes, and where each is anchored
+    caption: >-
+      Every edge is rdfs:subClassOf. The local vocabulary says only what the
+      standards leave open, and each of its classes reaches CIDOC CRM — some by
+      two routes at once, so that a CRM query and an OWL-Time query each find
+      the same node by their own path. Nothing here re-types or redefines a
+      term that already exists elsewhere.
+    source: >-
+      Built from CLASSES in py/ips_rdf_export.py, so a class added to the
+      export appears here on the next run. 18 subclass axioms.
+    note: >-
+      The two-parent classes are the interesting ones: DatedTimeSpan under both
+      crm:E52_Time-Span and time:ProperInterval, DatingModel under both
+      prov:Plan and crm:E29_Design_or_Procedure.
+
+  talk-pompeii:
+    title: Pompeii — Hoard, one findspot as triples
+    caption: >-
+      Place, findspot, dating, the two instants with their time positions and
+      the year scale they are read on, and the plot row that carries the
+      whiskers. sigmaYears 8.473, kFactor 0.5421, qInterval 0.786 — a tight box
+      on plenty of material. The whiskers sit on the plot row and not on the
+      time-span, deliberately: they are presentation, not an archaeological
+      claim.
+    source: >-
+      CONSTRUCT over the published graph. 36 triples, all of them real.
+
+  talk-langenhain:
+    title: Langenhain — store, the same shape, a different story
+    caption: >-
+      Identical structure, opposite reading. sigmaYears 17.582 against Pompeii's
+      8.473, so the box is wide; qStart 0.396 against 0.843, so the left whisker
+      is red while the right one is green. The potters disagree about when this
+      material begins, not about when it ends — and five dies for thirteen
+      stamps say it is a closed group all the same.
+    source: >-
+      CONSTRUCT over the published graph, same cut as Pompeii. 36 triples.
+    note: >-
+      This is the pair to show if there is time for only one point: one model,
+      two findspots, and the graph says why they differ.
+
+  talk-pipeline:
+    title: From the published graph to a plot, without leaving the notebook
+    caption: >-
+      The bundle is one file — data, vocabulary and a materialised CIDOC CRM
+      crosswalk — so it can be parsed by rdflib in a notebook or in the browser
+      under Pyodide, with no endpoint to keep alive. The criterion is stated
+      once, in SPARQL, and the plot is whatever the query returned.
+    source: Schematic; the counts come from the query it describes.
+    note: >-
+      The live version of this is talk/closed-groups.html, which runs the query
+      in the browser and draws the plot from the result.
+
+  talk-closed-groups:
+    title: Closed groups that are also sharply dated
+    caption: >-
+      One SPARQL query asking for both quality axes at once: qRepetition at
+      least 0.30, so the same dies recur and the deposit has the character of a
+      closed group; qInterval at least 0.60, so the potters agree closely
+      relative to the span they describe; and at least ten stamps, so the
+      coverage factor has come off its maximum. The two axes are never
+      multiplied into one score — in a query the threshold stays visible, per
+      axis, and can be argued with.
+    source: >-
+      talk/closed-groups-sharply-dated.rq, run against the published bundle.
+    note: >-
+      Köln (Hafen) is the one to point at: 26 stamps from 4 dies, the sharpest
+      interval in the set. Bregenz — Samian Hoard 1913 joined the corpus with
+      revision 31 and is the newest row in the figure.
