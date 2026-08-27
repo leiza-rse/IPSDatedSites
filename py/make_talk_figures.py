@@ -486,6 +486,70 @@ def build(graph_path: Path, out: Path) -> list[Path]:
     print(f"  {'talk-closed-groups':<22} {len(rows):>3} findspots "
           f"({rows[0]['from']} to {rows[-1]['to']})")
 
+    pages = publish_page(ROOT / "talk" / "closed-groups.html",
+                         ROOT / "docs" / "query")
+    written += pages
+    print(f"  {'docs/query/':<22} {len(pages):>3} files "
+          f"(the same page, for GitHub Pages)")
+
+    return written
+
+
+def publish_page(src: Path, out_dir: Path) -> list[Path]:
+    """Write the GitHub Pages copy of the live query page.
+
+    The same file twice, from one source, with ONE line rewritten: the
+    published copy reaches the graph as ../bundle.ttl, because docs/ is the
+    site root and docs/bundle.ttl is already there — byte-identical to
+    rdf/IPSDatedSites-bundle.ttl and refreshed by the same pipeline run.
+
+    Copying the graph into docs/query/ as well would put a third copy of it
+    in the repository, and a copy that only this page reads is a copy that
+    will one day be a month behind the other two. One graph, two pages
+    pointing at it.
+
+    An earlier version also rewrote a sentence in the footer, and located it
+    by a marker in the source file. When the marker went missing — an older
+    patch applied over a newer one is all it takes — the generator died with
+    ValueError: substring not found, which says nothing about what is wrong
+    or where. The footer now says something true of both copies, so there is
+    one substitution instead of two and nothing to lose.
+    """
+    import shutil
+
+    local = "const GRAPH_URL = '../rdf/IPSDatedSites-bundle.ttl';"
+    published = "const GRAPH_URL = '../bundle.ttl';"
+
+    html = src.read_text(encoding="utf-8")
+    if local not in html:
+        if published in html:
+            raise SystemExit(
+                f"  !!  {src} already points at the published graph. It is "
+                f"the LOCAL page and should read {local!r}; docs/query/ is "
+                f"written from it, not the other way round.")
+        raise SystemExit(
+            f"  !!  {src} has no line reading\n"
+            f"      {local}\n"
+            f"      so the published copy cannot be pointed at the graph "
+            f"under docs/. If the line was renamed, rename it here too.")
+
+    html = html.replace(local, published)
+
+    out_dir.mkdir(parents=True, exist_ok=True)
+    written = []
+    target = out_dir / "index.html"
+    target.write_text(html, encoding="utf-8")
+    written.append(target)
+
+    # The stylesheet and the .rq travel with it: the page links to both by
+    # a bare filename, so they have to sit beside it in either location.
+    for name in ("style.css", "closed-groups-sharply-dated.rq"):
+        source = src.parent / name
+        if not source.exists():
+            raise SystemExit(f"  !!  {source} is missing; the published page "
+                             f"links to it by name and would 404.")
+        shutil.copyfile(source, out_dir / name)
+        written.append(out_dir / name)
     return written
 
 
@@ -555,8 +619,8 @@ def main() -> int:
                     help="first port to try for the local server")
     args = ap.parse_args()
     written = build(args.graph, args.out)
-    print(f"\n  {len(written)} file(s) written to "
-          f"{args.out.relative_to(ROOT)}")
+    print(f"\n  {len(written)} file(s) written: {args.out.relative_to(ROOT)} "
+          f"and docs/query/")
 
     # Not when the output is being piped or captured: a build server has no
     # browser and nobody there to press Ctrl-C.
