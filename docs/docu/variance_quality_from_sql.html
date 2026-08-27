@@ -360,6 +360,18 @@ footer .fi{max-width:1080px; margin:0 auto}
       <tr><td>\(n\)</td><td>stamps at the findspot; the quantity that drives \(k\)</td><td><code>count_stamps</code></td></tr>
       <tr><td>\(n_{\text{die}}\)</td><td>stamps with a recorded die; descriptive only</td><td><code>n_stamps_die</code></td></tr>
       <tr><td>\(D\)</td><td>distinct \((\text{potter}, \text{die})\) pairs</td><td><code>n_dies</code></td></tr>
+      <tr><td>\(\sigma\)</td><td>aoristic dispersion of the findspot, in <em>years</em>: the standard deviation of the
+      summed uniform blocks, combining each stamp's own fuzziness with the disagreement
+      between stamps (<a href="#dispersion">§6</a>)</td><td><code>sigma_eff</code><br>
+      <code>SQRT( AVG(POWER(datemax-datemin,2)/12.0) + COALESCE(VAR_SAMP((datemin+datemax)/2.0), 0) )</code></td></tr>
+      <tr><td>\(k\)</td><td>coverage factor, <em>dimensionless</em>: how many \(\sigma\) wide the reported
+      interval is made, falling from \(k_{\max}\) towards \(k_{\min}\) as \(n\) grows
+      (<a href="#kfactor">§7</a>)</td><td><code>k_eff</code><br>
+      <code>k_max - (k_max - k_min) * (1 - EXP(-COUNT(di.number)::numeric / tau))</code><br>
+      with <code>k_max</code>, <code>k_min</code> and <code>tau</code> read from the
+      <code>params</code> CTE</td></tr>
+      <tr><td>\(k_{\min}\)</td><td>coverage factor of a richly attested findspot; lower bound of the \(k\) curve</td><td><code>p_k_min</code></td></tr>
+      <tr><td>\(k_{\max}\)</td><td>coverage factor of a findspot with no attestations; upper bound of the \(k\) curve</td><td><code>p_k_max</code></td></tr>
       <tr><td>\(\tau\)</td><td>saturation constant of the \(k\) curve, in <em>stamps</em></td><td><code>p_tau</code></td></tr>
       <tr><td>\(t_0\)</td><td>reference length for the edge measures, in <em>years</em></td><td><code>p_t0</code></td></tr>
     </tbody>
@@ -372,6 +384,15 @@ footer .fi{max-width:1080px; margin:0 auto}
     is achieved by counting <code>DISTINCT die</code> within each potter first and
     summing afterwards, not by a single <code>COUNT(DISTINCT die)</code> across the
     findspot.
+  </div>
+
+  <div class="note">
+    <strong>\(\sigma\) and \(k\) are the two factors of the half-width.</strong>
+    \(\sigma\) is measured in years and comes from the material; \(k\) is dimensionless
+    and comes from the model. The interval reported for a findspot is its midpoint
+    plus or minus \(k\sigma\) (<a href="#fuzzy">§8</a>), so a wide interval may mean
+    scattered evidence, thin evidence, or both. The two are therefore carried on
+    every row and exported separately, never pre-multiplied into a single number.
   </div>
 </section>
 
