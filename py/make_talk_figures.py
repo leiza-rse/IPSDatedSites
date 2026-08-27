@@ -489,17 +489,83 @@ def build(graph_path: Path, out: Path) -> list[Path]:
     return written
 
 
+def serve(root: Path, page: str, port: int) -> int:
+    """Serve the repository over HTTP and open the live page.
+
+    The page fetches rdf/IPSDatedSites-bundle.ttl, and a browser will not
+    fetch anything from a file:// page, so looking at it needs a server.
+    Making that one keystroke rather than three is the difference between
+    the page being used and the page being forgotten.
+
+    The root is the repository, not talk/, because the graph sits outside
+    talk/ and the page reaches it with ../rdf/.
+    """
+    import functools
+    import http.server
+    import socket
+    import socketserver
+    import webbrowser
+
+    handler = functools.partial(http.server.SimpleHTTPRequestHandler,
+                                directory=str(root))
+
+    # A port left open by an earlier run, or by anything else, should not
+    # be a dead end: walk up until one is free.
+    for attempt in range(port, port + 12):
+        try:
+            httpd = socketserver.ThreadingTCPServer(("127.0.0.1", attempt),
+                                                    handler)
+        except OSError as exc:
+            if exc.errno not in (48, 98, 10048):     # address in use
+                raise
+            continue
+        break
+    else:
+        print(f"  !!  no free port between {port} and {port + 11}.")
+        return 2
+
+    httpd.allow_reuse_address = True
+    url = f"http://127.0.0.1:{attempt}/{page}"
+    print(f"\n  Serving {root} at http://127.0.0.1:{attempt}/")
+    print(f"  Opening {url}")
+    print("  Ctrl-C to stop.\n")
+    try:
+        webbrowser.open(url)
+    except Exception as exc:                          # noqa: BLE001
+        print(f"  (could not open a browser: {exc} — open the URL by hand)")
+    try:
+        httpd.serve_forever()
+    except KeyboardInterrupt:
+        print("\n  Stopped.")
+    finally:
+        httpd.server_close()
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(
         description="Talk figures: real subgraphs and a real result set")
     ap.add_argument("--graph", type=Path,
                     default=ROOT / "rdf" / "IPSDatedSites-bundle.ttl")
     ap.add_argument("--out", type=Path, default=ROOT / "talk" / "img")
+    ap.add_argument("--no-serve", action="store_true",
+                    help="just write the figures; do not serve or open the "
+                         "live page")
+    ap.add_argument("--port", type=int, default=8000,
+                    help="first port to try for the local server")
     args = ap.parse_args()
     written = build(args.graph, args.out)
     print(f"\n  {len(written)} file(s) written to "
           f"{args.out.relative_to(ROOT)}")
-    return 0
+
+    # Not when the output is being piped or captured: a build server has no
+    # browser and nobody there to press Ctrl-C.
+    if args.no_serve or not sys.stdout.isatty():
+        if not args.no_serve:
+            print("  (not a terminal — skipping the live page; "
+                  "--no-serve silences this)")
+        return 0
+    return serve(ROOT, "talk/closed-groups.html", args.port)
 
 
 if __name__ == "__main__":

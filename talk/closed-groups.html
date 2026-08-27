@@ -38,18 +38,22 @@
       <label for="d-rep">q<sub>repetition</sub> at least <output id="o-rep">0.30</output></label>
       <span class="why">the same dies recur &mdash; a hoard, a consignment, a store</span>
       <input type="range" id="d-rep" min="0" max="0.9" step="0.05" value="0.30">
+      <span class="ceiling" id="c-rep"></span>
     </div>
     <div class="dial">
       <label for="d-int">q<sub>interval</sub> at least <output id="o-int">0.60</output></label>
       <span class="why">the potters agree, relative to the span they describe</span>
       <input type="range" id="d-int" min="0" max="0.95" step="0.05" value="0.60">
+      <span class="ceiling" id="c-int"></span>
     </div>
     <div class="dial">
       <label for="d-n">n<sub>stamps</sub> at least <output id="o-n">10</output></label>
       <span class="why">enough material for k to have come off its maximum</span>
       <input type="range" id="d-n" min="1" max="60" step="1" value="10">
+      <span class="ceiling" id="c-n"></span>
     </div>
   </div>
+  <p class="tally" id="tally">Counting starts once the graph is loaded.</p>
   <p class="note">
     The two quality axes are never multiplied into one score. Asking for both
     at once in a query is how they are combined: the threshold stays visible,
@@ -130,6 +134,19 @@ WHERE {
 }
 ORDER BY ?from`;
 
+/* Every findspot's three numbers, fetched once. With them the page can say
+   how many rows a setting will return before the query is run, which is the
+   difference between exploring the thresholds and dragging a slider into an
+   empty result and wondering whether something broke. */
+const CENSUS_QUERY = `PREFIX lado: <http://archaeology.link/ontology#>
+SELECT ?qInterval ?qRepetition ?nStamps WHERE {
+  ?ts a lado:FindspotDating ;
+      lado:qInterval ?qInterval ;
+      lado:qRepetition ?qRepetition ;
+      lado:nStamps ?nStamps .
+}`;
+let CENSUS = null;
+
 const $ = id => document.getElementById(id);
 const statusText = $('status-text'), dot = $('dot');
 let pyodide = null;
@@ -153,10 +170,61 @@ function currentQuery() {
     .replace('§N§',   String($('d-n').value));
 }
 
+function countFor(rep, int_, n) {
+  if (!CENSUS) return null;
+  return CENSUS.filter(r =>
+    r.qRepetition >= rep && r.qInterval >= int_ && r.nStamps >= n).length;
+}
+
+/* The largest value this one dial could take, with the other two where they
+   are, that still returns something. Shown as "empty above x" so the edge of
+   the useful range is visible before you drive over it. */
+function ceilingFor(which) {
+  if (!CENSUS) return null;
+  const rep = +$('d-rep').value, int_ = +$('d-int').value, n = +$('d-n').value;
+  const dial = $('d-' + which);
+  const step = +dial.step, max = +dial.max, min = +dial.min;
+  let best = null;
+  for (let v = min; v <= max + 1e-9; v += step) {
+    const c = which === 'rep' ? countFor(v, int_, n)
+            : which === 'int' ? countFor(rep, v, n)
+            :                   countFor(rep, int_, v);
+    if (c > 0) best = v;
+  }
+  return best;
+}
+
+function updateTally() {
+  const tally = $('tally');
+  if (!CENSUS) return;
+  const n = countFor(+$('d-rep').value, +$('d-int').value, +$('d-n').value);
+  tally.textContent = n === 0
+    ? `No findspot matches this. Loosen a threshold — the hints below each slider say where the edge is.`
+    : `${n} of ${CENSUS.length} findspots match. Press Run to fetch and plot them.`;
+  tally.className = 'tally' + (n === 0 ? ' empty' : '');
+
+  for (const which of ['rep', 'int', 'n']) {
+    const c = ceilingFor(which);
+    const el = $('c-' + which);
+    if (c === null) {
+      /* No setting of this dial rescues the result: the emptiness is coming
+         from one of the other two, and saying so is more use than a blank. */
+      el.textContent = 'nothing here helps — loosen another';
+      continue;
+    }
+    const dial = $('d-' + which);
+    const fmt = which === 'n' ? String(Math.round(c)) : c.toFixed(2);
+    el.textContent = c >= +dial.max - 1e-9
+      ? 'anything up to the maximum still returns rows'
+      : `empty above ${fmt}`;
+  }
+}
+
 function syncDials(rewrite) {
   $('o-rep').textContent = Number($('d-rep').value).toFixed(2);
   $('o-int').textContent = Number($('d-int').value).toFixed(2);
   $('o-n').textContent   = $('d-n').value;
+  updateTally();
   if (!rewrite) return;
   /* Replace the FILTER line in place, so an edit elsewhere in the query
      survives a drag of the slider. If the line has been renamed beyond
@@ -313,6 +381,15 @@ async def _load(url):
 _g = await _load(_graph_url)
 n_triples = len(_g)
 `);
+    pyodide.globals.set('_census_q', CENSUS_QUERY);
+    const censusJson = await pyodide.runPythonAsync(`
+import json
+_res = _g.query(_census_q)
+json.dumps([{"qInterval": float(r[0]), "qRepetition": float(r[1]),
+             "nStamps": int(r[2])} for r in _res])
+`);
+    CENSUS = JSON.parse(censusJson);
+
     const n = pyodide.globals.get('n_triples');
     const note = $('graph-note');
     note.hidden = false;
@@ -320,6 +397,7 @@ n_triples = len(_g)
       `<code>${esc(GRAPH_URL)}</code>.`;
     setStatus('Ready \u2014 drag a threshold, or edit the query, then Run.', 'ok');
     $('run').disabled = false;
+    updateTally();
   } catch (err) {
     setStatus('Could not start: ' + err.message, 'err');
     console.error(err);

@@ -128,6 +128,23 @@ code {
   color: var(--accent-dk);
 }
 
+.dial .ceiling {
+  display: block;
+  font-size: 0.74rem;
+  color: var(--muted);
+  margin-top: 0.2rem;
+  min-height: 1em;
+}
+.tally {
+  margin: 0.7rem 0 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--accent-dk);
+}
+.tally.empty {
+  color: #b03a2e;
+}
+
 /* ---- query ------------------------------------------------------------- */
 .query {
   border-top: 1px solid var(--rule);
