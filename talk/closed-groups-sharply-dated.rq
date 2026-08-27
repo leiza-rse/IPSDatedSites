@@ -1,0 +1,47 @@
+# Closed groups that are also sharply dated
+#
+# Three conditions, each a statement about the archaeology rather than about
+# the plot:
+#
+#   qRepetition >= 0.30   the same dies recur — a consignment, a hoard, a
+#                         store, rather than accumulated settlement rubbish
+#   qInterval   >= 0.60   the contributing potters agree closely, relative to
+#                         the length of the span they describe
+#   nStamps     >= 10     enough material that k has come down off its
+#                         maximum and the interval means something
+#
+# The two quality axes are deliberately never multiplied into one score.
+# Asking for both at once in a query is the right way to combine them: the
+# threshold is visible, it is per-axis, and it can be argued with.
+#
+# Against the snapshot of 25 August 2026 this returns nine findspots
+# spanning AD 30 to AD 230, among them Pompeii Hoard and Langenhain store.
+
+PREFIX samian: <http://data.archaeology.link/data/samian/>
+PREFIX lado:   <http://archaeology.link/ontology#>
+PREFIX crm:    <http://www.cidoc-crm.org/cidoc-crm/>
+PREFIX time:   <http://www.w3.org/2006/time#>
+PREFIX rdfs:   <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?site ?findspot ?from ?to ?midpoint ?sigma ?k ?qInterval ?qRepetition
+       ?nStamps ?nDies
+WHERE {
+  ?fs  a lado:Findspot ;
+       rdfs:label ?findspot ;
+       crm:P89_falls_within ?place ;
+       crm:P4_has_time-span ?ts .
+  ?place rdfs:label ?site .
+
+  ?ts  lado:qInterval    ?qInterval ;
+       lado:qRepetition  ?qRepetition ;
+       lado:nStamps      ?nStamps ;
+       lado:nDies        ?nDies ;
+       lado:sigmaYears   ?sigma ;
+       lado:kFactor      ?k ;
+       lado:midpointYear ?midpoint ;
+       crm:P82a_begin_of_the_begin ?from ;
+       crm:P82b_end_of_the_end     ?to .
+
+  FILTER( ?qRepetition >= 0.30 && ?qInterval >= 0.60 && ?nStamps >= 10 )
+}
+ORDER BY ?from
