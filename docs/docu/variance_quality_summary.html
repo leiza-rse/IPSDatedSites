@@ -189,7 +189,7 @@ set of figures.</p>
   <tbody>
     <tr><td>counted in</td><td>stamps</td><td>years</td></tr>
     <tr><td>controls</td><td>how wide the box is drawn</td><td>what colour the whiskers are</td></tr>
-    <tr><td>comes from</td><td>calibration against five findspots dated without ceramics — Dangstetten, Oberaden, Velsen I, Pompeii, Inchtuthil</td><td>the expert thresholds: about 5 years' scatter is a sharp date, about 25 is unusable</td></tr>
+    <tr><td>comes from</td><td>calibration against findspots dated without ceramics — Dangstetten, Oberaden, Pompeii, Inchtuthil, and Velsen I shown but excluded as contested. Only Pompeii binds the value; the others leave it headroom</td><td>the expert thresholds: about 5 years' scatter is a sharp date, about 25 is unusable</td></tr>
   </tbody>
 </table>
 
@@ -247,7 +247,7 @@ may score high on one and low on the other.</p>
   <div class="eq">
     \[ r = \frac{\text{stamps with a die}}{\text{distinct potter–die pairs}}
        \qquad\qquad
-       q_{\text{repetition}} = 1 - \frac{1}{r} \]
+       q_{\text{repetition}} = 1 - \frac{1}{\max(r,\,1)} \]
   </div>
   <p class="out">→ <code>die_repetition</code>, <code>q_repetition</code></p>
 </div>
@@ -296,22 +296,22 @@ dated.</p>
     <b>1</b> &nbsp; ā = 58.3 &nbsp;·&nbsp; b̄ = 85.0 &nbsp;·&nbsp; m = 71.7<br>
     <b>2</b> &nbsp; within = (400+400+1600)/12/3 = 66.7 &nbsp;·&nbsp; between = 8.3
              &nbsp;→&nbsp; σ = √75.0 = <b>8.7 years</b><br>
-    <b>3</b> &nbsp; n = 3 dies &nbsp;→&nbsp; k = 1.5 − 1.0(1 − e<sup>−3/20</sup>) = <b>1.36</b><br>
-    <b>4</b> &nbsp; 71.7 ± 1.36 × 8.7 = 71.7 ± 11.8<br><br>
+    <b>3</b> &nbsp; n = 3 stamps &nbsp;→&nbsp; k = 1.5 − 1.0(1 − e<sup>−3/6</sup>) = <b>1.11</b><br>
+    <b>4</b> &nbsp; 71.7 ± 1.11 × 8.7 = 71.7 ± 9.6<br><br>
     <b>Q1</b> &nbsp; √(58.3 + 25.0) = 9.1 &nbsp;·&nbsp; span = 26.7
               &nbsp;→&nbsp; q<sub>interval</sub> = e<sup>−0.34</sup> = <b>0.71</b><br>
     <b>Q2</b> &nbsp; 3 stamps ÷ 3 dies → r = 1 &nbsp;→&nbsp; q<sub>repetition</sub> = <b>0.00</b>
   </p>
 
   <div class="answer">
-    Date <span>AD 60 – 83</span> &nbsp;|&nbsp; sharpness <span>0.71</span> &nbsp;|&nbsp; repetition <span>0.00</span>
+    Date <span>AD 62 – 81</span> &nbsp;|&nbsp; sharpness <span>0.71</span> &nbsp;|&nbsp; repetition <span>0.00</span>
   </div>
 
   <p style="margin:.9rem 0 0; font-size:.92rem">Reasonably sharp for the material available,
   and no hoard signature: a normal settlement deposit of the Neronian–Flavian period.
   The interval is wide chiefly because three stamps is very little — with thirty stamps
-  of the same dates, \(k\) would fall to about 0.7 and the interval would tighten to
-  roughly AD 66 – 78.</p>
+  of the same dates, \(k\) would fall to about 0.51 and the interval would tighten to
+  roughly AD 67 – 76.</p>
 </div>
 
 </main>

@@ -284,8 +284,9 @@ footer .fi{max-width:1080px; margin:0 auto}
   <p class="sub">One row of output = one findspot, not one site.</p>
 
   <p>Rows are grouped by <code>(site, findspot)</code>. A site with several excavated
-  contexts therefore produces several rows — Bregenz contributes six, London and
-  Colchester two each. This is deliberate: a single site may contain contexts of very
+  contexts therefore produces several rows — Bregenz contributes three, and London,
+  Colchester, Vindonissa and La Graufesenque two each. This is deliberate: a single
+  site may contain contexts of very
   different date and very different reliability, and collapsing them would average away
   precisely the information the method depends on.</p>
 
@@ -305,11 +306,15 @@ footer .fi{max-width:1080px; margin:0 auto}
 
   <div class="warn">
     <strong>The potter join is effectively an inner join.</strong> It is written
-    <code>LEFT JOIN tblpotter</code>, but the <code>WHERE</code> clause tests
-    <code>p.datemin &lt;&gt; 0</code>, which discards any row where the join failed.
-    Stamps whose potter is not present in <code>tblpotter</code> are silently absent
-    from the result. This is almost certainly the intended behaviour — an undated
-    potter cannot contribute to a date — but it is not what the query appears to say.
+    <code>LEFT JOIN tblpotter</code>, but the row comparison
+    <code>(p.datemin, p.datemax) NOT IN (…)</code> in the <code>WHERE</code> clause
+    evaluates to <code>NULL</code>, not to true, wherever the join failed and both
+    dates are <code>NULL</code> — so those rows are discarded. Stamps whose potter is
+    not present in <code>tblpotter</code> are silently absent from the result. This is
+    almost certainly the intended behaviour — an undated potter cannot contribute to a
+    date — but it rests on <code>NULL</code> propagation rather than on anything the
+    query says out loud. Until revision 30a the same effect came from an explicit
+    <code>p.datemin &lt;&gt; 0</code>.
   </div>
 </section>
 
@@ -319,29 +324,65 @@ footer .fi{max-width:1080px; margin:0 auto}
   <p class="sub">Which stamps enter the calculation.</p>
 
 <pre><span class="c">-- applied to every stamp occurrence before aggregation</span>
-<span class="k">WHERE</span> di.isdate       = 'Θ'          <span class="c">-- occurrence is usable for dating</span>
-  <span class="k">AND</span> sitecharacter  = 'Σ'          <span class="c">-- settlement-type site</span>
-  <span class="k">AND</span> findspot IS NOT NULL           <span class="c">-- context is resolvable</span>
-  <span class="k">AND</span> p.datemin &lt;&gt; 0                <span class="c">-- potter carries a real date</span>
-  <span class="k">AND</span> p.datemax NOT IN (260,120,150) <span class="c">-- ??? see below</span></pre>
+<span class="k">WHERE</span> di.isdate = 'Θ' <span class="k">AND</span> di.sitecharacter = 'Σ' <span class="k">AND</span> findspot <span class="k">IS NOT NULL</span>
+  <span class="k">AND</span> (p.datemin, p.datemax) <span class="k">NOT IN</span> (      <span class="c">-- eleven placeholder datings</span>
+        (-30,150), (0,100), (0,120), (0,130), (0,150),
+        (0,180), (0,270), (100,200), (150,270),
+        (160,260), (165,270) )
+  <span class="k">AND</span> ( di.site <span class="k">NOT ILIKE</span> '%Bregenz%'      <span class="c">-- named inclusion, see below</span>
+        <span class="k">OR</span> btrim(di.findspot) <span class="k">IN</span> ('Böckleareal (period I)',
+                                  'Böckleareal (period II)',
+                                  'Böckleareal (destruction layer period II)') )
+<span class="k">GROUP BY</span> vds.id, di.site, di.findspot, …
+<span class="k">HAVING</span> <span class="k">COUNT</span>(di.number) &gt;= :min_stamps</pre>
+
+  <div class="note">
+    <strong>The statement is pure ASCII.</strong> Θ, Σ and the umlaut are written as
+    <code>U&amp;</code>-escapes — <code>U&amp;'\0398'</code>,
+    <code>U&amp;'\03A3'</code>, <code>U&amp;'B\00F6ckleareal …'</code> — so that the
+    query does not depend on what encoding a connection happens to assume. They are
+    spelled out here for legibility only.
+  </div>
+
+  <div class="note">
+    <strong>Eleven placeholder datings, matched as pairs.</strong> Until revision 30a
+    the filter read <code>p.datemax NOT IN (260, 120, 150)</code> and excluded a potter
+    on its end date alone, whatever its start date was. It is now a list of complete
+    <code>(datemin, datemax)</code> pairs — spans such as 0–100, 0–270 or 160–260 that
+    stand for "date not established" rather than for a production period. Pair logic
+    rather than <code>AND</code> logic: a potter genuinely dated to 160–260 would be
+    excluded, but one dated 165–260 is not.
+  </div>
 
   <div class="open">
-    <p style="margin:0">The exclusion <code>p.datemax NOT IN (260, 120, 150)</code> removes every
-    potter whose end date is exactly one of three years. No comment records what these
-    values mean. Three plausible readings — placeholder values standing for "unknown",
-    a legacy correction for a specific data problem, or a deliberate chronological
-    cut — have very different consequences for how the results should be read, and the
-    exclusion is not neutral: it silently removes potters from every findspot at which
-    they occur. This must be resolved and documented before publication, and recorded
-    as provenance in any RDF export.</p>
+    <p style="margin:0">Two things about it stay open. The list is a judgement about
+    which spans are placeholders, and that judgement lives in the statement rather than
+    in the database, where a flag on the potter record would belong; the same is true
+    of the Bregenz clause below. And the exclusion is not neutral either way — it
+    removes the affected potters at every findspot at which they occur, not at selected
+    ones. Both must be recorded as provenance in any RDF export rather than applied
+    silently.</p>
+  </div>
+
+  <div class="note">
+    <strong>Bregenz is admitted by name.</strong> The blanket exclusion of the site was
+    replaced on 25 August 2026 by a clause admitting the three checked Böckleareal
+    contexts and no others, which is why Bregenz contributes three rows rather than the
+    six it has records for. It is an editorial stopgap, not a permanent form: the right
+    fix is to mark checked and unchecked findspots in the database and let the ordinary
+    filter decide, rather than to carry a place name in the SQL. A check in
+    <code>py/verify.py</code> fails if the clause stops matching because a spelling has
+    changed.
   </div>
 
   <p>One further asymmetry is worth noting. The die-based measures in
   <a href="#qrep">§10</a> apply an additional filter, <code>di.die IS NOT NULL</code>,
   because a stamp without a recorded die cannot contribute to a repetition count.
   Consequently <code>count_stamps</code> (all qualifying stamps) and
-  <code>n_stamps_die</code> (those with a die) may differ, and it is
-  <code>n_stamps_die</code> that drives the coverage factor in <a href="#kfactor">§7</a>.</p>
+  <code>n_stamps_die</code> (those with a die) may differ. Since revision 30a it is
+  <code>count_stamps</code> that drives the coverage factor in
+  <a href="#kfactor">§7</a>; <code>n_stamps_die</code> is descriptive only, and feeds
+  the die measures in <a href="#qrep">§10</a>.</p>
 </section>
 
 <!-- ============ 4 ============ -->
@@ -996,8 +1037,10 @@ footer .fi{max-width:1080px; margin:0 auto}
   <p class="sub">To be settled before publication.</p>
 
   <ol>
-    <li><strong>The three excluded end dates.</strong> <code>p.datemax NOT IN (260, 120, 150)</code>
-    is undocumented and not neutral. <a href="#selection">§3</a></li>
+    <li><strong>The excluded datings.</strong> Eleven placeholder
+    <code>(datemin, datemax)</code> pairs, and Bregenz admitted by name: two editorial
+    judgements carried in the statement rather than flagged in the data, and neither is
+    neutral. <a href="#selection">§3</a></li>
 
     <li><strong>Fabricated fallbacks.</strong> <code>COALESCE(..., 0.5)</code> on the quality
     measures and <code>COALESCE(..., 0)</code> on the uncertainties turn "undefined" into

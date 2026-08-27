@@ -211,18 +211,31 @@ counts back in. One output row is one findspot.</p>
 <div class="unit">
   <div class="name">WHERE <em>— which stamps count</em></div>
   <div class="body">
-<pre><span class="k">WHERE</span> di.isdate       = <span class="s">'Θ'</span>          <span class="c">-- occurrence usable for dating</span>
-  <span class="k">AND</span> sitecharacter  = <span class="s">'Σ'</span>          <span class="c">-- settlement-type site</span>
-  <span class="k">AND</span> findspot <span class="k">IS NOT NULL</span>           <span class="c">-- context resolvable</span>
-  <span class="k">AND</span> p.datemin &lt;&gt; 0                <span class="c">-- potter carries a real date</span>
-  <span class="k">AND</span> p.datemax <span class="k">NOT IN</span> (260,120,150)</pre>
+<pre><span class="k">WHERE</span> di.isdate = <span class="s">'Θ'</span>                 <span class="c">-- occurrence usable for dating</span>
+  <span class="k">AND</span> di.sitecharacter = <span class="s">'Σ'</span>         <span class="c">-- settlement-type site</span>
+  <span class="k">AND</span> findspot <span class="k">IS NOT NULL</span>          <span class="c">-- context resolvable</span>
+  <span class="k">AND</span> (p.datemin, p.datemax) <span class="k">NOT IN</span> (   <span class="c">-- eleven placeholder datings</span>
+        (-30,150), (0,100), (0,120), (0,130), (0,150),
+        (0,180), (0,270), (100,200), (150,270),
+        (160,260), (165,270) )
+  <span class="k">AND</span> ( di.site <span class="k">NOT ILIKE</span> <span class="s">'%Bregenz%'</span>
+        <span class="k">OR</span> btrim(di.findspot) <span class="k">IN</span> (<span class="s">'Böckleareal (period I)'</span>,
+                                  <span class="s">'Böckleareal (period II)'</span>,
+                                  <span class="s">'Böckleareal (destruction layer period II)'</span>) )</pre>
     <div class="means">
       Stamps pass only if the occurrence is flagged as datable, the site is of
-      settlement character, the context is named, and the potter has a usable date.
-      The final line excludes potters whose end date is exactly 260, 120 or 150.
-      <b>Note:</b> because <code>p.datemin &lt;&gt; 0</code> is tested in the
-      <code>WHERE</code> clause, the left join to <code>tblpotter</code> behaves as an
-      inner join — stamps without a matching dated potter do not appear.
+      settlement character and the context is named. The pair list excludes eleven
+      <b>placeholder datings</b> — spans such as 0–100 or 160–260 that stand for
+      "date not established" rather than for a production period. It matches complete
+      <code>(datemin, datemax)</code> pairs: until revision 30a the filter read
+      <code>p.datemax NOT IN (260,120,150)</code> and excluded on the end date alone.
+      The last clause admits the three checked Böckleareal contexts at Bregenz and no
+      other record of that site. Θ, Σ and the umlaut are <code>U&amp;</code>-escapes in
+      the statement itself; they are spelled out here for legibility.
+      <b>Note:</b> the left join to <code>tblpotter</code> still behaves as an inner
+      join, but now by <code>NULL</code> propagation: where the join fails, both dates
+      are <code>NULL</code>, the row comparison against the pair list evaluates to
+      <code>NULL</code> rather than to true, and the stamp is dropped.
     </div>
   </div>
 </div>
@@ -381,8 +394,11 @@ wide, and different potters point to different years.</p>
       The more stamps a findspot yields, the tighter the interval that may reasonably be
       claimed. <b>k falls from 1.5 to 0.5</b> as material accumulates, saturating
       exponentially: the difference between two and twelve stamps matters far more than
-      between eighty and ninety. Where no die is recorded, k falls back to
-      <code>k_max</code>.
+      between eighty and ninety. <b>n is <code>count_stamps</code></b>, every qualifying
+      stamp at the findspot. Until revision 30a it was the subset carrying a die
+      attribution, and k fell back to <code>k_max</code> wherever no die was recorded —
+      widening the interval for a reason having nothing to do with the material.
+      <code>COUNT(*)</code> cannot be NULL, so no fallback remains.
     </div>
   </div>
 </div>
@@ -399,8 +415,8 @@ wide, and different potters point to different years.</p>
     <g font-family="IBM Plex Mono, monospace" font-size="10" fill="#46525f">
       <text x="62" y="44" text-anchor="end">1.5</text>
       <text x="62" y="164" text-anchor="end">0.5</text>
-      <text x="188" y="186" text-anchor="middle" fill="#b07d31">τ = 20</text>
-      <text x="660" y="186" text-anchor="end">stamps with a die →</text>
+      <text x="188" y="186" text-anchor="middle" fill="#b07d31">τ = 6</text>
+      <text x="660" y="186" text-anchor="end">stamps →</text>
     </g>
     <g font-family="Public Sans" font-size="11">
       <text x="600" y="34" text-anchor="end" fill="#9e3b26">k_max · thinly attested</text>
@@ -413,8 +429,10 @@ wide, and different potters point to different years.</p>
 <div class="unit">
   <div class="name">eff_start · eff_end <em>— the dated interval</em></div>
   <div class="body">
-<pre>( midpoint - <span class="k">COALESCE</span>(<span class="k">MIN</span>(k.k_eff), k_max) * σ )::numeric(10,1) <span class="k">AS</span> eff_start,
-( midpoint + <span class="k">COALESCE</span>(<span class="k">MIN</span>(k.k_eff), k_max) * σ )::numeric(10,1) <span class="k">AS</span> eff_end</pre>
+<pre>( midpoint - k_eff * σ )::numeric(10,1) <span class="k">AS</span> eff_start,
+( midpoint + k_eff * σ )::numeric(10,1) <span class="k">AS</span> eff_end
+<span class="c">-- k_eff and σ are written out in full in the statement; the CTE value</span>
+<span class="c">-- is no longer read here, and there is no COALESCE to k_max.</span></pre>
     <div class="eq">
       \[ \text{eff\_start} = m - k\sigma \qquad\qquad \text{eff\_end} = m + k\sigma \]
     </div>
@@ -486,7 +504,8 @@ questions, and a findspot may score high on one and low on the other.</p>
 <span class="k">CASE WHEN</span> <span class="k">MIN</span>(k.rep) <span class="k">IS NULL THEN NULL</span>
      <span class="k">ELSE ROUND</span>(1 - 1.0/<span class="k">GREATEST</span>(<span class="k">MIN</span>(k.rep),1), 3) <span class="k">END</span> <span class="k">AS</span> q_repetition</pre>
     <div class="eq">
-      \[ r = \frac{n_{\text{die}}}{D} \qquad\qquad q_{\text{repetition}} = 1 - \frac{1}{r} \]
+      \[ r = \frac{n_{\text{die}}}{D} \qquad\qquad
+         q_{\text{repetition}} = 1 - \frac{1}{\max(r,\,1)} \]
     </div>
     <div class="means">
       When the same die recurs, the assemblage carries the signature of a closed group —
@@ -549,7 +568,7 @@ questions, and a findspot may score high on one and low on the other.</p>
   <tbody>
     <tr><td><code>k_min</code></td><td class="v">0.5</td><td>narrowest interval, richly attested findspots</td></tr>
     <tr><td><code>k_max</code></td><td class="v">1.5</td><td>widest interval, thinly attested findspots</td></tr>
-    <tr><td><code>tau</code></td><td class="v">6</td><td>assemblage size, in <em>stamps</em>, at which ~63 % of the narrowing is reached; calibrated against five ceramic-independent ensembles</td></tr>
+    <tr><td><code>tau</code></td><td class="v">6</td><td>assemblage size, in <em>stamps</em>, at which ~63 % of the narrowing is reached; calibrated against ceramic-independent reference ensembles, of which only Pompeii binds the value — <a href="variance_quality_from_sql.html#constants">method page §7a</a></td></tr>
     <tr><td><code>t0</code></td><td class="v">20</td><td>reference length, in <em>years</em>, against which the edge dispersions are read; a stated convention, not a calibrated value</td></tr>
     <tr><td><code>w</code></td><td class="v">1.0</td><td>weight of volume against repetition in \(k\); 1.0 = volume only</td></tr>
     <tr><td>within-stamp variance</td><td class="v">\(w^2/12\)</td><td>uniform distribution across each potter's range</td></tr>
@@ -584,10 +603,15 @@ questions, and a findspot may score high on one and low on the other.</p>
     <tr><td class="v">q_interval</td><td>\(e^{-\sqrt{s^2_a+s^2_b}/|\overline{b}-\overline{a}|}\)</td><td>dating sharpness · box colour</td></tr>
     <tr><td class="v">n_dies</td><td>\(D\)</td><td>distinct potter–die pairs</td></tr>
     <tr><td class="v">die_repetition</td><td>\(r = n_{\text{die}}/D\)</td><td>attestations per die</td></tr>
-    <tr><td class="v">q_repetition</td><td>\(1 - 1/r\)</td><td>hoard character</td></tr>
+    <tr><td class="v">q_repetition</td><td>\(1 - 1/\max(r,1)\)</td><td>hoard character</td></tr>
     <tr><td class="v">q_start · q_end</td><td>\(e^{-s/t_0}\)</td><td>whisker colour</td></tr>
     <tr><td class="v">unc_*_years</td><td>\(s_a\), \(s_b\), \(\sqrt{s^2_a+s^2_b}\)</td><td>whisker lengths, graphical only</td></tr>
     <tr><td class="v">avg_interval</td><td>—</td><td>display string</td></tr>
+    <tr><td class="v">n_stamps_die</td><td>\(n_{\text{die}}\)</td><td>stamps carrying a die; descriptive since 30a</td></tr>
+    <tr><td class="v">k_eff · sigma_eff</td><td>\(k\), \(\sigma\)</td><td>the two factors of the half-width</td></tr>
+    <tr><td class="v">k_no_dierecord</td><td>—</td><td>true where no die is recorded at all; no effect on the interval</td></tr>
+    <tr><td class="v">p_k_min … p_t0</td><td>—</td><td>the five model parameters, carried as provenance</td></tr>
+    <tr><td class="v">n_stamps_wide · n_potters_wide · max_potter_span</td><td>—</td><td>watchdogs for potters dated across 100 years or more</td></tr>
   </tbody>
 </table>
 
