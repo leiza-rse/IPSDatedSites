@@ -40,9 +40,10 @@ TERM_DOCS: dict[str, str] = {
     "Findspot":
         "A named context within a discovery site, such as a pit, a ditch "
         "or a destruction layer. It falls within its site via "
-        "crm:P89_falls_within. A site may carry several findspots — "
-        "Bregenz has six — which is why the dating hangs on the findspot "
-        "and not on the site.",
+        "crm:P89_falls_within. A site may carry several findspots, dated "
+        "separately and sometimes far apart — Bregenz is the standing "
+        "example — which is why the dating hangs on the findspot and not "
+        "on the site.",
     "DatedTimeSpan":
         "A time-span inferred from dated material rather than recorded "
         "directly. Sits beneath both crm:E52_Time-Span and "

@@ -3,7 +3,7 @@ IPS Dated Sites — webjs/ builder
 ================================
 
 Writes webjs/, a folder that is copied 1:1 onto the ColdFusion server so
-that IPSDatedSites27.cfm can offer "Download triples" without a server
+that IPSDatedSites.cfm can offer "Download triples" without a server
 round-trip. Two files plus a copy note:
 
     webjs/ips_rdf.js         generated constants + the emitter
@@ -412,7 +412,7 @@ def write_copy_note(out_dir: Path, parity: str | None) -> Path:
     note.write_text(
         "IPS Dated Sites — browser RDF emitter\n"
         "=====================================\n\n"
-        "Copy the two .js files next to IPSDatedSites27.cfm on the\n"
+        "Copy the two .js files next to IPSDatedSites.cfm on the\n"
         "ColdFusion server. No build step, no CDN, no network access at\n"
         "run time.\n\n"
         "In the CFM page:\n\n"

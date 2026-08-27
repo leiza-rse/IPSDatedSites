@@ -414,8 +414,8 @@ crmdig:D14_Software rdfs:subClassOf crmdig:D1_Digital_Object .
 
 lado:Findspot a owl:Class ;
     rdfs:label "Findspot"@en ;
-    rdfs:comment "Benannte Fundstelle innerhalb eines Fundplatzes. Faellt ueber crm:P89_falls_within in die DiscoverySite. Ein Fundplatz kann mehrere Fundstellen tragen (Bregenz: sechs)."@de,
-        "A named context within a discovery site, such as a pit, a ditch or a destruction layer. It falls within its site via crm:P89_falls_within. A site may carry several findspots — Bregenz has six — which is why the dating hangs on the findspot and not on the site."@en ;
+    rdfs:comment "Benannte Fundstelle innerhalb eines Fundplatzes. Faellt ueber crm:P89_falls_within in die DiscoverySite. Ein Fundplatz kann mehrere Fundstellen tragen, getrennt datiert und mitunter weit auseinander (Bregenz ist der Standardfall)."@de,
+        "A named context within a discovery site, such as a pit, a ditch or a destruction layer. It falls within its site via crm:P89_falls_within. A site may carry several findspots, dated separately and sometimes far apart — Bregenz is the standing example — which is why the dating hangs on the findspot and not on the site."@en ;
     rdfs:isDefinedBy <http://archaeology.link/ontology> ;
     rdfs:subClassOf lado:Location .
 

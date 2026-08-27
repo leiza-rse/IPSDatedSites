@@ -337,7 +337,8 @@ CLASSES = [
     (LADO.Findspot, [LADO.Location], "Findspot",
      "Benannte Fundstelle innerhalb eines Fundplatzes. Faellt ueber "
      "crm:P89_falls_within in die DiscoverySite. Ein Fundplatz kann "
-     "mehrere Fundstellen tragen (Bregenz: sechs)."),
+     "mehrere Fundstellen tragen, getrennt datiert und mitunter weit "
+     "auseinander (Bregenz ist der Standardfall)."),
     (LADO.DatedTimeSpan, [CRM["E52_Time-Span"], TIME.ProperInterval],
      "Dated time-span",
      "Zeitspanne, die aus datiertem Material erschlossen wurde."),

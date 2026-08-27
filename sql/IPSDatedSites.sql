@@ -55,6 +55,12 @@
 --     datemax NOT IN (260,120,150). Paarlogik statt AND-Logik.
 --   * Griechische Marker durchgehend als U&-Escape.
 --   * kfactor-Join getrimmt und case-insensitiv.
+--   * Die geprueften Breitdatierungen stehen seit 31 in
+--     sql/wide_potters.sql: acht (datemin, datemax)-Paare, die Allard
+--     durchgesehen und ausdruecklich behalten hat. Diese Datei filtert
+--     nichts, sie fragt -- sie listet breit datierte Toepfer, die weder
+--     Platzhalter noch geprueft sind, und ist damit die Vorstufe zu
+--     jeder weiteren Ergaenzung der Platzhalterliste.
 --   * n_stamps_wide / n_potters_wide / max_potter_span als Waechter am
 --     Ende der Spaltenliste. Schwelle 100 Jahre, von Allard am 2026-08-25
 --     ausdruecklich bestaetigt: Toepfer wie Calvus i haben in mehreren
@@ -62,10 +68,14 @@
 --     Untersuchung laesst sich Verschleppung, Vater/Sohn, Einzelperson
 --     und Werkstatt nicht trennen. Die Schwelle markiert die Grenze der
 --     moeglichen Genauigkeit und wird deshalb NICHT enger gesetzt.
---   * Bregenz, zweite Fassung (2026-08-25). Der pauschale Ausschluss ist
---     entfallen und durch eine gezielte Einschlussklausel ersetzt: die
---     drei geprueften Boeckleareal-Fundkomplexe bleiben, die uebrigen,
---     noch ungepruefteten Records des Ortes nicht. Das ist eine
+--   * Bregenz, dritte Fassung (2026-08-27, Revision 31). Der pauschale
+--     Ausschluss ist entfallen und durch eine gezielte Einschlussklausel
+--     ersetzt: die vier geprueften Fundkomplexe bleiben, die uebrigen,
+--     noch ungepruefteten Records des Ortes nicht. 25 waren es die drei
+--     Boeckleareal-Komplexe; 31 kommt 'Samian Hoard 1913' hinzu. Der
+--     Korpus waechst damit von 40 auf 41 Fundstellen, sobald der naechste
+--     Live-Abzug die Zeilen mitbringt -- die Klausel steht hier, der
+--     Datenstand in data/SNAPSHOT.json. Das ist eine
 --     editorische Uebergangsloesung und keine Dauerform -- richtig waere,
 --     geprueft und ungeprueft in der Datenbank zu markieren und den
 --     regulaeren Filter entscheiden zu lassen, statt einen Ortsnamen im
@@ -282,9 +292,10 @@ diecounts AS (
           (-30,150), (0,100), (0,120), (0,130), (0,150),
           (0,180), (0,270), (100,200), (150,270),
           (160,260), (165,270) )
-      -- Bregenz: die drei geprueften Boeckleareal-Fundkomplexe bleiben
-      -- drin, die uebrigen, noch ungepruefteten Records des Ortes nicht.
-      -- Formuliert von Allard Mees am 2026-08-25. U&-Escape statt rohem
+      -- Bregenz: die vier geprueften Fundkomplexe bleiben drin, die
+      -- uebrigen, noch ungepruefteten Records des Ortes nicht.
+      -- Formuliert von Allard Mees am 2026-08-25, 31 ergaenzt um
+      -- 'Samian Hoard 1913'. U&-Escape statt rohem
       -- Umlaut aus demselben Grund wie bei Theta und Sigma: das Statement
       -- bleibt reines ASCII und haengt nicht daran, welche Kodierung die
       -- Verbindung gerade meint.
@@ -293,7 +304,8 @@ diecounts AS (
          OR btrim(di.findspot) IN (
                 U&'B\00F6ckleareal (period I)',
                 U&'B\00F6ckleareal (period II)',
-                U&'B\00F6ckleareal (destruction layer period II)')
+                U&'B\00F6ckleareal (destruction layer period II)',
+                U&'Samian Hoard 1913')
           )
       AND di.die IS NOT NULL
     GROUP BY di.site, di.findspot, di.pottername
@@ -438,9 +450,10 @@ AND (p.datemin, p.datemax) NOT IN (
       (-30,150), (0,100), (0,120), (0,130), (0,150),
       (0,180), (0,270), (100,200), (150,270),
       (160,260), (165,270) )
-  -- Bregenz: die drei geprueften Boeckleareal-Fundkomplexe bleiben
-  -- drin, die uebrigen, noch ungepruefteten Records des Ortes nicht.
-  -- Formuliert von Allard Mees am 2026-08-25. U&-Escape statt rohem
+  -- Bregenz: die vier geprueften Fundkomplexe bleiben drin, die
+  -- uebrigen, noch ungepruefteten Records des Ortes nicht.
+  -- Formuliert von Allard Mees am 2026-08-25, 31 ergaenzt um
+  -- 'Samian Hoard 1913'. U&-Escape statt rohem
   -- Umlaut aus demselben Grund wie bei Theta und Sigma: das Statement
   -- bleibt reines ASCII und haengt nicht daran, welche Kodierung die
   -- Verbindung gerade meint.
@@ -449,7 +462,8 @@ AND (p.datemin, p.datemax) NOT IN (
      OR btrim(di.findspot) IN (
         U&'B\00F6ckleareal (period I)',
         U&'B\00F6ckleareal (period II)',
-        U&'B\00F6ckleareal (destruction layer period II)')
+        U&'B\00F6ckleareal (destruction layer period II)',
+        U&'Samian Hoard 1913')
       )
 GROUP BY vds.id, di.site, di.findspot, di.siteancientname,
          di.coordinate1, di.coordinate2, di.pleiades

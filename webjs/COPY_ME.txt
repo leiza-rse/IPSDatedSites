@@ -1,7 +1,7 @@
 IPS Dated Sites — browser RDF emitter
 =====================================
 
-Copy the two .js files next to IPSDatedSites27.cfm on the
+Copy the two .js files next to IPSDatedSites.cfm on the
 ColdFusion server. No build step, no CDN, no network access at
 run time.
 
@@ -14,4 +14,4 @@ In the CFM page:
 GENERATED — do not edit. Regenerate with:
   python py/make_webjs.py --verify
 
-Parity with ips_rdf_export.py: OK, sha256 907892cc795284e1 over 3361 triples (ips_dated_sites_2026-08-25.csv)
+Parity with ips_rdf_export.py: OK, sha256 71fda0e2ca68eb41 over 3439 triples (ips_dated_sites_2026-08-27.csv)

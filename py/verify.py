@@ -87,6 +87,11 @@ EDITORIAL_INCLUSIONS = [
     ("Bregenz", "B\u00f6ckleareal (period I)"),
     ("Bregenz", "B\u00f6ckleareal (period II)"),
     ("Bregenz", "B\u00f6ckleareal (destruction layer period II)"),
+    # Added in revision 31, 2026-08-27. Until a live fetch brings it in,
+    # check (e) reports three of four and says so, which is the point of
+    # the check: an inclusion clause that matches nothing looks exactly
+    # like a findspot that was never admitted.
+    ("Bregenz", "Samian Hoard 1913"),
 ]
 
 EXPECTED_ROWS = 40        # 2026-08-25: 37 plus the three Boeckleareal
@@ -95,6 +100,14 @@ EXPECTED_ROWS = 40        # 2026-08-25: 37 plus the three Boeckleareal
                           # Bregenz remains unreviewed and stays out.
                           # A live database, so this is a landmark rather
                           # than a contract: check (a) warns, never fails.
+                          #
+                          # Revision 31 admits a fourth Bregenz context and
+                          # will make this 41 — but the number records what
+                          # the committed corpus HOLDS, not what the query
+                          # would now return. Raise it in the same commit
+                          # as the refetched data, not before, or the check
+                          # warns about a discrepancy the repository does
+                          # not yet contain.
 
 # Allard Mees: a scatter of about +/- 5 years counts as sharply dated for
 # samian ware, about +/- 25 years as chronologically unusable. These two

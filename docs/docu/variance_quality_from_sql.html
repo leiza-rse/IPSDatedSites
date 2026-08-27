@@ -285,8 +285,9 @@ footer .fi{max-width:1080px; margin:0 auto}
   <p class="sub">One row of output = one findspot, not one site.</p>
 
   <p>Rows are grouped by <code>(site, findspot)</code>. A site with several excavated
-  contexts therefore produces several rows — Bregenz contributes three, and London,
-  Colchester, Vindonissa and La Graufesenque two each. This is deliberate: a single
+  contexts therefore produces several rows — London, Colchester, Vindonissa and
+  La Graufesenque two each, Bregenz three at the snapshot of 25 August and four once the
+  context added in revision 31 arrives. This is deliberate: a single
   site may contain contexts of very
   different date and very different reliability, and collapsing them would average away
   precisely the information the method depends on.</p>
@@ -333,7 +334,8 @@ footer .fi{max-width:1080px; margin:0 auto}
   <span class="k">AND</span> ( di.site <span class="k">NOT ILIKE</span> '%Bregenz%'      <span class="c">-- named inclusion, see below</span>
         <span class="k">OR</span> btrim(di.findspot) <span class="k">IN</span> ('Böckleareal (period I)',
                                   'Böckleareal (period II)',
-                                  'Böckleareal (destruction layer period II)') )
+                                  'Böckleareal (destruction layer period II)',
+                                  'Samian Hoard 1913') )
 <span class="k">GROUP BY</span> vds.id, di.site, di.findspot, …
 <span class="k">HAVING</span> <span class="k">COUNT</span>(di.number) &gt;= :min_stamps</pre>
 
@@ -367,13 +369,16 @@ footer .fi{max-width:1080px; margin:0 auto}
 
   <div class="note">
     <strong>Bregenz is admitted by name.</strong> The blanket exclusion of the site was
-    replaced on 25 August 2026 by a clause admitting the three checked Böckleareal
-    contexts and no others, which is why Bregenz contributes three rows rather than the
-    six it has records for. It is an editorial stopgap, not a permanent form: the right
-    fix is to mark checked and unchecked findspots in the database and let the ordinary
-    filter decide, rather than to carry a place name in the SQL. A check in
-    <code>py/verify.py</code> fails if the clause stops matching because a spelling has
-    changed.
+    replaced on 25 August 2026 by a clause admitting the checked contexts and no others:
+    first the three Böckleareal complexes, and since revision 31 of 27 August the Samian
+    Hoard of 1913 as well. The remaining records of the site are unreviewed and stay out,
+    so the number of rows Bregenz contributes is a statement about what has been checked,
+    not about what has been excavated. It is an editorial stopgap, not a permanent form:
+    the right fix is to mark checked and unchecked findspots in the database and let the
+    ordinary filter decide, rather than to carry a place name in the SQL. Check (e) in
+    <code>py/verify.py</code> reports how many of the admitted contexts actually arrived,
+    because a clause that matches nothing is indistinguishable in the output from a
+    findspot that was never admitted.
   </div>
 
   <p>One further asymmetry is worth noting. The die-based measures in

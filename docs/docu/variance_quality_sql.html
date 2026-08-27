@@ -222,7 +222,8 @@ counts back in. One output row is one findspot.</p>
   <span class="k">AND</span> ( di.site <span class="k">NOT ILIKE</span> <span class="s">'%Bregenz%'</span>
         <span class="k">OR</span> btrim(di.findspot) <span class="k">IN</span> (<span class="s">'Böckleareal (period I)'</span>,
                                   <span class="s">'Böckleareal (period II)'</span>,
-                                  <span class="s">'Böckleareal (destruction layer period II)'</span>) )</pre>
+                                  <span class="s">'Böckleareal (destruction layer period II)'</span>,
+                                  <span class="s">'Samian Hoard 1913'</span>) )</pre>
     <div class="means">
       Stamps pass only if the occurrence is flagged as datable, the site is of
       settlement character and the context is named. The pair list excludes eleven
@@ -230,7 +231,8 @@ counts back in. One output row is one findspot.</p>
       "date not established" rather than for a production period. It matches complete
       <code>(datemin, datemax)</code> pairs: until revision 30a the filter read
       <code>p.datemax NOT IN (260,120,150)</code> and excluded on the end date alone.
-      The last clause admits the three checked Böckleareal contexts at Bregenz and no
+      The last clause admits the four checked contexts at Bregenz — the three
+      Böckleareal complexes and, since revision 31, the Samian Hoard of 1913 — and no
       other record of that site. Θ, Σ and the umlaut are <code>U&amp;</code>-escapes in
       the statement itself; they are spelled out here for legibility.
       <b>Note:</b> the left join to <code>tblpotter</code> still behaves as an inner
@@ -239,6 +241,17 @@ counts back in. One output row is one findspot.</p>
       <code>NULL</code> rather than to true, and the stamp is dropped.
     </div>
   </div>
+</div>
+
+<div class="note">
+  <strong>Where the eleven pairs come from.</strong> A companion query,
+  <code>sql/wide_potters.sql</code>, lists every potter dated across 100 years or
+  more that is neither in the pair list nor in a second list of spans checked and
+  deliberately kept — genuinely long-lived potters, of which there are currently
+  eight. An empty result means nothing new has appeared since the last review; a
+  row means somebody has to decide which of the two lists it belongs in. The query
+  filters nothing itself, which is why it sits beside the model statement rather
+  than inside it.
 </div>
 
 <div class="unit">
