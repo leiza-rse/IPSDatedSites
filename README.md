@@ -1,4 +1,4 @@
-# IPS Dated Sites — RDF export, SPARQL round trip, figures
+# IPS Dated Sites
 
 Local prototype for the RDF export of findspot datings (Samian Research /
 IPS). The input is the CSV produced by `sql/IPSDatedSites.sql`, one row per
