@@ -100,5 +100,7 @@ prose lives in `py/ips_docs_text.py`, which also supplies the English
 correct in the documentation and stale in the RDF. The generator refuses
 to run if a class or property in the code has no entry there.
 
-*Generated 2026-08-25 from 12 classes, 3 object
-properties and 44 datatype properties.*
+*12 classes, 3 object properties and 44 datatype
+properties. Undated by design: what these pages describe is the code, which
+does not have a date, and the corpus state is recorded in
+`data/SNAPSHOT.json`.*

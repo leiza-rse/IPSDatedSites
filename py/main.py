@@ -44,6 +44,22 @@ from ips_rdf_export import build_graph, build_ontology
 ROOT = Path(__file__).resolve().parent.parent
 
 
+def _archived_retrieval_date(default: str) -> str:
+    """The date data/source/ was fetched, from the last snapshot.
+
+    Falls back to the given default when there is no snapshot yet, or when
+    it carries no usable date: a first run on a fresh clone has nothing to
+    read, and refusing to build for that would be worse than being a day
+    out on a file that is about to be written anyway.
+    """
+    path = ROOT / "data" / "SNAPSHOT.json"
+    try:
+        retrieved = json.loads(path.read_text(encoding="utf-8"))["retrieved"]
+    except (OSError, ValueError, KeyError, TypeError):
+        return default
+    return retrieved if isinstance(retrieved, str) and retrieved else default
+
+
 def build_from_rest(offline: bool, timeout: float) -> tuple[Path, str, list]:
     """Get the corpus from the endpoints, recomputed and cross-checked.
 
@@ -112,7 +128,17 @@ def build_from_rest(offline: bool, timeout: float) -> tuple[Path, str, list]:
     # cross-check, never before: a file in data/ is taken by everything
     # downstream as the corpus, and one that failed its check has no
     # business being there.
+    #
+    # "The day it was pulled" is today's date only when something was
+    # actually pulled. A run that fell back to data/source/ — every CI run,
+    # and any workstation run behind a firewall — replays a corpus that was
+    # retrieved earlier, and stamping it with today's date says the opposite
+    # of what happened: it renames the committed CSV, deletes the old one,
+    # and moves the retrieval date in SNAPSHOT.json, none of which is a
+    # change to the data. The archive keeps the date it already carries.
     stamp = date.today().isoformat()
+    if origin != "live":
+        stamp = _archived_retrieval_date(default=stamp)
     target = ROOT / "data" / f"ips_dated_sites_{stamp}.csv"
     for stale in (ROOT / "data").glob("ips_dated_sites_*.csv"):
         if stale != target:

@@ -28,7 +28,6 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from datetime import date
 from pathlib import Path
 
 import ips_docs_text as T
@@ -197,8 +196,10 @@ prose lives in `py/ips_docs_text.py`, which also supplies the English
 correct in the documentation and stale in the RDF. The generator refuses
 to run if a class or property in the code has no entry there.
 
-*Generated {date.today().isoformat()} from {n_cls} classes, {n_obj} object
-properties and {n_dat} datatype properties.*
+*{n_cls} classes, {n_obj} object properties and {n_dat} datatype
+properties. Undated by design: what these pages describe is the code, which
+does not have a date, and the corpus state is recorded in
+`data/SNAPSHOT.json`.*
 """
     return write(out, "index.md", body)
 
