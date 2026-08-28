@@ -25,7 +25,7 @@ substituting a default.
 | [Statistics](statistics.md) | The formulas behind the intervals, as implemented in SQL |
 | [Queries](queries.md) | The SPARQL used to rebuild the figure, and the round-trip check |
 | [Bundle](bundle.md) | The standalone file for a triplestore, and why the crosswalk is materialised |
-| [Open questions](open-questions.md) | What remains unresolved and why it matters |
+| [Method notes](docu/) | The formulae in longhand, the SQL walkthrough, and where the data come from |
 
 
 ```mermaid

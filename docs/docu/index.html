@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Method notes &mdash; IPS dated sites</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;600&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#1b2430;--ink-soft:#46525f;--paper:#fbfaf7;--paper-2:#f2efe8;
+        --rule:#d9d3c6;--slip:#9e3b26}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);
+       font-family:"Public Sans",system-ui,sans-serif;font-size:16px;
+       line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:44rem;margin:0 auto;padding:3rem 1.4rem 4rem}
+  .kicker{font-family:"IBM Plex Mono",monospace;font-size:.73rem;
+          letter-spacing:.16em;text-transform:uppercase;color:var(--slip)}
+  h1{font-family:Spectral,Georgia,serif;font-weight:600;
+     font-size:clamp(1.7rem,3.6vw,2.4rem);margin:.5rem 0 .8rem}
+  p.lede{color:var(--ink-soft);margin:0 0 2rem}
+  ul.pages{list-style:none;margin:0;padding:0}
+  ul.pages li{border-top:1px solid var(--rule);padding:1rem 0}
+  ul.pages a{font-family:Spectral,Georgia,serif;font-size:1.12rem;
+             color:var(--ink);text-decoration:none}
+  ul.pages a:hover{color:var(--slip);text-decoration:underline}
+  ul.pages .file{display:block;font-family:"IBM Plex Mono",monospace;
+                 font-size:.74rem;color:var(--ink-soft);margin-top:.2rem}
+  .back{margin-top:2.5rem;border-top:1px solid var(--rule);
+        padding-top:1rem;font-size:.9rem;color:var(--ink-soft)}
+  .back a{color:var(--slip)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="kicker">IPS dated sites</p>
+  <h1>Method notes</h1>
+  <p class="lede">Longer companion pieces to the generated reference: the statistics written out in full, a walk through the SQL that computes them, and where the data come from. These are written by hand and revised as the model changes; the pages linked from the site navigation are generated from the code.</p>
+  <ul class="pages">
+    <li><a href="data_and_figures.html">Data &amp; figures</a><span class="file">data_and_figures.html</span></li>
+    <li><a href="variance_quality_from_sql.html">Method &amp; formulae</a><span class="file">variance_quality_from_sql.html</span></li>
+    <li><a href="variance_quality_sql.html">SQL walkthrough</a><span class="file">variance_quality_sql.html</span></li>
+    <li><a href="variance_quality_summary.html">At a glance</a><span class="file">variance_quality_summary.html</span></li>
+  </ul>
+  <p class="back">&larr; <a href="../">Back to the overview</a></p>
+</div>
+</body>
+</html>

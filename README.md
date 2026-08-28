@@ -210,7 +210,7 @@ down — **modernise the presentation, not what is encoded.**
 Amiens: `eff_start = -16.6` → rounded 17 BC → `time:inXSDgYear "-0016"`.
 Only the **calendar label** is converted; `time:numericPosition` stays the
 source value. Reasoning in
-[`docs/open-questions.md`](docs/open-questions.md).
+[`notes/open-questions.md`](notes/open-questions.md).
 
 **Findspot URI: hash.** `samian:fs_<site-id>_<hash>` with
 `sha256(NFC(trim(findspot)))[0:6]`. Amiens / *Sq. Bocquet pit 1973* becomes
@@ -276,7 +276,13 @@ added → exit code 0, and the text then appears in `docs/vocabulary.md`
 | [`crosswalk.md`](docs/crosswalk.md) | CIDOC CRM, OWL-Time, GeoSPARQL, PROV-O, DCAT, SKOS |
 | [`statistics.md`](docs/statistics.md) | the formulas from the SQL |
 | [`queries.md`](docs/queries.md) | the SPARQL queries and the round trip |
-| [`open-questions.md`](docs/open-questions.md) | what remains open |
+| [`bundle.md`](docs/bundle.md) | the standalone file for a triplestore |
+
+`notes/open-questions.md` sits outside `docs/` on purpose. It is a working
+list rather than a publication: half-settled questions, decisions waiting on
+the domain expert, defects found in someone else's data. `docs/` is the
+published website and addresses a reader who was not in the room; that file
+addresses the people who were.
 
 `docs/docu/` is different in kind: four hand-built pages that accompany the
 CFM application — method and formulae, an at-a-glance summary, a walkthrough

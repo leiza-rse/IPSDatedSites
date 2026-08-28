@@ -27,7 +27,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
+from html import escape, unescape
 from pathlib import Path
 
 import ips_docs_text as T
@@ -167,7 +169,7 @@ substituting a default.
 | [Statistics](statistics.md) | The formulas behind the intervals, as implemented in SQL |
 | [Queries](queries.md) | The SPARQL used to rebuild the figure, and the round-trip check |
 | [Bundle](bundle.md) | The standalone file for a triplestore, and why the crosswalk is materialised |
-| [Open questions](open-questions.md) | What remains unresolved and why it matters |
+| [Method notes](docu/) | The formulae in longhand, the SQL walkthrough, and where the data come from |
 
 {diagram("architecture", "The pipeline. Everything after the export reads from the graph, never from the CSV — apart from the round-trip check, which compares the two.")}
 ## The shape of it in one paragraph
@@ -871,7 +873,7 @@ def epoch_drift_sentence() -> str:
     )
 
 
-def page_open(out: Path) -> Path:
+def page_open(notes: Path) -> Path:
     body = f"""# Open questions
 
 Recorded here rather than left implicit, because each one would otherwise
@@ -1047,11 +1049,120 @@ intervals is not an artefact of the quality measure at all — it belongs
 in the width of the box, which already carries it through each potter's
 own interval. See the epoch-drift check in `py/verify.py`.
 """
-    return write(out, "open-questions.md", body)
+    # NOT under docs/. This page is a working list — half-settled
+    # questions, defects found in someone else's published data, decisions
+    # still waiting on the domain expert. docs/ is the published website
+    # and everything in it is addressed to a reader who was not in the
+    # room; this is addressed to the two people who were. It stays in the
+    # repository, and therefore stays visible to anyone who looks at the
+    # repository, but it is no longer part of what the project publishes.
+    notes.mkdir(parents=True, exist_ok=True)
+    p = notes / "open-questions.md"
+    p.write_text(HEADER + "\n" + body.rstrip() + "\n", encoding="utf-8")
+    return p
+
 
 
 # --------------------------------------------------------------------------
-def build(out: Path, graph=None) -> list[Path]:
+# The companion pages under docs/docu/
+# --------------------------------------------------------------------------
+# Those four pages are hand-written and stay that way: they are essays with
+# their own typography, not generated reference. What is generated is the
+# way in. A hand-written index would be one more thing to remember when a
+# fifth page appears, and forgetting it is not hypothetical — the stale
+# Bregenz count survived in four places for exactly that reason.
+#
+# The index deliberately carries NO Jekyll front matter. Jekyll only
+# templates files that have it, so this stays a static page and can look
+# like the essays it lists rather than like the rest of the site.
+DOCU_STYLE = """  :root{--ink:#1b2430;--ink-soft:#46525f;--paper:#fbfaf7;--paper-2:#f2efe8;
+        --rule:#d9d3c6;--slip:#9e3b26}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);
+       font-family:"Public Sans",system-ui,sans-serif;font-size:16px;
+       line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:44rem;margin:0 auto;padding:3rem 1.4rem 4rem}
+  .kicker{font-family:"IBM Plex Mono",monospace;font-size:.73rem;
+          letter-spacing:.16em;text-transform:uppercase;color:var(--slip)}
+  h1{font-family:Spectral,Georgia,serif;font-weight:600;
+     font-size:clamp(1.7rem,3.6vw,2.4rem);margin:.5rem 0 .8rem}
+  p.lede{color:var(--ink-soft);margin:0 0 2rem}
+  ul.pages{list-style:none;margin:0;padding:0}
+  ul.pages li{border-top:1px solid var(--rule);padding:1rem 0}
+  ul.pages a{font-family:Spectral,Georgia,serif;font-size:1.12rem;
+             color:var(--ink);text-decoration:none}
+  ul.pages a:hover{color:var(--slip);text-decoration:underline}
+  ul.pages .file{display:block;font-family:"IBM Plex Mono",monospace;
+                 font-size:.74rem;color:var(--ink-soft);margin-top:.2rem}
+  .back{margin-top:2.5rem;border-top:1px solid var(--rule);
+        padding-top:1rem;font-size:.9rem;color:var(--ink-soft)}
+  .back a{color:var(--slip)}"""
+
+DOCU_LEDE = (
+    "Longer companion pieces to the generated reference: the statistics "
+    "written out in full, a walk through the SQL that computes them, and "
+    "where the data come from. These are written by hand and revised as "
+    "the model changes; the pages linked from the site navigation are "
+    "generated from the code.")
+
+
+def docu_title(path: Path) -> str:
+    """The <title> of a companion page, minus any dash-separated subtitle."""
+    text = path.read_text(encoding="utf-8", errors="replace")
+    m = re.search(r"<title>(.*?)</title>", text, re.S | re.I)
+    if not m:
+        return path.stem.replace("_", " ")
+    title = unescape(" ".join(m.group(1).split()))
+    for sep in ("\u2014", " - "):
+        if sep in title:
+            return title.split(sep)[0].strip()
+    return title
+
+
+def page_docu_index(out: Path) -> Path:
+    docu = out / "docu"
+    docu.mkdir(parents=True, exist_ok=True)
+    # Sorted, so the output is byte-identical between runs and platforms;
+    # docs/ is compared byte for byte in CI.
+    pages = sorted(p for p in docu.glob("*.html") if p.name != "index.html")
+    items = "\n".join(
+        f'    <li><a href="{p.name}">{escape(docu_title(p))}</a>'
+        f'<span class="file">{p.name}</span></li>' for p in pages)
+    html = f"""<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Method notes &mdash; IPS dated sites</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;600&\
+family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500\
+&display=swap" rel="stylesheet">
+<style>
+{DOCU_STYLE}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="kicker">IPS dated sites</p>
+  <h1>Method notes</h1>
+  <p class="lede">{DOCU_LEDE}</p>
+  <ul class="pages">
+{items}
+  </ul>
+  <p class="back">&larr; <a href="../">Back to the overview</a></p>
+</div>
+</body>
+</html>
+"""
+    p = docu / "index.html"
+    p.write_text(html, encoding="utf-8")
+    return p
+
+
+# --------------------------------------------------------------------------
+def build(out: Path, graph=None, notes: Path | None = None) -> list[Path]:
     # Diagrams first: the pages embed them.
     _DIAGRAMS.clear()
     _DIAGRAMS.update(D.build(out / "diagrams", graph))
@@ -1063,7 +1174,8 @@ def build(out: Path, graph=None) -> list[Path]:
     out.mkdir(parents=True, exist_ok=True)
     return [page_index(out), page_model(out), page_vocabulary(out),
             page_crosswalk(out), page_statistics(out), page_queries(out),
-            page_bundle(out), page_open(out)]
+            page_bundle(out), page_docu_index(out),
+            page_open(notes or (ROOT / "notes"))]
 
 
 def main() -> int:
