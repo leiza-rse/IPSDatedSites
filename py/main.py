@@ -288,6 +288,14 @@ def main() -> int:
                        sort_keys=True) + "\n",
             encoding="utf-8")
         print(f"  Report            : {args.verify_out.relative_to(ROOT)}")
+        # Which statement is on this machine, if any. Absence is the normal
+        # case — CI and a fresh clone have no sql/ — and is not a failure.
+        import sql_manifest
+        sql_state, sql_lines = sql_manifest.check()
+        for line in sql_lines:
+            print(line)
+        if sql_state == "differs":
+            ok = False
         if vreport.failed or (args.verify_strict and vreport.warned):
             print("\n  Stopping: the CSV does not carry the model it "
                   "claims to carry.")

@@ -1,0 +1,23 @@
+{
+  "files": {
+    "IPSDatedSites.sql": {
+      "bytes": 29078,
+      "revision": "31",
+      "sha256": "ee790856b24b006ef47ee92efaa547a774f5034d329d229772411ddbc5fb3c81"
+    },
+    "v_ips_dated_stamps.sql": {
+      "bytes": 4656,
+      "revision": null,
+      "sha256": "4ef08576665038f2f911e44d009e5fce6b687b70f582e60fb2fb04903944285a"
+    },
+    "wide_potters.sql": {
+      "bytes": 3630,
+      "revision": "31",
+      "sha256": "831915abe926a40282ce69c2764fa69f38bbd00052574468f8e7141a9a6ee4ea"
+    }
+  },
+  "hashing": "sha256 of the file with CRLF normalised to LF",
+  "note": "Fingerprints only. The statements themselves are not in this repository — see py/sql_manifest.py for why, and sql/README.md for where they are.",
+  "recorded": "2026-08-28",
+  "revision": "31"
+}

@@ -25,7 +25,18 @@ Thumbs.db
 # data/, img/, rdf/ and docs/ are part of the reproducible archive.
 
 # --- Generated SQL drop-ins ---
-# sql/IPSDatedSites.sql IS the goldstandard and is tracked: it is what gets
+# The PostgreSQL statements are NOT in this repository. They name the tables,
+# columns and quality flags of a live database that also answers a public web
+# application, and nothing here needs them: the pipeline reads REST. What is
+# tracked instead is sql/MANIFEST.json — sizes, hashes and the revision — so
+# that two people can tell whether they hold the same statement without the
+# statement being published. See py/sql_manifest.py.
+#
+# Removing them from a clone is not enough on its own: they were tracked
+# until now, so they remain in the history. See sql/README.md.
+sql/*.sql
+
+# sql/IPSDatedSites.sql WAS the goldstandard and was tracked: it is what gets
 # cited, diffed and blamed. What lands here is derived from it by
 # py/make_sql.py — the ColdFusion drop-in and the psql form. Committing them
 # would create a second copy of the model that can drift without anyone
