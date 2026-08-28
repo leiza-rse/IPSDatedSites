@@ -159,7 +159,7 @@ import micropip
 await micropip.install("rdflib==" + _rdflib_version)
 `);
     setStatus('Loading the graph\u2026', 'busy');
-    pyodide.globals.set('_graph_url', GRAPH.url);
+    pyodide.globals.set('_graph_url', GRAPH.page_url || GRAPH.url);
     await pyodide.runPythonAsync(`
 from pyodide.http import pyfetch
 from rdflib import Graph
@@ -185,7 +185,7 @@ n_base = len(base)
     const n = pyodide.globals.get('n_base');
     const note = document.getElementById('graph-note');
     note.hidden = false;
-    note.innerHTML = `Graph loaded: <strong>${n}</strong> triples from <code>${esc(GRAPH.file)}</code> (${esc(GRAPH.megabytes)} MB). <a href="${esc(GRAPH.url)}">Download the Turtle file</a>.`;
+    note.innerHTML = `Graph loaded: <strong>${n}</strong> triples from <code>${esc(GRAPH.file)}</code> (${esc(GRAPH.megabytes)} MB). <a href="${esc(GRAPH.page_url || GRAPH.url)}">Download the Turtle file</a>.`;
     setStatus('Ready \u2014 edit a query and press Run.', 'ok');
     document.querySelectorAll('button.run').forEach(b => (b.disabled = false));
   } catch (err) {

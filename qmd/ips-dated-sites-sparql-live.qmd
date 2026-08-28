@@ -412,7 +412,7 @@ for r in rows[:15]:
 
 Every query above is generated from `queries.yaml` in the
 [IPSDatedSites repository](https://github.com/leiza-rse/IPSDatedSites), which
-also produces the [browser query page](https://leiza-rse.github.io/IPSDatedSites/sparql.html)
+also produces the [browser query page](https://leiza-rse.github.io/IPSDatedSites/query/)
 and the plain `.rq` files. One source, three products, so they cannot drift
 apart — and each query is executed against the real graph at build time, with
 an empty result failing the build.

@@ -435,7 +435,10 @@ def main() -> int:
     if not args.skip_docs:
         rule("8 · Documentation")
         for pth in make_docs.build(args.docs_out, gr):
-            print(f"  {pth.relative_to(ROOT)}")
+            # as_posix(): the run report is a committed artefact and a
+            # backslash here would make the Windows and Linux copies differ
+            # on a line that says nothing about either.
+            print(f"  {pth.relative_to(ROOT).as_posix()}")
 
     # ---- 9. Instance graphs ----------------------------------------------
     # Real subgraphs, cut with CONSTRUCT and laid out by GraphViz. The

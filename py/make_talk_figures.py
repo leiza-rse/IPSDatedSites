@@ -537,7 +537,12 @@ def publish_page(src: Path, out_dir: Path) -> list[Path]:
 
     out_dir.mkdir(parents=True, exist_ok=True)
     written = []
-    target = out_dir / "index.html"
+    # closed-groups.html, NOT index.html. docs/query/index.html belongs to
+    # py/build_sparql.py, which writes the editable query page there; two
+    # generators writing one path means whichever runs last wins, silently.
+    # The pipeline runs build_sparql on every build and this script only
+    # when somebody asks for it, so the loser would always be this page.
+    target = out_dir / "closed-groups.html"
     target.write_text(html, encoding="utf-8")
     written.append(target)
 

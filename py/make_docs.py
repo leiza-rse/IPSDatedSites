@@ -678,8 +678,9 @@ from the export causes the rebuild to fail rather than to fall back on a
 constant.
 
 The queries below are the ones the pipeline runs, reproduced from the
-code. They are also written out as standalone `.rq` files in `queries/`
-for use against an endpoint.
+code. They are also written out as standalone
+[`.rq` files](query/rq/) beside the [query page](query/), for use against
+an endpoint.
 
 {blocks}
 ## Reaching the interval boundaries

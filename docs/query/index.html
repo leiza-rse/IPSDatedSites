@@ -1,154 +1,362 @@
-<!DOCTYPE html>
-<html lang="en-GB">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>IPS dated sites &mdash; closed groups, queried live</title>
-<link rel="stylesheet" href="style.css">
-<script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
-</head>
-<body>
-<div class="container">
+---
+layout: default
+title: Query the dating graph
+---
 
-  <header class="page-head">
-    <h1>Closed groups that are also sharply dated</h1>
-    <p class="intro">
-      The same figure as <code>talk/img/talk-closed-groups.svg</code>, except
-      that it is not a figure: the query below runs against the published graph
-      in this browser, and the plot is whatever it returned. Move a threshold
-      and the selection changes in front of you.
-    </p>
-    <p class="note">
-      There is no SPARQL endpoint and no server. The bundle is fetched as a
-      static file and parsed with <code>rdflib</code> under Pyodide. That is
-      deliberate: an archived copy of this repository stays queryable without a
-      service having to be kept alive for it.
-    </p>
-  </header>
+<style>
+  /* Query-page rules. The tokens are those of _layouts/default.html, so
+     this page reads as part of the same site. */
+  .status { display:flex; align-items:center; gap:.55rem;
+            border:1px solid var(--hair); border-radius:6px;
+            padding:.6rem .85rem; background:var(--band);
+            font-size:.9rem; color:var(--muted); margin:1.2rem 0; }
+  .dot { width:.6rem; height:.6rem; border-radius:50%;
+         background:var(--muted); flex:none; }
+  .dot.busy { background:#b07d00; }
+  .dot.ok   { background:#2e7d32; }
+  .dot.err  { background:#b3392b; }
+  .query { border-top:1px solid var(--hair); padding-top:1.2rem;
+           margin-top:1.8rem; }
+  .query h2 { margin-top:0; }
+  textarea.sparql { width:100%; font-family: ui-monospace, SFMono-Regular,
+                    Menlo, Consolas, monospace; font-size:12.5px;
+                    line-height:1.5; border:1px solid var(--hair);
+                    border-radius:6px; padding:.7rem .8rem;
+                    background:var(--band); color:var(--ink);
+                    resize:vertical; tab-size:2; }
+  textarea.sparql:focus { outline:2px solid #1f5fa8; outline-offset:-1px;
+                          background:#fff; }
+  .query-bar { display:flex; align-items:center; gap:.5rem; margin:.55rem 0 0; }
+  .query-bar button { font:inherit; font-size:.85rem; border-radius:5px;
+                      padding:.32rem .9rem; cursor:pointer;
+                      border:1px solid #1f5fa8; background:#1f5fa8;
+                      color:#fff; }
+  .query-bar button:hover:not(:disabled) { background:#17497f;
+                                           border-color:#17497f; }
+  .query-bar button:disabled { opacity:.45; cursor:default; }
+  .query-bar button.reset { background:#fff; color:var(--muted);
+                            border-color:var(--hair); }
+  .query-bar button.reset:hover { color:#1f5fa8; border-color:#1f5fa8;
+                                  background:#fff; }
+  .timing { font-size:.8rem; color:var(--muted); }
+  .table-scroll { overflow-x:auto; border:1px solid var(--hair);
+                  border-radius:6px; margin-top:.7rem; }
+  .table-scroll table { margin:0; }
+  .table-scroll td { white-space:nowrap; }
+  td.nil { color:#aab2ba; }
+  pre.error { border:1px solid #e0b7b0; border-left:3px solid #b3392b;
+              background:#fdf6f5; color:#8c2f22; white-space:pre-wrap; }
+  .note { color:var(--muted); font-size:.9rem; }
+</style>
 
-  <div class="status" id="status">
-    <span class="dot" id="dot"></span>
-    <span id="status-text">Loading the Python runtime (~10 MB on first visit)&hellip;</span>
-  </div>
+<h1>Query the dating graph</h1>
 
-  <p class="note" id="graph-note" hidden></p>
+<p>The box plot in this repository is not drawn from a spreadsheet: it is drawn from a graph, and every number in it can be asked for directly. The queries below are editable and run in your browser.</p>
 
-  <div class="dials">
-    <div class="dial">
-      <label for="d-rep">q<sub>repetition</sub> at least <output id="o-rep">0.30</output></label>
-      <span class="why">the same dies recur &mdash; a hoard, a consignment, a store</span>
-      <input type="range" id="d-rep" min="0" max="0.9" step="0.05" value="0.30">
-      <span class="ceiling" id="c-rep"></span>
-    </div>
-    <div class="dial">
-      <label for="d-int">q<sub>interval</sub> at least <output id="o-int">0.60</output></label>
-      <span class="why">the potters agree, relative to the span they describe</span>
-      <input type="range" id="d-int" min="0" max="0.95" step="0.05" value="0.60">
-      <span class="ceiling" id="c-int"></span>
-    </div>
-    <div class="dial">
-      <label for="d-n">n<sub>stamps</sub> at least <output id="o-n">10</output></label>
-      <span class="why">enough material for k to have come off its maximum</span>
-      <input type="range" id="d-n" min="1" max="60" step="1" value="10">
-      <span class="ceiling" id="c-n"></span>
-    </div>
-  </div>
-  <p class="tally" id="tally">Counting starts once the graph is loaded.</p>
-  <p class="note">
-    The two quality axes are never multiplied into one score. Asking for both
-    at once in a query is how they are combined: the threshold stays visible,
-    it is stated per axis, and you can disagree with it by dragging it.
-  </p>
+<p class="note">
+  There is no SPARQL endpoint and no server. The graph is fetched as a
+  static file and parsed in your browser with <code>rdflib</code> under
+  Pyodide, so nothing you type leaves your machine and an archived copy of
+  this repository stays queryable without a service being kept alive for it.
+  The first visit downloads roughly 10 MB of Python runtime.
+</p>
 
-  <section class="query">
-    <h2>The query</h2>
-    <p class="intro">
-      Editable. The sliders rewrite the <code>FILTER</code> line; anything else
-      you type stays. The plot needs
-      <code>?site ?findspot ?from ?to ?midpoint ?qInterval ?qRepetition</code>
-      &mdash; drop one and you get the table without the chart.
-    </p>
-    <textarea class="sparql" id="src" spellcheck="false" rows="22"></textarea>
-    <div class="query-bar">
-      <button id="run" disabled>Run</button>
-      <button class="reset" id="reset">Reset</button>
-      <a class="rq" href="closed-groups-sharply-dated.rq" download>.rq</a>
-      <span class="timing" id="timing"></span>
-    </div>
-    <div id="err"></div>
-  </section>
-
-  <div class="chart-wrap">
-    <div id="chart"><p class="empty">Press Run.</p></div>
-    <div class="legend">
-      <span><span class="ramp"></span> q<sub>interval</sub> &mdash; box fill, red to green</span>
-      <span><span class="rep"></span> q<sub>repetition</sub> &mdash; bar in the left margin</span>
-      <span>| midpoint</span>
-    </div>
-  </div>
-
-  <div id="table"></div>
-
-  <footer class="page-foot">
-    <p>
-      Graph: <code>rdf/IPSDatedSites-bundle.ttl</code> &mdash; data, the full
-      LADO vocabulary and a materialised CIDOC CRM crosswalk in one file.
-      The query is <code>talk/closed-groups-sharply-dated.rq</code>, the same
-      file <code>py/make_talk_figures.py</code> reads to draw the static
-      version. Serve the repository root over HTTP
-      (<code>python -m http.server</code>) &mdash; a browser will not fetch the
-      graph from a <code>file://</code> page.
-    </p>
-  </footer>
+<div class="status" id="status">
+  <span class="dot" id="dot"></span>
+  <span id="status-text">Loading the Python runtime&hellip;</span>
 </div>
 
-<script>
-const GRAPH_URL = '../bundle.ttl';
-const MAX_ROWS  = 400;
+<p class="note" id="graph-note" hidden></p>
 
-const TEMPLATE = `PREFIX samian: <http://data.archaeology.link/data/samian/>
-PREFIX lado:   <http://archaeology.link/ontology#>
-PREFIX crm:    <http://www.cidoc-crm.org/cidoc-crm/>
-PREFIX rdfs:   <http://www.w3.org/2000/01/rdf-schema#>
-
-SELECT ?site ?findspot ?from ?to ?midpoint ?sigma ?k ?qInterval ?qRepetition
-       ?nStamps ?nDies
-WHERE {
-  ?fs  a lado:Findspot ;
-       rdfs:label ?findspot ;
-       crm:P89_falls_within ?place ;
-       crm:P4_has_time-span ?ts .
-  ?place rdfs:label ?site .
-
-  ?ts  lado:qInterval    ?qInterval ;
-       lado:qRepetition  ?qRepetition ;
-       lado:nStamps      ?nStamps ;
-       lado:nDies        ?nDies ;
-       lado:sigmaYears   ?sigma ;
-       lado:kFactor      ?k ;
-       lado:midpointYear ?midpoint ;
-       crm:P82a_begin_of_the_begin ?from ;
-       crm:P82b_end_of_the_end     ?to .
-
-  FILTER( ?qRepetition >= §REP§ && ?qInterval >= §INT§ && ?nStamps >= §N§ )
+<section class="query" id="q-dated-findspots">
+  <h2>1. The figure, as a table</h2>
+  <p>Every row of the box plot, in the order the figure draws them. The interval bounds come out of OWL-Time rather than from a column: the time-span has a beginning and an end, each of which is an instant holding a numeric position on a named scale. That indirection is what lets the calendar reading and the arithmetic position disagree about negative years without either being wrong.</p>
+  <textarea class="sparql" id="src-dated-findspots" spellcheck="false"
+            rows="12">SELECT ?site ?findspot ?from ?to ?span ?qInterval ?nStamps WHERE {
+  ?fs a lado:Findspot ; rdfs:label ?findspot ;
+      crm:P89_falls_within ?p ; crm:P4_has_time-span ?ts .
+  ?p rdfs:label ?site .
+  ?ts time:hasBeginning/time:inTimePosition/time:numericPosition ?from ;
+      time:hasEnd/time:inTimePosition/time:numericPosition ?to ;
+      lado:qInterval ?qInterval ; lado:nStamps ?nStamps ;
+      lado:avgDatemin ?order .
+  BIND(?to - ?from AS ?span)
 }
-ORDER BY ?from`;
+ORDER BY ?order</textarea>
+  <div class="query-bar">
+    <button class="run" data-q="dated-findspots" disabled>Run</button>
+    <button class="reset" data-q="dated-findspots">Reset</button>
+    <span class="timing" id="time-dated-findspots"></span>
+  </div>
+  <div class="result" id="out-dated-findspots"></div>
+</section>
 
-/* Every findspot's three numbers, fetched once. With them the page can say
-   how many rows a setting will return before the query is run, which is the
-   difference between exploring the thresholds and dragging a slider into an
-   empty result and wondering whether something broke. */
-const CENSUS_QUERY = `PREFIX lado: <http://archaeology.link/ontology#>
-SELECT ?qInterval ?qRepetition ?nStamps WHERE {
-  ?ts a lado:FindspotDating ;
-      lado:qInterval ?qInterval ;
-      lado:qRepetition ?qRepetition ;
-      lado:nStamps ?nStamps .
-}`;
-let CENSUS = null;
+<section class="query" id="q-crm-only">
+  <h2>2. The same answer in CIDOC CRM alone</h2>
+  <p>No lado: and no time: term appears below, only CIDOC CRM — and it still returns all 41 findspots with their dates. That is the point of the materialised crosswalk: most triplestores perform no RDFS entailment, so the inferred rdf:type triples are written out explicitly rather than left to a reasoner that may never run. Load the vocabulary alone and this query returns nothing.</p>
+  <textarea class="sparql" id="src-crm-only" spellcheck="false"
+            rows="10">SELECT ?place ?findspot ?from ?to WHERE {
+  ?fs a crm:E53_Place ; rdfs:label ?findspot ;
+      crm:P89_falls_within ?p ; crm:P4_has_time-span ?ts .
+  ?p a crm:E53_Place ; rdfs:label ?place .
+  ?ts a crm:E52_Time-Span ;
+      crm:P82a_begin_of_the_begin ?from ;
+      crm:P82b_end_of_the_end ?to .
+}
+ORDER BY ?from</textarea>
+  <div class="query-bar">
+    <button class="run" data-q="crm-only" disabled>Run</button>
+    <button class="reset" data-q="crm-only">Reset</button>
+    <span class="timing" id="time-crm-only"></span>
+  </div>
+  <div class="result" id="out-crm-only"></div>
+</section>
 
-const $ = id => document.getElementById(id);
-const statusText = $('status-text'), dot = $('dot');
+<section class="query" id="q-era-and-scale">
+  <h2>3. Where the calendar and the arithmetic part company</h2>
+  <p>The findspots whose interval begins before the year 1. Note that numericPosition and inXSDgYear differ by one: xsd:gYear counts astronomically, so 1 BC is the year 0, whereas the source database counts historically and the arithmetic must stay on an unbroken number line. Rather than silently picking one, the graph carries both and declares its own time reference system for the number line.</p>
+  <textarea class="sparql" id="src-era-and-scale" spellcheck="false"
+            rows="12">SELECT ?site ?findspot ?numeric ?calendar ?scale WHERE {
+  ?fs a lado:Findspot ; rdfs:label ?findspot ;
+      crm:P89_falls_within ?p ; crm:P4_has_time-span ?ts .
+  ?p rdfs:label ?site .
+  ?ts time:hasBeginning ?inst .
+  ?inst time:inXSDgYear ?calendar ; time:inTimePosition ?pos .
+  ?pos time:numericPosition ?numeric ; time:hasTRS ?trs .
+  ?trs rdfs:label ?scale .
+  FILTER(?numeric < 0)
+}
+ORDER BY ?numeric</textarea>
+  <div class="query-bar">
+    <button class="run" data-q="era-and-scale" disabled>Run</button>
+    <button class="reset" data-q="era-and-scale">Reset</button>
+    <span class="timing" id="time-era-and-scale"></span>
+  </div>
+  <div class="result" id="out-era-and-scale"></div>
+</section>
+
+<section class="query" id="q-two-quality-axes">
+  <h2>4. Sharply dated, but not a depot</h2>
+  <p>Findspots that are tightly dated (qInterval above 0.55) while showing almost no die repetition (qRepetition below 0.2) — each stamp occurs once or nearly once. These are exactly the sites that a single combined quality score would destroy: multiply the two and Rougham or the Keltengraben at Vindonissa drop to zero, although their dating is among the sharpest in the set. The two axes measure different things and are deliberately never merged.</p>
+  <textarea class="sparql" id="src-two-quality-axes" spellcheck="false"
+            rows="12">SELECT ?site ?findspot ?qInterval ?qRepetition ?nStamps ?nDies ?repetition
+WHERE {
+  ?fs a lado:Findspot ; rdfs:label ?findspot ;
+      crm:P89_falls_within ?p ; crm:P4_has_time-span ?ts .
+  ?p rdfs:label ?site .
+  ?ts lado:qInterval ?qInterval ; lado:qRepetition ?qRepetition ;
+      lado:nStamps ?nStamps ; lado:nDies ?nDies ;
+      lado:dieRepetition ?repetition .
+  FILTER(?qInterval > 0.55 && ?qRepetition < 0.2)
+}
+ORDER BY DESC(?qInterval)</textarea>
+  <div class="query-bar">
+    <button class="run" data-q="two-quality-axes" disabled>Run</button>
+    <button class="reset" data-q="two-quality-axes">Reset</button>
+    <span class="timing" id="time-two-quality-axes"></span>
+  </div>
+  <div class="result" id="out-two-quality-axes"></div>
+</section>
+
+<section class="query" id="q-findspots-per-site">
+  <h2>5. Sites with more than one findspot</h2>
+  <p>Bregenz contributes four separately dated findspots; Colchester, London, Vindonissa and La Graufesenque two each. This is why the dating hangs on the findspot rather than on the site, and why the URI fragment is a hash of the findspot name taken per site: a site identifier alone could not tell the four Bregenz contexts apart, and they are dated differently.</p>
+  <textarea class="sparql" id="src-findspots-per-site" spellcheck="false"
+            rows="10">SELECT ?site (COUNT(DISTINCT ?fs) AS ?findspots)
+       (GROUP_CONCAT(?name; separator=" · ") AS ?names)
+WHERE {
+  ?fs a lado:Findspot ; rdfs:label ?name ; crm:P89_falls_within ?p .
+  ?p rdfs:label ?site .
+}
+GROUP BY ?site
+HAVING (COUNT(DISTINCT ?fs) > 1)
+ORDER BY DESC(?findspots) ?site</textarea>
+  <div class="query-bar">
+    <button class="run" data-q="findspots-per-site" disabled>Run</button>
+    <button class="reset" data-q="findspots-per-site">Reset</button>
+    <span class="timing" id="time-findspots-per-site"></span>
+  </div>
+  <div class="result" id="out-findspots-per-site"></div>
+</section>
+
+<section class="query" id="q-external-identifiers">
+  <h2>6. What links out, and what does not</h2>
+  <p>Every site, with its ancient name and its Pleiades identifier where the source has one. The gaps are the interesting part: roughly a third of the sites carry no Pleiades link and most carry no Latin name. Absence here is recorded as absence — no placeholder is invented — so this query doubles as a worklist for the concordance.</p>
+  <textarea class="sparql" id="src-external-identifiers" spellcheck="false"
+            rows="10">SELECT ?site ?ancientName ?pleiades ?findspots WHERE {
+  { SELECT ?p (COUNT(DISTINCT ?fs) AS ?findspots) WHERE {
+      ?fs a lado:Findspot ; crm:P89_falls_within ?p .
+    } GROUP BY ?p }
+  ?p rdfs:label ?site .
+  OPTIONAL { ?p lado:ancientName ?ancientName }
+  OPTIONAL { ?p lado:pleiadesID  ?pleiades }
+}
+ORDER BY ?site</textarea>
+  <div class="query-bar">
+    <button class="run" data-q="external-identifiers" disabled>Run</button>
+    <button class="reset" data-q="external-identifiers">Reset</button>
+    <span class="timing" id="time-external-identifiers"></span>
+  </div>
+  <div class="result" id="out-external-identifiers"></div>
+</section>
+
+<section class="query" id="q-allen-possible">
+  <h2>7. What came before what — the complete matrix</h2>
+  <p>Every pair of datings stands in exactly one of Allen's thirteen relations, computed on the modelled interval [eff_start, eff_end] and published under <code>lado:possibly*</code>. Complete means countable: the numbers below add up to all 820 pairs of 41 findspots, so a missing relation is a missing pair rather than a silence that could mean anything. Note how lopsided the result is — two thirds of all pairs are simple precedence, which is what a corpus spread over three centuries looks like.</p>
+  <textarea class="sparql" id="src-allen-possible" spellcheck="false"
+            rows="9">SELECT ?relation (COUNT(*) AS ?pairs) WHERE {
+  ?a ?relation ?b .
+  ?a a lado:FindspotDating .
+  ?b a lado:FindspotDating .
+  FILTER(STRSTARTS(STR(?relation), CONCAT(STR(lado:), "possibly")))
+}
+GROUP BY ?relation
+ORDER BY DESC(?pairs)</textarea>
+  <div class="query-bar">
+    <button class="run" data-q="allen-possible" disabled>Run</button>
+    <button class="reset" data-q="allen-possible">Reset</button>
+    <span class="timing" id="time-allen-possible"></span>
+  </div>
+  <div class="result" id="out-allen-possible"></div>
+</section>
+
+<section class="query" id="q-allen-time-only">
+  <h2>8. The same question in OWL-Time alone</h2>
+  <p>No <code>lado:</code> predicate appears below — only OWL-Time's own interval relations. It works, and it deliberately returns FEWER pairs than the query above. OWL-Time relations are sharp: there is no way to say "before, probably". So only the relations that survive a more generous reading of the bounds are asserted with them, and the rest live under <code>lado:possibly*</code> where the hedge is visible. This is not OWL-Time falling short. It is a vocabulary without a notion of uncertainty saying exactly as much as it can support — and the gap between the two counts is the uncertainty, made countable.</p>
+  <textarea class="sparql" id="src-allen-time-only" spellcheck="false"
+            rows="9">SELECT ?relation (COUNT(*) AS ?pairs) WHERE {
+  ?a ?relation ?b .
+  ?a time:hasBeginning ?ab .
+  ?b time:hasBeginning ?bb .
+  FILTER(STRSTARTS(STR(?relation), CONCAT(STR(time:), "interval")))
+}
+GROUP BY ?relation
+ORDER BY DESC(?pairs)</textarea>
+  <div class="query-bar">
+    <button class="run" data-q="allen-time-only" disabled>Run</button>
+    <button class="reset" data-q="allen-time-only">Reset</button>
+    <span class="timing" id="time-allen-time-only"></span>
+  </div>
+  <div class="result" id="out-allen-time-only"></div>
+</section>
+
+<section class="query" id="q-allen-unstable">
+  <h2>9. Where the two readings disagree</h2>
+  <p>The pairs whose relation holds on the modelled boxes but not once the intervals are widened to the full span of their potters' date ranges. These are exactly the statements a sharp vocabulary should not make: draw any of these two findspots with their stubs and the asserted order stops being visible. Roughly half the matrix sits here, which is worth knowing before anyone builds a seriation on it.</p>
+  <textarea class="sparql" id="src-allen-unstable" spellcheck="false"
+            rows="14">SELECT ?siteA ?findspotA ?siteB ?findspotB ?fromA ?toA ?fromB ?toB
+WHERE {
+  ?tsA lado:possiblyBefore ?tsB .
+  FILTER NOT EXISTS { ?tsA time:intervalBefore ?tsB }
+  ?fsA crm:P4_has_time-span ?tsA ; rdfs:label ?findspotA ;
+       crm:P89_falls_within/rdfs:label ?siteA .
+  ?fsB crm:P4_has_time-span ?tsB ; rdfs:label ?findspotB ;
+       crm:P89_falls_within/rdfs:label ?siteB .
+  ?tsA lado:avgDatemin ?fromA ; lado:avgDatemax ?toA .
+  ?tsB lado:avgDatemin ?fromB ; lado:avgDatemax ?toB .
+}
+ORDER BY ?fromA ?fromB
+LIMIT 40</textarea>
+  <div class="query-bar">
+    <button class="run" data-q="allen-unstable" disabled>Run</button>
+    <button class="reset" data-q="allen-unstable">Reset</button>
+    <span class="timing" id="time-allen-unstable"></span>
+  </div>
+  <div class="result" id="out-allen-unstable"></div>
+</section>
+
+<section class="query" id="q-map-layer">
+  <h2>10. Everything a map needs, in one query</h2>
+  <p>Coordinates, interval and colour for each findspot. The point sits on the discovery site rather than the findspot, because that is where the source records it — the four Bregenz contexts share one coordinate, and a map that wants them apart has to spread them itself rather than pretend the data distinguishes them. The colour is presentation and is published as such, on the plot row alongside the other "visual only" quantities, never on the time-span.</p>
+  <textarea class="sparql" id="src-map-layer" spellcheck="false"
+            rows="11">SELECT ?site ?findspot ?wkt ?from ?to ?norm ?colour WHERE {
+  ?fs a lado:Findspot ; rdfs:label ?findspot ;
+      crm:P89_falls_within ?p ; crm:P4_has_time-span ?ts .
+  ?p rdfs:label ?site ; geo:hasGeometry/geo:asWKT ?wkt .
+  ?ts time:hasBeginning/time:inTimePosition/time:numericPosition ?from ;
+      time:hasEnd/time:inTimePosition/time:numericPosition ?to .
+  ?row lado:renders ?ts ;
+       lado:normQInterval ?norm ; lado:hexQInterval ?colour .
+}
+ORDER BY ?from</textarea>
+  <div class="query-bar">
+    <button class="run" data-q="map-layer" disabled>Run</button>
+    <button class="reset" data-q="map-layer">Reset</button>
+    <span class="timing" id="time-map-layer"></span>
+  </div>
+  <div class="result" id="out-map-layer"></div>
+</section>
+
+<section class="query" id="q-colour-axes">
+  <h2>11. How the colours were made</h2>
+  <p>A colour in a dataset is usually an assertion nobody can check. These can be: each axis publishes its ramp stops, its interpolation and the domain the values were stretched onto, so any hex value in the graph can be recomputed from the graph alone. Watch <code>lado:domainBasis</code> — an observed domain is read off this corpus, which means adding a findspot can change the colour of one that did not change at all. The chronological axis avoids red-green on purpose: late material is not worse material.</p>
+  <textarea class="sparql" id="src-colour-axes" spellcheck="false"
+            rows="9">SELECT ?axis ?source ?ramp ?scale ?basis ?min ?max ?stops WHERE {
+  ?a a lado:ColourAxis ; lado:colourSource ?source ;
+     lado:rampName ?ramp ; lado:rampStops ?stops ;
+     lado:domainScale ?scale ; lado:domainBasis ?basis ;
+     lado:domainMin ?min ; lado:domainMax ?max .
+  BIND(REPLACE(STR(?a), "^.*/", "") AS ?axis)
+}
+ORDER BY ?axis</textarea>
+  <div class="query-bar">
+    <button class="run" data-q="colour-axes" disabled>Run</button>
+    <button class="reset" data-q="colour-axes">Reset</button>
+    <span class="timing" id="time-colour-axes"></span>
+  </div>
+  <div class="result" id="out-colour-axes"></div>
+</section>
+
+<section class="query" id="q-provenance">
+  <h2>12. Which method produced these dates</h2>
+  <p>The parameters are in the graph, not only in the paper. Each dating is generated by an activity, and that activity records the plan it followed — so a consumer can ask what k, τ, t₀ and the era convention were, and which datemax values the source query excluded, without reading any prose. τ and lado:referenceLength are unrelated quantities that happened to carry the same value until τ was calibrated: τ governs how fast the interval tightens as stamps accumulate, t₀ is the fixed length against which qStart and qEnd are read. lado:calibrationBasis says how τ was obtained, and lado:calibratedAgainst names the findspots it was fitted to — try following those IRIs. The excluded datemax values are an inherited filter whose justification is still open; publishing them is how that stays visible.</p>
+  <textarea class="sparql" id="src-provenance" spellcheck="false"
+            rows="15">SELECT ?software ?model ?kMin ?kMax ?tau ?t0 ?w ?era
+       (GROUP_CONCAT(DISTINCT STR(?ex); separator=", ") AS ?excludedDatemax)
+       (COUNT(DISTINCT ?ts) AS ?datings)
+WHERE {
+  ?ts a lado:FindspotDating ; prov:wasGeneratedBy ?act .
+  ?act crm:P33_used_specific_technique ?m ;
+       crm:P14_carried_out_by ?agent .
+  ?agent rdfs:label ?software .
+  ?m rdfs:label ?model ; lado:kMin ?kMin ; lado:kMax ?kMax ;
+     lado:tau ?tau ; lado:referenceLength ?t0 ;
+     lado:volumeWeight ?w ; lado:eraConvention ?era ;
+     lado:excludedDatemax ?ex .
+}
+GROUP BY ?software ?model ?kMin ?kMax ?tau ?t0 ?w ?era</textarea>
+  <div class="query-bar">
+    <button class="run" data-q="provenance" disabled>Run</button>
+    <button class="reset" data-q="provenance">Reset</button>
+    <span class="timing" id="time-provenance"></span>
+  </div>
+  <div class="result" id="out-provenance"></div>
+</section>
+
+<p class="note">
+  Vocabulary: <code>rdf/lado_dating_extension.ttl</code>, extending <a href="http://www.cidoc-crm.org/">CIDOC CRM</a>, <a href="https://www.w3.org/TR/owl-time/">OWL-Time</a> and <a href="https://www.w3.org/TR/prov-o/">PROV-O</a>. The bundle carries the vocabulary and a materialised CRM crosswalk, so it can be loaded into a triplestore on its own.
+  A <a href="https://quarto.org">quarto-live</a> version of
+  this page, for reuse as teaching material, is in <code>qmd/</code>.
+</p>
+
+<script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+{% raw %}
+<script>
+/* Written from queries.yaml by py/build_sparql.py, so this page, the .rq
+   files and the quarto-live variant cannot drift apart. Wrapped in a Liquid
+   raw block: a query containing a doubled brace would otherwise be eaten by
+   Jekyll on the way to Pages, and only there. */
+{% endraw %}
+const PREFIXES = "PREFIX samian:  <http://data.archaeology.link/data/samian/>\nPREFIX lado:    <http://archaeology.link/ontology#>\nPREFIX crm:     <http://www.cidoc-crm.org/cidoc-crm/>\nPREFIX crmdig:  <http://www.ics.forth.gr/isl/CRMdig/>\nPREFIX time:    <http://www.w3.org/2006/time#>\nPREFIX prov:    <http://www.w3.org/ns/prov#>\nPREFIX dcat:    <http://www.w3.org/ns/dcat#>\nPREFIX dcterms: <http://purl.org/dc/terms/>\nPREFIX skos:    <http://www.w3.org/2004/02/skos/core#>\nPREFIX geo:     <http://www.opengis.net/ont/geosparql#>\nPREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd:     <http://www.w3.org/2001/XMLSchema#>\n";
+const QUERIES  = {"dated-findspots": "SELECT ?site ?findspot ?from ?to ?span ?qInterval ?nStamps WHERE {\n  ?fs a lado:Findspot ; rdfs:label ?findspot ;\n      crm:P89_falls_within ?p ; crm:P4_has_time-span ?ts .\n  ?p rdfs:label ?site .\n  ?ts time:hasBeginning/time:inTimePosition/time:numericPosition ?from ;\n      time:hasEnd/time:inTimePosition/time:numericPosition ?to ;\n      lado:qInterval ?qInterval ; lado:nStamps ?nStamps ;\n      lado:avgDatemin ?order .\n  BIND(?to - ?from AS ?span)\n}\nORDER BY ?order", "crm-only": "SELECT ?place ?findspot ?from ?to WHERE {\n  ?fs a crm:E53_Place ; rdfs:label ?findspot ;\n      crm:P89_falls_within ?p ; crm:P4_has_time-span ?ts .\n  ?p a crm:E53_Place ; rdfs:label ?place .\n  ?ts a crm:E52_Time-Span ;\n      crm:P82a_begin_of_the_begin ?from ;\n      crm:P82b_end_of_the_end ?to .\n}\nORDER BY ?from", "era-and-scale": "SELECT ?site ?findspot ?numeric ?calendar ?scale WHERE {\n  ?fs a lado:Findspot ; rdfs:label ?findspot ;\n      crm:P89_falls_within ?p ; crm:P4_has_time-span ?ts .\n  ?p rdfs:label ?site .\n  ?ts time:hasBeginning ?inst .\n  ?inst time:inXSDgYear ?calendar ; time:inTimePosition ?pos .\n  ?pos time:numericPosition ?numeric ; time:hasTRS ?trs .\n  ?trs rdfs:label ?scale .\n  FILTER(?numeric < 0)\n}\nORDER BY ?numeric", "two-quality-axes": "SELECT ?site ?findspot ?qInterval ?qRepetition ?nStamps ?nDies ?repetition\nWHERE {\n  ?fs a lado:Findspot ; rdfs:label ?findspot ;\n      crm:P89_falls_within ?p ; crm:P4_has_time-span ?ts .\n  ?p rdfs:label ?site .\n  ?ts lado:qInterval ?qInterval ; lado:qRepetition ?qRepetition ;\n      lado:nStamps ?nStamps ; lado:nDies ?nDies ;\n      lado:dieRepetition ?repetition .\n  FILTER(?qInterval > 0.55 && ?qRepetition < 0.2)\n}\nORDER BY DESC(?qInterval)", "findspots-per-site": "SELECT ?site (COUNT(DISTINCT ?fs) AS ?findspots)\n       (GROUP_CONCAT(?name; separator=\" · \") AS ?names)\nWHERE {\n  ?fs a lado:Findspot ; rdfs:label ?name ; crm:P89_falls_within ?p .\n  ?p rdfs:label ?site .\n}\nGROUP BY ?site\nHAVING (COUNT(DISTINCT ?fs) > 1)\nORDER BY DESC(?findspots) ?site", "external-identifiers": "SELECT ?site ?ancientName ?pleiades ?findspots WHERE {\n  { SELECT ?p (COUNT(DISTINCT ?fs) AS ?findspots) WHERE {\n      ?fs a lado:Findspot ; crm:P89_falls_within ?p .\n    } GROUP BY ?p }\n  ?p rdfs:label ?site .\n  OPTIONAL { ?p lado:ancientName ?ancientName }\n  OPTIONAL { ?p lado:pleiadesID  ?pleiades }\n}\nORDER BY ?site", "allen-possible": "SELECT ?relation (COUNT(*) AS ?pairs) WHERE {\n  ?a ?relation ?b .\n  ?a a lado:FindspotDating .\n  ?b a lado:FindspotDating .\n  FILTER(STRSTARTS(STR(?relation), CONCAT(STR(lado:), \"possibly\")))\n}\nGROUP BY ?relation\nORDER BY DESC(?pairs)", "allen-time-only": "SELECT ?relation (COUNT(*) AS ?pairs) WHERE {\n  ?a ?relation ?b .\n  ?a time:hasBeginning ?ab .\n  ?b time:hasBeginning ?bb .\n  FILTER(STRSTARTS(STR(?relation), CONCAT(STR(time:), \"interval\")))\n}\nGROUP BY ?relation\nORDER BY DESC(?pairs)", "allen-unstable": "SELECT ?siteA ?findspotA ?siteB ?findspotB ?fromA ?toA ?fromB ?toB\nWHERE {\n  ?tsA lado:possiblyBefore ?tsB .\n  FILTER NOT EXISTS { ?tsA time:intervalBefore ?tsB }\n  ?fsA crm:P4_has_time-span ?tsA ; rdfs:label ?findspotA ;\n       crm:P89_falls_within/rdfs:label ?siteA .\n  ?fsB crm:P4_has_time-span ?tsB ; rdfs:label ?findspotB ;\n       crm:P89_falls_within/rdfs:label ?siteB .\n  ?tsA lado:avgDatemin ?fromA ; lado:avgDatemax ?toA .\n  ?tsB lado:avgDatemin ?fromB ; lado:avgDatemax ?toB .\n}\nORDER BY ?fromA ?fromB\nLIMIT 40", "map-layer": "SELECT ?site ?findspot ?wkt ?from ?to ?norm ?colour WHERE {\n  ?fs a lado:Findspot ; rdfs:label ?findspot ;\n      crm:P89_falls_within ?p ; crm:P4_has_time-span ?ts .\n  ?p rdfs:label ?site ; geo:hasGeometry/geo:asWKT ?wkt .\n  ?ts time:hasBeginning/time:inTimePosition/time:numericPosition ?from ;\n      time:hasEnd/time:inTimePosition/time:numericPosition ?to .\n  ?row lado:renders ?ts ;\n       lado:normQInterval ?norm ; lado:hexQInterval ?colour .\n}\nORDER BY ?from", "colour-axes": "SELECT ?axis ?source ?ramp ?scale ?basis ?min ?max ?stops WHERE {\n  ?a a lado:ColourAxis ; lado:colourSource ?source ;\n     lado:rampName ?ramp ; lado:rampStops ?stops ;\n     lado:domainScale ?scale ; lado:domainBasis ?basis ;\n     lado:domainMin ?min ; lado:domainMax ?max .\n  BIND(REPLACE(STR(?a), \"^.*/\", \"\") AS ?axis)\n}\nORDER BY ?axis", "provenance": "SELECT ?software ?model ?kMin ?kMax ?tau ?t0 ?w ?era\n       (GROUP_CONCAT(DISTINCT STR(?ex); separator=\", \") AS ?excludedDatemax)\n       (COUNT(DISTINCT ?ts) AS ?datings)\nWHERE {\n  ?ts a lado:FindspotDating ; prov:wasGeneratedBy ?act .\n  ?act crm:P33_used_specific_technique ?m ;\n       crm:P14_carried_out_by ?agent .\n  ?agent rdfs:label ?software .\n  ?m rdfs:label ?model ; lado:kMin ?kMin ; lado:kMax ?kMax ;\n     lado:tau ?tau ; lado:referenceLength ?t0 ;\n     lado:volumeWeight ?w ; lado:eraConvention ?era ;\n     lado:excludedDatemax ?ex .\n}\nGROUP BY ?software ?model ?kMin ?kMax ?tau ?t0 ?w ?era"};
+const GRAPH    = {"file": "rdf/IPSDatedSites-bundle.ttl", "url": "bundle.ttl", "publish": true, "page_url": "../bundle.ttl", "megabytes": "0.3"};
+const MAX_ROWS = 500;
+const RDFLIB   = "7.1.1";
+</script>
+{% raw %}
+<script>
+const statusText = document.getElementById('status-text');
+const dot = document.getElementById('dot');
 let pyodide = null;
 
 function setStatus(text, state) {
@@ -156,306 +364,133 @@ function setStatus(text, state) {
   dot.className = 'dot ' + (state || '');
 }
 
+/* Escape once, centrally: cell values come from the graph and may contain
+   <, & or a stray quote, and building a table by string concatenation
+   without this is how an injection bug gets in. */
 function esc(s) {
   return String(s).replace(/[&<>"']/g, c => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
   }[c]));
 }
 
-/* ---- the sliders write the FILTER line, and only that line -------------- */
-function currentQuery() {
-  return TEMPLATE
-    .replace('§REP§', Number($('d-rep').value).toFixed(2))
-    .replace('§INT§', Number($('d-int').value).toFixed(2))
-    .replace('§N§',   String($('d-n').value));
-}
-
-function countFor(rep, int_, n) {
-  if (!CENSUS) return null;
-  return CENSUS.filter(r =>
-    r.qRepetition >= rep && r.qInterval >= int_ && r.nStamps >= n).length;
-}
-
-/* The largest value this one dial could take, with the other two where they
-   are, that still returns something. Shown as "empty above x" so the edge of
-   the useful range is visible before you drive over it. */
-function ceilingFor(which) {
-  if (!CENSUS) return null;
-  const rep = +$('d-rep').value, int_ = +$('d-int').value, n = +$('d-n').value;
-  const dial = $('d-' + which);
-  const step = +dial.step, max = +dial.max, min = +dial.min;
-  let best = null;
-  for (let v = min; v <= max + 1e-9; v += step) {
-    const c = which === 'rep' ? countFor(v, int_, n)
-            : which === 'int' ? countFor(rep, v, n)
-            :                   countFor(rep, int_, v);
-    if (c > 0) best = v;
-  }
-  return best;
-}
-
-function updateTally() {
-  const tally = $('tally');
-  if (!CENSUS) return;
-  const n = countFor(+$('d-rep').value, +$('d-int').value, +$('d-n').value);
-  tally.textContent = n === 0
-    ? `No findspot matches this. Loosen a threshold — the hints below each slider say where the edge is.`
-    : `${n} of ${CENSUS.length} findspots match. Press Run to fetch and plot them.`;
-  tally.className = 'tally' + (n === 0 ? ' empty' : '');
-
-  for (const which of ['rep', 'int', 'n']) {
-    const c = ceilingFor(which);
-    const el = $('c-' + which);
-    if (c === null) {
-      /* No setting of this dial rescues the result: the emptiness is coming
-         from one of the other two, and saying so is more use than a blank. */
-      el.textContent = 'nothing here helps — loosen another';
-      continue;
-    }
-    const dial = $('d-' + which);
-    const fmt = which === 'n' ? String(Math.round(c)) : c.toFixed(2);
-    el.textContent = c >= +dial.max - 1e-9
-      ? 'anything up to the maximum still returns rows'
-      : `empty above ${fmt}`;
-  }
-}
-
-function syncDials(rewrite) {
-  $('o-rep').textContent = Number($('d-rep').value).toFixed(2);
-  $('o-int').textContent = Number($('d-int').value).toFixed(2);
-  $('o-n').textContent   = $('d-n').value;
-  updateTally();
-  if (!rewrite) return;
-  /* Replace the FILTER line in place, so an edit elsewhere in the query
-     survives a drag of the slider. If the line has been renamed beyond
-     recognition the template is restored wholesale, which is the honest
-     thing: the sliders can only drive a filter they can find. */
-  const src = $('src').value;
-  const line = `  FILTER( ?qRepetition >= ${Number($('d-rep').value).toFixed(2)}` +
-               ` && ?qInterval >= ${Number($('d-int').value).toFixed(2)}` +
-               ` && ?nStamps >= ${$('d-n').value} )`;
-  $('src').value = /^\s*FILTER\(.*\)\s*$/m.test(src)
-    ? src.replace(/^\s*FILTER\(.*\)\s*$/m, line)
-    : currentQuery();
-}
-
-/* ---- RdYlGn, the same ramp the static figures use ----------------------- */
-const RAMP = [
-  [0.000, [165,  0, 38]], [0.125, [215, 48, 39]], [0.250, [244,109, 67]],
-  [0.375, [253,174, 97]], [0.500, [254,224,139]], [0.625, [217,239,139]],
-  [0.750, [166,217,106]], [0.875, [102,189, 99]], [1.000, [ 26,152, 80]]
-];
-function ramp(t) {
-  t = Math.max(0, Math.min(1, t));
-  for (let i = 1; i < RAMP.length; i++) {
-    if (t <= RAMP[i][0]) {
-      const [t0, c0] = RAMP[i - 1], [t1, c1] = RAMP[i];
-      const f = (t - t0) / (t1 - t0);
-      const c = c0.map((v, j) => Math.round(v + f * (c1[j] - v)));
-      return `rgb(${c[0]},${c[1]},${c[2]})`;
-    }
-  }
-  return 'rgb(26,152,80)';
-}
-
-/* ---- the plot, as SVG -------------------------------------------------- */
-function drawChart(rows) {
-  const host = $('chart');
-  const need = ['site', 'findspot', 'from', 'to', 'midpoint',
-                'qInterval', 'qRepetition'];
+function renderTable(cols, rows, elId, total) {
+  const out = document.getElementById(elId);
   if (!rows.length) {
-    host.innerHTML = '<p class="empty">Nothing matched. Loosen a threshold.</p>';
+    out.innerHTML = '<p class="note">No results. The query is valid but matched nothing.</p>';
     return;
   }
-  if (!need.every(k => k in rows[0])) {
-    host.innerHTML = '<p class="empty">The result has no ' +
-      esc(need.find(k => !(k in rows[0]))) +
-      ' column, so there is nothing to plot. The table is below.</p>';
-    return;
-  }
-
-  const R = 34, LABEL_W = 250, BAR_W = 62, PAD_R = 78, TOP = 26, BOT = 44;
-  const plotW = 620;
-  const W = LABEL_W + BAR_W + plotW + PAD_R;
-  const H = TOP + rows.length * R + BOT;
-
-  const lo = Math.min(...rows.map(r => +r.from));
-  const hi = Math.max(...rows.map(r => +r.to));
-  const padY = Math.max(8, (hi - lo) * 0.06);
-  const x0 = lo - padY, x1 = hi + padY;
-  const X = v => LABEL_W + BAR_W + ((v - x0) / (x1 - x0)) * plotW;
-
-  const ticks = [];
-  const step = (x1 - x0) > 260 ? 50 : 25;
-  for (let v = Math.ceil(x0 / step) * step; v <= x1; v += step) ticks.push(v);
-
-  let s = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" ` +
-          `xmlns="http://www.w3.org/2000/svg" font-family="inherit">`;
-  s += `<rect width="${W}" height="${H}" fill="#fff"/>`;
-
-  for (const v of ticks) {
-    s += `<line x1="${X(v).toFixed(1)}" y1="${TOP - 6}" x2="${X(v).toFixed(1)}" ` +
-         `y2="${TOP + rows.length * R}" stroke="#e2e6eb" stroke-width="1"/>` +
-         `<text x="${X(v).toFixed(1)}" y="${TOP + rows.length * R + 16}" ` +
-         `text-anchor="middle" font-size="10" fill="#5b6470">${v}</text>`;
-  }
-  s += `<text x="${(LABEL_W + BAR_W + plotW / 2).toFixed(1)}" ` +
-       `y="${H - 10}" text-anchor="middle" font-size="10" fill="#5b6470">year AD</text>`;
-
-  rows.forEach((r, i) => {
-    const y = TOP + i * R + R / 2;
-    s += `<text x="${LABEL_W - 12}" y="${y - 2}" text-anchor="end" ` +
-         `font-size="11" fill="#1a1a1a">${esc(r.site)}</text>`;
-    s += `<text x="${LABEL_W - 12}" y="${y + 10}" text-anchor="end" ` +
-         `font-size="10" fill="#5b6470">${esc(r.findspot)}</text>`;
-
-    const rep = Math.max(0, Math.min(1, +r.qRepetition));
-    /* The bar is scaled to leave room for its own number: at qRepetition
-       0.85 a bar drawn across the whole margin runs under the label. */
-    s += `<rect x="${LABEL_W}" y="${y - 5}" width="${(rep * (BAR_W - 42)).toFixed(1)}" ` +
-         `height="10" fill="#4a6b96" opacity="0.85"/>`;
-    s += `<text x="${LABEL_W + BAR_W - 6}" y="${y + 4}" text-anchor="end" ` +
-         `font-size="9" fill="#4a6b96">${rep.toFixed(2)}</text>`;
-
-    const bx = X(+r.from), bw = Math.max(2, X(+r.to) - X(+r.from));
-    s += `<rect x="${bx.toFixed(1)}" y="${y - 9}" width="${bw.toFixed(1)}" height="18" ` +
-         `fill="${ramp(+r.qInterval)}" stroke="#1b2430" stroke-width="0.8"/>`;
-    const mx = X(+r.midpoint);
-    s += `<line x1="${mx.toFixed(1)}" y1="${y - 7}" x2="${mx.toFixed(1)}" ` +
-         `y2="${y + 7}" stroke="#1b2430" stroke-width="1.2"/>`;
-    s += `<text x="${(X(+r.to) + 6).toFixed(1)}" y="${y + 4}" font-size="9.5" ` +
-         `fill="#5b6470">${esc(r.from)}\u2013${esc(r.to)}</text>`;
-  });
-
-  s += '</svg>';
-  host.innerHTML = s;
-}
-
-function drawTable(cols, rows, total) {
-  const host = $('table');
-  if (!rows.length) { host.innerHTML = ''; return; }
-  const num = new Set(['from', 'to', 'midpoint', 'sigma', 'k', 'qInterval',
-                       'qRepetition', 'nStamps', 'nDies']);
-  let h = '<div class="table-scroll"><table class="layer-table"><thead><tr>';
-  h += cols.map(c => `<th>${esc(c)}</th>`).join('') + '</tr></thead><tbody>';
+  let h = '<div class="table-scroll"><table><thead><tr>';
+  h += cols.map(c => `<th>${esc(c)}</th>`).join('');
+  h += '</tr></thead><tbody>';
   for (const r of rows) {
     h += '<tr>' + cols.map(c => {
       const v = r[c];
-      if (v === null || v === undefined) return '<td>&mdash;</td>';
-      return num.has(c) ? `<td class="num">${esc(v)}</td>` : `<td>${esc(v)}</td>`;
+      if (v === null || v === undefined) return '<td class="nil">&mdash;</td>';
+      const s = String(v);
+      return /^https?:\/\//.test(s)
+        ? `<td><a href="${esc(s)}" target="_blank" rel="noopener">${esc(s)}</a></td>`
+        : `<td>${esc(s)}</td>`;
     }).join('') + '</tr>';
   }
-  h += `</tbody></table></div><p class="note">${
-    total > rows.length ? `Showing the first ${rows.length} of ${total} rows.`
-                        : `${rows.length} findspot${rows.length === 1 ? '' : 's'}.`}</p>`;
-  host.innerHTML = h;
+  h += '</tbody></table></div>';
+  h += `<p class="note">${total > rows.length
+    ? `Showing the first ${rows.length} of ${total} rows.`
+    : `${rows.length} row${rows.length === 1 ? '' : 's'}.`}</p>`;
+  out.innerHTML = h;
 }
 
-/* ---- boot -------------------------------------------------------------- */
 async function boot() {
   try {
     pyodide = await loadPyodide();
     setStatus('Installing rdflib\u2026', 'busy');
     await pyodide.loadPackage('micropip');
+    pyodide.globals.set('_rdflib_version', RDFLIB);
     await pyodide.runPythonAsync(`
 import micropip
-await micropip.install("rdflib==7.1.1")
+await micropip.install("rdflib==" + _rdflib_version)
 `);
     setStatus('Loading the graph\u2026', 'busy');
-    pyodide.globals.set('_graph_url', GRAPH_URL);
+    pyodide.globals.set('_graph_url', GRAPH.page_url || GRAPH.url);
     await pyodide.runPythonAsync(`
-import warnings
-warnings.filterwarnings("ignore")
-
 from pyodide.http import pyfetch
 from rdflib import Graph
 
-async def _load(url):
+_graphs = {}
+
+async def load(url, key):
+    """Fetch a Turtle file and parse it. Cached: a re-run must not refetch."""
+    if key in _graphs:
+        return _graphs[key]
     resp = await pyfetch(url)
     if resp.status != 200:
         raise RuntimeError(f"{url} -> HTTP {resp.status}")
+    text = await resp.string()
     g = Graph()
-    g.parse(data=await resp.string(), format="turtle")
+    g.parse(data=text, format="turtle")
+    _graphs[key] = g
     return g
 
-_g = await _load(_graph_url)
-n_triples = len(_g)
+base = await load(_graph_url, "base")
+n_base = len(base)
 `);
-    pyodide.globals.set('_census_q', CENSUS_QUERY);
-    const censusJson = await pyodide.runPythonAsync(`
-import json
-_res = _g.query(_census_q)
-json.dumps([{"qInterval": float(r[0]), "qRepetition": float(r[1]),
-             "nStamps": int(r[2])} for r in _res])
-`);
-    CENSUS = JSON.parse(censusJson);
-
-    const n = pyodide.globals.get('n_triples');
-    const note = $('graph-note');
+    const n = pyodide.globals.get('n_base');
+    const note = document.getElementById('graph-note');
     note.hidden = false;
-    note.innerHTML = `Graph loaded: <strong>${n}</strong> triples from ` +
-      `<code>${esc(GRAPH_URL)}</code>.`;
-    setStatus('Ready \u2014 drag a threshold, or edit the query, then Run.', 'ok');
-    $('run').disabled = false;
-    updateTally();
+    note.innerHTML = `Graph loaded: <strong>${n}</strong> triples from <code>${esc(GRAPH.file)}</code> (${esc(GRAPH.megabytes)} MB). <a href="${esc(GRAPH.page_url || GRAPH.url)}">Download the Turtle file</a>.`;
+    setStatus('Ready \u2014 edit a query and press Run.', 'ok');
+    document.querySelectorAll('button.run').forEach(b => (b.disabled = false));
   } catch (err) {
     setStatus('Could not start: ' + err.message, 'err');
     console.error(err);
   }
 }
 
-async function run() {
-  const btn = $('run');
+async function runQuery(id) {
+  const btn = document.querySelector(`button.run[data-q="${id}"]`);
+  const timing = document.getElementById('time-' + id);
+  const out = document.getElementById('out-' + id);
   btn.disabled = true;
-  $('timing').textContent = 'running\u2026';
-  $('err').innerHTML = '';
+  timing.textContent = 'running\u2026';
+  out.innerHTML = '';
   const t0 = performance.now();
   try {
-    pyodide.globals.set('_q', $('src').value);
+    const src = document.getElementById('src-' + id).value;
+    pyodide.globals.set('_q_src', PREFIXES + '\n' + src);
+    pyodide.globals.set('_max_rows', MAX_ROWS);
     const json = await pyodide.runPythonAsync(`
 import json
-res = _g.query(_q)
+g = _graphs["base"]
+res = g.query(_q_src)
 cols = [str(v) for v in res.vars]
 _all = list(res)
 rows = [{c: (None if r[i] is None else str(r[i])) for i, c in enumerate(cols)}
-        for r in _all[:${MAX_ROWS}]]
-json.dumps({"cols": cols, "rows": rows, "total": len(_all)})
+        for r in _all[:_max_rows]]
+json.dumps({"cols": cols, "rows": rows, "n": len(g), "total": len(_all)})
 `);
     const data = JSON.parse(json);
-    /* gYear literals arrive zero-padded: "0070". Numbers are wanted. */
-    for (const r of data.rows) {
-      for (const k of ['from', 'to']) {
-        if (r[k] !== null && r[k] !== undefined) r[k] = String(parseInt(r[k], 10));
-      }
-    }
-    drawChart(data.rows);
-    drawTable(data.cols, data.rows, data.total);
-    $('timing').textContent =
-      `${((performance.now() - t0) / 1000).toFixed(1)}s \u00b7 ${data.total} findspots`;
+    renderTable(data.cols, data.rows, 'out-' + id, data.total);
+    const dt = ((performance.now() - t0) / 1000).toFixed(1);
+    timing.textContent = `${dt}s over ${data.n} triples`;
   } catch (err) {
-    $('err').innerHTML = `<pre class="error">${esc(err.message)}</pre>`;
-    $('timing').textContent = '';
-    $('chart').innerHTML = '<p class="empty">The query did not run.</p>';
+    /* Show the real error. A malformed query is the normal case here —
+       people are meant to edit these — so the message has to be the
+       actual parse error. */
+    out.innerHTML = `<pre class="error">${esc(err.message)}</pre>`;
+    timing.textContent = '';
   }
   btn.disabled = false;
 }
 
-['d-rep', 'd-int', 'd-n'].forEach(id =>
-  $(id).addEventListener('input', () => syncDials(true)));
-$('run').addEventListener('click', run);
-$('reset').addEventListener('click', () => {
-  $('d-rep').value = 0.30; $('d-int').value = 0.60; $('d-n').value = 10;
-  $('src').value = currentQuery();
-  syncDials(false);
-  $('chart').innerHTML = '<p class="empty">Press Run.</p>';
-  $('table').innerHTML = '';
-  $('err').innerHTML = '';
-  $('timing').textContent = '';
-});
+document.querySelectorAll('button.run').forEach(b =>
+  b.addEventListener('click', () => runQuery(b.dataset.q)));
+document.querySelectorAll('button.reset').forEach(b =>
+  b.addEventListener('click', () => {
+    const id = b.dataset.q;
+    document.getElementById('src-' + id).value = QUERIES[id];
+    document.getElementById('out-' + id).innerHTML = '';
+    document.getElementById('time-' + id).textContent = '';
+  }));
 
-$('src').value = currentQuery();
-syncDials(false);
 boot();
 </script>
-</body>
-</html>
+{% endraw %}

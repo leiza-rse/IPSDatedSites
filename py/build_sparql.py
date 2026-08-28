@@ -4,8 +4,9 @@ IPS Dated Sites — the query page, from queries.yaml
 
 One source, three products, so that they cannot drift apart:
 
-    docs/sparql.html               the page the repository publishes
-    docs/downloads/queries/*.rq    the same queries as plain files
+    docs/query/index.html          the page the repository publishes
+    docs/query/rq/*.rq             the same queries as plain files
+    docs/sparql.html               a redirect stub, see WHY A STUB below
     qmd/<name>.qmd                 the quarto-live variant, for OER reuse
     docs/map.html, docs/map.geojson   the map, via py/build_map.py
 
@@ -59,7 +60,30 @@ ROOT = Path(__file__).resolve().parent.parent
 TEMPLATES = Path(__file__).resolve().parent / "templates"
 QUERIES_YAML = ROOT / "queries.yaml"
 QMD_DIR = ROOT / "qmd"
-RQ_DIRNAME = "queries"
+# The query layer lives under docs/query/. Two owners write into that
+# folder: this module writes index.html and rq/, py/make_talk_figures.py
+# writes closed-groups.html with its stylesheet and its own .rq. They are
+# kept apart by folder rather than by good intentions — write_rq_files()
+# clears its target directory, and pointing it at docs/query/ itself would
+# delete the talk page's query file on the next run.
+QUERY_DIRNAME = "query"
+RQ_DIRNAME = "rq"
+
+# WHY A STUB
+# ----------
+# docs/sparql.html was the published address of this page and is wired into
+# the live ColdFusion application through webjs/CFM_PATCH.md. GitHub Pages
+# performs no redirects without a plugin, so the old path keeps a small
+# page that forwards. Three lines against a dead link in somebody else's
+# application is a trade worth making, and it costs nothing to keep.
+REDIRECT_STUB = """\
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>Moved &mdash; the query page is now at query/</title>
+<link rel="canonical" href="query/">
+<meta http-equiv="refresh" content="0; url=query/">
+<p>The query page has moved to <a href="query/">query/</a>.</p>
+"""
 
 # Pinned so that an archived copy keeps working. An unpinned CDN path
 # follows whatever Pyodide ships next, and an rdflib that no longer
@@ -114,7 +138,7 @@ def check_queries(cfg: dict, graph_file: Path) -> bool:
 
 def write_rq_files(cfg: dict, docs: Path) -> Path:
     """Each query as a plain .rq file, for use outside the browser."""
-    out_dir = docs / "downloads" / RQ_DIRNAME
+    out_dir = docs / QUERY_DIRNAME / RQ_DIRNAME
     out_dir.mkdir(parents=True, exist_ok=True)
     for stale in out_dir.glob("*.rq"):      # drop renamed leftovers
         stale.unlink()
@@ -151,12 +175,15 @@ def build(docs: Path = ROOT / "docs", strict: bool = True) -> list[Path]:
 
     written = [write_rq_files(cfg, docs)]
 
-    # The browser fetches the graph relative to the page.
+    # The browser fetches the graph relative to the page. The file stays at
+    # the site root — it is the citable artefact and qmd/ hard-codes its
+    # absolute URL — so the page, one directory down, reaches it with ../.
     if graph_cfg.get("publish"):
         target = docs / graph_cfg["url"]
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(graph_file, target)
         written.append(target)
+    graph_cfg["page_url"] = "../" + graph_cfg["url"]
     graph_cfg["megabytes"] = f"{graph_file.stat().st_size / 1e6:.1f}"
 
     queries = []
@@ -179,9 +206,14 @@ def build(docs: Path = ROOT / "docs", strict: bool = True) -> list[Path]:
         graph_json=json.dumps(graph_cfg, ensure_ascii=False),
         queries_json=json.dumps({q["id"]: q["sparql"] for q in queries},
                                 ensure_ascii=False))
-    html_path = docs / "sparql.html"
+    html_path = docs / QUERY_DIRNAME / "index.html"
+    html_path.parent.mkdir(parents=True, exist_ok=True)
     html_path.write_text(html, encoding="utf-8")
     written.append(html_path)
+
+    stub_path = docs / "sparql.html"
+    stub_path.write_text(REDIRECT_STUB, encoding="utf-8")
+    written.append(stub_path)
 
     # The map is generated from the same config and the same graph, so it
     # cannot describe a different corpus than the query page beside it.

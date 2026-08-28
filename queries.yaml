@@ -23,9 +23,10 @@ page:
     the vocabulary and a materialised CRM crosswalk, so it can be loaded
     into a triplestore on its own.
   nav:
-    - {href: "index.html", label: "Overview"}
-    - {href: "model.html", label: "Model"}
-    - {href: "sparql.html", label: "Query", active: true}
+    - {href: "../index.html", label: "Overview"}
+    - {href: "../model.html", label: "Model"}
+    - {href: "index.html", label: "Query", active: true}
+    - {href: "closed-groups.html", label: "Closed groups"}
 
 qmd:
   file: ips-dated-sites-sparql-live.qmd

@@ -113,7 +113,7 @@ def diagram_architecture(**_) -> str:
     WEB["py/make_webjs.py"]
     JS["webjs/<br/>ips_rdf.js<br/>to the ColdFusion server"]
     SPB["py/build_sparql.py<br/>queries.yaml"]
-    PAGE["docs/sparql.html<br/>docs/bundle.ttl<br/>qmd/"]
+    PAGE["docs/query/<br/>docs/bundle.ttl<br/>qmd/"]
     CHK{{"round trip<br/>17 fields compared"}}
     PAR{{"parity<br/>sorted N-Triples, SHA-256"}}
 

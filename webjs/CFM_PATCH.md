@@ -69,7 +69,7 @@ contract and a SQL change shows up in the diff instead of slipping through.
 ```html
 <button id="downloadSvg">Download SVG</button>
 <button id="downloadTtl">Download triples (.ttl)</button>
-<a href="https://leiza-rse.github.io/IPSDatedSites/sparql.html"
+<a href="https://leiza-rse.github.io/IPSDatedSites/query/"
    target="_blank" rel="noopener">Query the published graph &rarr;</a>
 ```
 
