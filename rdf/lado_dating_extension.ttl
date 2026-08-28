@@ -107,6 +107,14 @@ lado:colourSource a owl:ObjectProperty ;
     rdfs:isDefinedBy <http://archaeology.link/ontology> ;
     rdfs:range rdf:Property .
 
+lado:constrains a owl:ObjectProperty ;
+    rdfs:label "constrains"@en ;
+    rdfs:comment "Das Ensemble, fuer das dieser Termin eine Schranke setzt."@de,
+        "The assemblage a terminus sets a bound on. Following it leads from the fixed point to the dating it constrains, and back."@en ;
+    rdfs:domain lado:IndependentTerminus ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range lado:Findspot .
+
 lado:dieRepetition a owl:DatatypeProperty ;
     rdfs:label "die repetition"@en ;
     rdfs:comment "nStampsWithDie / nDies. Depot-Indikator."@de,
@@ -238,6 +246,14 @@ lado:identifierScheme a owl:DatatypeProperty ;
     rdfs:comment "Rezept, nach dem die Fundstellen-Fragmente gebildet werden. Muss von jeder weiteren Implementierung zeichengenau reproduziert werden, sonst entstehen abweichende URIs."@de,
         "The recipe by which findspot URI fragments are built. Any further implementation must reproduce it character for character, including the Unicode normalisation step, or it will mint different URIs for the same findspot."@en ;
     rdfs:domain dcat:Dataset ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:string .
+
+lado:independentEvidence a owl:DatatypeProperty ;
+    rdfs:label "independent evidence"@en ;
+    rdfs:comment "Woher das Datum stammt. Muss von Sigillata unabhaengig sein, sonst waere die Kalibrierung zirkulaer."@de,
+        "Where the date comes from. It has to be independent of samian, or the calibration would be circular — the model would be tuned against dates the model itself produced."@en ;
+    rdfs:domain lado:IndependentTerminus ;
     rdfs:isDefinedBy <http://archaeology.link/ontology> ;
     rdfs:range xsd:string .
 
@@ -626,6 +642,14 @@ lado:tau a owl:DatatypeProperty ;
     rdfs:isDefinedBy <http://archaeology.link/ontology> ;
     rdfs:range xsd:decimal .
 
+lado:terminusKind a owl:DatatypeProperty ;
+    rdfs:label "terminus kind"@en ;
+    rdfs:comment "Welche Art von Schranke. 'terminus ante quem': das Material lag spaetestens zu diesem Zeitpunkt am Fundort. AUSDRUECKLICH KEIN Herstellungsdatum — Pompeji 79 heisst, dass die Ware 79 dort lag, nicht dass sie 79 produziert wurde."@de,
+        "What kind of bound this is. A terminus ante quem says the material was in place by that date; it is emphatically not a production date. Pompeii AD 79 means the ware was there when Vesuvius erupted, not that it was made in 79. Blurring the two is the standard way of over-reading a fixed point, and the distinction is why this property exists rather than a bare year."@en ;
+    rdfs:domain lado:IndependentTerminus ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:string .
+
 lado:uncEndYears a owl:DatatypeProperty ;
     rdfs:label "uncertainty end (years)"@en ;
     rdfs:comment "VISUAL ONLY. Siehe uncStartYears."@de,
@@ -666,14 +690,23 @@ lado:volumeWeight a owl:DatatypeProperty ;
     rdfs:isDefinedBy <http://archaeology.link/ontology> ;
     rdfs:range xsd:decimal .
 
-crmdig:D14_Software rdfs:subClassOf crmdig:D1_Digital_Object .
-
-lado:Findspot a owl:Class ;
-    rdfs:label "Findspot"@en ;
-    rdfs:comment "Benannte Fundstelle innerhalb eines Fundplatzes. Faellt ueber crm:P89_falls_within in die DiscoverySite. Ein Fundplatz kann mehrere Fundstellen tragen, getrennt datiert und mitunter weit auseinander (Bregenz ist der Standardfall)."@de,
-        "A named context within a discovery site, such as a pit, a ditch or a destruction layer. It falls within its site via crm:P89_falls_within. A site may carry several findspots, dated separately and sometimes far apart — Bregenz is the standing example — which is why the dating hangs on the findspot and not on the site."@en ;
+lado:withheldBecause a owl:DatatypeProperty ;
+    rdfs:label "withheld because"@en ;
+    rdfs:comment "Die Begruendung fuer die Zurueckhaltung, im Klartext."@de,
+        "Why a terminus was withheld from the criterion, in plain words, so that the judgement can be disagreed with rather than merely obeyed."@en ;
+    rdfs:domain lado:IndependentTerminus ;
     rdfs:isDefinedBy <http://archaeology.link/ontology> ;
-    rdfs:subClassOf lado:Location .
+    rdfs:range xsd:string .
+
+lado:withheldFromCriterion a owl:DatatypeProperty ;
+    rdfs:label "withheld from criterion"@en ;
+    rdfs:comment "Wahr, wenn dieser Termin in den Abbildungen erscheint, aber nicht in das Kalibrierungskriterium eingeht. Ein bestrittener Termin darf keinen publizierten Parameter setzen; ihn ganz wegzulassen wuerde verbergen, dass er je ein Kandidat war."@de,
+        "True where a terminus appears in the figures but was kept out of the calibration criterion. A contested date should not set a published parameter; dropping it altogether would hide that it was ever a candidate and why. The accompanying reason says which is the case here."@en ;
+    rdfs:domain lado:IndependentTerminus ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:boolean .
+
+crmdig:D14_Software rdfs:subClassOf crmdig:D1_Digital_Object .
 
 crm:E11_Modification rdfs:subClassOf crm:E7_Activity .
 
@@ -686,12 +719,26 @@ crmdig:D1_Digital_Object rdfs:subClassOf crm:E73_Information_Object .
 crmdig:D7_Digital_Machine_Event rdfs:subClassOf crm:E11_Modification,
         crm:E65_Creation .
 
+lado:Findspot a owl:Class ;
+    rdfs:label "Findspot"@en ;
+    rdfs:comment "Benannte Fundstelle innerhalb eines Fundplatzes. Faellt ueber crm:P89_falls_within in die DiscoverySite. Ein Fundplatz kann mehrere Fundstellen tragen, getrennt datiert und mitunter weit auseinander (Bregenz ist der Standardfall)."@de,
+        "A named context within a discovery site, such as a pit, a ditch or a destruction layer. It falls within its site via crm:P89_falls_within. A site may carry several findspots, dated separately and sometimes far apart — Bregenz is the standing example — which is why the dating hangs on the findspot and not on the site."@en ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:subClassOf lado:Location .
+
 lado:Location a owl:Class ;
     rdfs:label "Location"@en ;
     rdfs:comment "Bestehende LADO-Klasse, hier in CIDOC CRM verankert."@de,
         "An existing LADO class, anchored here beneath crm:E53_Place so that consumers who reason over CIDOC CRM can reach it without knowing LADO."@en ;
     rdfs:isDefinedBy <http://archaeology.link/ontology> ;
     rdfs:subClassOf crm:E53_Place .
+
+lado:IndependentTerminus a owl:Class ;
+    rdfs:label "Independent terminus"@en ;
+    rdfs:comment "Ein Ereignis, dessen Datum unabhaengig von Sigillata bekannt ist und das dadurch eine Schranke fuer ein Ensemble setzt. Die Klasse benennt die ROLLE des Ereignisses im Datierungsverfahren, nicht seine Art: der Vesuvausbruch und die Aufgabe eines Lagers sind beides Ereignisse, und beide werden hier zu Terminen, weil ihr Datum aus anderen Quellen stammt als aus dem datierten Material selbst."@de,
+        "An event whose date is known from something other than samian — a coin series, a dendrochronological sequence, a volcano, the historical record — and which therefore bounds the assemblage found with it. The class names the event's ROLE in the dating procedure rather than its kind: an eruption and the abandonment of a fort are both events, and both become termini here because their dates come from outside the material being dated. Publishing them closes a gap: the graph used to say that the model was calibrated against five findspots without ever saying against what."@en ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:subClassOf crm:E5_Event .
 
 lado:DatingModel a owl:Class ;
     rdfs:label "Dating model"@en ;

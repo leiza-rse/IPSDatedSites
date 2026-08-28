@@ -1,0 +1,39 @@
+# The dates the model was calibrated against
+# Five events dated by something other than samian — coins, dendrochronology,
+# a volcano, the historical record — and the assemblage each of them bounds.
+# Every one of these intervals must contain its own terminus, because that is
+# the criterion that fixed tau = 6 in the first place, so this query is also a
+# self-test. <code>margin</code> is how much room the model had to spare at
+# the nearer edge: Pompeii is the tightest, which is why it is the reference
+# that binds. Velsen is marked withheld — it appears in the figures but was
+# kept out of the criterion, because activity continued on the site and the
+# terminus may bound the base rather than the assemblage.
+
+PREFIX samian:  <http://data.archaeology.link/data/samian/>
+PREFIX lado:    <http://archaeology.link/ontology#>
+PREFIX crm:     <http://www.cidoc-crm.org/cidoc-crm/>
+PREFIX crmdig:  <http://www.ics.forth.gr/isl/CRMdig/>
+PREFIX time:    <http://www.w3.org/2006/time#>
+PREFIX prov:    <http://www.w3.org/ns/prov#>
+PREFIX dcat:    <http://www.w3.org/ns/dcat#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX skos:    <http://www.w3.org/2004/02/skos/core#>
+PREFIX geo:     <http://www.opengis.net/ont/geosparql#>
+PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?event ?terminus ?site ?findspot ?from ?to ?margin ?withheld
+WHERE {
+  ?ev a lado:IndependentTerminus ; rdfs:label ?event ;
+      lado:constrains ?fs ;
+      crm:P4_has_time-span/time:inTimePosition/time:numericPosition
+        ?terminus .
+  ?fs rdfs:label ?findspot ; crm:P89_falls_within/rdfs:label ?site ;
+      crm:P4_has_time-span ?ts .
+  ?ts time:hasBeginning/time:inTimePosition/time:numericPosition ?from ;
+      time:hasEnd/time:inTimePosition/time:numericPosition ?to .
+  BIND(ROUND(IF(?terminus - ?from < ?to - ?terminus,
+                ?terminus - ?from, ?to - ?terminus)) AS ?margin)
+  OPTIONAL { ?ev lado:withheldFromCriterion ?withheld }
+}
+ORDER BY ?margin

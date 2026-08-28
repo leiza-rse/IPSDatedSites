@@ -87,6 +87,12 @@ A published figure. Carries the constants that belong to the drawing rather than
 
 The presentation layer of a single dating. It deliberately carries the uncertainty whiskers, which the method documentation describes as visual only, keeping them off the time-span where they would read as an archaeological claim.
 
+### `lado:IndependentTerminus`
+
+*Independent terminus* — subclass of `crm:E5_Event`
+
+An event whose date is known from something other than samian — a coin series, a dendrochronological sequence, a volcano, the historical record — and which therefore bounds the assemblage found with it. The class names the event's ROLE in the dating procedure rather than its kind: an eruption and the abandonment of a fort are both events, and both become termini here because their dates come from outside the material being dated. Publishing them closes a gap: the graph used to say that the model was calibrated against five findspots without ever saying against what.
+
 ### `lado:ColourAxis`
 
 *Colour axis* — subclass of `crm:E36_Visual_Item`
@@ -100,6 +106,7 @@ A complete specification of how one measured quantity becomes a colour: the ramp
 | `lado:renders` | `lado:PlotRow` | `lado:DatedTimeSpan` | Links a plot row to the dating it depicts. Following this property in reverse tells you whether a given dating appears in any published figure. |
 | `lado:hasRow` | `lado:Figure` | `lado:PlotRow` | Links a figure to the plot rows it contains. |
 | `lado:undefinedMeasure` | `lado:DatedTimeSpan` | `<http://www.w3.org/1999/02/22-rdf-syntax-ns#Property>` | Names a measure that could not be computed for this subject. Under the open-world assumption a missing triple is merely unknown; this property distinguishes 'we computed it and it does not exist' from 'nobody has looked yet'. |
+| `lado:constrains` | `lado:IndependentTerminus` | `lado:Findspot` | The assemblage a terminus sets a bound on. Following it leads from the fixed point to the dating it constrains, and back. |
 | `lado:hasColourAxis` | `lado:Figure` | `lado:ColourAxis` | Relates a figure to a colour axis its rows can be shaded by. A figure carries several, because sharpness, chronology, dispersion and sample size answer different questions and choosing between them belongs to whoever is drawing the map. |
 | `lado:colourSource` | `lado:ColourAxis` | `<http://www.w3.org/1999/02/22-rdf-syntax-ns#Property>` | The measured property an axis takes its values from. Following it leads from the colour back to the evidence. |
 | `lado:normalisedProperty` | `lado:ColourAxis` | `<http://www.w3.org/1999/02/22-rdf-syntax-ns#Property>` | The property under which this axis's normalised value appears on a plot row. Named in the graph so that a client can discover the axes rather than having the property names compiled into it. |
@@ -192,6 +199,15 @@ A complete specification of how one measured quantity becomes a colour: the ramp
 | `lado:bandPadding` | `xsd:decimal` | Fraction of each row left empty between bars, following the d3.scaleBand convention. |
 | `lado:colourRamp` | `xsd:string` | Name of the colour ramp mapping quality to colour, recorded so that a reader can reproduce the fill colours rather than eyeballing them. |
 | `lado:rowOrder` | `xsd:string` | The rule by which rows are sorted, allowing the order of the published figure to be reproduced from the graph alone. |
+
+### Properties of `lado:IndependentTerminus`
+
+| Property | Range | Definition |
+|---|---|---|
+| `lado:terminusKind` | `xsd:string` | What kind of bound this is. A terminus ante quem says the material was in place by that date; it is emphatically not a production date. Pompeii AD 79 means the ware was there when Vesuvius erupted, not that it was made in 79. Blurring the two is the standard way of over-reading a fixed point, and the distinction is why this property exists rather than a bare year. |
+| `lado:independentEvidence` | `xsd:string` | Where the date comes from. It has to be independent of samian, or the calibration would be circular — the model would be tuned against dates the model itself produced. |
+| `lado:withheldFromCriterion` | `xsd:boolean` | True where a terminus appears in the figures but was kept out of the calibration criterion. A contested date should not set a published parameter; dropping it altogether would hide that it was ever a candidate and why. The accompanying reason says which is the case here. |
+| `lado:withheldBecause` | `xsd:string` | Why a terminus was withheld from the criterion, in plain words, so that the judgement can be disagreed with rather than merely obeyed. |
 
 ### Properties of `lado:PlotRow`
 

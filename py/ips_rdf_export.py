@@ -200,6 +200,17 @@ CALIBRATION_REFERENCES = [
      "historically dated abandonment", False),
 ]
 
+# Label for the event behind each terminus, keyed by discovery site. Kept
+# apart from CALIBRATION_REFERENCES so that adding a label cannot disturb
+# the tuple py/calibrate_tau.py unpacks.
+TERMINUS_EVENTS = {
+    "Dangstetten": "Abandonment of the legionary camp",
+    "Oberaden": "Abandonment of the legionary camp",
+    "Velsen": "Abandonment of the naval base",
+    "Pompeii": "Eruption of Vesuvius",
+    "Inchtuthil": "Abandonment of the legionary fortress",
+}
+
 FIGURE_CONSTANTS = {
     "padYears": (60, XSD.integer),            # Z. 373
     "extremeStubYears": (10, XSD.integer),    # Z. 472
@@ -389,6 +400,13 @@ CLASSES = [
     (LADO.PlotRow, [CRM.E36_Visual_Item], "Plot row",
      "Darstellungsschicht einer Datierung. Traegt ausdruecklich die "
      "Groessen, die laut Methodendoku 'visual only' sind."),
+    (LADO.IndependentTerminus, [CRM.E5_Event], "Independent terminus",
+     "Ein Ereignis, dessen Datum unabhaengig von Sigillata bekannt ist und "
+     "das dadurch eine Schranke fuer ein Ensemble setzt. Die Klasse "
+     "benennt die ROLLE des Ereignisses im Datierungsverfahren, nicht "
+     "seine Art: der Vesuvausbruch und die Aufgabe eines Lagers sind "
+     "beides Ereignisse, und beide werden hier zu Terminen, weil ihr Datum "
+     "aus anderen Quellen stammt als aus dem datierten Material selbst."),
     (LADO.ColourAxis, [CRM.E36_Visual_Item], "Colour axis",
      "Eine Abbildung einer gemessenen Groesse auf eine Farbskala, "
      "vollstaendig beschrieben: Stuetzstellen, Interpolation, "
@@ -430,6 +448,9 @@ OBJ_PROPS = [
      "Benennt eine Groesse, die fuer diese Zeitspanne nicht berechenbar "
      "war. Macht Abwesenheit explizit, statt sie der Open-World-Annahme "
      "zu ueberlassen."),
+    (LADO.constrains, LADO.IndependentTerminus, LADO.Findspot,
+     "constrains",
+     "Das Ensemble, fuer das dieser Termin eine Schranke setzt."),
     (LADO.hasColourAxis, LADO.Figure, LADO.ColourAxis, "has colour axis",
      "Verbindet die Abbildung mit einer der Farbachsen, nach denen ihre "
      "Zeilen eingefaerbt werden koennen."),
@@ -570,6 +591,26 @@ DATA_PROPS = [
     (LADO.rowOrder, LADO.Figure, XSD.string, "row order",
      "Sortierregel der Zeilen. Erlaubt es, die Reihenfolge der Abbildung "
      "aus dem Graphen zu reproduzieren."),
+    # Unabhaengige Termine
+    (LADO.terminusKind, LADO.IndependentTerminus, XSD.string,
+     "terminus kind",
+     "Welche Art von Schranke. 'terminus ante quem': das Material lag "
+     "spaetestens zu diesem Zeitpunkt am Fundort. AUSDRUECKLICH KEIN "
+     "Herstellungsdatum — Pompeji 79 heisst, dass die Ware 79 dort lag, "
+     "nicht dass sie 79 produziert wurde."),
+    (LADO.independentEvidence, LADO.IndependentTerminus, XSD.string,
+     "independent evidence",
+     "Woher das Datum stammt. Muss von Sigillata unabhaengig sein, sonst "
+     "waere die Kalibrierung zirkulaer."),
+    (LADO.withheldFromCriterion, LADO.IndependentTerminus, XSD.boolean,
+     "withheld from criterion",
+     "Wahr, wenn dieser Termin in den Abbildungen erscheint, aber nicht in "
+     "das Kalibrierungskriterium eingeht. Ein bestrittener Termin darf "
+     "keinen publizierten Parameter setzen; ihn ganz wegzulassen wuerde "
+     "verbergen, dass er je ein Kandidat war."),
+    (LADO.withheldBecause, LADO.IndependentTerminus, XSD.string,
+     "withheld because",
+     "Die Begruendung fuer die Zurueckhaltung, im Klartext."),
     # Farbachse
     (LADO.rampName, LADO.ColourAxis, XSD.string, "ramp name",
      "Name der Farbskala. BEWUSST NICHT lado:colourRamp: dort steht der "
@@ -695,10 +736,85 @@ def build_ontology() -> Graph:
 # --------------------------------------------------------------------------
 # Export
 # --------------------------------------------------------------------------
+def emit_termini(g: Graph, df, keys, ts_of, era: str) -> None:
+    """Termini as events, and every dating's position relative to each."""
+    for site, findspot, year, why, contested in CALIBRATION_REFERENCES:
+        slug_id = slug(f"{site}_{findspot}")
+        ev = SAMIAN[f"terminus_{slug_id}"]
+        tsp = SAMIAN[f"terminus_{slug_id}_instant"]
+        pos = SAMIAN[f"terminus_{slug_id}_instant_pos"]
+        label = TERMINUS_EVENTS.get(site, "Independent terminus")
+
+        g.add((ev, RDF.type, LADO.IndependentTerminus))
+        g.add((ev, RDF.type, CRM.E5_Event))
+        g.add((ev, RDFS.label, Literal(
+            f"{label}, {site} ({fmt_year(year)})", lang="en")))
+        # 'terminus ante quem' throughout, and the property documentation
+        # says why that is not a production date. Pompeii AD 79 means the
+        # ware was there by then, not that it was made then.
+        g.add((ev, LADO.terminusKind, Literal("terminus ante quem")))
+        g.add((ev, LADO.independentEvidence, Literal(why, lang="en")))
+        g.add((ev, P_HAS_TIME_SPAN, tsp))
+
+        g.add((tsp, RDF.type, CRM["E52_Time-Span"]))
+        g.add((tsp, RDF.type, TIME.Instant))
+        g.add((tsp, RDFS.label, Literal(fmt_year(year), lang="en")))
+        g.add((tsp, TIME.inTimePosition, pos))
+        g.add((tsp, TIME.inXSDgYear, gyear(year, era)))
+        g.add((tsp, CRM.P82a_begin_of_the_begin, gyear(year, era)))
+        g.add((tsp, CRM.P82b_end_of_the_end, gyear(year, era)))
+        g.add((pos, RDF.type, TIME.TimePosition))
+        g.add((pos, RDF.type, LADO.DatingTimePosition))
+        g.add((pos, TIME.hasTRS, TRS_IPS))
+        g.add((pos, TIME.numericPosition, dec(numeric_year(year))))
+
+        if contested:
+            # Kept in the figures, kept out of the criterion. Publishing the
+            # five without this distinction would claim more certainty than
+            # there is, and at the one reference the domain expert himself
+            # corrected.
+            g.add((ev, LADO.withheldFromCriterion, Literal(True)))
+            g.add((ev, LADO.withheldBecause, Literal(
+                "Activity continued on the site after this date and "
+                "admixture cannot be ruled out, which would make the "
+                "terminus an upper bound on the site rather than on the "
+                "assemblage. Excluding it leaves the calibrated tau "
+                "unchanged, so nothing published depends on the decision.",
+                lang="en")))
+
+        for _, row in df.iterrows():
+            if str(row.the_site) == site and \
+                    str(row.the_findspot) == findspot:
+                sid = int(row.the_id)
+                frag = keys[(sid, str(row.the_findspot))]
+                g.add((ev, LADO.constrains, SAMIAN[f"fs_{sid}_{frag}"]))
+                break
+
+        # Where every dating stands relative to this instant. 41 x 5, so a
+        # couple of hundred triples, and it turns the run report's line
+        # "terminus inside the modelled interval: 4 of 4" into something a
+        # consumer can check rather than take on trust.
+        for _, row in df.iterrows():
+            ts = ts_of[(int(row.the_id), str(row.the_findspot))]
+            lo = numeric_year(row.eff_start)
+            hi = numeric_year(row.eff_end)
+            n = numeric_year(year)
+            if hi < n:
+                g.add((ts, TIME.before, tsp))
+            elif lo > n:
+                g.add((ts, TIME.after, tsp))
+            else:
+                g.add((ts, TIME.inside, tsp))
+
+
+def fmt_year(year: int) -> str:
+    return f"AD {year}" if year > 0 else f"{abs(year)} BC"
+
+
 def build_graph(df: pd.DataFrame, era: str, figure_name: str,
                 emit_geometry: bool = True, key_mode: str = "hash",
                 emit_allen: bool = True, allen_inverse: bool = True,
-                emit_colour: bool = True,
+                emit_colour: bool = True, emit_termini_layer: bool = True,
                 stats: dict | None = None) -> Graph:
     g = Graph()
     for p, ns in PREFIXES.items():
@@ -1029,6 +1145,30 @@ def build_graph(df: pd.DataFrame, era: str, figure_name: str,
         g.add((act, CRM.P33_used_specific_technique, model))
         g.add((act, CRM.P14_carried_out_by, agent))
         g.add((ts, PROV.wasDerivedFrom, dataset))
+
+    # ---- Independent termini --------------------------------------------
+    # The dates the model was calibrated against, published as data rather
+    # than left in CALIBRATION_REFERENCES where only a reader of the Python
+    # could find them. Until now the graph said THAT it was calibrated
+    # against five findspots and never said against what.
+    #
+    # A terminus is an INSTANT, not an interval, which is why none of
+    # Allen's relations applies to it: they hold between proper intervals.
+    # OWL-Time's own vocabulary covers this case exactly —
+    #
+    #   time:inside   the interval contains the instant
+    #   time:before   the interval ends before it
+    #   time:after    the interval begins after it
+    #
+    # so the three relations need no lado: terms at all, and a query written
+    # in pure OWL-Time can ask all of it.
+    #
+    # No margin is materialised. Both numbers are already in the graph as
+    # time:numericPosition, so a consumer subtracts them; storing the
+    # difference as well would be a second copy that can fall out of step
+    # with the first.
+    if emit_termini_layer:
+        emit_termini(g, df, keys, ts_of, era)
 
     # ---- Allen's interval algebra ---------------------------------------
     # Last, because it needs every time-span URI to exist first. See

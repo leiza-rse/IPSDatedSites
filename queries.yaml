@@ -266,6 +266,97 @@ queries:
       }
       ORDER BY ?site
 
+  - id: termini
+    view: intervals
+    view_columns: {from: "from", to: "to", label: "findspot"}
+    title: "The dates the model was calibrated against"
+    intro: >-
+      Five events dated by something other than samian — coins,
+      dendrochronology, a volcano, the historical record — and the
+      assemblage each of them bounds. Every one of these intervals must
+      contain its own terminus, because that is the criterion that fixed
+      tau = 6 in the first place, so this query is also a self-test.
+      <code>margin</code> is how much room the model had to spare at the
+      nearer edge: Pompeii is the tightest, which is why it is the
+      reference that binds. Velsen is marked withheld — it appears in the
+      figures but was kept out of the criterion, because activity continued
+      on the site and the terminus may bound the base rather than the
+      assemblage.
+    sparql: |
+      SELECT ?event ?terminus ?site ?findspot ?from ?to ?margin ?withheld
+      WHERE {
+        ?ev a lado:IndependentTerminus ; rdfs:label ?event ;
+            lado:constrains ?fs ;
+            crm:P4_has_time-span/time:inTimePosition/time:numericPosition
+              ?terminus .
+        ?fs rdfs:label ?findspot ; crm:P89_falls_within/rdfs:label ?site ;
+            crm:P4_has_time-span ?ts .
+        ?ts time:hasBeginning/time:inTimePosition/time:numericPosition ?from ;
+            time:hasEnd/time:inTimePosition/time:numericPosition ?to .
+        BIND(ROUND(IF(?terminus - ?from < ?to - ?terminus,
+                      ?terminus - ?from, ?to - ?terminus)) AS ?margin)
+        OPTIONAL { ?ev lado:withheldFromCriterion ?withheld }
+      }
+      ORDER BY ?margin
+
+  - id: contemporary-with-vesuvius
+    view: map
+    title: "In use when Vesuvius erupted"
+    intro: >-
+      The findspots whose modelled interval contains AD 79. Not a claim
+      that anything here was destroyed by the eruption — it is the other
+      way round: an independently dated instant is used as a probe, and
+      these are the assemblages the model puts in circulation at that
+      moment. The map is the point. A horizon scattered across the
+      provinces is what a well-dated ceramic phase looks like; one that
+      clustered would suggest the dating follows excavation history rather
+      than the material.
+    sparql: |
+      SELECT ?site ?findspot ?wkt ?from ?to ?colour WHERE {
+        ?ev a lado:IndependentTerminus ; rdfs:label ?event ;
+            crm:P4_has_time-span ?tsp .
+        FILTER(CONTAINS(?event, "Vesuvius"))
+        ?ts time:inside ?tsp ;
+            time:hasBeginning/time:inTimePosition/time:numericPosition ?from ;
+            time:hasEnd/time:inTimePosition/time:numericPosition ?to .
+        ?fs crm:P4_has_time-span ?ts ; rdfs:label ?findspot ;
+            crm:P89_falls_within ?p .
+        ?p rdfs:label ?site ; geo:hasGeometry/geo:asWKT ?wkt .
+        ?row lado:renders ?ts ; lado:hexMidpointYear ?colour .
+      }
+      ORDER BY ?from
+
+  - id: terminus-positions
+    title: "Every dating against every fixed point"
+    intro: >-
+      The whole 41 by 5 grid, counted. Each dating ends before an
+      independent terminus, contains it, or begins after it. Because a
+      terminus is an instant and not an interval, these are OWL-Time's own
+      <code>time:before</code>, <code>time:inside</code> and
+      <code>time:after</code> rather than Allen relations, which hold only
+      between proper intervals. The shape of the table is a sanity check on
+      the corpus: a terminus near the start should have almost nothing
+      before it, one near the end almost nothing after it.
+    sparql: |
+      SELECT ?event ?year ?before ?inside ?after WHERE {
+        {
+          SELECT ?ev
+                 (SUM(IF(?rel = time:before, 1, 0)) AS ?before)
+                 (SUM(IF(?rel = time:inside, 1, 0)) AS ?inside)
+                 (SUM(IF(?rel = time:after, 1, 0)) AS ?after)
+          WHERE {
+            ?ev a lado:IndependentTerminus ; crm:P4_has_time-span ?tsp .
+            ?ts ?rel ?tsp .
+            FILTER(?rel IN (time:before, time:inside, time:after))
+          }
+          GROUP BY ?ev
+        }
+        ?ev rdfs:label ?event ;
+            crm:P4_has_time-span/time:inTimePosition/time:numericPosition
+              ?year .
+      }
+      ORDER BY ?year
+
   - id: allen-strength
     title: "How much of the order survives a closer look"
     intro: >-

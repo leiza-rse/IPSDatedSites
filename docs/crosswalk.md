@@ -53,6 +53,7 @@ procedure.
 | `lado:DatingActivity` | `lado:DatingActivity` → `crmdig:D10_Software_Execution` → `crmdig:D7_Digital_Machine_Event` → `crm:E11_Modification` → `crm:E7_Activity`<br>`lado:DatingActivity` → `crmdig:D10_Software_Execution` → `crmdig:D7_Digital_Machine_Event` → `crm:E65_Creation` → `crm:E7_Activity`<br>`lado:DatingActivity` → `prov:Activity` |
 | `lado:Figure` | `lado:Figure` → `crm:E36_Visual_Item` |
 | `lado:PlotRow` | `lado:PlotRow` → `crm:E36_Visual_Item` |
+| `lado:IndependentTerminus` | `lado:IndependentTerminus` → `crm:E5_Event` |
 | `lado:ColourAxis` | `lado:ColourAxis` → `crm:E36_Visual_Item` |
 
 Rows for classes reached through CRMdig continue past the extension into
@@ -92,7 +93,7 @@ bridge into CRM, not the authoritative figure.
 ```mermaid
 flowchart LR
     LADO["lado:<br/><b>local extension</b><br/>only what the standards do not cover"]
-    crm["CIDOC CRM<br/>places, time-spans,<br/>activities, dimensions<br/><i>9 class(es) anchored</i>"]
+    crm["CIDOC CRM<br/>places, time-spans,<br/>activities, dimensions<br/><i>10 class(es) anchored</i>"]
     LADO --> crm
     time["OWL-Time<br/>instants, positions,<br/>time reference systems<br/><i>4 class(es) anchored</i>"]
     LADO --> time
@@ -207,10 +208,13 @@ flowchart BT
     lado_Figure -->|subClassOf| crm_E36_Visual_Item
     lado_PlotRow["lado:PlotRow"]
     lado_PlotRow -->|subClassOf| crm_E36_Visual_Item
+    lado_IndependentTerminus["lado:IndependentTerminus"]
+    crm_E5_Event["crm:E5_Event"]
+    lado_IndependentTerminus -->|subClassOf| crm_E5_Event
     lado_ColourAxis["lado:ColourAxis"]
     lado_ColourAxis -->|subClassOf| crm_E36_Visual_Item
-    class lado_ColourAxis,lado_DatedTimeSpan,lado_DatingActivity,lado_DatingInstant,lado_DatingModel,lado_DatingTimePosition,lado_DiscoverySite,lado_Figure,lado_Findspot,lado_FindspotDating,lado_Location,lado_PlotRow,lado_YearScale local
-    class crm_E29_Design_or_Procedure,crm_E36_Visual_Item,crm_E52_Time_Span,crm_E53_Place,crm_E54_Dimension,crm_E73_Information_Object crm
+    class lado_ColourAxis,lado_DatedTimeSpan,lado_DatingActivity,lado_DatingInstant,lado_DatingModel,lado_DatingTimePosition,lado_DiscoverySite,lado_Figure,lado_Findspot,lado_FindspotDating,lado_IndependentTerminus,lado_Location,lado_PlotRow,lado_YearScale local
+    class crm_E29_Design_or_Procedure,crm_E36_Visual_Item,crm_E52_Time_Span,crm_E53_Place,crm_E54_Dimension,crm_E5_Event,crm_E73_Information_Object crm
     class time_Instant,time_ProperInterval,time_TRS,time_TimePosition time
     class crmdig_D10_Software_Execution,prov_Activity,prov_Plan ext
 

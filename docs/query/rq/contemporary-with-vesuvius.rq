@@ -1,0 +1,35 @@
+# In use when Vesuvius erupted
+# The findspots whose modelled interval contains AD 79. Not a claim that
+# anything here was destroyed by the eruption — it is the other way round: an
+# independently dated instant is used as a probe, and these are the
+# assemblages the model puts in circulation at that moment. The map is the
+# point. A horizon scattered across the provinces is what a well-dated ceramic
+# phase looks like; one that clustered would suggest the dating follows
+# excavation history rather than the material.
+
+PREFIX samian:  <http://data.archaeology.link/data/samian/>
+PREFIX lado:    <http://archaeology.link/ontology#>
+PREFIX crm:     <http://www.cidoc-crm.org/cidoc-crm/>
+PREFIX crmdig:  <http://www.ics.forth.gr/isl/CRMdig/>
+PREFIX time:    <http://www.w3.org/2006/time#>
+PREFIX prov:    <http://www.w3.org/ns/prov#>
+PREFIX dcat:    <http://www.w3.org/ns/dcat#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX skos:    <http://www.w3.org/2004/02/skos/core#>
+PREFIX geo:     <http://www.opengis.net/ont/geosparql#>
+PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?site ?findspot ?wkt ?from ?to ?colour WHERE {
+  ?ev a lado:IndependentTerminus ; rdfs:label ?event ;
+      crm:P4_has_time-span ?tsp .
+  FILTER(CONTAINS(?event, "Vesuvius"))
+  ?ts time:inside ?tsp ;
+      time:hasBeginning/time:inTimePosition/time:numericPosition ?from ;
+      time:hasEnd/time:inTimePosition/time:numericPosition ?to .
+  ?fs crm:P4_has_time-span ?ts ; rdfs:label ?findspot ;
+      crm:P89_falls_within ?p .
+  ?p rdfs:label ?site ; geo:hasGeometry/geo:asWKT ?wkt .
+  ?row lado:renders ?ts ; lado:hexMidpointYear ?colour .
+}
+ORDER BY ?from

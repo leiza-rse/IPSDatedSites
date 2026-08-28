@@ -603,3 +603,39 @@ for _name, _inv, _time_local, _definition in _allen.RELATIONS:
         f"claim that the relation survives a more generous reading of the "
         f"bounds — where it does, time:{_time_local} is asserted as well, "
         f"and that property is declared a subproperty of this one.")
+
+TERM_DOCS.update({
+    "IndependentTerminus":
+        "An event whose date is known from something other than samian — a "
+        "coin series, a dendrochronological sequence, a volcano, the "
+        "historical record — and which therefore bounds the assemblage "
+        "found with it. The class names the event's ROLE in the dating "
+        "procedure rather than its kind: an eruption and the abandonment of "
+        "a fort are both events, and both become termini here because their "
+        "dates come from outside the material being dated. Publishing them "
+        "closes a gap: the graph used to say that the model was calibrated "
+        "against five findspots without ever saying against what.",
+    "constrains":
+        "The assemblage a terminus sets a bound on. Following it leads from "
+        "the fixed point to the dating it constrains, and back.",
+    "terminusKind":
+        "What kind of bound this is. A terminus ante quem says the material "
+        "was in place by that date; it is emphatically not a production "
+        "date. Pompeii AD 79 means the ware was there when Vesuvius erupted, "
+        "not that it was made in 79. Blurring the two is the standard way of "
+        "over-reading a fixed point, and the distinction is why this "
+        "property exists rather than a bare year.",
+    "independentEvidence":
+        "Where the date comes from. It has to be independent of samian, or "
+        "the calibration would be circular — the model would be tuned "
+        "against dates the model itself produced.",
+    "withheldFromCriterion":
+        "True where a terminus appears in the figures but was kept out of "
+        "the calibration criterion. A contested date should not set a "
+        "published parameter; dropping it altogether would hide that it was "
+        "ever a candidate and why. The accompanying reason says which is the "
+        "case here.",
+    "withheldBecause":
+        "Why a terminus was withheld from the criterion, in plain words, so "
+        "that the judgement can be disagreed with rather than merely obeyed.",
+})

@@ -77,6 +77,12 @@ WEBJS_OMITS = [
      "corpus differs between the live query and the published snapshot "
      "anyway. Two implementations of one scale is precisely the drift this "
      "parity check exists to prevent."),
+    ("independent termini",
+     "Five calibration events and every dating's position relative to "
+     "them. The live page exports one query's worth of findspots, which "
+     "may not include the reference assemblages at all; emitting the "
+     "termini beside a set that does not contain them would publish a "
+     "criterion with nothing to check it against."),
     ("interval relations",
      "Quadratic in the number of findspots. The live query is not limited "
      "to the 41 published rows, so a browser export could face a few "
@@ -367,7 +373,8 @@ def python_reference(df: pd.DataFrame, onto: Graph, era: str) -> str:
     """The data layer as the bundle holds it: data + site types + closure."""
     g = X.build_graph(df, era, "sites_dating_v1",
                       emit_geometry=False, key_mode="hash",
-                      emit_allen=False, emit_colour=False)
+                      emit_allen=False, emit_colour=False,
+                      emit_termini_layer=False)
     make_bundle.type_discovery_sites(g)
     closure = make_bundle.superclass_closure(onto)
     for subj, cls in list(g.subject_objects(RDF.type)):
