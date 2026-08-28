@@ -232,9 +232,8 @@ def strings_from_graph(onto: Graph) -> dict:
         "MODEL_COMMENT": _model_comment(),
         "DATASET_TITLE":
             "Archaeological findspots dated by samian potters' stamps",
-        "DATASET_SOURCE":
-            "Samian Research / IPS, tbldistribution + tblpotter + "
-            "v_discoverysite",
+        # Must match ips_rdf_export.py exactly or the parity check fails.
+        "DATASET_SOURCE": "Samian Research / IPS",
         "DATASET_COMMENT": _dataset_comment(),
         "FIGURE_LABEL": "Archaeological sites dated by potters — box plot",
     }

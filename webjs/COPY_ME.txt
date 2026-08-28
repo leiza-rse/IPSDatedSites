@@ -14,7 +14,7 @@ In the CFM page:
 GENERATED — do not edit. Regenerate with:
   python py/make_webjs.py --verify
 
-Parity with ips_rdf_export.py: OK, sha256 71fda0e2ca68eb41 over 3439 triples (ips_dated_sites_2026-08-28.csv)
+Parity with ips_rdf_export.py: OK, sha256 e02e87ca56fc087a over 3439 triples (ips_dated_sites_2026-08-28.csv)
 
 SCOPE — layers the published graph has and this emitter has not:
   * geometry

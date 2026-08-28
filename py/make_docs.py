@@ -228,7 +228,7 @@ samian:loc_ds_<id>          already published, referenced only
 samian:fs_<id>_<hash>       lado:Findspot, crm:P89_falls_within the site
 ```
 
-The discovery site is not re-minted. `the_id` from the `v_discoverysite`
+The discovery site is not re-minted. `the_id` from the source
 join is the `dc:identifier` of an already published node, and all 3,879 of
 those identifiers match their URI suffix exactly, so the URI can be
 constructed directly with no lookup table. This export adds an
@@ -812,7 +812,7 @@ together with the published data.
 One exception surfaced during that check and is worth recording: of the 32
 sites referenced here, `samian:loc_ds_1004709` (Pecio del Guadiaro, a
 shipwreck) has **no triples at all** in the 2019 release of
-`loc_discoverysite_1.ttl`. The `v_discoverysite` view knows the identifier
+`loc_discoverysite_1.ttl`. The source database knows the identifier
 but that file does not contain the node — the site postdates the release.
 In a merged graph it would be a reference into nothing; in the bundle it
 is at least typed and labelled. A regenerated discovery-site export would

@@ -574,7 +574,7 @@ lado:rampStops a owl:DatatypeProperty ;
 
 lado:referenceLength a owl:DatatypeProperty ;
     rdfs:label "reference length"@en ;
-    rdfs:comment "Called t0 in sql/IPSDatedSites.sql. The common time scale against which qStart and qEnd are read: q = exp(-sigma / referenceLength). A fixed length rather than a calendar value, which is what makes the measure independent of where in the calendar the material sits. Anchored on expert thresholds: sigma = 5 years counts as a sharp dating, sigma = 25 years as an unusable one."@de,
+    rdfs:comment "Called t0 in the source query. The common time scale against which qStart and qEnd are read: q = exp(-sigma / referenceLength). A fixed length rather than a calendar value, which is what makes the measure independent of where in the calendar the material sits. Anchored on expert thresholds: sigma = 5 years counts as a sharp dating, sigma = 25 years as an unusable one."@de,
         "The common time scale on which qStart and qEnd are read, called t0 in the source query. Because it is a fixed length rather than a calendar value, the two edge measures no longer depend on the epoch of the material. Its value of 20 years is anchored on expert thresholds: a dispersion of 5 years counts as a sharp dating, one of 25 years as unusable, giving q of about 0.78 and 0.29 respectively. Until the calibration of tau it happened to carry the same value, which invited the two to be read as one constant; they are unrelated, and now they differ."@en ;
     rdfs:domain lado:DatingModel ;
     rdfs:isDefinedBy <http://archaeology.link/ontology> ;

@@ -535,7 +535,7 @@ DATA_PROPS = [
      "checked."),
     (LADO.referenceLength, LADO.DatingModel, XSD.decimal,
      "reference length",
-     "Called t0 in sql/IPSDatedSites.sql. The common time scale against "
+     "Called t0 in the source query. The common time scale against "
      "which qStart and qEnd are read: q = exp(-sigma / referenceLength). "
      "A fixed length rather than a calendar value, which is what makes "
      "the measure independent of where in the calendar the material "
@@ -777,9 +777,14 @@ def build_graph(df: pd.DataFrame, era: str, figure_name: str,
         lang="en")))
     g.add((dataset, DCTERMS.created, now))
     g.add((dataset, PROV.wasAttributedTo, agent))
-    g.add((dataset, DCTERMS.source, Literal(
-        "Samian Research / IPS, tbldistribution + tblpotter + "
-        "v_discoverysite")))
+    # Names the database, not its tables. The earlier value listed the
+    # three source relations, which tells an outside consumer nothing they
+    # can act on — they cannot query those tables — while carrying the
+    # schema of a live database into every copy of this graph, including
+    # the ones that travel on into aggregators. Provenance that is useful
+    # to a reader is the dataset; provenance that is useful to us is in
+    # sql/MANIFEST.json, where it does not get published.
+    g.add((dataset, DCTERMS.source, Literal("Samian Research / IPS")))
     # Rights. Without an explicit licence a published graph is not reusable,
     # whatever the intention behind it - NFDI4Objects and every other
     # aggregator has to be able to read the terms off the data itself.

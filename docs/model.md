@@ -17,7 +17,7 @@ samian:loc_ds_<id>          already published, referenced only
 samian:fs_<id>_<hash>       lado:Findspot, crm:P89_falls_within the site
 ```
 
-The discovery site is not re-minted. `the_id` from the `v_discoverysite`
+The discovery site is not re-minted. `the_id` from the source
 join is the `dc:identifier` of an already published node, and all 3,879 of
 those identifiers match their URI suffix exactly, so the URI can be
 constructed directly with no lookup table. This export adds an

@@ -144,8 +144,16 @@ def summarise(statement: str) -> None:
     """A few facts about what was rendered, so a silent wrong file shows."""
     # The main SELECT, not the one inside the params CTE, and its own FROM,
     # not the one in diecounts — which sits earlier in the text.
+    # Located by pattern rather than by the table's name. The statement is
+    # not in this repository any more (see sql/README.md); spelling its
+    # schema out here would put back in the code what was taken out of the
+    # data, and a pattern is no more fragile than a literal was.
     head = statement.index("SELECT\n    vds.id")
-    select = statement[head:statement.index("FROM tbldistribution AS di", head)]
+    m = re.compile(r"FROM\s+\w+\s+AS\s+di\b").search(statement, head)
+    if not m:
+        raise SystemExit("  !!  the main SELECT has no 'FROM ... AS di' — "
+                         "the statement is not the one this expects.")
+    select = statement[head:m.start()]
     columns = re.findall(r"\bAS\s+([a-z_0-9]+)\b", select)
     tau = re.search(r"([0-9.]+)::numeric AS tau", statement)
     t0 = re.search(r"([0-9.]+)::numeric AS t0", statement)
