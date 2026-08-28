@@ -54,12 +54,13 @@ title: How the colours were made
 <div class="status"><span class="dot" id="dot"></span><span id="status-text">Starting the Python runtime&hellip;</span></div>
 <p class="note" id="graph-note" hidden></p>
 
-<textarea class="sparql" id="src" rows="9" spellcheck="false">SELECT ?axis ?source ?ramp ?scale ?basis ?min ?max ?stops WHERE {
-  ?a a lado:ColourAxis ; lado:colourSource ?source ;
+<textarea class="sparql" id="src" rows="10" spellcheck="false">SELECT ?axis ?source ?ramp ?scale ?basis ?min ?max ?stops WHERE {
+  ?a a lado:ColourAxis ; lado:colourSource ?src ;
      lado:rampName ?ramp ; lado:rampStops ?stops ;
      lado:domainScale ?scale ; lado:domainBasis ?basis ;
      lado:domainMin ?min ; lado:domainMax ?max .
   BIND(REPLACE(STR(?a), &#34;^.*/&#34;, &#34;&#34;) AS ?axis)
+  BIND(REPLACE(STR(?src), &#34;^.*#&#34;, &#34;&#34;) AS ?source)
 }
 ORDER BY ?axis</textarea>
 <div class="query-bar">
@@ -82,7 +83,7 @@ ORDER BY ?axis</textarea>
 <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
 <script>
 const PREFIXES = "PREFIX samian:  <http://data.archaeology.link/data/samian/>\nPREFIX lado:    <http://archaeology.link/ontology#>\nPREFIX crm:     <http://www.cidoc-crm.org/cidoc-crm/>\nPREFIX crmdig:  <http://www.ics.forth.gr/isl/CRMdig/>\nPREFIX time:    <http://www.w3.org/2006/time#>\nPREFIX prov:    <http://www.w3.org/ns/prov#>\nPREFIX dcat:    <http://www.w3.org/ns/dcat#>\nPREFIX dcterms: <http://purl.org/dc/terms/>\nPREFIX skos:    <http://www.w3.org/2004/02/skos/core#>\nPREFIX geo:     <http://www.opengis.net/ont/geosparql#>\nPREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd:     <http://www.w3.org/2001/XMLSchema#>\n";
-const QUERY    = "SELECT ?axis ?source ?ramp ?scale ?basis ?min ?max ?stops WHERE {\n  ?a a lado:ColourAxis ; lado:colourSource ?source ;\n     lado:rampName ?ramp ; lado:rampStops ?stops ;\n     lado:domainScale ?scale ; lado:domainBasis ?basis ;\n     lado:domainMin ?min ; lado:domainMax ?max .\n  BIND(REPLACE(STR(?a), \"^.*/\", \"\") AS ?axis)\n}\nORDER BY ?axis";
+const QUERY    = "SELECT ?axis ?source ?ramp ?scale ?basis ?min ?max ?stops WHERE {\n  ?a a lado:ColourAxis ; lado:colourSource ?src ;\n     lado:rampName ?ramp ; lado:rampStops ?stops ;\n     lado:domainScale ?scale ; lado:domainBasis ?basis ;\n     lado:domainMin ?min ; lado:domainMax ?max .\n  BIND(REPLACE(STR(?a), \"^.*/\", \"\") AS ?axis)\n  BIND(REPLACE(STR(?src), \"^.*#\", \"\") AS ?source)\n}\nORDER BY ?axis";
 const GRAPH    = {"file": "rdf/IPSDatedSites-bundle.ttl", "url": "bundle.ttl", "publish": true, "page_url": "../bundle.ttl", "megabytes": "0.3"};
 const MAX_ROWS = 500;
 const RDFLIB   = "7.1.1";

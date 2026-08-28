@@ -21,10 +21,11 @@ PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#>
 
 SELECT ?axis ?source ?ramp ?scale ?basis ?min ?max ?stops WHERE {
-  ?a a lado:ColourAxis ; lado:colourSource ?source ;
+  ?a a lado:ColourAxis ; lado:colourSource ?src ;
      lado:rampName ?ramp ; lado:rampStops ?stops ;
      lado:domainScale ?scale ; lado:domainBasis ?basis ;
      lado:domainMin ?min ; lado:domainMax ?max .
   BIND(REPLACE(STR(?a), "^.*/", "") AS ?axis)
+  BIND(REPLACE(STR(?src), "^.*#", "") AS ?source)
 }
 ORDER BY ?axis

@@ -103,7 +103,7 @@ ORDER BY ?order</textarea>
       crm:P82a_begin_of_the_begin ?from ;
       crm:P82b_end_of_the_end ?to .
 }
-ORDER BY ?from</textarea>
+ORDER BY xsd:integer(STR(?from))</textarea>
   <div class="query-bar">
     <button class="run" data-q="crm-only" disabled>Run</button>
     <button class="reset" data-q="crm-only">Reset</button>
@@ -200,18 +200,45 @@ ORDER BY ?site</textarea>
   <div class="result" id="out-external-identifiers"></div>
 </section>
 
+<section class="query" id="q-allen-strength">
+  <h2>7. How much of the order survives a closer look</h2>
+  <p>The one number the two queries below do not show between them. Every pair of the 41 datings stands in exactly one relation on the modelled interval, so the first row is all 820 pairs. The second counts only those whose relation is unchanged when the intervals are widened to the full span of their potters' date ranges. Just under half. That ratio is the uncertainty of the relative chronology, expressed as a count rather than as a caveat — and it is the reason <code>time:interval*</code> carries the smaller set.</p>
+  <textarea class="sparql" id="src-allen-strength" spellcheck="false"
+            rows="15">SELECT ?reading (COUNT(*) AS ?assertions) (COUNT(*)/2 AS ?pairs)
+WHERE {
+  { ?a ?p ?b .
+    ?a a lado:FindspotDating . ?b a lado:FindspotDating .
+    FILTER(STRSTARTS(STR(?p), CONCAT(STR(lado:), "possibly")))
+    BIND("holds on the modelled interval (lado:possibly*)" AS ?reading) }
+  UNION
+  { ?a ?p ?b .
+    ?a a lado:FindspotDating . ?b a lado:FindspotDating .
+    FILTER(STRSTARTS(STR(?p), CONCAT(STR(time:), "interval")))
+    BIND("survives both readings (time:interval*)" AS ?reading) }
+}
+GROUP BY ?reading
+ORDER BY DESC(?assertions)</textarea>
+  <div class="query-bar">
+    <button class="run" data-q="allen-strength" disabled>Run</button>
+    <button class="reset" data-q="allen-strength">Reset</button>
+    <span class="timing" id="time-allen-strength"></span>
+  </div>
+  <div class="result" id="out-allen-strength"></div>
+</section>
+
 <section class="query" id="q-allen-possible">
-  <h2>7. What came before what — the complete matrix</h2>
+  <h2>8. What came before what — the complete matrix</h2>
   <p>Every pair of datings stands in exactly one of Allen's thirteen relations, computed on the modelled interval [eff_start, eff_end] and published under <code>lado:possibly*</code>. Complete means countable: the numbers below add up to all 820 pairs of 41 findspots, so a missing relation is a missing pair rather than a silence that could mean anything. Note how lopsided the result is — two thirds of all pairs are simple precedence, which is what a corpus spread over three centuries looks like.</p>
   <textarea class="sparql" id="src-allen-possible" spellcheck="false"
-            rows="9">SELECT ?relation (COUNT(*) AS ?pairs) WHERE {
-  ?a ?relation ?b .
+            rows="10">SELECT ?relation (COUNT(*) AS ?assertions) WHERE {
+  ?a ?p ?b .
   ?a a lado:FindspotDating .
   ?b a lado:FindspotDating .
-  FILTER(STRSTARTS(STR(?relation), CONCAT(STR(lado:), "possibly")))
+  FILTER(STRSTARTS(STR(?p), CONCAT(STR(lado:), "possibly")))
+  BIND(REPLACE(STR(?p), "^.*#possibly", "") AS ?relation)
 }
 GROUP BY ?relation
-ORDER BY DESC(?pairs)</textarea>
+ORDER BY DESC(?assertions)</textarea>
   <div class="query-bar">
     <button class="run" data-q="allen-possible" disabled>Run</button>
     <button class="reset" data-q="allen-possible">Reset</button>
@@ -221,17 +248,18 @@ ORDER BY DESC(?pairs)</textarea>
 </section>
 
 <section class="query" id="q-allen-time-only">
-  <h2>8. The same question in OWL-Time alone</h2>
+  <h2>9. The same question in OWL-Time alone</h2>
   <p>No <code>lado:</code> predicate appears below — only OWL-Time's own interval relations. It works, and it deliberately returns FEWER pairs than the query above. OWL-Time relations are sharp: there is no way to say "before, probably". So only the relations that survive a more generous reading of the bounds are asserted with them, and the rest live under <code>lado:possibly*</code> where the hedge is visible. This is not OWL-Time falling short. It is a vocabulary without a notion of uncertainty saying exactly as much as it can support — and the gap between the two counts is the uncertainty, made countable.</p>
   <textarea class="sparql" id="src-allen-time-only" spellcheck="false"
-            rows="9">SELECT ?relation (COUNT(*) AS ?pairs) WHERE {
-  ?a ?relation ?b .
+            rows="10">SELECT ?relation (COUNT(*) AS ?assertions) WHERE {
+  ?a ?p ?b .
   ?a time:hasBeginning ?ab .
   ?b time:hasBeginning ?bb .
-  FILTER(STRSTARTS(STR(?relation), CONCAT(STR(time:), "interval")))
+  FILTER(STRSTARTS(STR(?p), CONCAT(STR(time:), "interval")))
+  BIND(REPLACE(STR(?p), "^.*#interval", "") AS ?relation)
 }
 GROUP BY ?relation
-ORDER BY DESC(?pairs)</textarea>
+ORDER BY DESC(?assertions)</textarea>
   <div class="query-bar">
     <button class="run" data-q="allen-time-only" disabled>Run</button>
     <button class="reset" data-q="allen-time-only">Reset</button>
@@ -241,22 +269,23 @@ ORDER BY DESC(?pairs)</textarea>
 </section>
 
 <section class="query" id="q-allen-unstable">
-  <h2>9. Where the two readings disagree</h2>
-  <p>The pairs whose relation holds on the modelled boxes but not once the intervals are widened to the full span of their potters' date ranges. These are exactly the statements a sharp vocabulary should not make: draw any of these two findspots with their stubs and the asserted order stops being visible. Roughly half the matrix sits here, which is worth knowing before anyone builds a seriation on it.</p>
+  <h2>10. Why an order stops holding</h2>
+  <p>The pairs that are ordered on the modelled intervals but not once the evidence is read generously. The columns are the bounds the relation is actually computed from, and the gap between them — sorted with the narrowest first, because those are the claims that fail soonest. Read the last two columns beside it: the modelled intervals are a year apart while the potters' date ranges overlap by decades. That is the whole distinction in one line, and it is why these pairs carry <code>lado:possiblyBefore</code> and not <code>time:intervalBefore</code>.</p>
   <textarea class="sparql" id="src-allen-unstable" spellcheck="false"
-            rows="14">SELECT ?siteA ?findspotA ?siteB ?findspotB ?fromA ?toA ?fromB ?toB
+            rows="15">SELECT ?earlier ?ends ?later ?begins ?gap ?evidenceEndsA ?evidenceBeginsB
 WHERE {
   ?tsA lado:possiblyBefore ?tsB .
   FILTER NOT EXISTS { ?tsA time:intervalBefore ?tsB }
-  ?fsA crm:P4_has_time-span ?tsA ; rdfs:label ?findspotA ;
-       crm:P89_falls_within/rdfs:label ?siteA .
-  ?fsB crm:P4_has_time-span ?tsB ; rdfs:label ?findspotB ;
-       crm:P89_falls_within/rdfs:label ?siteB .
-  ?tsA lado:avgDatemin ?fromA ; lado:avgDatemax ?toA .
-  ?tsB lado:avgDatemin ?fromB ; lado:avgDatemax ?toB .
+  ?fsA crm:P4_has_time-span ?tsA ; rdfs:label ?earlier .
+  ?fsB crm:P4_has_time-span ?tsB ; rdfs:label ?later .
+  ?tsA time:hasEnd/time:inTimePosition/time:numericPosition ?ends ;
+       lado:maxDatemax ?evidenceEndsA .
+  ?tsB time:hasBeginning/time:inTimePosition/time:numericPosition ?begins ;
+       lado:minDatemin ?evidenceBeginsB .
+  BIND(ROUND(?begins - ?ends) AS ?gap)
 }
-ORDER BY ?fromA ?fromB
-LIMIT 40</textarea>
+ORDER BY ?gap
+LIMIT 25</textarea>
   <div class="query-bar">
     <button class="run" data-q="allen-unstable" disabled>Run</button>
     <button class="reset" data-q="allen-unstable">Reset</button>
@@ -266,7 +295,7 @@ LIMIT 40</textarea>
 </section>
 
 <section class="query" id="q-map-layer">
-  <h2>10. Everything a map needs, in one query</h2>
+  <h2>11. Everything a map needs, in one query</h2>
   <p>Coordinates, interval and colour for each findspot. The point sits on the discovery site rather than the findspot, because that is where the source records it — the four Bregenz contexts share one coordinate, and a map that wants them apart has to spread them itself rather than pretend the data distinguishes them. The colour is presentation and is published as such, on the plot row alongside the other "visual only" quantities, never on the time-span.</p>
   <textarea class="sparql" id="src-map-layer" spellcheck="false"
             rows="11">SELECT ?site ?findspot ?wkt ?from ?to ?norm ?colour WHERE {
@@ -288,15 +317,16 @@ ORDER BY ?from</textarea>
 </section>
 
 <section class="query" id="q-colour-axes">
-  <h2>11. How the colours were made</h2>
+  <h2>12. How the colours were made</h2>
   <p>A colour in a dataset is usually an assertion nobody can check. These can be: each axis publishes its ramp stops, its interpolation and the domain the values were stretched onto, so any hex value in the graph can be recomputed from the graph alone. Watch <code>lado:domainBasis</code> — an observed domain is read off this corpus, which means adding a findspot can change the colour of one that did not change at all. The chronological axis avoids red-green on purpose: late material is not worse material.</p>
   <textarea class="sparql" id="src-colour-axes" spellcheck="false"
-            rows="9">SELECT ?axis ?source ?ramp ?scale ?basis ?min ?max ?stops WHERE {
-  ?a a lado:ColourAxis ; lado:colourSource ?source ;
+            rows="10">SELECT ?axis ?source ?ramp ?scale ?basis ?min ?max ?stops WHERE {
+  ?a a lado:ColourAxis ; lado:colourSource ?src ;
      lado:rampName ?ramp ; lado:rampStops ?stops ;
      lado:domainScale ?scale ; lado:domainBasis ?basis ;
      lado:domainMin ?min ; lado:domainMax ?max .
   BIND(REPLACE(STR(?a), "^.*/", "") AS ?axis)
+  BIND(REPLACE(STR(?src), "^.*#", "") AS ?source)
 }
 ORDER BY ?axis</textarea>
   <div class="query-bar">
@@ -308,7 +338,7 @@ ORDER BY ?axis</textarea>
 </section>
 
 <section class="query" id="q-provenance">
-  <h2>12. Which method produced these dates</h2>
+  <h2>13. Which method produced these dates</h2>
   <p>The parameters are in the graph, not only in the paper. Each dating is generated by an activity, and that activity records the plan it followed — so a consumer can ask what k, τ, t₀ and the era convention were, and which datemax values the source query excluded, without reading any prose. τ and lado:referenceLength are unrelated quantities that happened to carry the same value until τ was calibrated: τ governs how fast the interval tightens as stamps accumulate, t₀ is the fixed length against which qStart and qEnd are read. lado:calibrationBasis says how τ was obtained, and lado:calibratedAgainst names the findspots it was fitted to — try following those IRIs. The excluded datemax values are an inherited filter whose justification is still open; publishing them is how that stays visible.</p>
   <textarea class="sparql" id="src-provenance" spellcheck="false"
             rows="15">SELECT ?software ?model ?kMin ?kMax ?tau ?t0 ?w ?era
@@ -348,7 +378,7 @@ GROUP BY ?software ?model ?kMin ?kMax ?tau ?t0 ?w ?era</textarea>
    Jekyll on the way to Pages, and only there. */
 {% endraw %}
 const PREFIXES = "PREFIX samian:  <http://data.archaeology.link/data/samian/>\nPREFIX lado:    <http://archaeology.link/ontology#>\nPREFIX crm:     <http://www.cidoc-crm.org/cidoc-crm/>\nPREFIX crmdig:  <http://www.ics.forth.gr/isl/CRMdig/>\nPREFIX time:    <http://www.w3.org/2006/time#>\nPREFIX prov:    <http://www.w3.org/ns/prov#>\nPREFIX dcat:    <http://www.w3.org/ns/dcat#>\nPREFIX dcterms: <http://purl.org/dc/terms/>\nPREFIX skos:    <http://www.w3.org/2004/02/skos/core#>\nPREFIX geo:     <http://www.opengis.net/ont/geosparql#>\nPREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd:     <http://www.w3.org/2001/XMLSchema#>\n";
-const QUERIES  = {"dated-findspots": "SELECT ?site ?findspot ?from ?to ?span ?qInterval ?nStamps WHERE {\n  ?fs a lado:Findspot ; rdfs:label ?findspot ;\n      crm:P89_falls_within ?p ; crm:P4_has_time-span ?ts .\n  ?p rdfs:label ?site .\n  ?ts time:hasBeginning/time:inTimePosition/time:numericPosition ?from ;\n      time:hasEnd/time:inTimePosition/time:numericPosition ?to ;\n      lado:qInterval ?qInterval ; lado:nStamps ?nStamps ;\n      lado:avgDatemin ?order .\n  BIND(?to - ?from AS ?span)\n}\nORDER BY ?order", "crm-only": "SELECT ?place ?findspot ?from ?to WHERE {\n  ?fs a crm:E53_Place ; rdfs:label ?findspot ;\n      crm:P89_falls_within ?p ; crm:P4_has_time-span ?ts .\n  ?p a crm:E53_Place ; rdfs:label ?place .\n  ?ts a crm:E52_Time-Span ;\n      crm:P82a_begin_of_the_begin ?from ;\n      crm:P82b_end_of_the_end ?to .\n}\nORDER BY ?from", "era-and-scale": "SELECT ?site ?findspot ?numeric ?calendar ?scale WHERE {\n  ?fs a lado:Findspot ; rdfs:label ?findspot ;\n      crm:P89_falls_within ?p ; crm:P4_has_time-span ?ts .\n  ?p rdfs:label ?site .\n  ?ts time:hasBeginning ?inst .\n  ?inst time:inXSDgYear ?calendar ; time:inTimePosition ?pos .\n  ?pos time:numericPosition ?numeric ; time:hasTRS ?trs .\n  ?trs rdfs:label ?scale .\n  FILTER(?numeric < 0)\n}\nORDER BY ?numeric", "two-quality-axes": "SELECT ?site ?findspot ?qInterval ?qRepetition ?nStamps ?nDies ?repetition\nWHERE {\n  ?fs a lado:Findspot ; rdfs:label ?findspot ;\n      crm:P89_falls_within ?p ; crm:P4_has_time-span ?ts .\n  ?p rdfs:label ?site .\n  ?ts lado:qInterval ?qInterval ; lado:qRepetition ?qRepetition ;\n      lado:nStamps ?nStamps ; lado:nDies ?nDies ;\n      lado:dieRepetition ?repetition .\n  FILTER(?qInterval > 0.55 && ?qRepetition < 0.2)\n}\nORDER BY DESC(?qInterval)", "findspots-per-site": "SELECT ?site (COUNT(DISTINCT ?fs) AS ?findspots)\n       (GROUP_CONCAT(?name; separator=\" · \") AS ?names)\nWHERE {\n  ?fs a lado:Findspot ; rdfs:label ?name ; crm:P89_falls_within ?p .\n  ?p rdfs:label ?site .\n}\nGROUP BY ?site\nHAVING (COUNT(DISTINCT ?fs) > 1)\nORDER BY DESC(?findspots) ?site", "external-identifiers": "SELECT ?site ?ancientName ?pleiades ?findspots WHERE {\n  { SELECT ?p (COUNT(DISTINCT ?fs) AS ?findspots) WHERE {\n      ?fs a lado:Findspot ; crm:P89_falls_within ?p .\n    } GROUP BY ?p }\n  ?p rdfs:label ?site .\n  OPTIONAL { ?p lado:ancientName ?ancientName }\n  OPTIONAL { ?p lado:pleiadesID  ?pleiades }\n}\nORDER BY ?site", "allen-possible": "SELECT ?relation (COUNT(*) AS ?pairs) WHERE {\n  ?a ?relation ?b .\n  ?a a lado:FindspotDating .\n  ?b a lado:FindspotDating .\n  FILTER(STRSTARTS(STR(?relation), CONCAT(STR(lado:), \"possibly\")))\n}\nGROUP BY ?relation\nORDER BY DESC(?pairs)", "allen-time-only": "SELECT ?relation (COUNT(*) AS ?pairs) WHERE {\n  ?a ?relation ?b .\n  ?a time:hasBeginning ?ab .\n  ?b time:hasBeginning ?bb .\n  FILTER(STRSTARTS(STR(?relation), CONCAT(STR(time:), \"interval\")))\n}\nGROUP BY ?relation\nORDER BY DESC(?pairs)", "allen-unstable": "SELECT ?siteA ?findspotA ?siteB ?findspotB ?fromA ?toA ?fromB ?toB\nWHERE {\n  ?tsA lado:possiblyBefore ?tsB .\n  FILTER NOT EXISTS { ?tsA time:intervalBefore ?tsB }\n  ?fsA crm:P4_has_time-span ?tsA ; rdfs:label ?findspotA ;\n       crm:P89_falls_within/rdfs:label ?siteA .\n  ?fsB crm:P4_has_time-span ?tsB ; rdfs:label ?findspotB ;\n       crm:P89_falls_within/rdfs:label ?siteB .\n  ?tsA lado:avgDatemin ?fromA ; lado:avgDatemax ?toA .\n  ?tsB lado:avgDatemin ?fromB ; lado:avgDatemax ?toB .\n}\nORDER BY ?fromA ?fromB\nLIMIT 40", "map-layer": "SELECT ?site ?findspot ?wkt ?from ?to ?norm ?colour WHERE {\n  ?fs a lado:Findspot ; rdfs:label ?findspot ;\n      crm:P89_falls_within ?p ; crm:P4_has_time-span ?ts .\n  ?p rdfs:label ?site ; geo:hasGeometry/geo:asWKT ?wkt .\n  ?ts time:hasBeginning/time:inTimePosition/time:numericPosition ?from ;\n      time:hasEnd/time:inTimePosition/time:numericPosition ?to .\n  ?row lado:renders ?ts ;\n       lado:normQInterval ?norm ; lado:hexQInterval ?colour .\n}\nORDER BY ?from", "colour-axes": "SELECT ?axis ?source ?ramp ?scale ?basis ?min ?max ?stops WHERE {\n  ?a a lado:ColourAxis ; lado:colourSource ?source ;\n     lado:rampName ?ramp ; lado:rampStops ?stops ;\n     lado:domainScale ?scale ; lado:domainBasis ?basis ;\n     lado:domainMin ?min ; lado:domainMax ?max .\n  BIND(REPLACE(STR(?a), \"^.*/\", \"\") AS ?axis)\n}\nORDER BY ?axis", "provenance": "SELECT ?software ?model ?kMin ?kMax ?tau ?t0 ?w ?era\n       (GROUP_CONCAT(DISTINCT STR(?ex); separator=\", \") AS ?excludedDatemax)\n       (COUNT(DISTINCT ?ts) AS ?datings)\nWHERE {\n  ?ts a lado:FindspotDating ; prov:wasGeneratedBy ?act .\n  ?act crm:P33_used_specific_technique ?m ;\n       crm:P14_carried_out_by ?agent .\n  ?agent rdfs:label ?software .\n  ?m rdfs:label ?model ; lado:kMin ?kMin ; lado:kMax ?kMax ;\n     lado:tau ?tau ; lado:referenceLength ?t0 ;\n     lado:volumeWeight ?w ; lado:eraConvention ?era ;\n     lado:excludedDatemax ?ex .\n}\nGROUP BY ?software ?model ?kMin ?kMax ?tau ?t0 ?w ?era"};
+const QUERIES  = {"dated-findspots": "SELECT ?site ?findspot ?from ?to ?span ?qInterval ?nStamps WHERE {\n  ?fs a lado:Findspot ; rdfs:label ?findspot ;\n      crm:P89_falls_within ?p ; crm:P4_has_time-span ?ts .\n  ?p rdfs:label ?site .\n  ?ts time:hasBeginning/time:inTimePosition/time:numericPosition ?from ;\n      time:hasEnd/time:inTimePosition/time:numericPosition ?to ;\n      lado:qInterval ?qInterval ; lado:nStamps ?nStamps ;\n      lado:avgDatemin ?order .\n  BIND(?to - ?from AS ?span)\n}\nORDER BY ?order", "crm-only": "SELECT ?place ?findspot ?from ?to WHERE {\n  ?fs a crm:E53_Place ; rdfs:label ?findspot ;\n      crm:P89_falls_within ?p ; crm:P4_has_time-span ?ts .\n  ?p a crm:E53_Place ; rdfs:label ?place .\n  ?ts a crm:E52_Time-Span ;\n      crm:P82a_begin_of_the_begin ?from ;\n      crm:P82b_end_of_the_end ?to .\n}\nORDER BY xsd:integer(STR(?from))", "era-and-scale": "SELECT ?site ?findspot ?numeric ?calendar ?scale WHERE {\n  ?fs a lado:Findspot ; rdfs:label ?findspot ;\n      crm:P89_falls_within ?p ; crm:P4_has_time-span ?ts .\n  ?p rdfs:label ?site .\n  ?ts time:hasBeginning ?inst .\n  ?inst time:inXSDgYear ?calendar ; time:inTimePosition ?pos .\n  ?pos time:numericPosition ?numeric ; time:hasTRS ?trs .\n  ?trs rdfs:label ?scale .\n  FILTER(?numeric < 0)\n}\nORDER BY ?numeric", "two-quality-axes": "SELECT ?site ?findspot ?qInterval ?qRepetition ?nStamps ?nDies ?repetition\nWHERE {\n  ?fs a lado:Findspot ; rdfs:label ?findspot ;\n      crm:P89_falls_within ?p ; crm:P4_has_time-span ?ts .\n  ?p rdfs:label ?site .\n  ?ts lado:qInterval ?qInterval ; lado:qRepetition ?qRepetition ;\n      lado:nStamps ?nStamps ; lado:nDies ?nDies ;\n      lado:dieRepetition ?repetition .\n  FILTER(?qInterval > 0.55 && ?qRepetition < 0.2)\n}\nORDER BY DESC(?qInterval)", "findspots-per-site": "SELECT ?site (COUNT(DISTINCT ?fs) AS ?findspots)\n       (GROUP_CONCAT(?name; separator=\" · \") AS ?names)\nWHERE {\n  ?fs a lado:Findspot ; rdfs:label ?name ; crm:P89_falls_within ?p .\n  ?p rdfs:label ?site .\n}\nGROUP BY ?site\nHAVING (COUNT(DISTINCT ?fs) > 1)\nORDER BY DESC(?findspots) ?site", "external-identifiers": "SELECT ?site ?ancientName ?pleiades ?findspots WHERE {\n  { SELECT ?p (COUNT(DISTINCT ?fs) AS ?findspots) WHERE {\n      ?fs a lado:Findspot ; crm:P89_falls_within ?p .\n    } GROUP BY ?p }\n  ?p rdfs:label ?site .\n  OPTIONAL { ?p lado:ancientName ?ancientName }\n  OPTIONAL { ?p lado:pleiadesID  ?pleiades }\n}\nORDER BY ?site", "allen-strength": "SELECT ?reading (COUNT(*) AS ?assertions) (COUNT(*)/2 AS ?pairs)\nWHERE {\n  { ?a ?p ?b .\n    ?a a lado:FindspotDating . ?b a lado:FindspotDating .\n    FILTER(STRSTARTS(STR(?p), CONCAT(STR(lado:), \"possibly\")))\n    BIND(\"holds on the modelled interval (lado:possibly*)\" AS ?reading) }\n  UNION\n  { ?a ?p ?b .\n    ?a a lado:FindspotDating . ?b a lado:FindspotDating .\n    FILTER(STRSTARTS(STR(?p), CONCAT(STR(time:), \"interval\")))\n    BIND(\"survives both readings (time:interval*)\" AS ?reading) }\n}\nGROUP BY ?reading\nORDER BY DESC(?assertions)", "allen-possible": "SELECT ?relation (COUNT(*) AS ?assertions) WHERE {\n  ?a ?p ?b .\n  ?a a lado:FindspotDating .\n  ?b a lado:FindspotDating .\n  FILTER(STRSTARTS(STR(?p), CONCAT(STR(lado:), \"possibly\")))\n  BIND(REPLACE(STR(?p), \"^.*#possibly\", \"\") AS ?relation)\n}\nGROUP BY ?relation\nORDER BY DESC(?assertions)", "allen-time-only": "SELECT ?relation (COUNT(*) AS ?assertions) WHERE {\n  ?a ?p ?b .\n  ?a time:hasBeginning ?ab .\n  ?b time:hasBeginning ?bb .\n  FILTER(STRSTARTS(STR(?p), CONCAT(STR(time:), \"interval\")))\n  BIND(REPLACE(STR(?p), \"^.*#interval\", \"\") AS ?relation)\n}\nGROUP BY ?relation\nORDER BY DESC(?assertions)", "allen-unstable": "SELECT ?earlier ?ends ?later ?begins ?gap ?evidenceEndsA ?evidenceBeginsB\nWHERE {\n  ?tsA lado:possiblyBefore ?tsB .\n  FILTER NOT EXISTS { ?tsA time:intervalBefore ?tsB }\n  ?fsA crm:P4_has_time-span ?tsA ; rdfs:label ?earlier .\n  ?fsB crm:P4_has_time-span ?tsB ; rdfs:label ?later .\n  ?tsA time:hasEnd/time:inTimePosition/time:numericPosition ?ends ;\n       lado:maxDatemax ?evidenceEndsA .\n  ?tsB time:hasBeginning/time:inTimePosition/time:numericPosition ?begins ;\n       lado:minDatemin ?evidenceBeginsB .\n  BIND(ROUND(?begins - ?ends) AS ?gap)\n}\nORDER BY ?gap\nLIMIT 25", "map-layer": "SELECT ?site ?findspot ?wkt ?from ?to ?norm ?colour WHERE {\n  ?fs a lado:Findspot ; rdfs:label ?findspot ;\n      crm:P89_falls_within ?p ; crm:P4_has_time-span ?ts .\n  ?p rdfs:label ?site ; geo:hasGeometry/geo:asWKT ?wkt .\n  ?ts time:hasBeginning/time:inTimePosition/time:numericPosition ?from ;\n      time:hasEnd/time:inTimePosition/time:numericPosition ?to .\n  ?row lado:renders ?ts ;\n       lado:normQInterval ?norm ; lado:hexQInterval ?colour .\n}\nORDER BY ?from", "colour-axes": "SELECT ?axis ?source ?ramp ?scale ?basis ?min ?max ?stops WHERE {\n  ?a a lado:ColourAxis ; lado:colourSource ?src ;\n     lado:rampName ?ramp ; lado:rampStops ?stops ;\n     lado:domainScale ?scale ; lado:domainBasis ?basis ;\n     lado:domainMin ?min ; lado:domainMax ?max .\n  BIND(REPLACE(STR(?a), \"^.*/\", \"\") AS ?axis)\n  BIND(REPLACE(STR(?src), \"^.*#\", \"\") AS ?source)\n}\nORDER BY ?axis", "provenance": "SELECT ?software ?model ?kMin ?kMax ?tau ?t0 ?w ?era\n       (GROUP_CONCAT(DISTINCT STR(?ex); separator=\", \") AS ?excludedDatemax)\n       (COUNT(DISTINCT ?ts) AS ?datings)\nWHERE {\n  ?ts a lado:FindspotDating ; prov:wasGeneratedBy ?act .\n  ?act crm:P33_used_specific_technique ?m ;\n       crm:P14_carried_out_by ?agent .\n  ?agent rdfs:label ?software .\n  ?m rdfs:label ?model ; lado:kMin ?kMin ; lado:kMax ?kMax ;\n     lado:tau ?tau ; lado:referenceLength ?t0 ;\n     lado:volumeWeight ?w ; lado:eraConvention ?era ;\n     lado:excludedDatemax ?ex .\n}\nGROUP BY ?software ?model ?kMin ?kMax ?tau ?t0 ?w ?era"};
 const GRAPH    = {"file": "rdf/IPSDatedSites-bundle.ttl", "url": "bundle.ttl", "publish": true, "page_url": "../bundle.ttl", "megabytes": "0.3"};
 const MAX_ROWS = 500;
 const RDFLIB   = "7.1.1";

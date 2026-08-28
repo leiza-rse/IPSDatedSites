@@ -54,14 +54,15 @@ title: What came before what — the complete matrix
 <div class="status"><span class="dot" id="dot"></span><span id="status-text">Starting the Python runtime&hellip;</span></div>
 <p class="note" id="graph-note" hidden></p>
 
-<textarea class="sparql" id="src" rows="9" spellcheck="false">SELECT ?relation (COUNT(*) AS ?pairs) WHERE {
-  ?a ?relation ?b .
+<textarea class="sparql" id="src" rows="10" spellcheck="false">SELECT ?relation (COUNT(*) AS ?assertions) WHERE {
+  ?a ?p ?b .
   ?a a lado:FindspotDating .
   ?b a lado:FindspotDating .
-  FILTER(STRSTARTS(STR(?relation), CONCAT(STR(lado:), &#34;possibly&#34;)))
+  FILTER(STRSTARTS(STR(?p), CONCAT(STR(lado:), &#34;possibly&#34;)))
+  BIND(REPLACE(STR(?p), &#34;^.*#possibly&#34;, &#34;&#34;) AS ?relation)
 }
 GROUP BY ?relation
-ORDER BY DESC(?pairs)</textarea>
+ORDER BY DESC(?assertions)</textarea>
 <div class="query-bar">
   <button class="run" id="run" disabled>Run</button>
   <button class="reset" id="reset">Reset</button>
@@ -82,7 +83,7 @@ ORDER BY DESC(?pairs)</textarea>
 <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
 <script>
 const PREFIXES = "PREFIX samian:  <http://data.archaeology.link/data/samian/>\nPREFIX lado:    <http://archaeology.link/ontology#>\nPREFIX crm:     <http://www.cidoc-crm.org/cidoc-crm/>\nPREFIX crmdig:  <http://www.ics.forth.gr/isl/CRMdig/>\nPREFIX time:    <http://www.w3.org/2006/time#>\nPREFIX prov:    <http://www.w3.org/ns/prov#>\nPREFIX dcat:    <http://www.w3.org/ns/dcat#>\nPREFIX dcterms: <http://purl.org/dc/terms/>\nPREFIX skos:    <http://www.w3.org/2004/02/skos/core#>\nPREFIX geo:     <http://www.opengis.net/ont/geosparql#>\nPREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd:     <http://www.w3.org/2001/XMLSchema#>\n";
-const QUERY    = "SELECT ?relation (COUNT(*) AS ?pairs) WHERE {\n  ?a ?relation ?b .\n  ?a a lado:FindspotDating .\n  ?b a lado:FindspotDating .\n  FILTER(STRSTARTS(STR(?relation), CONCAT(STR(lado:), \"possibly\")))\n}\nGROUP BY ?relation\nORDER BY DESC(?pairs)";
+const QUERY    = "SELECT ?relation (COUNT(*) AS ?assertions) WHERE {\n  ?a ?p ?b .\n  ?a a lado:FindspotDating .\n  ?b a lado:FindspotDating .\n  FILTER(STRSTARTS(STR(?p), CONCAT(STR(lado:), \"possibly\")))\n  BIND(REPLACE(STR(?p), \"^.*#possibly\", \"\") AS ?relation)\n}\nGROUP BY ?relation\nORDER BY DESC(?assertions)";
 const GRAPH    = {"file": "rdf/IPSDatedSites-bundle.ttl", "url": "bundle.ttl", "publish": true, "page_url": "../bundle.ttl", "megabytes": "0.3"};
 const MAX_ROWS = 500;
 const RDFLIB   = "7.1.1";

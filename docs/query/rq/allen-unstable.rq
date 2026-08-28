@@ -1,10 +1,12 @@
-# Where the two readings disagree
-# The pairs whose relation holds on the modelled boxes but not once the
-# intervals are widened to the full span of their potters' date ranges. These
-# are exactly the statements a sharp vocabulary should not make: draw any of
-# these two findspots with their stubs and the asserted order stops being
-# visible. Roughly half the matrix sits here, which is worth knowing before
-# anyone builds a seriation on it.
+# Why an order stops holding
+# The pairs that are ordered on the modelled intervals but not once the
+# evidence is read generously. The columns are the bounds the relation is
+# actually computed from, and the gap between them — sorted with the narrowest
+# first, because those are the claims that fail soonest. Read the last two
+# columns beside it: the modelled intervals are a year apart while the
+# potters' date ranges overlap by decades. That is the whole distinction in
+# one line, and it is why these pairs carry <code>lado:possiblyBefore</code>
+# and not <code>time:intervalBefore</code>.
 
 PREFIX samian:  <http://data.archaeology.link/data/samian/>
 PREFIX lado:    <http://archaeology.link/ontology#>
@@ -19,16 +21,17 @@ PREFIX geo:     <http://www.opengis.net/ont/geosparql#>
 PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#>
 
-SELECT ?siteA ?findspotA ?siteB ?findspotB ?fromA ?toA ?fromB ?toB
+SELECT ?earlier ?ends ?later ?begins ?gap ?evidenceEndsA ?evidenceBeginsB
 WHERE {
   ?tsA lado:possiblyBefore ?tsB .
   FILTER NOT EXISTS { ?tsA time:intervalBefore ?tsB }
-  ?fsA crm:P4_has_time-span ?tsA ; rdfs:label ?findspotA ;
-       crm:P89_falls_within/rdfs:label ?siteA .
-  ?fsB crm:P4_has_time-span ?tsB ; rdfs:label ?findspotB ;
-       crm:P89_falls_within/rdfs:label ?siteB .
-  ?tsA lado:avgDatemin ?fromA ; lado:avgDatemax ?toA .
-  ?tsB lado:avgDatemin ?fromB ; lado:avgDatemax ?toB .
+  ?fsA crm:P4_has_time-span ?tsA ; rdfs:label ?earlier .
+  ?fsB crm:P4_has_time-span ?tsB ; rdfs:label ?later .
+  ?tsA time:hasEnd/time:inTimePosition/time:numericPosition ?ends ;
+       lado:maxDatemax ?evidenceEndsA .
+  ?tsB time:hasBeginning/time:inTimePosition/time:numericPosition ?begins ;
+       lado:minDatemin ?evidenceBeginsB .
+  BIND(ROUND(?begins - ?ends) AS ?gap)
 }
-ORDER BY ?fromA ?fromB
-LIMIT 40
+ORDER BY ?gap
+LIMIT 25

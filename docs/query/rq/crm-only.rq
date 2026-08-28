@@ -27,4 +27,4 @@ SELECT ?place ?findspot ?from ?to WHERE {
       crm:P82a_begin_of_the_begin ?from ;
       crm:P82b_end_of_the_end ?to .
 }
-ORDER BY ?from
+ORDER BY xsd:integer(STR(?from))

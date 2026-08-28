@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Why an order stops holding
+title: How much of the order survives a closer look
 ---
 
 <style>
@@ -49,25 +49,25 @@ title: Why an order stops holding
 
 <p class="crumb"><a href="index.html">&larr; All queries</a></p>
 
-<p>The pairs that are ordered on the modelled intervals but not once the evidence is read generously. The columns are the bounds the relation is actually computed from, and the gap between them — sorted with the narrowest first, because those are the claims that fail soonest. Read the last two columns beside it: the modelled intervals are a year apart while the potters' date ranges overlap by decades. That is the whole distinction in one line, and it is why these pairs carry <code>lado:possiblyBefore</code> and not <code>time:intervalBefore</code>.</p>
+<p>The one number the two queries below do not show between them. Every pair of the 41 datings stands in exactly one relation on the modelled interval, so the first row is all 820 pairs. The second counts only those whose relation is unchanged when the intervals are widened to the full span of their potters' date ranges. Just under half. That ratio is the uncertainty of the relative chronology, expressed as a count rather than as a caveat — and it is the reason <code>time:interval*</code> carries the smaller set.</p>
 
 <div class="status"><span class="dot" id="dot"></span><span id="status-text">Starting the Python runtime&hellip;</span></div>
 <p class="note" id="graph-note" hidden></p>
 
-<textarea class="sparql" id="src" rows="15" spellcheck="false">SELECT ?earlier ?ends ?later ?begins ?gap ?evidenceEndsA ?evidenceBeginsB
+<textarea class="sparql" id="src" rows="15" spellcheck="false">SELECT ?reading (COUNT(*) AS ?assertions) (COUNT(*)/2 AS ?pairs)
 WHERE {
-  ?tsA lado:possiblyBefore ?tsB .
-  FILTER NOT EXISTS { ?tsA time:intervalBefore ?tsB }
-  ?fsA crm:P4_has_time-span ?tsA ; rdfs:label ?earlier .
-  ?fsB crm:P4_has_time-span ?tsB ; rdfs:label ?later .
-  ?tsA time:hasEnd/time:inTimePosition/time:numericPosition ?ends ;
-       lado:maxDatemax ?evidenceEndsA .
-  ?tsB time:hasBeginning/time:inTimePosition/time:numericPosition ?begins ;
-       lado:minDatemin ?evidenceBeginsB .
-  BIND(ROUND(?begins - ?ends) AS ?gap)
+  { ?a ?p ?b .
+    ?a a lado:FindspotDating . ?b a lado:FindspotDating .
+    FILTER(STRSTARTS(STR(?p), CONCAT(STR(lado:), &#34;possibly&#34;)))
+    BIND(&#34;holds on the modelled interval (lado:possibly*)&#34; AS ?reading) }
+  UNION
+  { ?a ?p ?b .
+    ?a a lado:FindspotDating . ?b a lado:FindspotDating .
+    FILTER(STRSTARTS(STR(?p), CONCAT(STR(time:), &#34;interval&#34;)))
+    BIND(&#34;survives both readings (time:interval*)&#34; AS ?reading) }
 }
-ORDER BY ?gap
-LIMIT 25</textarea>
+GROUP BY ?reading
+ORDER BY DESC(?assertions)</textarea>
 <div class="query-bar">
   <button class="run" id="run" disabled>Run</button>
   <button class="reset" id="reset">Reset</button>
@@ -79,7 +79,7 @@ LIMIT 25</textarea>
 
 <p class="note" style="margin-top:1.6rem">
   Also available as a plain file:
-  <a href="rq/allen-unstable.rq"><code>allen-unstable.rq</code></a>.
+  <a href="rq/allen-strength.rq"><code>allen-strength.rq</code></a>.
   The graph is fetched as a static file and queried in your browser with
   rdflib under Pyodide &mdash; there is no endpoint, and nothing you type
   leaves your machine.
@@ -88,7 +88,7 @@ LIMIT 25</textarea>
 <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
 <script>
 const PREFIXES = "PREFIX samian:  <http://data.archaeology.link/data/samian/>\nPREFIX lado:    <http://archaeology.link/ontology#>\nPREFIX crm:     <http://www.cidoc-crm.org/cidoc-crm/>\nPREFIX crmdig:  <http://www.ics.forth.gr/isl/CRMdig/>\nPREFIX time:    <http://www.w3.org/2006/time#>\nPREFIX prov:    <http://www.w3.org/ns/prov#>\nPREFIX dcat:    <http://www.w3.org/ns/dcat#>\nPREFIX dcterms: <http://purl.org/dc/terms/>\nPREFIX skos:    <http://www.w3.org/2004/02/skos/core#>\nPREFIX geo:     <http://www.opengis.net/ont/geosparql#>\nPREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd:     <http://www.w3.org/2001/XMLSchema#>\n";
-const QUERY    = "SELECT ?earlier ?ends ?later ?begins ?gap ?evidenceEndsA ?evidenceBeginsB\nWHERE {\n  ?tsA lado:possiblyBefore ?tsB .\n  FILTER NOT EXISTS { ?tsA time:intervalBefore ?tsB }\n  ?fsA crm:P4_has_time-span ?tsA ; rdfs:label ?earlier .\n  ?fsB crm:P4_has_time-span ?tsB ; rdfs:label ?later .\n  ?tsA time:hasEnd/time:inTimePosition/time:numericPosition ?ends ;\n       lado:maxDatemax ?evidenceEndsA .\n  ?tsB time:hasBeginning/time:inTimePosition/time:numericPosition ?begins ;\n       lado:minDatemin ?evidenceBeginsB .\n  BIND(ROUND(?begins - ?ends) AS ?gap)\n}\nORDER BY ?gap\nLIMIT 25";
+const QUERY    = "SELECT ?reading (COUNT(*) AS ?assertions) (COUNT(*)/2 AS ?pairs)\nWHERE {\n  { ?a ?p ?b .\n    ?a a lado:FindspotDating . ?b a lado:FindspotDating .\n    FILTER(STRSTARTS(STR(?p), CONCAT(STR(lado:), \"possibly\")))\n    BIND(\"holds on the modelled interval (lado:possibly*)\" AS ?reading) }\n  UNION\n  { ?a ?p ?b .\n    ?a a lado:FindspotDating . ?b a lado:FindspotDating .\n    FILTER(STRSTARTS(STR(?p), CONCAT(STR(time:), \"interval\")))\n    BIND(\"survives both readings (time:interval*)\" AS ?reading) }\n}\nGROUP BY ?reading\nORDER BY DESC(?assertions)";
 const GRAPH    = {"file": "rdf/IPSDatedSites-bundle.ttl", "url": "bundle.ttl", "publish": true, "page_url": "../bundle.ttl", "megabytes": "0.3"};
 const MAX_ROWS = 500;
 const RDFLIB   = "7.1.1";

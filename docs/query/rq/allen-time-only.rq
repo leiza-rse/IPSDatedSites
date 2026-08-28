@@ -22,11 +22,12 @@ PREFIX geo:     <http://www.opengis.net/ont/geosparql#>
 PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#>
 
-SELECT ?relation (COUNT(*) AS ?pairs) WHERE {
-  ?a ?relation ?b .
+SELECT ?relation (COUNT(*) AS ?assertions) WHERE {
+  ?a ?p ?b .
   ?a time:hasBeginning ?ab .
   ?b time:hasBeginning ?bb .
-  FILTER(STRSTARTS(STR(?relation), CONCAT(STR(time:), "interval")))
+  FILTER(STRSTARTS(STR(?p), CONCAT(STR(time:), "interval")))
+  BIND(REPLACE(STR(?p), "^.*#interval", "") AS ?relation)
 }
 GROUP BY ?relation
-ORDER BY DESC(?pairs)
+ORDER BY DESC(?assertions)

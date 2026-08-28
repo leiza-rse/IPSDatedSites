@@ -1,0 +1,36 @@
+# How much of the order survives a closer look
+# The one number the two queries below do not show between them. Every pair of
+# the 41 datings stands in exactly one relation on the modelled interval, so
+# the first row is all 820 pairs. The second counts only those whose relation
+# is unchanged when the intervals are widened to the full span of their
+# potters' date ranges. Just under half. That ratio is the uncertainty of the
+# relative chronology, expressed as a count rather than as a caveat — and it
+# is the reason <code>time:interval*</code> carries the smaller set.
+
+PREFIX samian:  <http://data.archaeology.link/data/samian/>
+PREFIX lado:    <http://archaeology.link/ontology#>
+PREFIX crm:     <http://www.cidoc-crm.org/cidoc-crm/>
+PREFIX crmdig:  <http://www.ics.forth.gr/isl/CRMdig/>
+PREFIX time:    <http://www.w3.org/2006/time#>
+PREFIX prov:    <http://www.w3.org/ns/prov#>
+PREFIX dcat:    <http://www.w3.org/ns/dcat#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX skos:    <http://www.w3.org/2004/02/skos/core#>
+PREFIX geo:     <http://www.opengis.net/ont/geosparql#>
+PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?reading (COUNT(*) AS ?assertions) (COUNT(*)/2 AS ?pairs)
+WHERE {
+  { ?a ?p ?b .
+    ?a a lado:FindspotDating . ?b a lado:FindspotDating .
+    FILTER(STRSTARTS(STR(?p), CONCAT(STR(lado:), "possibly")))
+    BIND("holds on the modelled interval (lado:possibly*)" AS ?reading) }
+  UNION
+  { ?a ?p ?b .
+    ?a a lado:FindspotDating . ?b a lado:FindspotDating .
+    FILTER(STRSTARTS(STR(?p), CONCAT(STR(time:), "interval")))
+    BIND("survives both readings (time:interval*)" AS ?reading) }
+}
+GROUP BY ?reading
+ORDER BY DESC(?assertions)

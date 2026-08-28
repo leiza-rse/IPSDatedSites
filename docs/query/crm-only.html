@@ -62,7 +62,7 @@ title: The same answer in CIDOC CRM alone
       crm:P82a_begin_of_the_begin ?from ;
       crm:P82b_end_of_the_end ?to .
 }
-ORDER BY ?from</textarea>
+ORDER BY xsd:integer(STR(?from))</textarea>
 <div class="query-bar">
   <button class="run" id="run" disabled>Run</button>
   <button class="reset" id="reset">Reset</button>
@@ -87,7 +87,7 @@ ORDER BY ?from</textarea>
 <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
 <script>
 const PREFIXES = "PREFIX samian:  <http://data.archaeology.link/data/samian/>\nPREFIX lado:    <http://archaeology.link/ontology#>\nPREFIX crm:     <http://www.cidoc-crm.org/cidoc-crm/>\nPREFIX crmdig:  <http://www.ics.forth.gr/isl/CRMdig/>\nPREFIX time:    <http://www.w3.org/2006/time#>\nPREFIX prov:    <http://www.w3.org/ns/prov#>\nPREFIX dcat:    <http://www.w3.org/ns/dcat#>\nPREFIX dcterms: <http://purl.org/dc/terms/>\nPREFIX skos:    <http://www.w3.org/2004/02/skos/core#>\nPREFIX geo:     <http://www.opengis.net/ont/geosparql#>\nPREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd:     <http://www.w3.org/2001/XMLSchema#>\n";
-const QUERY    = "SELECT ?place ?findspot ?from ?to WHERE {\n  ?fs a crm:E53_Place ; rdfs:label ?findspot ;\n      crm:P89_falls_within ?p ; crm:P4_has_time-span ?ts .\n  ?p a crm:E53_Place ; rdfs:label ?place .\n  ?ts a crm:E52_Time-Span ;\n      crm:P82a_begin_of_the_begin ?from ;\n      crm:P82b_end_of_the_end ?to .\n}\nORDER BY ?from";
+const QUERY    = "SELECT ?place ?findspot ?from ?to WHERE {\n  ?fs a crm:E53_Place ; rdfs:label ?findspot ;\n      crm:P89_falls_within ?p ; crm:P4_has_time-span ?ts .\n  ?p a crm:E53_Place ; rdfs:label ?place .\n  ?ts a crm:E52_Time-Span ;\n      crm:P82a_begin_of_the_begin ?from ;\n      crm:P82b_end_of_the_end ?to .\n}\nORDER BY xsd:integer(STR(?from))";
 const GRAPH    = {"file": "rdf/IPSDatedSites-bundle.ttl", "url": "bundle.ttl", "publish": true, "page_url": "../bundle.ttl", "megabytes": "0.3"};
 const MAX_ROWS = 500;
 const RDFLIB   = "7.1.1";
