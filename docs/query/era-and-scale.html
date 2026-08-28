@@ -334,6 +334,78 @@ function renderBarChart(cols, rows) {
   svg.innerHTML = h;
 }
 
+/* Intervals and instants on one scale.
+ *
+ * The whole method in one picture: every dated assemblage as a bar, and
+ * the independently dated events as vertical lines across all of them. A
+ * reference assemblage must cross its own line — that is the criterion
+ * that fixed tau — and how narrowly it does so is visible rather than
+ * asserted.
+ *
+ * Two kinds of row from one result set, told apart by the `kind` column
+ * rather than by geometry. Deciding on from == to would have been
+ * tempting and wrong: an interval of zero width is a legitimate outcome
+ * for a findspot with a single tightly dated potter, and it would have
+ * been silently promoted to a fixed point.
+ */
+function renderTimeline(cols, rows) {
+  const cf = VIEW_COLS.from, ct = VIEW_COLS.to, ck = VIEW_COLS.kind;
+  if (!cols.includes(cf) || !cols.includes(ct)) {
+    viewMissing(`This view needs ?${cf} and ?${ct}; the current query does not select both.`);
+    return;
+  }
+  viewClearMessage();
+  const all = rows.map(r => ({
+    from: year(r[cf]), to: year(r[ct]),
+    label: String(r[VIEW_COLS.label] ?? r.findspot ?? r.site ?? ''),
+    marker: cols.includes(ck) && String(r[ck]) === VIEW_COLS.marker
+  })).filter(d => d.from !== null && d.to !== null);
+
+  const bars = all.filter(d => !d.marker).sort((a, b) => a.from - b.from);
+  const marks = all.filter(d => d.marker).sort((a, b) => a.from - b.from);
+  const svg = document.getElementById('bars');
+  if (!bars.length) { viewMissing('No row carried two readable years.'); return; }
+  if (!marks.length) {
+    viewMissing(`No row has ${ck} = "${VIEW_COLS.marker}", so there are no fixed points to draw — the bars are below.`);
+  }
+
+  const rowH = 15, padT = 34, padB = 26, padL = 175, padR = 24;
+  const W = svg.parentElement.clientWidth || 800;
+  const H = padT + bars.length * rowH + padB;
+  const lo = Math.min(...all.map(d => d.from));
+  const hi = Math.max(...all.map(d => d.to));
+  const span = (hi - lo) || 1;
+  const x = v => padL + ((v - lo) / span) * (W - padL - padR);
+
+  let h = '';
+  const step = span > 400 ? 100 : span > 150 ? 50 : 25;
+  for (let t = Math.ceil(lo / step) * step; t <= hi; t += step) {
+    h += `<line x1="${x(t)}" x2="${x(t)}" y1="${padT}" y2="${H - padB}" stroke="#e4e4e4"/>`;
+    h += `<text x="${x(t)}" y="${H - padB + 15}" font-size="10" fill="#666" text-anchor="middle">${t}</text>`;
+  }
+  // Fixed points first, so the bars sit on top of them and a bar that
+  // crosses a line is legible where it does.
+  for (const m of marks) {
+    const px = x(m.from);
+    h += `<line class="fixed-point" x1="${px}" x2="${px}" y1="${padT - 6}" y2="${H - padB}" `
+      +  `stroke="#9e3b26" stroke-width="1.5" stroke-dasharray="5,3"><title>${esc(m.label)}</title></line>`;
+    h += `<text x="${px}" y="${padT - 12}" font-size="10" fill="#9e3b26" text-anchor="middle">${esc(m.label)}</text>`;
+  }
+  bars.forEach((d, i) => {
+    const y = padT + i * rowH;
+    // Does this bar cross a fixed point? Those are the rows the picture is
+    // about, so they get the darker fill.
+    const crosses = marks.some(m => d.from <= m.from && m.from <= d.to);
+    h += `<text x="${padL - 8}" y="${y + 10}" font-size="10" fill="${crosses ? '#1b2430' : '#666'}" text-anchor="end">${esc(d.label).slice(0, 34)}</text>`;
+    h += `<rect x="${x(d.from)}" y="${y + 2}" width="${Math.max(2, x(d.to) - x(d.from)).toFixed(1)}" height="${rowH - 5}" `
+      +  `fill="${crosses ? '#2b5580' : '#8fb0cd'}" fill-opacity="${crosses ? '.9' : '.65'}" stroke="#2b5580">`
+      +  `<title>${esc(d.label)}: ${Math.round(d.from)} to ${Math.round(d.to)}</title></rect>`;
+  });
+  svg.setAttribute('height', H);
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.innerHTML = h;
+}
+
 async function boot() {
   try {
     pyodide = await loadPyodide();
@@ -407,6 +479,7 @@ json.dumps({"cols": cols, "rows": rows, "n": len(g), "total": len(_all)})
     if (VIEW === 'intervals') renderBars(data.cols, data.rows);
     if (VIEW === 'scatter') renderScatter(data.cols, data.rows);
     if (VIEW === 'barchart') renderBarChart(data.cols, data.rows);
+    if (VIEW === 'timeline') renderTimeline(data.cols, data.rows);
     timing.textContent = `${((performance.now() - t0) / 1000).toFixed(1)}s over ${data.n} triples`;
   } catch (err) {
     out.innerHTML = `<pre class="error">${esc(err.message)}</pre>`;

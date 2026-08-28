@@ -257,7 +257,44 @@ for r in rows[:15]:
     print(r)
 ```
 
-## Step 8 — The dates the model was calibrated against
+## Step 8 — The whole corpus against the independent dates
+
+Everything the method rests on, in one picture. Forty-one dated assemblages as bars, and the five independently dated events as vertical lines across them: two Augustan camps, the naval base at Velsen, Vesuvius, Inchtuthil. The bars that cross a line are drawn darker — those are the assemblages the model puts in circulation at a moment somebody else dated for us. The five reference assemblages must each cross their own line, because that is the criterion that fixed tau, and Pompeii's crosses by a fifth of a year. A future revision that broke the calibration would show here as a bar sliding off its line, before any number changed in the documentation.
+
+```{pyodide}
+#| autorun: false
+#| label: query-corpus-against-fixed-points
+assert "base" in dir(), "Run the 'load-graph' cell first."
+rows = show(base, """
+SELECT ?kind ?label ?from ?to WHERE {
+  {
+    ?fs a lado:Findspot ; rdfs:label ?label ;
+        crm:P4_has_time-span ?ts .
+    ?ts time:hasBeginning/time:inTimePosition/time:numericPosition
+          ?from ;
+        time:hasEnd/time:inTimePosition/time:numericPosition ?to .
+    BIND("interval" AS ?kind)
+  }
+  UNION
+  {
+    ?ev a lado:IndependentTerminus ;
+        lado:constrains/crm:P89_falls_within/rdfs:label ?site ;
+        crm:P4_has_time-span/time:inTimePosition/time:numericPosition
+          ?year .
+    BIND(?year AS ?from)
+    BIND(?year AS ?to)
+    BIND(CONCAT(?site, " ", STR(ROUND(?year))) AS ?label)
+    BIND("terminus" AS ?kind)
+  }
+}
+ORDER BY ?from
+""")
+print(f"{len(rows)} rows")
+for r in rows[:15]:
+    print(r)
+```
+
+## Step 9 — The dates the model was calibrated against
 
 Five events dated by something other than samian — coins, dendrochronology, a volcano, the historical record — and the assemblage each of them bounds. Every one of these intervals must contain its own terminus, because that is the criterion that fixed tau = 6 in the first place, so this query is also a self-test. <code>margin</code> is how much room the model had to spare at the nearer edge: Pompeii is the tightest, which is why it is the reference that binds. Velsen is marked withheld — it appears in the figures but was kept out of the criterion, because activity continued on the site and the terminus may bound the base rather than the assemblage.
 
@@ -287,7 +324,7 @@ for r in rows[:15]:
     print(r)
 ```
 
-## Step 9 — In use when Vesuvius erupted
+## Step 10 — In use when Vesuvius erupted
 
 The findspots whose modelled interval contains AD 79. Not a claim that anything here was destroyed by the eruption — it is the other way round: an independently dated instant is used as a probe, and these are the assemblages the model puts in circulation at that moment. The map is the point. A horizon scattered across the provinces is what a well-dated ceramic phase looks like; one that clustered would suggest the dating follows excavation history rather than the material.
 
@@ -315,7 +352,7 @@ for r in rows[:15]:
     print(r)
 ```
 
-## Step 10 — Every dating against every fixed point
+## Step 11 — Every dating against every fixed point
 
 The whole 41 by 5 grid, counted. Each dating ends before an independent terminus, contains it, or begins after it. Because a terminus is an instant and not an interval, these are OWL-Time's own <code>time:before</code>, <code>time:inside</code> and <code>time:after</code> rather than Allen relations, which hold only between proper intervals. The shape of the table is a sanity check on the corpus: a terminus near the start should have almost nothing before it, one near the end almost nothing after it.
 
@@ -348,7 +385,7 @@ for r in rows[:15]:
     print(r)
 ```
 
-## Step 11 — How much of the order survives a closer look
+## Step 12 — How much of the order survives a closer look
 
 The one number the two queries below do not show between them. Every pair of the 41 datings stands in exactly one relation on the modelled interval, so the first row is all 820 pairs. The second counts only those whose relation is unchanged when the intervals are widened to the full span of their potters' date ranges. Just under half. That ratio is the uncertainty of the relative chronology, expressed as a count rather than as a caveat — and it is the reason <code>time:interval*</code> carries the smaller set.
 
@@ -377,7 +414,7 @@ for r in rows[:15]:
     print(r)
 ```
 
-## Step 12 — What came before what — the complete matrix
+## Step 13 — What came before what — the complete matrix
 
 Every pair of datings stands in exactly one of Allen's thirteen relations, computed on the modelled interval [eff_start, eff_end] and published under <code>lado:possibly*</code>. Complete means countable: the numbers below add up to all 820 pairs of 41 findspots, so a missing relation is a missing pair rather than a silence that could mean anything. Note how lopsided the result is — two thirds of all pairs are simple precedence, which is what a corpus spread over three centuries looks like.
 
@@ -401,7 +438,7 @@ for r in rows[:15]:
     print(r)
 ```
 
-## Step 13 — The same question in OWL-Time alone
+## Step 14 — The same question in OWL-Time alone
 
 No <code>lado:</code> predicate appears below — only OWL-Time's own interval relations. It works, and it deliberately returns FEWER pairs than the query above. OWL-Time relations are sharp: there is no way to say "before, probably". So only the relations that survive a more generous reading of the bounds are asserted with them, and the rest live under <code>lado:possibly*</code> where the hedge is visible. This is not OWL-Time falling short. It is a vocabulary without a notion of uncertainty saying exactly as much as it can support — and the gap between the two counts is the uncertainty, made countable.
 
@@ -425,7 +462,7 @@ for r in rows[:15]:
     print(r)
 ```
 
-## Step 14 — Why an order stops holding
+## Step 15 — Why an order stops holding
 
 The pairs that are ordered on the modelled intervals but not once the evidence is read generously. The columns are the bounds the relation is actually computed from, and the gap between them — sorted with the narrowest first, because those are the claims that fail soonest. Read the last two columns beside it: the modelled intervals are a year apart while the potters' date ranges overlap by decades. That is the whole distinction in one line, and it is why these pairs carry <code>lado:possiblyBefore</code> and not <code>time:intervalBefore</code>.
 
@@ -454,7 +491,7 @@ for r in rows[:15]:
     print(r)
 ```
 
-## Step 15 — Everything a map needs, in one query
+## Step 16 — Everything a map needs, in one query
 
 Coordinates, interval and colour for each findspot. The point sits on the discovery site rather than the findspot, because that is where the source records it — the four Bregenz contexts share one coordinate, and a map that wants them apart has to spread them itself rather than pretend the data distinguishes them. The colour is presentation and is published as such, on the plot row alongside the other "visual only" quantities, never on the time-span.
 
@@ -479,7 +516,7 @@ for r in rows[:15]:
     print(r)
 ```
 
-## Step 16 — How the colours were made
+## Step 17 — How the colours were made
 
 A colour in a dataset is usually an assertion nobody can check. These can be: each axis publishes its ramp stops, its interpolation and the domain the values were stretched onto, so any hex value in the graph can be recomputed from the graph alone. Watch <code>lado:domainBasis</code> — an observed domain is read off this corpus, which means adding a findspot can change the colour of one that did not change at all. The chronological axis avoids red-green on purpose: late material is not worse material.
 
@@ -503,7 +540,7 @@ for r in rows[:15]:
     print(r)
 ```
 
-## Step 17 — Which method produced these dates
+## Step 18 — Which method produced these dates
 
 The parameters are in the graph, not only in the paper. Each dating is generated by an activity, and that activity records the plan it followed — so a consumer can ask what k, τ, t₀ and the era convention were, and which datemax values the source query excluded, without reading any prose. τ and lado:referenceLength are unrelated quantities that happened to carry the same value until τ was calibrated: τ governs how fast the interval tightens as stamps accumulate, t₀ is the fixed length against which qStart and qEnd are read. lado:calibrationBasis says how τ was obtained, and lado:calibratedAgainst names the findspots it was fitted to — try following those IRIs. The excluded datemax values are an inherited filter whose justification is still open; publishing them is how that stays visible.
 

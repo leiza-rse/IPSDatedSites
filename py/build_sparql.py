@@ -86,6 +86,7 @@ VIEW_LABELS = {
     "intervals": "table and interval bars",
     "scatter": "table and scatter plot",
     "barchart": "table and bar chart",
+    "timeline": "table and timeline with fixed points",
 }
 
 # The columns each view reads, and what it falls back on. Declared here
@@ -98,6 +99,13 @@ VIEW_COLUMNS = {
     "intervals": {"from": "from", "to": "to", "label": "findspot"},
     "scatter": {"x": "x", "y": "y", "label": "findspot"},
     "barchart": {"category": "category", "value": "value"},
+    # The timeline draws two kinds of row from one result: intervals as
+    # bars, instants as vertical lines across all of them. `kind` is the
+    # column that says which, and `marker` is the value in it that means
+    # "this row is an instant" — configurable rather than hard-coded, so a
+    # query can label its rows in its own words.
+    "timeline": {"from": "from", "to": "to", "label": "label",
+                 "kind": "kind", "marker": "terminus"},
 }
 
 # Leaflet, pinned exactly as in py/build_map.py. Imported from there rather

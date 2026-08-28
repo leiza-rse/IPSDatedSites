@@ -1,0 +1,46 @@
+# The whole corpus against the independent dates
+# Everything the method rests on, in one picture. Forty-one dated assemblages
+# as bars, and the five independently dated events as vertical lines across
+# them: two Augustan camps, the naval base at Velsen, Vesuvius, Inchtuthil.
+# The bars that cross a line are drawn darker — those are the assemblages the
+# model puts in circulation at a moment somebody else dated for us. The five
+# reference assemblages must each cross their own line, because that is the
+# criterion that fixed tau, and Pompeii's crosses by a fifth of a year. A
+# future revision that broke the calibration would show here as a bar sliding
+# off its line, before any number changed in the documentation.
+
+PREFIX samian:  <http://data.archaeology.link/data/samian/>
+PREFIX lado:    <http://archaeology.link/ontology#>
+PREFIX crm:     <http://www.cidoc-crm.org/cidoc-crm/>
+PREFIX crmdig:  <http://www.ics.forth.gr/isl/CRMdig/>
+PREFIX time:    <http://www.w3.org/2006/time#>
+PREFIX prov:    <http://www.w3.org/ns/prov#>
+PREFIX dcat:    <http://www.w3.org/ns/dcat#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX skos:    <http://www.w3.org/2004/02/skos/core#>
+PREFIX geo:     <http://www.opengis.net/ont/geosparql#>
+PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?kind ?label ?from ?to WHERE {
+  {
+    ?fs a lado:Findspot ; rdfs:label ?label ;
+        crm:P4_has_time-span ?ts .
+    ?ts time:hasBeginning/time:inTimePosition/time:numericPosition
+          ?from ;
+        time:hasEnd/time:inTimePosition/time:numericPosition ?to .
+    BIND("interval" AS ?kind)
+  }
+  UNION
+  {
+    ?ev a lado:IndependentTerminus ;
+        lado:constrains/crm:P89_falls_within/rdfs:label ?site ;
+        crm:P4_has_time-span/time:inTimePosition/time:numericPosition
+          ?year .
+    BIND(?year AS ?from)
+    BIND(?year AS ?to)
+    BIND(CONCAT(?site, " ", STR(ROUND(?year))) AS ?label)
+    BIND("terminus" AS ?kind)
+  }
+}
+ORDER BY ?from

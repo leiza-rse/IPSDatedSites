@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Sharply dated, but not a depot
+title: The whole corpus against the independent dates
 ---
 
 <style>
@@ -49,22 +49,33 @@ title: Sharply dated, but not a depot
 
 <p class="crumb"><a href="index.html">&larr; All queries</a></p>
 
-<p>Findspots that are tightly dated (qInterval above 0.55) while showing almost no die repetition (qRepetition below 0.2) — each stamp occurs once or nearly once. These are exactly the sites that a single combined quality score would destroy: multiply the two and Rougham or the Keltengraben at Vindonissa drop to zero, although their dating is among the sharpest in the set. The two axes measure different things and are deliberately never merged.</p>
+<p>Everything the method rests on, in one picture. Forty-one dated assemblages as bars, and the five independently dated events as vertical lines across them: two Augustan camps, the naval base at Velsen, Vesuvius, Inchtuthil. The bars that cross a line are drawn darker — those are the assemblages the model puts in circulation at a moment somebody else dated for us. The five reference assemblages must each cross their own line, because that is the criterion that fixed tau, and Pompeii's crosses by a fifth of a year. A future revision that broke the calibration would show here as a bar sliding off its line, before any number changed in the documentation.</p>
 
 <div class="status"><span class="dot" id="dot"></span><span id="status-text">Starting the Python runtime&hellip;</span></div>
 <p class="note" id="graph-note" hidden></p>
 
-<textarea class="sparql" id="src" rows="12" spellcheck="false">SELECT ?site ?findspot ?qInterval ?qRepetition ?nStamps ?nDies ?repetition
-WHERE {
-  ?fs a lado:Findspot ; rdfs:label ?findspot ;
-      crm:P89_falls_within ?p ; crm:P4_has_time-span ?ts .
-  ?p rdfs:label ?site .
-  ?ts lado:qInterval ?qInterval ; lado:qRepetition ?qRepetition ;
-      lado:nStamps ?nStamps ; lado:nDies ?nDies ;
-      lado:dieRepetition ?repetition .
-  FILTER(?qInterval &gt; 0.55 &amp;&amp; ?qRepetition &lt; 0.2)
+<textarea class="sparql" id="src" rows="23" spellcheck="false">SELECT ?kind ?label ?from ?to WHERE {
+  {
+    ?fs a lado:Findspot ; rdfs:label ?label ;
+        crm:P4_has_time-span ?ts .
+    ?ts time:hasBeginning/time:inTimePosition/time:numericPosition
+          ?from ;
+        time:hasEnd/time:inTimePosition/time:numericPosition ?to .
+    BIND(&#34;interval&#34; AS ?kind)
+  }
+  UNION
+  {
+    ?ev a lado:IndependentTerminus ;
+        lado:constrains/crm:P89_falls_within/rdfs:label ?site ;
+        crm:P4_has_time-span/time:inTimePosition/time:numericPosition
+          ?year .
+    BIND(?year AS ?from)
+    BIND(?year AS ?to)
+    BIND(CONCAT(?site, &#34; &#34;, STR(ROUND(?year))) AS ?label)
+    BIND(&#34;terminus&#34; AS ?kind)
+  }
 }
-ORDER BY DESC(?qInterval)</textarea>
+ORDER BY ?from</textarea>
 <div class="query-bar">
   <button class="run" id="run" disabled>Run</button>
   <button class="reset" id="reset">Reset</button>
@@ -72,7 +83,7 @@ ORDER BY DESC(?qInterval)</textarea>
 </div>
 
 <div class="viewbox">
-  <div class="head">Scatter &mdash; <code>?qInterval</code> against <code>?qRepetition</code></div>
+  <div class="head">Timeline &mdash; rows where <code>?kind</code> is <code>terminus</code> are drawn as fixed points across the intervals</div>
   <div id="bars-wrap"><svg id="bars" height="40"></svg></div>
 </div>
 
@@ -80,7 +91,7 @@ ORDER BY DESC(?qInterval)</textarea>
 
 <p class="note" style="margin-top:1.6rem">
   Also available as a plain file:
-  <a href="rq/two-quality-axes.rq"><code>two-quality-axes.rq</code></a>.
+  <a href="rq/corpus-against-fixed-points.rq"><code>corpus-against-fixed-points.rq</code></a>.
   The graph is fetched as a static file and queried in your browser with
   rdflib under Pyodide &mdash; there is no endpoint, and nothing you type
   leaves your machine.
@@ -89,12 +100,12 @@ ORDER BY DESC(?qInterval)</textarea>
 <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
 <script>
 const PREFIXES = "PREFIX samian:  <http://data.archaeology.link/data/samian/>\nPREFIX lado:    <http://archaeology.link/ontology#>\nPREFIX crm:     <http://www.cidoc-crm.org/cidoc-crm/>\nPREFIX crmdig:  <http://www.ics.forth.gr/isl/CRMdig/>\nPREFIX time:    <http://www.w3.org/2006/time#>\nPREFIX prov:    <http://www.w3.org/ns/prov#>\nPREFIX dcat:    <http://www.w3.org/ns/dcat#>\nPREFIX dcterms: <http://purl.org/dc/terms/>\nPREFIX skos:    <http://www.w3.org/2004/02/skos/core#>\nPREFIX geo:     <http://www.opengis.net/ont/geosparql#>\nPREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd:     <http://www.w3.org/2001/XMLSchema#>\n";
-const QUERY    = "SELECT ?site ?findspot ?qInterval ?qRepetition ?nStamps ?nDies ?repetition\nWHERE {\n  ?fs a lado:Findspot ; rdfs:label ?findspot ;\n      crm:P89_falls_within ?p ; crm:P4_has_time-span ?ts .\n  ?p rdfs:label ?site .\n  ?ts lado:qInterval ?qInterval ; lado:qRepetition ?qRepetition ;\n      lado:nStamps ?nStamps ; lado:nDies ?nDies ;\n      lado:dieRepetition ?repetition .\n  FILTER(?qInterval > 0.55 && ?qRepetition < 0.2)\n}\nORDER BY DESC(?qInterval)";
+const QUERY    = "SELECT ?kind ?label ?from ?to WHERE {\n  {\n    ?fs a lado:Findspot ; rdfs:label ?label ;\n        crm:P4_has_time-span ?ts .\n    ?ts time:hasBeginning/time:inTimePosition/time:numericPosition\n          ?from ;\n        time:hasEnd/time:inTimePosition/time:numericPosition ?to .\n    BIND(\"interval\" AS ?kind)\n  }\n  UNION\n  {\n    ?ev a lado:IndependentTerminus ;\n        lado:constrains/crm:P89_falls_within/rdfs:label ?site ;\n        crm:P4_has_time-span/time:inTimePosition/time:numericPosition\n          ?year .\n    BIND(?year AS ?from)\n    BIND(?year AS ?to)\n    BIND(CONCAT(?site, \" \", STR(ROUND(?year))) AS ?label)\n    BIND(\"terminus\" AS ?kind)\n  }\n}\nORDER BY ?from";
 const GRAPH    = {"file": "rdf/IPSDatedSites-bundle.ttl", "url": "bundle.ttl", "publish": true, "page_url": "../bundle.ttl", "megabytes": "0.3"};
 const MAX_ROWS = 500;
 const RDFLIB   = "7.1.1";
-const VIEW      = "scatter";
-const VIEW_COLS = {"x": "qInterval", "y": "qRepetition", "label": "findspot"};
+const VIEW      = "timeline";
+const VIEW_COLS = {"from": "from", "to": "to", "label": "label", "kind": "kind", "marker": "terminus"};
 </script>
 {% raw %}
 <script>
