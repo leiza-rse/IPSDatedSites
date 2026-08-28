@@ -1,0 +1,1532 @@
+{
+ "features": [
+  {
+   "geometry": {
+    "coordinates": [
+     -1.866667,
+     52.21667
+    ],
+    "type": "Point"
+   },
+   "properties": {
+    "findspots": [
+     {
+      "colours": {
+       "midpointYear": "#56c566",
+       "nStamps": "#545b6d",
+       "qInterval": "#3aa858",
+       "sigmaYears": "#86cb66"
+      },
+      "findspot": "Pit",
+      "from": 149.8,
+      "to": 165.7,
+      "values": {
+       "midpointYear": 0.73174,
+       "nStamps": 0.36227,
+       "qInterval": 0.858,
+       "sigmaYears": 0.2495
+      }
+     }
+    ],
+    "from": 149.8,
+    "median": {
+     "midpointYear": 0.73174,
+     "nStamps": 0.36227,
+     "qInterval": 0.858,
+     "sigmaYears": 0.2495
+    },
+    "n_findspots": 1,
+    "site": "Alcester",
+    "to": 165.7
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     2.299999,
+     49.900001
+    ],
+    "type": "Point"
+   },
+   "properties": {
+    "findspots": [
+     {
+      "colours": {
+       "midpointYear": "#440154",
+       "nStamps": "#969076",
+       "qInterval": "#fffebd",
+       "sigmaYears": "#9ad469"
+      },
+      "findspot": "Sq. Bocquet pit 1973",
+      "from": -15.0,
+      "to": -2.8,
+      "values": {
+       "midpointYear": 0.0,
+       "nStamps": 0.67987,
+       "qInterval": 0.497,
+       "sigmaYears": 0.281
+      }
+     }
+    ],
+    "from": -15.0,
+    "median": {
+     "midpointYear": 0.0,
+     "nStamps": 0.67987,
+     "qInterval": 0.497,
+     "sigmaYears": 0.281
+    },
+    "n_findspots": 1,
+    "site": "Amiens",
+    "to": -2.8
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     7.599999,
+     47.566669
+    ],
+    "type": "Point"
+   },
+   "properties": {
+    "findspots": [
+     {
+      "colours": {
+       "midpointYear": "#440659",
+       "nStamps": "#2d426d",
+       "qInterval": "#fee18d",
+       "sigmaYears": "#57b65f"
+      },
+      "findspot": "Münster, Sch. 3 o",
+      "from": -14.7,
+      "to": 3.7,
+      "values": {
+       "midpointYear": 0.01494,
+       "nStamps": 0.20625,
+       "qInterval": 0.404,
+       "sigmaYears": 0.17978
+      }
+     }
+    ],
+    "from": -14.7,
+    "median": {
+     "midpointYear": 0.01494,
+     "nStamps": 0.20625,
+     "qInterval": 0.404,
+     "sigmaYears": 0.17978
+    },
+    "n_findspots": 1,
+    "site": "Basel",
+    "to": 3.7
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     5.3,
+     50.816665
+    ],
+    "type": "Point"
+   },
+   "properties": {
+    "findspots": [
+     {
+      "colours": {
+       "midpointYear": "#32658d",
+       "nStamps": "#49536c",
+       "qInterval": "#edf7a6",
+       "sigmaYears": "#bde379"
+      },
+      "findspot": "tumulus",
+      "from": 54.2,
+      "to": 75.1,
+      "values": {
+       "midpointYear": 0.32312,
+       "nStamps": 0.31204,
+       "qInterval": 0.548,
+       "sigmaYears": 0.34548
+      }
+     }
+    ],
+    "from": 54.2,
+    "median": {
+     "midpointYear": 0.32312,
+     "nStamps": 0.31204,
+     "qInterval": 0.548,
+     "sigmaYears": 0.34548
+    },
+    "n_findspots": 1,
+    "site": "Berlingen",
+    "to": 75.1
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     9.7471,
+     47.50311
+    ],
+    "type": "Point"
+   },
+   "properties": {
+    "findspots": [
+     {
+      "colours": {
+       "midpointYear": "#375a8c",
+       "nStamps": "#595e6d",
+       "qInterval": "#f6fbb3",
+       "sigmaYears": "#b2de72"
+      },
+      "findspot": "Böckleareal (destruction layer period II)",
+      "from": 46.8,
+      "to": 64.2,
+      "values": {
+       "midpointYear": 0.28258,
+       "nStamps": 0.38372,
+       "qInterval": 0.523,
+       "sigmaYears": 0.32323
+      }
+     },
+     {
+      "colours": {
+       "midpointYear": "#3d4c88",
+       "nStamps": "#676a71",
+       "qInterval": "#f2f9ad",
+       "sigmaYears": "#d7ee89"
+      },
+      "findspot": "Böckleareal (period I)",
+      "from": 34.9,
+      "to": 52.1,
+      "values": {
+       "midpointYear": 0.23009,
+       "nStamps": 0.45354,
+       "qInterval": 0.535,
+       "sigmaYears": 0.39534
+      }
+     },
+     {
+      "colours": {
+       "midpointYear": "#365d8c",
+       "nStamps": "#424e6c",
+       "qInterval": "#ffffbf",
+       "sigmaYears": "#c9e881"
+      },
+      "findspot": "Böckleareal (period II)",
+      "from": 46.0,
+      "to": 69.0,
+      "values": {
+       "midpointYear": 0.29156,
+       "nStamps": 0.28199,
+       "qInterval": 0.5,
+       "sigmaYears": 0.36829
+      }
+     },
+     {
+      "colours": {
+       "midpointYear": "#3f4686",
+       "nStamps": "#9f9775",
+       "qInterval": "#a7d96a",
+       "sigmaYears": "#58b660"
+      },
+      "findspot": "Samian Hoard 1913",
+      "from": 33.4,
+      "to": 43.4,
+      "values": {
+       "midpointYear": 0.20777,
+       "nStamps": 0.71999,
+       "qInterval": 0.699,
+       "sigmaYears": 0.18205
+      }
+     }
+    ],
+    "from": 33.4,
+    "median": {
+     "midpointYear": 0.25633,
+     "nStamps": 0.41863,
+     "qInterval": 0.529,
+     "sigmaYears": 0.34576
+    },
+    "n_findspots": 4,
+    "site": "Bregenz",
+    "to": 69.0
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     19.04045,
+     47.49835
+    ],
+    "type": "Point"
+   },
+   "properties": {
+    "findspots": [
+     {
+      "colours": {
+       "midpointYear": "#57c566",
+       "nStamps": "#1c3a6f",
+       "qInterval": "#cce982",
+       "sigmaYears": "#a4d86a"
+      },
+      "findspot": "Aquincum, Hoard",
+      "from": 145.4,
+      "to": 170.9,
+      "values": {
+       "midpointYear": 0.73339,
+       "nStamps": 0.15602,
+       "qInterval": 0.626,
+       "sigmaYears": 0.29705
+      }
+     }
+    ],
+    "from": 145.4,
+    "median": {
+     "midpointYear": 0.73339,
+     "nStamps": 0.15602,
+     "qInterval": 0.626,
+     "sigmaYears": 0.29705
+    },
+    "n_findspots": 1,
+    "site": "Budapest",
+    "to": 170.9
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     10.84333,
+     48.659999
+    ],
+    "type": "Point"
+   },
+   "properties": {
+    "findspots": [
+     {
+      "colours": {
+       "midpointYear": "#2f6b8d",
+       "nStamps": "#424e6c",
+       "qInterval": "#e0f294",
+       "sigmaYears": "#a5d96a"
+      },
+      "findspot": "Geschirrdepot",
+      "from": 60.1,
+      "to": 80.6,
+      "values": {
+       "midpointYear": 0.34801,
+       "nStamps": 0.28199,
+       "qInterval": 0.582,
+       "sigmaYears": 0.2991
+      }
+     }
+    ],
+    "from": 60.1,
+    "median": {
+     "midpointYear": 0.34801,
+     "nStamps": 0.28199,
+     "qInterval": 0.582,
+     "sigmaYears": 0.2991
+    },
+    "n_findspots": 1,
+    "site": "Burghöfe",
+    "to": 80.6
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     6.849999,
+     43.416667
+    ],
+    "type": "Point"
+   },
+   "properties": {
+    "findspots": [
+     {
+      "colours": {
+       "midpointYear": "#365d8c",
+       "nStamps": "#00224e",
+       "qInterval": "#c6e77f",
+       "sigmaYears": "#87cc67"
+      },
+      "findspot": "wreck 6",
+      "from": 43.5,
+      "to": 71.5,
+      "values": {
+       "midpointYear": 0.29156,
+       "nStamps": 0.0,
+       "qInterval": 0.637,
+       "sigmaYears": 0.25185
+      }
+     }
+    ],
+    "from": 43.5,
+    "median": {
+     "midpointYear": 0.29156,
+     "nStamps": 0.0,
+     "qInterval": 0.637,
+     "sigmaYears": 0.25185
+    },
+    "n_findspots": 1,
+    "site": "Cap Drammont",
+    "to": 71.5
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     3.316666,
+     42.316665
+    ],
+    "type": "Point"
+   },
+   "properties": {
+    "findspots": [
+     {
+      "colours": {
+       "midpointYear": "#306a8d",
+       "nStamps": "#fee838",
+       "qInterval": "#a4d86a",
+       "sigmaYears": "#acdc6e"
+      },
+      "findspot": "Cala Culip IV",
+      "from": 62.7,
+      "to": 75.6,
+      "values": {
+       "midpointYear": 0.3427,
+       "nStamps": 1.0,
+       "qInterval": 0.703,
+       "sigmaYears": 0.31184
+      }
+     }
+    ],
+    "from": 62.7,
+    "median": {
+     "midpointYear": 0.3427,
+     "nStamps": 1.0,
+     "qInterval": 0.703,
+     "sigmaYears": 0.31184
+    },
+    "n_findspots": 1,
+    "site": "Cap de Creus",
+    "to": 75.6
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     -1.35,
+     53.71667
+    ],
+    "type": "Point"
+   },
+   "properties": {
+    "findspots": [
+     {
+      "colours": {
+       "midpointYear": "#3cb875",
+       "nStamps": "#bcae6b",
+       "qInterval": "#b4df73",
+       "sigmaYears": "#7cc765"
+      },
+      "findspot": "Pottery Shop",
+      "from": 138.2,
+      "to": 149.4,
+      "values": {
+       "midpointYear": 0.67052,
+       "nStamps": 0.84661,
+       "qInterval": 0.672,
+       "sigmaYears": 0.2351
+      }
+     }
+    ],
+    "from": 138.2,
+    "median": {
+     "midpointYear": 0.67052,
+     "nStamps": 0.84661,
+     "qInterval": 0.672,
+     "sigmaYears": 0.2351
+    },
+    "n_findspots": 1,
+    "site": "Castleford",
+    "to": 149.4
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     -2.359504,
+     54.991588
+    ],
+    "type": "Point"
+   },
+   "properties": {
+    "findspots": [
+     {
+      "colours": {
+       "midpointYear": "#287e8d",
+       "nStamps": "#4f576d",
+       "qInterval": "#98d368",
+       "sigmaYears": "#5db961"
+      },
+      "findspot": "Per.1 Ditch",
+      "from": 80.5,
+      "to": 95.1,
+      "values": {
+       "midpointYear": 0.4245,
+       "nStamps": 0.33855,
+       "qInterval": 0.722,
+       "sigmaYears": 0.18825
+      }
+     }
+    ],
+    "from": 80.5,
+    "median": {
+     "midpointYear": 0.4245,
+     "nStamps": 0.33855,
+     "qInterval": 0.722,
+     "sigmaYears": 0.18825
+    },
+    "n_findspots": 1,
+    "site": "Chesterholm-Vindolanda",
+    "to": 95.1
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     -1.983332,
+     51.733329
+    ],
+    "type": "Point"
+   },
+   "properties": {
+    "findspots": [
+     {
+      "colours": {
+       "midpointYear": "#38598c",
+       "nStamps": "#787875",
+       "qInterval": "#bfe47a",
+       "sigmaYears": "#6dc064"
+      },
+      "findspot": "fort ditch",
+      "from": 49.0,
+      "to": 60.1,
+      "values": {
+       "midpointYear": 0.27858,
+       "nStamps": 0.53974,
+       "qInterval": 0.651,
+       "sigmaYears": 0.21085
+      }
+     }
+    ],
+    "from": 49.0,
+    "median": {
+     "midpointYear": 0.27858,
+     "nStamps": 0.53974,
+     "qInterval": 0.651,
+     "sigmaYears": 0.21085
+    },
+    "n_findspots": 1,
+    "site": "Cirencester",
+    "to": 60.1
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     0.899999,
+     51.883338
+    ],
+    "type": "Point"
+   },
+   "properties": {
+    "findspots": [
+     {
+      "colours": {
+       "midpointYear": "#355f8c",
+       "nStamps": "#7c7b75",
+       "qInterval": "#c1e57b",
+       "sigmaYears": "#8ece67"
+      },
+      "findspot": "Pottery Shop I",
+      "from": 53.1,
+      "to": 65.3,
+      "values": {
+       "midpointYear": 0.29888,
+       "nStamps": 0.55933,
+       "qInterval": 0.647,
+       "sigmaYears": 0.26189
+      }
+     },
+     {
+      "colours": {
+       "midpointYear": "#34618c",
+       "nStamps": "#848177",
+       "qInterval": "#b8e176",
+       "sigmaYears": "#85cb66"
+      },
+      "findspot": "Pottery Shop II",
+      "from": 55.7,
+      "to": 67.4,
+      "values": {
+       "midpointYear": 0.3092,
+       "nStamps": 0.59403,
+       "qInterval": 0.664,
+       "sigmaYears": 0.24823
+      }
+     }
+    ],
+    "from": 53.1,
+    "median": {
+     "midpointYear": 0.30404,
+     "nStamps": 0.57668,
+     "qInterval": 0.6555,
+     "sigmaYears": 0.25506
+    },
+    "n_findspots": 2,
+    "site": "Colchester",
+    "to": 67.4
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     8.31,
+     47.59
+    ],
+    "type": "Point"
+   },
+   "properties": {
+    "findspots": [
+     {
+      "colours": {
+       "midpointYear": "#440456",
+       "nStamps": "#c0b16a",
+       "qInterval": "#e1f296",
+       "sigmaYears": "#36a557"
+      },
+      "findspot": "Military camp",
+      "from": -11.7,
+      "to": -2.8,
+      "values": {
+       "midpointYear": 0.00735,
+       "nStamps": 0.86179,
+       "qInterval": 0.579,
+       "sigmaYears": 0.13629
+      }
+     }
+    ],
+    "from": -11.7,
+    "median": {
+     "midpointYear": 0.00735,
+     "nStamps": 0.86179,
+     "qInterval": 0.579,
+     "sigmaYears": 0.13629
+    },
+    "n_findspots": 1,
+    "site": "Dangstetten",
+    "to": -2.8
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     8.866666,
+     47.650001
+    ],
+    "type": "Point"
+   },
+   "properties": {
+    "findspots": [
+     {
+      "colours": {
+       "midpointYear": "#7bd050",
+       "nStamps": "#888578",
+       "qInterval": "#f0f9ab",
+       "sigmaYears": "#feeea3"
+      },
+      "findspot": "shop",
+      "from": 163.0,
+      "to": 181.7,
+      "values": {
+       "midpointYear": 0.7958,
+       "nStamps": 0.61694,
+       "qInterval": 0.539,
+       "sigmaYears": 0.55462
+      }
+     }
+    ],
+    "from": 163.0,
+    "median": {
+     "midpointYear": 0.7958,
+     "nStamps": 0.61694,
+     "qInterval": 0.539,
+     "sigmaYears": 0.55462
+    },
+    "n_findspots": 1,
+    "site": "Eschenz",
+    "to": 181.7
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     5.266667,
+     50.816667
+    ],
+    "type": "Point"
+   },
+   "properties": {
+    "findspots": [
+     {
+      "colours": {
+       "midpointYear": "#3eb974",
+       "nStamps": "#2d426d",
+       "qInterval": "#e5f49c",
+       "sigmaYears": "#d4ed88"
+      },
+      "findspot": "tumulus",
+      "from": 131.2,
+      "to": 158.8,
+      "values": {
+       "midpointYear": 0.67576,
+       "nStamps": 0.20625,
+       "qInterval": 0.568,
+       "sigmaYears": 0.38997
+      }
+     }
+    ],
+    "from": 131.2,
+    "median": {
+     "midpointYear": 0.67576,
+     "nStamps": 0.20625,
+     "qInterval": 0.568,
+     "sigmaYears": 0.38997
+    },
+    "n_findspots": 1,
+    "site": "Helsoven",
+    "to": 158.8
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     -3.422952,
+     56.541347
+    ],
+    "type": "Point"
+   },
+   "properties": {
+    "findspots": [
+     {
+      "colours": {
+       "midpointYear": "#2b768e",
+       "nStamps": "#0d3067",
+       "qInterval": "#a6d96a",
+       "sigmaYears": "#92d068"
+      },
+      "findspot": "Gutter",
+      "from": 66.8,
+      "to": 93.2,
+      "values": {
+       "midpointYear": 0.39035,
+       "nStamps": 0.09127,
+       "qInterval": 0.7,
+       "sigmaYears": 0.26865
+      }
+     }
+    ],
+    "from": 66.8,
+    "median": {
+     "midpointYear": 0.39035,
+     "nStamps": 0.09127,
+     "qInterval": 0.7,
+     "sigmaYears": 0.26865
+    },
+    "n_findspots": 1,
+    "site": "Inchtuthil",
+    "to": 93.2
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     6.95427,
+     50.93835
+    ],
+    "type": "Point"
+   },
+   "properties": {
+    "findspots": [
+     {
+      "colours": {
+       "midpointYear": "#2b758e",
+       "nStamps": "#807e76",
+       "qInterval": "#30a356",
+       "sigmaYears": "#08783f"
+      },
+      "findspot": "Hafen",
+      "from": 76.2,
+      "to": 82.9,
+      "values": {
+       "midpointYear": 0.38824,
+       "nStamps": 0.57735,
+       "qInterval": 0.871,
+       "sigmaYears": 0.0325
+      }
+     }
+    ],
+    "from": 76.2,
+    "median": {
+     "midpointYear": 0.38824,
+     "nStamps": 0.57735,
+     "qInterval": 0.871,
+     "sigmaYears": 0.0325
+    },
+    "n_findspots": 1,
+    "site": "Köln",
+    "to": 82.9
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     3.083333,
+     44.099998
+    ],
+    "type": "Point"
+   },
+   "properties": {
+    "findspots": [
+     {
+      "colours": {
+       "midpointYear": "#404184",
+       "nStamps": "#b5a86e",
+       "qInterval": "#84ca66",
+       "sigmaYears": "#4cb15d"
+      },
+      "findspot": "Fosse Cirratus",
+      "from": 30.4,
+      "to": 40.0,
+      "values": {
+       "midpointYear": 0.1935,
+       "nStamps": 0.81581,
+       "qInterval": 0.753,
+       "sigmaYears": 0.16639
+      }
+     },
+     {
+      "colours": {
+       "midpointYear": "#3b538b",
+       "nStamps": "#f8e33d",
+       "qInterval": "#c4e67d",
+       "sigmaYears": "#92d068"
+      },
+      "findspot": "Fosse Malaval",
+      "from": 42.7,
+      "to": 54.6,
+      "values": {
+       "midpointYear": 0.25277,
+       "nStamps": 0.98776,
+       "qInterval": 0.641,
+       "sigmaYears": 0.26839
+      }
+     }
+    ],
+    "from": 30.4,
+    "median": {
+     "midpointYear": 0.22314,
+     "nStamps": 0.90179,
+     "qInterval": 0.697,
+     "sigmaYears": 0.21739
+    },
+    "n_findspots": 2,
+    "site": "La Graufesenque",
+    "to": 54.6
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     8.644794,
+     50.365103
+    ],
+    "type": "Point"
+   },
+   "properties": {
+    "findspots": [
+     {
+      "colours": {
+       "midpointYear": "#fde725",
+       "nStamps": "#60646f",
+       "qInterval": "#b6e074",
+       "sigmaYears": "#fffab7"
+      },
+      "findspot": "store",
+      "from": 208.0,
+      "to": 229.7,
+      "values": {
+       "midpointYear": 1.0,
+       "nStamps": 0.42133,
+       "qInterval": 0.669,
+       "sigmaYears": 0.51514
+      }
+     }
+    ],
+    "from": 208.0,
+    "median": {
+     "midpointYear": 1.0,
+     "nStamps": 0.42133,
+     "qInterval": 0.669,
+     "sigmaYears": 0.51514
+    },
+    "n_findspots": 1,
+    "site": "Langenhain",
+    "to": 229.7
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     -0.09184,
+     51.51279
+    ],
+    "type": "Point"
+   },
+   "properties": {
+    "findspots": [
+     {
+      "colours": {
+       "midpointYear": "#97d73e",
+       "nStamps": "#fee838",
+       "qInterval": "#fed07e",
+       "sigmaYears": "#a50026"
+      },
+      "findspot": "New Fresh Wharf: quay",
+      "from": 168.1,
+      "to": 196.8,
+      "values": {
+       "midpointYear": 0.84028,
+       "nStamps": 1.0,
+       "qInterval": 0.368,
+       "sigmaYears": 1.0
+      }
+     },
+     {
+      "colours": {
+       "midpointYear": "#249c88",
+       "nStamps": "#7a7975",
+       "qInterval": "#90cf68",
+       "sigmaYears": "#4db15d"
+      },
+      "findspot": "Second Fire",
+      "from": 110.4,
+      "to": 120.4,
+      "values": {
+       "midpointYear": 0.54594,
+       "nStamps": 0.54975,
+       "qInterval": 0.734,
+       "sigmaYears": 0.16665
+      }
+     }
+    ],
+    "from": 110.4,
+    "median": {
+     "midpointYear": 0.69311,
+     "nStamps": 0.77487,
+     "qInterval": 0.551,
+     "sigmaYears": 0.58332
+    },
+    "n_findspots": 2,
+    "site": "London",
+    "to": 196.8
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     8.2791,
+     50.0
+    ],
+    "type": "Point"
+   },
+   "properties": {
+    "findspots": [
+     {
+      "colours": {
+       "midpointYear": "#450e60",
+       "nStamps": "#858277",
+       "qInterval": "#f1f9ab",
+       "sigmaYears": "#94d168"
+      },
+      "findspot": "Emmeranstraße",
+      "from": -6.4,
+      "to": 5.8,
+      "values": {
+       "midpointYear": 0.03795,
+       "nStamps": 0.60193,
+       "qInterval": 0.538,
+       "sigmaYears": 0.27253
+      }
+     }
+    ],
+    "from": -6.4,
+    "median": {
+     "midpointYear": 0.03795,
+     "nStamps": 0.60193,
+     "qInterval": 0.538,
+     "sigmaYears": 0.27253
+    },
+    "n_findspots": 1,
+    "site": "Mainz",
+    "to": 5.8
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     3.0,
+     43.18333
+    ],
+    "type": "Point"
+   },
+   "properties": {
+    "findspots": [
+     {
+      "colours": {
+       "midpointYear": "#38598c",
+       "nStamps": "#baac6c",
+       "qInterval": "#b1de71",
+       "sigmaYears": "#7fc866"
+      },
+      "findspot": "les ports (La Nautique)",
+      "from": 49.0,
+      "to": 60.3,
+      "values": {
+       "midpointYear": 0.27911,
+       "nStamps": 0.83589,
+       "qInterval": 0.679,
+       "sigmaYears": 0.23829
+      }
+     }
+    ],
+    "from": 49.0,
+    "median": {
+     "midpointYear": 0.27911,
+     "nStamps": 0.83589,
+     "qInterval": 0.679,
+     "sigmaYears": 0.23829
+    },
+    "n_findspots": 1,
+    "site": "Narbonne",
+    "to": 60.3
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     5.866666,
+     51.833328
+    ],
+    "type": "Point"
+   },
+   "properties": {
+    "findspots": [
+     {
+      "colours": {
+       "midpointYear": "#2d708e",
+       "nStamps": "#424e6c",
+       "qInterval": "#006837",
+       "sigmaYears": "#006837"
+      },
+      "findspot": "Barbarossastraat",
+      "from": 70.3,
+      "to": 79.7,
+      "values": {
+       "midpointYear": 0.3684,
+       "nStamps": 0.28199,
+       "qInterval": 1.0,
+       "sigmaYears": 0.0
+      }
+     }
+    ],
+    "from": 70.3,
+    "median": {
+     "midpointYear": 0.3684,
+     "nStamps": 0.28199,
+     "qInterval": 1.0,
+     "sigmaYears": 0.0
+    },
+    "n_findspots": 1,
+    "site": "Nijmegen",
+    "to": 79.7
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     7.52,
+     51.62
+    ],
+    "type": "Point"
+   },
+   "properties": {
+    "findspots": [
+     {
+      "colours": {
+       "midpointYear": "#440658",
+       "nStamps": "#9f9775",
+       "qInterval": "#daef8d",
+       "sigmaYears": "#2da155"
+      },
+      "findspot": "Military camp",
+      "from": -10.3,
+      "to": -1.7,
+      "values": {
+       "midpointYear": 0.01288,
+       "nStamps": 0.71999,
+       "qInterval": 0.597,
+       "sigmaYears": 0.12438
+      }
+     }
+    ],
+    "from": -10.3,
+    "median": {
+     "midpointYear": 0.01288,
+     "nStamps": 0.71999,
+     "qInterval": 0.597,
+     "sigmaYears": 0.12438
+    },
+    "n_findspots": 1,
+    "site": "Oberaden",
+    "to": -1.7
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     -5.07193,
+     36.36909
+    ],
+    "type": "Point"
+   },
+   "properties": {
+    "findspots": [
+     {
+      "colours": {
+       "midpointYear": "#297c8d",
+       "nStamps": "#958f76",
+       "qInterval": "#fff9b5",
+       "sigmaYears": "#f8fcb6"
+      },
+      "findspot": "Shipwreck",
+      "from": 76.8,
+      "to": 93.7,
+      "values": {
+       "midpointYear": 0.4134,
+       "nStamps": 0.67431,
+       "qInterval": 0.481,
+       "sigmaYears": 0.48259
+      }
+     }
+    ],
+    "from": 76.8,
+    "median": {
+     "midpointYear": 0.4134,
+     "nStamps": 0.67431,
+     "qInterval": 0.481,
+     "sigmaYears": 0.48259
+    },
+    "n_findspots": 1,
+    "site": "Pecio del Guadiaro",
+    "to": 93.7
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     14.483329,
+     40.75
+    ],
+    "type": "Point"
+   },
+   "properties": {
+    "findspots": [
+     {
+      "colours": {
+       "midpointYear": "#2d708e",
+       "nStamps": "#717273",
+       "qInterval": "#6fc164",
+       "sigmaYears": "#279f53"
+      },
+      "findspot": "Hoard",
+      "from": 70.0,
+      "to": 79.2,
+      "values": {
+       "midpointYear": 0.36666,
+       "nStamps": 0.50675,
+       "qInterval": 0.786,
+       "sigmaYears": 0.11775
+      }
+     }
+    ],
+    "from": 70.0,
+    "median": {
+     "midpointYear": 0.36666,
+     "nStamps": 0.50675,
+     "qInterval": 0.786,
+     "sigmaYears": 0.11775
+    },
+    "n_findspots": 1,
+    "site": "Pompeii",
+    "to": 79.2
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     4.033333,
+     49.25
+    ],
+    "type": "Point"
+   },
+   "properties": {
+    "findspots": [
+     {
+      "colours": {
+       "midpointYear": "#2f6b8d",
+       "nStamps": "#6a6c71",
+       "qInterval": "#ceea84",
+       "sigmaYears": "#9fd669"
+      },
+      "findspot": "rue de l'Equerre",
+      "from": 62.9,
+      "to": 77.1,
+      "values": {
+       "midpointYear": 0.34644,
+       "nStamps": 0.46806,
+       "qInterval": 0.622,
+       "sigmaYears": 0.28959
+      }
+     }
+    ],
+    "from": 62.9,
+    "median": {
+     "midpointYear": 0.34644,
+     "nStamps": 0.46806,
+     "qInterval": 0.622,
+     "sigmaYears": 0.28959
+    },
+    "n_findspots": 1,
+    "site": "Reims",
+    "to": 77.1
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     0.69727,
+     52.755577
+    ],
+    "type": "Point"
+   },
+   "properties": {
+    "findspots": [
+     {
+      "colours": {
+       "midpointYear": "#58c665",
+       "nStamps": "#1c3a6f",
+       "qInterval": "#a0d669",
+       "sigmaYears": "#9ad469"
+      },
+      "findspot": "tumulus",
+      "from": 146.4,
+      "to": 171.1,
+      "values": {
+       "midpointYear": 0.73613,
+       "nStamps": 0.15602,
+       "qInterval": 0.709,
+       "sigmaYears": 0.28056
+      }
+     }
+    ],
+    "from": 146.4,
+    "median": {
+     "midpointYear": 0.73613,
+     "nStamps": 0.15602,
+     "qInterval": 0.709,
+     "sigmaYears": 0.28056
+    },
+    "n_findspots": 1,
+    "site": "Rougham",
+    "to": 171.1
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     8.566659,
+     50.271522
+    ],
+    "type": "Point"
+   },
+   "properties": {
+    "findspots": [
+     {
+      "colours": {
+       "midpointYear": "#26a783",
+       "nStamps": "#4f576d",
+       "qInterval": "#e6f59d",
+       "sigmaYears": "#fff3aa"
+      },
+      "findspot": "Erdkastell",
+      "from": 113.3,
+      "to": 139.5,
+      "values": {
+       "midpointYear": 0.59404,
+       "nStamps": 0.33855,
+       "qInterval": 0.565,
+       "sigmaYears": 0.54022
+      }
+     }
+    ],
+    "from": 113.3,
+    "median": {
+     "midpointYear": 0.59404,
+     "nStamps": 0.33855,
+     "qInterval": 0.565,
+     "sigmaYears": 0.54022
+    },
+    "n_findspots": 1,
+    "site": "Saalburg",
+    "to": 139.5
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     4.633333,
+     52.46667
+    ],
+    "type": "Point"
+   },
+   "properties": {
+    "findspots": [
+     {
+      "colours": {
+       "midpointYear": "#46307c",
+       "nStamps": "#a09875",
+       "qInterval": "#fdfebc",
+       "sigmaYears": "#fdc474"
+      },
+      "findspot": "Velsen I",
+      "from": 11.7,
+      "to": 32.5,
+      "values": {
+       "midpointYear": 0.13594,
+       "nStamps": 0.729,
+       "qInterval": 0.506,
+       "sigmaYears": 0.65522
+      }
+     }
+    ],
+    "from": 11.7,
+    "median": {
+     "midpointYear": 0.13594,
+     "nStamps": 0.729,
+     "qInterval": 0.506,
+     "sigmaYears": 0.65522
+    },
+    "n_findspots": 1,
+    "site": "Velsen",
+    "to": 32.5
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     -0.333333,
+     51.75
+    ],
+    "type": "Point"
+   },
+   "properties": {
+    "findspots": [
+     {
+      "colours": {
+       "midpointYear": "#40ba73",
+       "nStamps": "#3a496c",
+       "qInterval": "#d7ee8a",
+       "sigmaYears": "#bde379"
+      },
+      "findspot": "Second Fire",
+      "from": 134.0,
+      "to": 157.7,
+      "values": {
+       "midpointYear": 0.67941,
+       "nStamps": 0.24729,
+       "qInterval": 0.604,
+       "sigmaYears": 0.34526
+      }
+     }
+    ],
+    "from": 134.0,
+    "median": {
+     "midpointYear": 0.67941,
+     "nStamps": 0.24729,
+     "qInterval": 0.604,
+     "sigmaYears": 0.34526
+    },
+    "n_findspots": 1,
+    "site": "Verulamium",
+    "to": 157.7
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     8.233333,
+     47.46667
+    ],
+    "type": "Point"
+   },
+   "properties": {
+    "findspots": [
+     {
+      "colours": {
+       "midpointYear": "#472c7a",
+       "nStamps": "#545b6d",
+       "qInterval": "#c8e880",
+       "sigmaYears": "#fee796"
+      },
+      "findspot": "Depotfund",
+      "from": 5.6,
+      "to": 31.9,
+      "values": {
+       "midpointYear": 0.12141,
+       "nStamps": 0.36227,
+       "qInterval": 0.633,
+       "sigmaYears": 0.5787
+      }
+     },
+     {
+      "colours": {
+       "midpointYear": "#451062",
+       "nStamps": "#2d426d",
+       "qInterval": "#a1d769",
+       "sigmaYears": "#93d168"
+      },
+      "findspot": "Keltengraben",
+      "from": -10.2,
+      "to": 12.2,
+      "values": {
+       "midpointYear": 0.04348,
+       "nStamps": 0.20625,
+       "qInterval": 0.708,
+       "sigmaYears": 0.27079
+      }
+     }
+    ],
+    "from": -10.2,
+    "median": {
+     "midpointYear": 0.08245,
+     "nStamps": 0.28426,
+     "qInterval": 0.6705,
+     "sigmaYears": 0.42474
+    },
+    "n_findspots": 2,
+    "site": "Vindonissa",
+    "to": 31.9
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     -2.65,
+     52.666671
+    ],
+    "type": "Point"
+   },
+   "properties": {
+    "findspots": [
+     {
+      "colours": {
+       "midpointYear": "#7ad050",
+       "nStamps": "#6a6c71",
+       "qInterval": "#e4f49b",
+       "sigmaYears": "#e2f397"
+      },
+      "findspot": "gutter",
+      "from": 163.2,
+      "to": 180.8,
+      "values": {
+       "midpointYear": 0.79444,
+       "nStamps": 0.46806,
+       "qInterval": 0.57,
+       "sigmaYears": 0.42248
+      }
+     }
+    ],
+    "from": 163.2,
+    "median": {
+     "midpointYear": 0.79444,
+     "nStamps": 0.46806,
+     "qInterval": 0.57,
+     "sigmaYears": 0.42248
+    },
+    "n_findspots": 1,
+    "site": "Wroxeter",
+    "to": 180.8
+   },
+   "type": "Feature"
+  }
+ ],
+ "metadata": {
+  "colourAxes": [
+   "midpointYear",
+   "nStamps",
+   "qInterval",
+   "sigmaYears"
+  ],
+  "derivedFrom": "bundle.ttl",
+  "generatedBy": "py/build_map.py",
+  "licence": "https://creativecommons.org/licenses/by/4.0/",
+  "note": "Positions are per discovery site, as the source records them; several findspots of one site share one point. Colours are presentation, computed from the axes published in the graph.",
+  "query": "SELECT ?site ?findspot ?wkt ?from ?to ?axis ?norm ?colour WHERE {\n  VALUES (?axis ?normProp ?hexProp) {\n    (\"qInterval\"    lado:normQInterval    lado:hexQInterval)\n    (\"midpointYear\" lado:normMidpointYear lado:hexMidpointYear)\n    (\"sigmaYears\"   lado:normSigmaYears   lado:hexSigmaYears)\n    (\"nStamps\"      lado:normNStamps      lado:hexNStamps)\n  }\n  ?fs a lado:Findspot ; rdfs:label ?findspot ;\n      crm:P89_falls_within ?p ; crm:P4_has_time-span ?ts .\n  ?p rdfs:label ?site ; geo:hasGeometry/geo:asWKT ?wkt .\n  ?ts time:hasBeginning/time:inTimePosition/time:numericPosition ?from ;\n      time:hasEnd/time:inTimePosition/time:numericPosition ?to .\n  ?row lado:renders ?ts ; ?normProp ?norm ; ?hexProp ?colour .\n}\nORDER BY ?site ?findspot ?axis",
+  "title": "Roman findspots dated by samian potters' stamps"
+ },
+ "type": "FeatureCollection"
+}

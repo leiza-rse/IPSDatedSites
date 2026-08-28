@@ -866,7 +866,7 @@ def build_graph(df: pd.DataFrame, era: str, figure_name: str,
             # The coordinate sits on the DISCOVERY SITE, never on the
             # findspot. In the source it comes from the site record, so
             # several findspots of one site share one point — Bregenz has
-            # six. Copying it down to each findspot would manufacture six
+            # four. Copying it down to each findspot would manufacture four
             # coincident positions and invite a map to draw them as
             # distinct places. Findspots reach it through P89_falls_within.
             geom = SAMIAN[f"loc_ds_{sid}_geom_ips"]

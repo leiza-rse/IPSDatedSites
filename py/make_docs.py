@@ -235,7 +235,7 @@ it does not re-type the node or restate what the published file already
 says.
 
 The findspot is new. It exists because a site may carry several findspots
-with different dates — Bregenz has six — and hanging six time-spans
+with different dates — Bregenz has four — and hanging four time-spans
 directly off one place would lose which is which.
 
 ### 2 — The dating

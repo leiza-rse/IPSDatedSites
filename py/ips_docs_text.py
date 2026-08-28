@@ -407,9 +407,9 @@ CROSSWALK_NOTES: dict[str, str] = {
         "the snapshot they came from and a comment saying plainly that "
         "they are not asserted to be the same point as the published "
         "geometry. The position sits on the discovery site rather than the "
-        "findspot, because that is where the source records it: the six "
+        "findspot, because that is where the source records it: the four "
         "Bregenz findspots share one coordinate, and copying it down to "
-        "each of them would invent six distinct places. Use --no-geometry "
+        "each of them would invent four distinct places. Use --no-geometry "
         "for the merge-alongside case.",
     "sf":
         "Simple Features, the geometry-type vocabulary that GeoSPARQL "

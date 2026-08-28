@@ -1,0 +1,202 @@
+---
+layout: default
+title: [[ page.title ]]
+---
+[# Jinja2 runs with [% %] / [[ ]] here, so the {% raw %} below reaches
+   Jekyll verbatim and shields the JavaScript from Liquid. #]
+<link rel="stylesheet"
+      href="https://unpkg.com/leaflet@[[ leaflet_version ]]/dist/leaflet.css"
+      integrity="[[ leaflet_sri_css ]]" crossorigin="">
+<style>
+  /* Same tokens as _layouts/default.html, so the map reads as part of the
+     site rather than as an embedded widget from somewhere else. */
+  #map { height: min(70vh, 640px); border:1px solid var(--hair);
+         border-radius:6px; margin:1.2rem 0 .6rem; background:var(--band); }
+  .controls { display:flex; flex-wrap:wrap; align-items:center;
+              gap:.7rem 1.1rem; margin:1.1rem 0 .2rem; font-size:.9rem; }
+  .controls label { color:var(--muted); }
+  .controls select { font:inherit; font-size:.88rem; padding:.28rem .5rem;
+                     border:1px solid var(--hair); border-radius:5px;
+                     background:#fff; color:var(--ink); }
+  .ramp { display:flex; align-items:center; gap:.5rem;
+          font-size:.8rem; color:var(--muted); }
+  .ramp .bar { width:170px; height:11px; border:1px solid var(--hair);
+               border-radius:2px; }
+  .status { display:flex; align-items:center; gap:.55rem;
+            border:1px solid var(--hair); border-radius:6px;
+            padding:.6rem .85rem; background:var(--band);
+            font-size:.9rem; color:var(--muted); margin:.6rem 0 0; }
+  .dot { width:.6rem; height:.6rem; border-radius:50%;
+         background:var(--muted); flex:none; }
+  .dot.ok  { background:#2e7d32; }
+  .dot.err { background:#b3392b; }
+  .leaflet-popup-content { font-size:.85rem; line-height:1.45; }
+  .leaflet-popup-content h4 { margin:.1rem 0 .4rem; font-size:.95rem; }
+  .leaflet-popup-content ul { margin:.2rem 0 0; padding-left:1.1rem; }
+  .leaflet-popup-content .swatch { display:inline-block; width:.62rem;
+                                   height:.62rem; border-radius:2px;
+                                   border:1px solid rgba(0,0,0,.35);
+                                   margin-right:.35rem; }
+  details.query-source > summary { cursor:pointer; color:var(--muted);
+                                   font-size:.88rem; margin-top:1.4rem; }
+  details.query-source pre { font-size:12px; }
+</style>
+
+<p>[[ page.intro ]]</p>
+
+<div class="controls">
+  <span><label for="axis">Colour by</label>
+    <select id="axis">
+[% for a in axes %]      <option value="[[ a ]]">[[ axis_labels.get(a, a) ]]</option>
+[% endfor %]    </select></span>
+  <span class="ramp"><span id="ramp-lo">low</span>
+    <span class="bar" id="ramp-bar"></span>
+    <span id="ramp-hi">high</span></span>
+</div>
+
+<div id="map"></div>
+
+<div class="status"><span class="dot" id="dot"></span><span id="msg">Loading the map data…</span></div>
+
+<p style="font-size:.88rem; color:var(--muted); margin-top:1rem;">
+  [[ n_sites ]] discovery sites, [[ n_findspots ]] dated findspots. One
+  marker per site: the source records a single coordinate per site, so
+  findspots at the same site share a position and are listed together in
+  the popup. The marker takes the median of its findspots' values.
+  The underlying file is
+  <a href="map.geojson">map.geojson</a> — plain GeoJSON, usable in QGIS or
+  anything else that reads it.
+</p>
+
+<details class="query-source">
+  <summary>The query this map was built from</summary>
+  <pre><code>[[ sparql ]]</code></pre>
+  <p style="font-size:.88rem; color:var(--muted);">
+    It ran once, when the site was built, and its result became the
+    GeoJSON above. To change it and see the answer, run it on the
+    <a href="sparql.html">query page</a>, where the graph is parsed in your
+    browser.
+  </p>
+</details>
+
+<script src="https://unpkg.com/leaflet@[[ leaflet_version ]]/dist/leaflet.js"
+        integrity="[[ leaflet_sri_js ]]" crossorigin=""></script>
+<script>
+const AXES = [[ axes_json ]];
+const LABELS = [[ labels_json ]];
+const DEFAULT_AXIS = "[[ default_axis ]]";
+</script>
+{% raw %}
+<script>
+(function () {
+  const dot = document.getElementById("dot");
+  const msg = document.getElementById("msg");
+  const sel = document.getElementById("axis");
+
+  function say(text, cls) {
+    msg.textContent = text;
+    dot.className = "dot" + (cls ? " " + cls : "");
+  }
+
+  const map = L.map("map", { scrollWheelZoom: false });
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 18,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  }).addTo(map);
+
+  let features = [];
+  let layer = null;
+
+  // The marker colour for a site on the current axis. The GeoJSON carries
+  // one colour per findspot and the median normalised value per site; the
+  // marker uses the colour of the findspot whose value is closest to that
+  // median, so the colour shown is always one that actually occurs rather
+  // than an interpolation between two of them.
+  function colourFor(props, axis) {
+    const target = props.median[axis];
+    if (target === undefined) return "#999999";
+    let best = null, bestDist = Infinity;
+    for (const f of props.findspots) {
+      const v = f.values[axis];
+      if (v === undefined) continue;
+      const d = Math.abs(v - target);
+      if (d < bestDist) { bestDist = d; best = f.colours[axis]; }
+    }
+    return best || "#999999";
+  }
+
+  function radiusFor(props) {
+    // Area grows with the number of findspots, not the radius: doubling
+    // the radius would quadruple the ink for twice the evidence.
+    return 5 + Math.sqrt(props.n_findspots) * 2.6;
+  }
+
+  function popupFor(props, axis) {
+    const rows = props.findspots.map(f => {
+      const c = f.colours[axis] || "#999999";
+      const from = Math.round(f.from), to = Math.round(f.to);
+      return `<li><span class="swatch" style="background:${c}"></span>` +
+             `${f.findspot} <span style="color:#666">${from} to ${to}</span></li>`;
+    }).join("");
+    return `<h4>${props.site}</h4><ul>${rows}</ul>`;
+  }
+
+  function draw() {
+    const axis = sel.value;
+    if (layer) layer.remove();
+    layer = L.layerGroup(features.map(ft => {
+      const [lon, lat] = ft.geometry.coordinates;
+      const p = ft.properties;
+      return L.circleMarker([lat, lon], {
+        radius: radiusFor(p),
+        fillColor: colourFor(p, axis),
+        color: "#333", weight: 1, opacity: 0.9, fillOpacity: 0.85
+      }).bindPopup(popupFor(p, axis));
+    })).addTo(map);
+    updateRamp(axis);
+  }
+
+  // The legend is built from the colours actually present on this axis,
+  // sorted by their normalised value. No ramp is reimplemented here: the
+  // stops come from the data, which come from the graph.
+  function updateRamp(axis) {
+    const pairs = [];
+    for (const ft of features) {
+      for (const f of ft.properties.findspots) {
+        if (f.values[axis] !== undefined) {
+          pairs.push([f.values[axis], f.colours[axis]]);
+        }
+      }
+    }
+    pairs.sort((a, b) => a[0] - b[0]);
+    if (!pairs.length) return;
+    const stops = pairs.map((p, i) =>
+      `${p[1]} ${(100 * i / (pairs.length - 1)).toFixed(1)}%`).join(", ");
+    document.getElementById("ramp-bar").style.background =
+      `linear-gradient(to right, ${stops})`;
+  }
+
+  fetch("map.geojson")
+    .then(r => { if (!r.ok) throw new Error(r.status + " " + r.statusText);
+                 return r.json(); })
+    .then(doc => {
+      features = doc.features;
+      sel.value = AXES.includes(DEFAULT_AXIS) ? DEFAULT_AXIS : AXES[0];
+      draw();
+      const pts = features.map(f => [f.geometry.coordinates[1],
+                                     f.geometry.coordinates[0]]);
+      map.fitBounds(L.latLngBounds(pts).pad(0.08));
+      say(features.length + " sites drawn. Click a marker for its findspots.",
+          "ok");
+    })
+    .catch(e => {
+      say("Could not load map.geojson: " + e.message +
+          ". If you opened this page from the file system, the browser " +
+          "will have blocked the fetch — serve the folder over HTTP.",
+          "err");
+    });
+
+  sel.addEventListener("change", draw);
+})();
+</script>
+{% endraw %}

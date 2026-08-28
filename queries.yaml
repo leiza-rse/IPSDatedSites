@@ -64,6 +64,48 @@ qmd:
     calendar reading is attached separately as `time:inXSDgYear`. Shifting
     only the negative values would tear the scale apart at zero.
 
+# --------------------------------------------------------------------------
+# The map (py/build_map.py -> docs/map.html + docs/map.geojson)
+# --------------------------------------------------------------------------
+# This query runs once at build time and its result becomes the GeoJSON the
+# map page reads. It is here rather than inside the Python so that changing
+# what the map shows is an edit to a query, not to a program — and so that
+# the page can print the query it was built from.
+#
+# One row per findspot AND axis: the four axes are unfolded with VALUES so
+# that adding an axis in py/ips_colour.py needs no change here beyond the
+# list below.
+map:
+  title: "Where the dated findspots are"
+  intro: >-
+    The same 41 findspots the box plot draws, on a map, shaded by any of the
+    four colour axes the graph publishes. The colours are not chosen here:
+    each axis carries its ramp, its interpolation and its normalisation
+    domain in the graph itself, so every colour on this map can be
+    recomputed from the data behind it.
+  default_axis: qInterval
+  axis_labels:
+    qInterval: "Dating sharpness"
+    midpointYear: "Chronology (midpoint)"
+    sigmaYears: "Dispersion (sigma)"
+    nStamps: "Number of stamps"
+  sparql: |
+    SELECT ?site ?findspot ?wkt ?from ?to ?axis ?norm ?colour WHERE {
+      VALUES (?axis ?normProp ?hexProp) {
+        ("qInterval"    lado:normQInterval    lado:hexQInterval)
+        ("midpointYear" lado:normMidpointYear lado:hexMidpointYear)
+        ("sigmaYears"   lado:normSigmaYears   lado:hexSigmaYears)
+        ("nStamps"      lado:normNStamps      lado:hexNStamps)
+      }
+      ?fs a lado:Findspot ; rdfs:label ?findspot ;
+          crm:P89_falls_within ?p ; crm:P4_has_time-span ?ts .
+      ?p rdfs:label ?site ; geo:hasGeometry/geo:asWKT ?wkt .
+      ?ts time:hasBeginning/time:inTimePosition/time:numericPosition ?from ;
+          time:hasEnd/time:inTimePosition/time:numericPosition ?to .
+      ?row lado:renders ?ts ; ?normProp ?norm ; ?hexProp ?colour .
+    }
+    ORDER BY ?site ?findspot ?axis
+
 prefixes: |
   PREFIX samian:  <http://data.archaeology.link/data/samian/>
   PREFIX lado:    <http://archaeology.link/ontology#>
@@ -169,10 +211,11 @@ queries:
   - id: findspots-per-site
     title: "Sites with more than one findspot"
     intro: >-
-      Bregenz contributes six separately dated findspots, Colchester two.
+      Bregenz contributes four separately dated findspots; Colchester,
+      London, Vindonissa and La Graufesenque two each.
       This is why the dating hangs on the findspot rather than on the site,
       and why the URI fragment is a hash of the findspot name taken per
-      site: a site identifier alone could not tell the six Bregenz contexts
+      site: a site identifier alone could not tell the four Bregenz contexts
       apart, and they are dated differently.
     sparql: |
       SELECT ?site (COUNT(DISTINCT ?fs) AS ?findspots)
@@ -276,7 +319,7 @@ queries:
     intro: >-
       Coordinates, interval and colour for each findspot. The point sits on
       the discovery site rather than the findspot, because that is where the
-      source records it — the six Bregenz contexts share one coordinate, and
+      source records it — the four Bregenz contexts share one coordinate, and
       a map that wants them apart has to spread them itself rather than
       pretend the data distinguishes them. The colour is presentation and is
       published as such, on the plot row alongside the other "visual only"

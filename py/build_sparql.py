@@ -7,6 +7,7 @@ One source, three products, so that they cannot drift apart:
     docs/sparql.html               the page the repository publishes
     docs/downloads/queries/*.rq    the same queries as plain files
     qmd/<name>.qmd                 the quarto-live variant, for OER reuse
+    docs/map.html, docs/map.geojson   the map, via py/build_map.py
 
 NO ENDPOINT, NO SERVER
 ----------------------
@@ -181,6 +182,11 @@ def build(docs: Path = ROOT / "docs", strict: bool = True) -> list[Path]:
     html_path = docs / "sparql.html"
     html_path.write_text(html, encoding="utf-8")
     written.append(html_path)
+
+    # The map is generated from the same config and the same graph, so it
+    # cannot describe a different corpus than the query page beside it.
+    import build_map
+    written.extend(build_map.build(cfg, docs, env))
 
     qmd_cfg = dict(cfg.get("qmd", {}))
     if qmd_cfg.get("file"):

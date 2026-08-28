@@ -1,9 +1,9 @@
 # Sites with more than one findspot
-# Bregenz contributes six separately dated findspots, Colchester two. This is
-# why the dating hangs on the findspot rather than on the site, and why the
-# URI fragment is a hash of the findspot name taken per site: a site
-# identifier alone could not tell the six Bregenz contexts apart, and they are
-# dated differently.
+# Bregenz contributes four separately dated findspots; Colchester, London,
+# Vindonissa and La Graufesenque two each. This is why the dating hangs on the
+# findspot rather than on the site, and why the URI fragment is a hash of the
+# findspot name taken per site: a site identifier alone could not tell the
+# four Bregenz contexts apart, and they are dated differently.
 
 PREFIX samian:  <http://data.archaeology.link/data/samian/>
 PREFIX lado:    <http://archaeology.link/ontology#>

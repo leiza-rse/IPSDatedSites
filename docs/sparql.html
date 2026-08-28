@@ -160,7 +160,7 @@ ORDER BY DESC(?qInterval)</textarea>
 
 <section class="query" id="q-findspots-per-site">
   <h2>5. Sites with more than one findspot</h2>
-  <p>Bregenz contributes six separately dated findspots, Colchester two. This is why the dating hangs on the findspot rather than on the site, and why the URI fragment is a hash of the findspot name taken per site: a site identifier alone could not tell the six Bregenz contexts apart, and they are dated differently.</p>
+  <p>Bregenz contributes four separately dated findspots; Colchester, London, Vindonissa and La Graufesenque two each. This is why the dating hangs on the findspot rather than on the site, and why the URI fragment is a hash of the findspot name taken per site: a site identifier alone could not tell the four Bregenz contexts apart, and they are dated differently.</p>
   <textarea class="sparql" id="src-findspots-per-site" spellcheck="false"
             rows="10">SELECT ?site (COUNT(DISTINCT ?fs) AS ?findspots)
        (GROUP_CONCAT(?name; separator=" · ") AS ?names)
@@ -267,7 +267,7 @@ LIMIT 40</textarea>
 
 <section class="query" id="q-map-layer">
   <h2>10. Everything a map needs, in one query</h2>
-  <p>Coordinates, interval and colour for each findspot. The point sits on the discovery site rather than the findspot, because that is where the source records it — the six Bregenz contexts share one coordinate, and a map that wants them apart has to spread them itself rather than pretend the data distinguishes them. The colour is presentation and is published as such, on the plot row alongside the other "visual only" quantities, never on the time-span.</p>
+  <p>Coordinates, interval and colour for each findspot. The point sits on the discovery site rather than the findspot, because that is where the source records it — the four Bregenz contexts share one coordinate, and a map that wants them apart has to spread them itself rather than pretend the data distinguishes them. The colour is presentation and is published as such, on the plot row alongside the other "visual only" quantities, never on the time-span.</p>
   <textarea class="sparql" id="src-map-layer" spellcheck="false"
             rows="11">SELECT ?site ?findspot ?wkt ?from ?to ?norm ?colour WHERE {
   ?fs a lado:Findspot ; rdfs:label ?findspot ;

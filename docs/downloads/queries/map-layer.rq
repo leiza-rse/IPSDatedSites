@@ -1,7 +1,7 @@
 # Everything a map needs, in one query
 # Coordinates, interval and colour for each findspot. The point sits on the
 # discovery site rather than the findspot, because that is where the source
-# records it — the six Bregenz contexts share one coordinate, and a map that
+# records it — the four Bregenz contexts share one coordinate, and a map that
 # wants them apart has to spread them itself rather than pretend the data
 # distinguishes them. The colour is presentation and is published as such, on
 # the plot row alongside the other "visual only" quantities, never on the
