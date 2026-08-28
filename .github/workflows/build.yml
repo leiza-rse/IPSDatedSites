@@ -115,6 +115,22 @@ jobs:
         # not by the Python pipeline, so the working tree cannot be
         # expected to contain them before the render step has run.
         #
+        # talk/img is NOT in scope, although step 10 now builds it here.
+        # It was tried and reverted: two of the six talk figures
+        # (talk-pompeii, talk-langenhain) come out with different matplotlib
+        # clip-path identifiers on Windows and on this runner, while
+        # img/plot_*.svg are identical on both. Each is stable run to run on
+        # one machine, so this is a platform difference and not randomness.
+        #
+        # The clip-path id is a hash of the path data, so the cause is
+        # almost certainly float formatting somewhere in the layout those
+        # two figures go through — py/graph_layout.py — rather than in
+        # matplotlib. Rounding the coordinates before they reach the backend
+        # would fix it and would change every talk figure, so it is a job of
+        # its own rather than a line in this workflow. Until then, checking
+        # talk/img here would turn the build red on every commit from a
+        # Windows workstation for a reason nobody in the pull request caused.
+        #
         # img/graphs/ is excluded too, for the reason docs/bundle.ttl is:
         # the provenance cut contains the dataset node, whose URI carries
         # the export date, so the SVG differs after every run whether or

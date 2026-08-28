@@ -59,8 +59,17 @@ All paths resolve against the repository root through
 
 ```powershell
 pip install -r requirements.txt
-python py/main.py
+python py/main.py --serve
 ```
+
+`--serve` opens the built site in a browser when the run finishes. It is a
+local approximation of GitHub Pages, not a rebuild of it: `py/preview.py`
+renders the Markdown pages and applies the Jekyll layout so that the
+navigation resolves, and every page it renders says so in a banner.
+Install `markdown` (`pip install markdown`) for that; without it the .md
+pages are shown as source and everything else — map, query pages,
+companion pages, run report — works anyway. Leave `--serve` off and the
+run behaves as before.
 
 Leave the terminal on PowerShell; the scripts write UTF-8 regardless of the
 code page, because rdflib handles the serialisation. The CSV is picked up
@@ -70,13 +79,16 @@ and names the candidates.
 ```powershell
 python py/main.py --era astronomical      # the other era convention
 python py/main.py --findspot-uri slug     # readable instead of hashed URIs
-python py/main.py --emit-geometry         # emit the IPS coordinates as well
+python py/main.py --no-geometry           # leave the IPS coordinates out
 python py/main.py --csv data\other.csv    # a different input file
 python py/main.py --skip-verify           # without step 0
 python py/main.py --verify-strict         # step 0 fails on warnings too
 python py/main.py --skip-plots            # without the figures
 python py/main.py --skip-bundle           # without the standalone bundle
 python py/main.py --skip-docs             # without the documentation
+python py/main.py --skip-talk             # without the talk figures (step 10)
+python py/main.py --serve --port 8123     # preview on a different port
+python py/main.py --serve --no-browser    # serve without opening a window
 ```
 
 The target folders can be redirected with `--rdf-out`, `--img-out` and

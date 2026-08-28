@@ -220,6 +220,17 @@ def main() -> int:
     ap.add_argument("--webjs-out", type=Path, default=ROOT / "webjs")
     ap.add_argument("--skip-sparql", action="store_true")
     ap.add_argument("--skip-graphs", action="store_true")
+    ap.add_argument("--skip-talk", action="store_true",
+                    help="skip step 10. The talk figures and the published "
+                         "closed-groups page are then left as committed.")
+    ap.add_argument("--serve", action="store_true",
+                    help="after the build, serve docs/ and open it. An "
+                         "approximation of GitHub Pages, not a rebuild of "
+                         "it — see py/preview.py.")
+    ap.add_argument("--port", type=int, default=8000,
+                    help="first port the preview tries")
+    ap.add_argument("--no-browser", action="store_true",
+                    help="serve, but do not open a browser window")
     ap.add_argument("--graphs-out", type=Path,
                     default=ROOT / "img" / "graphs")
     ap.add_argument("--docs-out", type=Path, default=ROOT / "docs")
@@ -450,6 +461,24 @@ def main() -> int:
                 out / "IPSDatedSites-bundle.ttl", args.graphs_out) != 0:
             ok = False
 
+    # ---- 10. Talk figures and the published live page --------------------
+    # Part of the pipeline since the query layer moved: build_sparql.py
+    # writes docs/query/index.html on every build and this writes
+    # docs/query/closed-groups.html beside it. Leaving the second to a
+    # separate command meant the two halves of one folder were rebuilt on
+    # different occasions, and the one nobody remembered to run was the one
+    # that went stale.
+    if not args.skip_talk:
+        rule("10 \u00b7 Talk figures and docs/query/closed-groups.html")
+        import make_talk_figures
+        try:
+            written = make_talk_figures.build(
+                out / "IPSDatedSites-bundle.ttl", ROOT / "talk" / "img")
+            print(f"  {len(written)} file(s): talk/img and docs/query/")
+        except SystemExit as exc:
+            print(f"  !!  {exc}")
+            ok = False
+
     rule("Result")
     print("  " + ("All consistent." if ok
                   else "Round trip failed — see above."))
@@ -499,6 +528,22 @@ def run() -> int:
             written = run_report.write(log, out, ok=(code == 0))
             for path in written:
                 print(f"  Report            : {path.relative_to(ROOT)}")
+
+    # The preview comes AFTER the report, deliberately. It blocks until
+    # Ctrl-C, and inside the capture above that would mean the report is
+    # written only once the server is stopped — or never, if the terminal
+    # is closed instead. The report is the more valuable of the two.
+    argv = sys.argv[1:]
+    if "--serve" in argv and code == 0:
+        import preview
+        port = 8000
+        if "--port" in argv:
+            port = int(argv[argv.index("--port") + 1])
+        docs = ROOT / "docs"
+        if "--docs-out" in argv:
+            docs = Path(argv[argv.index("--docs-out") + 1])
+        rule("Preview  docs/ over HTTP")
+        preview.serve(docs, port, open_browser="--no-browser" not in argv)
     return code
 
 
