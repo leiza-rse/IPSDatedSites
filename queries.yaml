@@ -74,6 +74,7 @@ prefixes: |
   PREFIX dcat:    <http://www.w3.org/ns/dcat#>
   PREFIX dcterms: <http://purl.org/dc/terms/>
   PREFIX skos:    <http://www.w3.org/2004/02/skos/core#>
+  PREFIX geo:     <http://www.opengis.net/ont/geosparql#>
   PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
   PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#>
 
@@ -202,6 +203,116 @@ queries:
         OPTIONAL { ?p lado:pleiadesID  ?pleiades }
       }
       ORDER BY ?site
+
+  - id: allen-possible
+    title: "What came before what — the complete matrix"
+    intro: >-
+      Every pair of datings stands in exactly one of Allen's thirteen
+      relations, computed on the modelled interval [eff_start, eff_end] and
+      published under <code>lado:possibly*</code>. Complete means countable:
+      the numbers below add up to all 820 pairs of 41 findspots, so a
+      missing relation is a missing pair rather than a silence that could
+      mean anything. Note how lopsided the result is — two thirds of all
+      pairs are simple precedence, which is what a corpus spread over three
+      centuries looks like.
+    sparql: |
+      SELECT ?relation (COUNT(*) AS ?pairs) WHERE {
+        ?a ?relation ?b .
+        ?a a lado:FindspotDating .
+        ?b a lado:FindspotDating .
+        FILTER(STRSTARTS(STR(?relation), CONCAT(STR(lado:), "possibly")))
+      }
+      GROUP BY ?relation
+      ORDER BY DESC(?pairs)
+
+  - id: allen-time-only
+    title: "The same question in OWL-Time alone"
+    intro: >-
+      No <code>lado:</code> predicate appears below — only OWL-Time's own
+      interval relations. It works, and it deliberately returns FEWER pairs
+      than the query above. OWL-Time relations are sharp: there is no way to
+      say "before, probably". So only the relations that survive a more
+      generous reading of the bounds are asserted with them, and the rest
+      live under <code>lado:possibly*</code> where the hedge is visible.
+      This is not OWL-Time falling short. It is a vocabulary without a
+      notion of uncertainty saying exactly as much as it can support — and
+      the gap between the two counts is the uncertainty, made countable.
+    sparql: |
+      SELECT ?relation (COUNT(*) AS ?pairs) WHERE {
+        ?a ?relation ?b .
+        ?a time:hasBeginning ?ab .
+        ?b time:hasBeginning ?bb .
+        FILTER(STRSTARTS(STR(?relation), CONCAT(STR(time:), "interval")))
+      }
+      GROUP BY ?relation
+      ORDER BY DESC(?pairs)
+
+  - id: allen-unstable
+    title: "Where the two readings disagree"
+    intro: >-
+      The pairs whose relation holds on the modelled boxes but not once the
+      intervals are widened to the full span of their potters' date ranges.
+      These are exactly the statements a sharp vocabulary should not make:
+      draw any of these two findspots with their stubs and the asserted
+      order stops being visible. Roughly half the matrix sits here, which is
+      worth knowing before anyone builds a seriation on it.
+    sparql: |
+      SELECT ?siteA ?findspotA ?siteB ?findspotB ?fromA ?toA ?fromB ?toB
+      WHERE {
+        ?tsA lado:possiblyBefore ?tsB .
+        FILTER NOT EXISTS { ?tsA time:intervalBefore ?tsB }
+        ?fsA crm:P4_has_time-span ?tsA ; rdfs:label ?findspotA ;
+             crm:P89_falls_within/rdfs:label ?siteA .
+        ?fsB crm:P4_has_time-span ?tsB ; rdfs:label ?findspotB ;
+             crm:P89_falls_within/rdfs:label ?siteB .
+        ?tsA lado:avgDatemin ?fromA ; lado:avgDatemax ?toA .
+        ?tsB lado:avgDatemin ?fromB ; lado:avgDatemax ?toB .
+      }
+      ORDER BY ?fromA ?fromB
+      LIMIT 40
+
+  - id: map-layer
+    title: "Everything a map needs, in one query"
+    intro: >-
+      Coordinates, interval and colour for each findspot. The point sits on
+      the discovery site rather than the findspot, because that is where the
+      source records it — the six Bregenz contexts share one coordinate, and
+      a map that wants them apart has to spread them itself rather than
+      pretend the data distinguishes them. The colour is presentation and is
+      published as such, on the plot row alongside the other "visual only"
+      quantities, never on the time-span.
+    sparql: |
+      SELECT ?site ?findspot ?wkt ?from ?to ?norm ?colour WHERE {
+        ?fs a lado:Findspot ; rdfs:label ?findspot ;
+            crm:P89_falls_within ?p ; crm:P4_has_time-span ?ts .
+        ?p rdfs:label ?site ; geo:hasGeometry/geo:asWKT ?wkt .
+        ?ts time:hasBeginning/time:inTimePosition/time:numericPosition ?from ;
+            time:hasEnd/time:inTimePosition/time:numericPosition ?to .
+        ?row lado:renders ?ts ;
+             lado:normQInterval ?norm ; lado:hexQInterval ?colour .
+      }
+      ORDER BY ?from
+
+  - id: colour-axes
+    title: "How the colours were made"
+    intro: >-
+      A colour in a dataset is usually an assertion nobody can check. These
+      can be: each axis publishes its ramp stops, its interpolation and the
+      domain the values were stretched onto, so any hex value in the graph
+      can be recomputed from the graph alone. Watch
+      <code>lado:domainBasis</code> — an observed domain is read off this
+      corpus, which means adding a findspot can change the colour of one
+      that did not change at all. The chronological axis avoids red-green on
+      purpose: late material is not worse material.
+    sparql: |
+      SELECT ?axis ?source ?ramp ?scale ?basis ?min ?max ?stops WHERE {
+        ?a a lado:ColourAxis ; lado:colourSource ?source ;
+           lado:rampName ?ramp ; lado:rampStops ?stops ;
+           lado:domainScale ?scale ; lado:domainBasis ?basis ;
+           lado:domainMin ?min ; lado:domainMax ?max .
+        BIND(REPLACE(STR(?a), "^.*/", "") AS ?axis)
+      }
+      ORDER BY ?axis
 
   - id: provenance
     title: "Which method produced these dates"

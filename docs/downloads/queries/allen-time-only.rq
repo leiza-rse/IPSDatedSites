@@ -1,0 +1,32 @@
+# The same question in OWL-Time alone
+# No <code>lado:</code> predicate appears below — only OWL-Time's own interval
+# relations. It works, and it deliberately returns FEWER pairs than the query
+# above. OWL-Time relations are sharp: there is no way to say "before,
+# probably". So only the relations that survive a more generous reading of the
+# bounds are asserted with them, and the rest live under
+# <code>lado:possibly*</code> where the hedge is visible. This is not OWL-Time
+# falling short. It is a vocabulary without a notion of uncertainty saying
+# exactly as much as it can support — and the gap between the two counts is
+# the uncertainty, made countable.
+
+PREFIX samian:  <http://data.archaeology.link/data/samian/>
+PREFIX lado:    <http://archaeology.link/ontology#>
+PREFIX crm:     <http://www.cidoc-crm.org/cidoc-crm/>
+PREFIX crmdig:  <http://www.ics.forth.gr/isl/CRMdig/>
+PREFIX time:    <http://www.w3.org/2006/time#>
+PREFIX prov:    <http://www.w3.org/ns/prov#>
+PREFIX dcat:    <http://www.w3.org/ns/dcat#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX skos:    <http://www.w3.org/2004/02/skos/core#>
+PREFIX geo:     <http://www.opengis.net/ont/geosparql#>
+PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?relation (COUNT(*) AS ?pairs) WHERE {
+  ?a ?relation ?b .
+  ?a time:hasBeginning ?ab .
+  ?b time:hasBeginning ?bb .
+  FILTER(STRSTARTS(STR(?relation), CONCAT(STR(time:), "interval")))
+}
+GROUP BY ?relation
+ORDER BY DESC(?pairs)

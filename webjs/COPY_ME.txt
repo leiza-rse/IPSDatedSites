@@ -15,3 +15,14 @@ GENERATED — do not edit. Regenerate with:
   python py/make_webjs.py --verify
 
 Parity with ips_rdf_export.py: OK, sha256 71fda0e2ca68eb41 over 3439 triples (ips_dated_sites_2026-08-27.csv)
+
+SCOPE — layers the published graph has and this emitter has not:
+  * geometry
+      The CFM page already plots these sites from the same coordinates it would be re-encoding here. Nothing reads the WKT in that context.
+  * colour axes
+      The ramp stops and the normalisation would have to exist twice, in Python and in JavaScript, and a normalisation domain read off the corpus differs between the live query and the published snapshot anyway. Two implementations of one scale is precisely the drift this parity check exists to prevent.
+  * interval relations
+      Quadratic in the number of findspots. The live query is not limited to the 41 published rows, so a browser export could face a few hundred findspots and tens of thousands of pairs, computed on the main thread while somebody waits for a download.
+The parity check compares against a Python graph built with
+these switched off, so it measures agreement where the two
+emitters overlap. Everything they both emit is identical.

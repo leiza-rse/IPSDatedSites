@@ -195,7 +195,13 @@ def main() -> int:
     ap.add_argument("--findspot-uri", choices=("hash", "slug"),
                     default="hash")
     ap.add_argument("--figure-name", default="sites_dating_v1")
-    ap.add_argument("--emit-geometry", action="store_true")
+    ap.add_argument("--no-geometry", action="store_false",
+                    dest="emit_geometry",
+                    help="leave the IPS coordinates out of the graph")
+    ap.add_argument("--no-allen", action="store_false", dest="emit_allen",
+                    help="skip the pairwise interval relations")
+    ap.add_argument("--no-allen-inverse", action="store_false",
+                    dest="allen_inverse")
     ap.add_argument("--skip-verify", action="store_true",
                     help="skip step 0. Only sensible when the CSV comes "
                          "from a different query on purpose.")
@@ -281,8 +287,16 @@ def main() -> int:
     df = pd.read_csv(csv)
     print(f"  Source            : {csv.relative_to(ROOT)}  ({len(df)} rows)")
     onto = build_ontology()
+    rdf_stats: dict = {}
+    # Keyword arguments throughout: this call has grown past the point
+    # where positional order is safe, and a new parameter inserted in the
+    # middle would otherwise silently become someone else's argument.
     g = build_graph(df, args.era, args.figure_name,
-                    args.emit_geometry, args.findspot_uri)
+                    emit_geometry=args.emit_geometry,
+                    key_mode=args.findspot_uri,
+                    emit_allen=args.emit_allen,
+                    allen_inverse=args.allen_inverse,
+                    stats=rdf_stats)
 
     onto_path = out / "lado_dating_extension.ttl"
     ttl_path = out / f"ips_{args.figure_name}.ttl"
@@ -296,6 +310,20 @@ def main() -> int:
     print(f"  JSON-LD           : {jld_path.name}")
     print(f"  Era convention    : {args.era}")
     print(f"  Findspot URI      : {args.findspot_uri}")
+    print(f"  Geometry          : "
+          f"{'IPS coordinates emitted' if args.emit_geometry else 'omitted'}")
+    a = rdf_stats.get("allen")
+    if a:
+        share = a["stable"] / a["possible"] if a["possible"] else 0.0
+        print(f"  Interval relations: {a['pairs']} pairs, "
+              f"{a['possible']} possible, {a['stable']} stable "
+              f"({share:.1%})")
+        print("    inner reading   : " + ", ".join(
+            f"{k} {v}" for k, v in sorted(a["inner"].items(),
+                                          key=lambda kv: -kv[1])))
+        if a["widened"]:
+            print(f"    !! {a['widened']} rows have a modelled interval "
+                  f"wider than their evidence extremes")
     bc = ips_compat.count_bc_gyears(g)
     if bc:
         print(f"  BC years          : {bc} gYear literals before year 1")

@@ -233,6 +233,22 @@ def build(data: Graph, onto: Graph, out: Path,
 VOCABULARY_TYPES = {OWL.Class, OWL.DatatypeProperty, OWL.ObjectProperty,
                     OWL.Ontology}
 
+# Instances typed ONLY by these foreign, standard classes are outside the
+# undertaking below, which is about the application classes this project
+# mints. The case is the GeoSPARQL geometry node.
+#
+# It is exempt rather than anchored because CIDOC CRM's class for a
+# geometry, crm:E94_Space_Primitive, is a subclass of E59_Primitive_Value:
+# a literal value, not a resource. Typing the geometry node as E94 would
+# silence this check and misrepresent both vocabularies. What a CRM-only
+# consumer needs instead is the coordinate itself, and it gets it — the
+# export puts crm:P168_place_is_defined_by with the WKT literal on the
+# place, so nothing is actually unreachable from CRM.
+FOREIGN_TYPES = {
+    X.GEO.Geometry,
+    X.SF.Point,
+}
+
 
 def unanchored_instances(g: Graph) -> list[tuple]:
     """
@@ -252,6 +268,8 @@ def unanchored_instances(g: Graph) -> list[tuple]:
     for s in {s for s in g.subjects(RDF.type, None)}:
         types = set(g.objects(s, RDF.type))
         if types & VOCABULARY_TYPES:
+            continue
+        if types and types <= FOREIGN_TYPES:
             continue
         if not any(str(t).startswith(crm) for t in types):
             out.append((s, tuple(sorted(str(t) for t in types))))
@@ -328,7 +346,8 @@ def main() -> int:
 
     csv = args.csv or sorted((ROOT / "data").glob("*.csv"))[0]
     df = pd.read_csv(csv)
-    data = X.build_graph(df, args.era, "sites_dating_v1", False, "hash")
+    data = X.build_graph(df, args.era, "sites_dating_v1",
+                         emit_geometry=False, key_mode="hash")
     onto = X.build_ontology()
     path, stats = build(data, onto, args.out, not args.no_materialise,
                         not args.no_type_sites)

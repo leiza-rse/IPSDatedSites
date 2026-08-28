@@ -1,0 +1,30 @@
+# What came before what — the complete matrix
+# Every pair of datings stands in exactly one of Allen's thirteen relations,
+# computed on the modelled interval [eff_start, eff_end] and published under
+# <code>lado:possibly*</code>. Complete means countable: the numbers below add
+# up to all 820 pairs of 41 findspots, so a missing relation is a missing pair
+# rather than a silence that could mean anything. Note how lopsided the result
+# is — two thirds of all pairs are simple precedence, which is what a corpus
+# spread over three centuries looks like.
+
+PREFIX samian:  <http://data.archaeology.link/data/samian/>
+PREFIX lado:    <http://archaeology.link/ontology#>
+PREFIX crm:     <http://www.cidoc-crm.org/cidoc-crm/>
+PREFIX crmdig:  <http://www.ics.forth.gr/isl/CRMdig/>
+PREFIX time:    <http://www.w3.org/2006/time#>
+PREFIX prov:    <http://www.w3.org/ns/prov#>
+PREFIX dcat:    <http://www.w3.org/ns/dcat#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX skos:    <http://www.w3.org/2004/02/skos/core#>
+PREFIX geo:     <http://www.opengis.net/ont/geosparql#>
+PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?relation (COUNT(*) AS ?pairs) WHERE {
+  ?a ?relation ?b .
+  ?a a lado:FindspotDating .
+  ?b a lado:FindspotDating .
+  FILTER(STRSTARTS(STR(?relation), CONCAT(STR(lado:), "possibly")))
+}
+GROUP BY ?relation
+ORDER BY DESC(?pairs)

@@ -1,10 +1,11 @@
-# The figure, as a table
-# Every row of the box plot, in the order the figure draws them. The interval
-# bounds come out of OWL-Time rather than from a column: the time-span has a
-# beginning and an end, each of which is an instant holding a numeric position
-# on a named scale. That indirection is what lets the calendar reading and the
-# arithmetic position disagree about negative years without either being
-# wrong.
+# Everything a map needs, in one query
+# Coordinates, interval and colour for each findspot. The point sits on the
+# discovery site rather than the findspot, because that is where the source
+# records it — the six Bregenz contexts share one coordinate, and a map that
+# wants them apart has to spread them itself rather than pretend the data
+# distinguishes them. The colour is presentation and is published as such, on
+# the plot row alongside the other "visual only" quantities, never on the
+# time-span.
 
 PREFIX samian:  <http://data.archaeology.link/data/samian/>
 PREFIX lado:    <http://archaeology.link/ontology#>
@@ -19,14 +20,13 @@ PREFIX geo:     <http://www.opengis.net/ont/geosparql#>
 PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#>
 
-SELECT ?site ?findspot ?from ?to ?span ?qInterval ?nStamps WHERE {
+SELECT ?site ?findspot ?wkt ?from ?to ?norm ?colour WHERE {
   ?fs a lado:Findspot ; rdfs:label ?findspot ;
       crm:P89_falls_within ?p ; crm:P4_has_time-span ?ts .
-  ?p rdfs:label ?site .
+  ?p rdfs:label ?site ; geo:hasGeometry/geo:asWKT ?wkt .
   ?ts time:hasBeginning/time:inTimePosition/time:numericPosition ?from ;
-      time:hasEnd/time:inTimePosition/time:numericPosition ?to ;
-      lado:qInterval ?qInterval ; lado:nStamps ?nStamps ;
-      lado:avgDatemin ?order .
-  BIND(?to - ?from AS ?span)
+      time:hasEnd/time:inTimePosition/time:numericPosition ?to .
+  ?row lado:renders ?ts ;
+       lado:normQInterval ?norm ; lado:hexQInterval ?colour .
 }
-ORDER BY ?order
+ORDER BY ?from

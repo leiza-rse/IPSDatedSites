@@ -1,0 +1,34 @@
+# Where the two readings disagree
+# The pairs whose relation holds on the modelled boxes but not once the
+# intervals are widened to the full span of their potters' date ranges. These
+# are exactly the statements a sharp vocabulary should not make: draw any of
+# these two findspots with their stubs and the asserted order stops being
+# visible. Roughly half the matrix sits here, which is worth knowing before
+# anyone builds a seriation on it.
+
+PREFIX samian:  <http://data.archaeology.link/data/samian/>
+PREFIX lado:    <http://archaeology.link/ontology#>
+PREFIX crm:     <http://www.cidoc-crm.org/cidoc-crm/>
+PREFIX crmdig:  <http://www.ics.forth.gr/isl/CRMdig/>
+PREFIX time:    <http://www.w3.org/2006/time#>
+PREFIX prov:    <http://www.w3.org/ns/prov#>
+PREFIX dcat:    <http://www.w3.org/ns/dcat#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX skos:    <http://www.w3.org/2004/02/skos/core#>
+PREFIX geo:     <http://www.opengis.net/ont/geosparql#>
+PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?siteA ?findspotA ?siteB ?findspotB ?fromA ?toA ?fromB ?toB
+WHERE {
+  ?tsA lado:possiblyBefore ?tsB .
+  FILTER NOT EXISTS { ?tsA time:intervalBefore ?tsB }
+  ?fsA crm:P4_has_time-span ?tsA ; rdfs:label ?findspotA ;
+       crm:P89_falls_within/rdfs:label ?siteA .
+  ?fsB crm:P4_has_time-span ?tsB ; rdfs:label ?findspotB ;
+       crm:P89_falls_within/rdfs:label ?siteB .
+  ?tsA lado:avgDatemin ?fromA ; lado:avgDatemax ?toA .
+  ?tsB lado:avgDatemin ?fromB ; lado:avgDatemax ?toB .
+}
+ORDER BY ?fromA ?fromB
+LIMIT 40

@@ -56,6 +56,34 @@ silence_gyear_warnings()
 ROOT = Path(__file__).resolve().parent.parent
 TEMPLATES = Path(__file__).resolve().parent / "templates"
 
+# --------------------------------------------------------------------------
+# What the browser emitter does NOT carry
+# --------------------------------------------------------------------------
+# The parity check compares the JS output against a Python graph built with
+# these layers switched off. That is not a way of making a failing check
+# pass: it is the honest statement that the two emitters have different
+# scopes, and it is written down here so that the scope cannot widen by
+# accident. A layer added to build_graph() and forgotten here fails the
+# check immediately, which is the behaviour worth keeping.
+#
+# Each entry says why porting it would cost more than it returns.
+WEBJS_OMITS = [
+    ("geometry",
+     "The CFM page already plots these sites from the same coordinates it "
+     "would be re-encoding here. Nothing reads the WKT in that context."),
+    ("colour axes",
+     "The ramp stops and the normalisation would have to exist twice, in "
+     "Python and in JavaScript, and a normalisation domain read off the "
+     "corpus differs between the live query and the published snapshot "
+     "anyway. Two implementations of one scale is precisely the drift this "
+     "parity check exists to prevent."),
+    ("interval relations",
+     "Quadratic in the number of findspots. The live query is not limited "
+     "to the 41 published rows, so a browser export could face a few "
+     "hundred findspots and tens of thousands of pairs, computed on the "
+     "main thread while somebody waits for a download."),
+]
+
 # SHA-256 round constants and initial state, injected rather than typed
 # out again in JavaScript: two hand-copied 64-entry tables are two chances
 # to transpose a digit, and the findspot URIs depend on the result.
@@ -338,7 +366,9 @@ def normalise(nt: str) -> str:
 
 def python_reference(df: pd.DataFrame, onto: Graph, era: str) -> str:
     """The data layer as the bundle holds it: data + site types + closure."""
-    g = X.build_graph(df, era, "sites_dating_v1", False, "hash")
+    g = X.build_graph(df, era, "sites_dating_v1",
+                      emit_geometry=False, key_mode="hash",
+                      emit_allen=False, emit_colour=False)
     make_bundle.type_discovery_sites(g)
     closure = make_bundle.superclass_closure(onto)
     for subj, cls in list(g.subject_objects(RDF.type)):
@@ -422,7 +452,12 @@ def write_copy_note(out_dir: Path, parity: str | None) -> Path:
         "GENERATED — do not edit. Regenerate with:\n"
         "  python py/make_webjs.py --verify\n\n"
         + (f"Parity with ips_rdf_export.py: {parity}\n" if parity else
-           "Parity not checked in this run (node missing or --verify off).\n"),
+           "Parity not checked in this run (node missing or --verify off).\n")
+        + "\nSCOPE — layers the published graph has and this emitter has not:\n"
+        + "".join(f"  * {name}\n      {why}\n" for name, why in WEBJS_OMITS)
+        + "The parity check compares against a Python graph built with\n"
+          "these switched off, so it measures agreement where the two\n"
+          "emitters overlap. Everything they both emit is identical.\n",
         encoding="utf-8")
     return note
 
@@ -497,6 +532,9 @@ def run(out_dir: Path, csv: Path, era: str, verify: bool = True) -> int:
             write_copy_note(out_dir, "FAILED")
             return 2
         print(f"  Parity            : OK, {n} N-Triples, sha256 {h_py}")
+        print("    scope           : compared without "
+              + ", ".join(name for name, _why in WEBJS_OMITS)
+              + " (see COPY_ME.txt)")
         parity = f"OK, sha256 {h_py} over {n} triples ({csv.name})"
     print(f"  {write_copy_note(out_dir, parity).relative_to(ROOT)}")
     return 0

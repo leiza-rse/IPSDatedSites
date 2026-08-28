@@ -58,6 +58,8 @@ import pandas as pd
 from rdflib import Graph, Literal, Namespace, RDF, RDFS, OWL, URIRef
 from rdflib.namespace import DCTERMS, SKOS, XSD
 
+import ips_allen
+import ips_colour
 from ips_compat import silence_gyear_warnings
 from ips_docs_text import TERM_DOCS
 
@@ -77,6 +79,10 @@ PROV = Namespace("http://www.w3.org/ns/prov#")  # KORREKT. Die publizierte
 # loc_discoverysite_1.ttl wrongly binds prov: to .../ns/prov-o/ , which
 # leaves all six PROV predicates there pointing nowhere. Do not copy it.
 GEO = Namespace("http://www.opengis.net/ont/geosparql#")
+# Simple Features, the geometry-type vocabulary GeoSPARQL defers to. tiger
+# uses sf:Point for exactly these places; matching it means the two graphs
+# merge without a type clash.
+SF = Namespace("http://www.opengis.net/ont/sf#")
 # CRMdig — the CIDOC CRM extension for digital provenance. The namespace is
 # the one assigned by FORTH, checked against the official v4.0 definition and
 # against OntoME, because a guessed-wrong namespace is precisely the defect
@@ -92,7 +98,7 @@ TRS_IPS = SAMIAN["trs_ips_year"]
 
 PREFIXES = {
     "samian": SAMIAN, "lado": LADO, "crm": CRM, "time": TIME, "prov": PROV,
-    "geo": GEO, "dcat": DCAT, "dcterms": DCTERMS, "skos": SKOS,
+    "geo": GEO, "sf": SF, "dcat": DCAT, "dcterms": DCTERMS, "skos": SKOS,
     "crmdig": CRMDIG,
     "pleiades": PLEIADES, "owl": OWL, "xsd": XSD,
 }
@@ -383,6 +389,11 @@ CLASSES = [
     (LADO.PlotRow, [CRM.E36_Visual_Item], "Plot row",
      "Darstellungsschicht einer Datierung. Traegt ausdruecklich die "
      "Groessen, die laut Methodendoku 'visual only' sind."),
+    (LADO.ColourAxis, [CRM.E36_Visual_Item], "Colour axis",
+     "Eine Abbildung einer gemessenen Groesse auf eine Farbskala, "
+     "vollstaendig beschrieben: Stuetzstellen, Interpolation, "
+     "Normierungsbereich. Damit ist jeder Hexwert im Graphen aus dem "
+     "Graphen selbst nachrechenbar und nicht nur zu glauben."),
 ]
 
 # --------------------------------------------------------------------------
@@ -419,7 +430,37 @@ OBJ_PROPS = [
      "Benennt eine Groesse, die fuer diese Zeitspanne nicht berechenbar "
      "war. Macht Abwesenheit explizit, statt sie der Open-World-Annahme "
      "zu ueberlassen."),
+    (LADO.hasColourAxis, LADO.Figure, LADO.ColourAxis, "has colour axis",
+     "Verbindet die Abbildung mit einer der Farbachsen, nach denen ihre "
+     "Zeilen eingefaerbt werden koennen."),
+    (LADO.colourSource, LADO.ColourAxis, RDF.Property, "colour source",
+     "Die gemessene Eigenschaft, aus der diese Achse ihre Werte nimmt."),
+    (LADO.normalisedProperty, LADO.ColourAxis, RDF.Property,
+     "normalised property",
+     "Die Eigenschaft, unter der der normierte Wert an der Plotzeile "
+     "steht."),
+    (LADO.hexProperty, LADO.ColourAxis, RDF.Property, "hex property",
+     "Die Eigenschaft, unter der der Hexwert an der Plotzeile steht."),
 ]
+
+# --------------------------------------------------------------------------
+# Allen's interval algebra — the uncertain half of the matrix
+# --------------------------------------------------------------------------
+# Thirteen relations, declared mechanically from the table in ips_allen.py so
+# that the vocabulary cannot fall out of step with what the exporter emits.
+# The strong counterparts are OWL-Time's own predicates and are NOT redeclared
+# here; only the subproperty axiom relating the two is asserted, and that is
+# written next to the data.
+for _name, _inv, _time_local, _definition in ips_allen.RELATIONS:
+    OBJ_PROPS.append((
+        LADO[ips_allen.lado_local(_name)],
+        LADO.DatedTimeSpan, LADO.DatedTimeSpan,
+        f"possibly {_name}",
+        f"Gilt auf dem modellierten Intervall [eff_start, eff_end]: diese "
+        f"Zeitspanne {_definition} — aber nicht notwendig auch auf der "
+        f"weiteren Lesart bis zu den Extremwerten des Materials. Die "
+        f"belastbare Variante ist time:{_time_local}, eine "
+        f"Untereigenschaft hiervon."))
 
 DATA_PROPS = [
     # Messschicht — Zeitspanne
@@ -529,7 +570,46 @@ DATA_PROPS = [
     (LADO.rowOrder, LADO.Figure, XSD.string, "row order",
      "Sortierregel der Zeilen. Erlaubt es, die Reihenfolge der Abbildung "
      "aus dem Graphen zu reproduzieren."),
+    # Farbachse
+    (LADO.rampName, LADO.ColourAxis, XSD.string, "ramp name",
+     "Name der Farbskala. BEWUSST NICHT lado:colourRamp: dort steht der "
+     "Name einer D3-Funktion, die dieser Export nicht nachbildet. Hier "
+     "steht eine Skala, die durch rampStops und rampInterpolation "
+     "vollstaendig festgelegt ist."),
+    (LADO.rampStops, LADO.ColourAxis, XSD.string, "ramp stops",
+     "Die Stuetzstellen der Skala als Hexwerte, durch Leerzeichen "
+     "getrennt, von 0 nach 1."),
+    (LADO.rampInterpolation, LADO.ColourAxis, XSD.string,
+     "ramp interpolation",
+     "Wie zwischen den Stuetzstellen interpoliert wird. 'linear-rgb': "
+     "kanalweise linear. Nicht identisch mit D3s Spline, siehe "
+     "py/ips_colour.py."),
+    (LADO.domainMin, LADO.ColourAxis, XSD.decimal, "domain minimum",
+     "Wert, der auf 0 abgebildet wird."),
+    (LADO.domainMax, LADO.ColourAxis, XSD.decimal, "domain maximum",
+     "Wert, der auf 1 abgebildet wird."),
+    (LADO.domainBasis, LADO.ColourAxis, XSD.string, "domain basis",
+     "'fixed': gesetzte Konvention, bleibt bei wachsendem Korpus stehen. "
+     "'observed': aus diesem Korpus gelesen — kommen Fundstellen hinzu, "
+     "verschieben sich die Farben auch der unveraenderten."),
+    (LADO.domainScale, LADO.ColourAxis, XSD.string, "domain scale",
+     "'linear' oder 'log'."),
 ]
+
+# Zwei Eigenschaften je Farbachse an der Plotzeile. Mechanisch erzeugt, damit
+# eine neue Achse in ips_colour.AXES genuegt und nicht an vier Stellen
+# nachgetragen werden muss.
+for _axis, _col, _src, _ramp, _scale, _fixed, _why in ips_colour.AXES:
+    DATA_PROPS.append((
+        LADO[ips_colour.norm_property(_axis)], LADO.PlotRow, XSD.decimal,
+        f"normalised {_axis}",
+        f"VISUAL ONLY. lado:{_src} auf [0,1] gestreckt, nach der Achse "
+        f"samian:axis_{_axis}. {_why}"))
+    DATA_PROPS.append((
+        LADO[ips_colour.hex_property(_axis)], LADO.PlotRow, XSD.string,
+        f"colour for {_axis}",
+        f"VISUAL ONLY. Der Hexwert zu lado:{ips_colour.norm_property(_axis)} "
+        f"auf der Skala samian:axis_{_axis}. Aus dem Graphen nachrechenbar."))
 
 
 def _local(term) -> str:
@@ -616,7 +696,10 @@ def build_ontology() -> Graph:
 # Export
 # --------------------------------------------------------------------------
 def build_graph(df: pd.DataFrame, era: str, figure_name: str,
-                emit_geometry: bool, key_mode: str = "hash") -> Graph:
+                emit_geometry: bool = True, key_mode: str = "hash",
+                emit_allen: bool = True, allen_inverse: bool = True,
+                emit_colour: bool = True,
+                stats: dict | None = None) -> Graph:
     g = Graph()
     for p, ns in PREFIXES.items():
         g.bind(p, ns)
@@ -726,7 +809,39 @@ def build_graph(df: pd.DataFrame, era: str, figure_name: str,
         lit = dec(value) if dt == XSD.decimal else Literal(value, datatype=dt)
         g.add((figure, LADO[name], lit))
 
+    # ---- Colour axes ----------------------------------------------------
+    # Each axis is described completely enough that its hex values can be
+    # recomputed from the graph alone. The domains are worked out here,
+    # once, and reused for every row below.
+    axis_domains = {}
+    for axis, column, source, ramp, scale, fixed, why in (
+            ips_colour.AXES if emit_colour else []):
+        values = [float(v) for v in df[column] if not isna(v)]
+        lo, hi = ips_colour.domain(values, fixed, scale)
+        axis_domains[axis] = (lo, hi, ramp, scale, column)
+
+        node = SAMIAN[f"axis_{axis}"]
+        g.add((node, RDF.type, LADO.ColourAxis))
+        g.add((node, RDFS.label, Literal(f"Colour axis: {axis}", lang="en")))
+        g.add((node, RDFS.comment, Literal(why, lang="en")))
+        g.add((figure, LADO.hasColourAxis, node))
+        g.add((node, LADO.colourSource, LADO[source]))
+        g.add((node, LADO.normalisedProperty,
+               LADO[ips_colour.norm_property(axis)]))
+        g.add((node, LADO.hexProperty, LADO[ips_colour.hex_property(axis)]))
+        g.add((node, LADO.rampName, Literal(ramp)))
+        g.add((node, LADO.rampStops,
+               Literal(" ".join(ips_colour.RAMPS[ramp]))))
+        g.add((node, LADO.rampInterpolation,
+               Literal(ips_colour.INTERPOLATION)))
+        g.add((node, LADO.domainMin, dec(ips_colour.quantise(lo))))
+        g.add((node, LADO.domainMax, dec(ips_colour.quantise(hi))))
+        g.add((node, LADO.domainBasis,
+               Literal("fixed" if fixed is not None else "observed")))
+        g.add((node, LADO.domainScale, Literal(scale)))
+
     # ---- Rows -----------------------------------------------------------
+    ts_of = {}
     for _, r in df.iterrows():
         sid = int(r.the_id)
         fs_slug = slug(r.the_findspot)          # as skos:notation only
@@ -737,6 +852,7 @@ def build_graph(df: pd.DataFrame, era: str, figure_name: str,
         ts = SAMIAN[f"ts_{key}"]
         row = SAMIAN[f"plotrow_{key}"]
         act = SAMIAN[f"act_dating_{key}"]
+        ts_of[(sid, str(r.the_findspot))] = ts
 
         # --- Place: reference only, do not reassert ---
         g.add((place, RDFS.label, Literal(str(r.the_site), lang="en")))
@@ -747,11 +863,44 @@ def build_graph(df: pd.DataFrame, era: str, figure_name: str,
             g.add((place, LADO.pleiadesID,
                    PLEIADES[str(int(float(r.pleiades)))]))
         if emit_geometry and not isna(r.lat) and not isna(r["long"]):
+            # The coordinate sits on the DISCOVERY SITE, never on the
+            # findspot. In the source it comes from the site record, so
+            # several findspots of one site share one point — Bregenz has
+            # six. Copying it down to each findspot would manufacture six
+            # coincident positions and invite a map to draw them as
+            # distinct places. Findspots reach it through P89_falls_within.
             geom = SAMIAN[f"loc_ds_{sid}_geom_ips"]
-            g.add((place, GEO.hasGeometry, geom))
-            g.add((geom, GEO.asWKT, Literal(
+            wkt = Literal(
                 f"<http://www.opengis.net/def/crs/EPSG/0/4326> "
-                f"POINT({r['long']} {r.lat})", datatype=GEO.wktLiteral)))
+                f"POINT({r['long']} {r.lat})", datatype=GEO.wktLiteral)
+            g.add((place, GEO.hasGeometry, geom))
+            g.add((geom, RDF.type, GEO.Geometry))
+            g.add((geom, RDF.type, SF.Point))
+            g.add((geom, GEO.asWKT, wkt))
+            # The same point again, in CIDOC CRM's own terms, for the same
+            # reason P82a/P82b restate the interval bounds: a consumer that
+            # knows only CRM would otherwise find the place and get no
+            # coordinate out of it.
+            #
+            # It hangs on the PLACE and takes the literal, not the geometry
+            # node. crm:E94_Space_Primitive — the range of P168 — is a
+            # subclass of E59_Primitive_Value, that is, a value rather than
+            # a resource. Typing the geo:Geometry node as E94 would be the
+            # obvious way to satisfy a CRM-anchoring check and would also
+            # be wrong.
+            g.add((place, CRM.P168_place_is_defined_by, wkt))
+            # A SECOND position for a place that already has one. The
+            # separate node and this triple are what keep that honest: the
+            # published discovery-site geometry is not overwritten and not
+            # claimed to be identical, and a consumer can see at a glance
+            # which of the two it is looking at.
+            g.add((geom, PROV.wasDerivedFrom, dataset))
+            g.add((geom, RDFS.comment, Literal(
+                "IPS coordinate for this discovery site, as delivered by "
+                "the Samian Research endpoint. Published alongside the "
+                "geometry in loc_discoverysite_1.ttl rather than instead "
+                "of it; the two are not asserted to be the same point.",
+                lang="en")))
 
         # --- Findspot ---
         g.add((findspot, RDF.type, LADO.Findspot))
@@ -839,6 +988,21 @@ def build_graph(df: pd.DataFrame, era: str, figure_name: str,
             else:
                 g.add((row, prop, integer(value)))
 
+        # Colour, per axis. Absence follows the same null contract as
+        # everything else: a findspot whose source value is missing gets no
+        # colour rather than a default grey smuggled in as data.
+        for axis, (lo, hi, _ramp, scale, column) in axis_domains.items():
+            value = r[column]
+            if isna(value):
+                g.add((row, LADO.undefinedMeasure,
+                       LADO[ips_colour.norm_property(axis)]))
+                continue
+            t = ips_colour.normalise(float(value), lo, hi, scale)
+            g.add((row, LADO[ips_colour.norm_property(axis)],
+                   dec(ips_colour.quantise(t))))
+            g.add((row, LADO[ips_colour.hex_property(axis)],
+                   Literal(ips_colour.ramp_colour(axis_domains[axis][2], t))))
+
         # --- PROV ---
         g.add((act, RDF.type, PROV.Activity))
         g.add((act, RDF.type, LADO.DatingActivity))
@@ -860,6 +1024,18 @@ def build_graph(df: pd.DataFrame, era: str, figure_name: str,
         g.add((act, CRM.P33_used_specific_technique, model))
         g.add((act, CRM.P14_carried_out_by, agent))
         g.add((ts, PROV.wasDerivedFrom, dataset))
+
+    # ---- Allen's interval algebra ---------------------------------------
+    # Last, because it needs every time-span URI to exist first. See
+    # py/ips_allen.py for what the two strengths mean and why OWL-Time gets
+    # only the stable half.
+    if emit_allen:
+        ips_allen.declare(g, LADO, TIME, OWL)
+        result = ips_allen.build(
+            g, df, lambda r: ts_of[(int(r.the_id), str(r.the_findspot))],
+            LADO, TIME, allen_inverse)
+        if stats is not None:
+            stats["allen"] = result
 
     return g
 
@@ -883,10 +1059,20 @@ def main() -> int:
                          "hash: six characters from the name (default). "
                          "slug: readable transliteration.")
     ap.add_argument("--figure-name", default="sites_dating_v1")
-    ap.add_argument("--emit-geometry", action="store_true",
-                    help="emit the IPS coordinates as well. Off by default, "
-                         "weil loc_discoverysite_1.ttl bereits eine "
-                         "Geometrie fuer diese Orte publiziert.")
+    ap.add_argument("--no-geometry", action="store_false",
+                    dest="emit_geometry",
+                    help="leave the IPS coordinates out. They are emitted "
+                         "by default, on a geometry node of their own, "
+                         "because a map and an in-browser query page have "
+                         "no way to federate out to the published "
+                         "discovery-site geometry.")
+    ap.add_argument("--no-allen", action="store_false", dest="emit_allen",
+                    help="skip the pairwise interval relations.")
+    ap.add_argument("--no-allen-inverse", action="store_false",
+                    dest="allen_inverse",
+                    help="write each relation in one direction only. "
+                         "Halves the triples and forces UNION on the "
+                         "consumer.")
     args = ap.parse_args()
 
     if not args.csv.exists():
@@ -897,8 +1083,16 @@ def main() -> int:
     args.out.mkdir(parents=True, exist_ok=True)
 
     onto = build_ontology()
+    rdf_stats: dict = {}
+    # Keyword arguments throughout: this call has grown past the point
+    # where positional order is safe, and a new parameter inserted in the
+    # middle would otherwise silently become someone else's argument.
     g = build_graph(df, args.era, args.figure_name,
-                    args.emit_geometry, args.findspot_uri)
+                    emit_geometry=args.emit_geometry,
+                    key_mode=args.findspot_uri,
+                    emit_allen=args.emit_allen,
+                    allen_inverse=args.allen_inverse,
+                    stats=rdf_stats)
 
     onto_path = args.out / "lado_dating_extension.ttl"
     ttl_path = args.out / f"ips_{args.figure_name}.ttl"

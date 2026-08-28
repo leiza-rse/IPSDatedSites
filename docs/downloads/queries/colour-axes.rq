@@ -1,0 +1,30 @@
+# How the colours were made
+# A colour in a dataset is usually an assertion nobody can check. These can
+# be: each axis publishes its ramp stops, its interpolation and the domain the
+# values were stretched onto, so any hex value in the graph can be recomputed
+# from the graph alone. Watch <code>lado:domainBasis</code> — an observed
+# domain is read off this corpus, which means adding a findspot can change the
+# colour of one that did not change at all. The chronological axis avoids red-
+# green on purpose: late material is not worse material.
+
+PREFIX samian:  <http://data.archaeology.link/data/samian/>
+PREFIX lado:    <http://archaeology.link/ontology#>
+PREFIX crm:     <http://www.cidoc-crm.org/cidoc-crm/>
+PREFIX crmdig:  <http://www.ics.forth.gr/isl/CRMdig/>
+PREFIX time:    <http://www.w3.org/2006/time#>
+PREFIX prov:    <http://www.w3.org/ns/prov#>
+PREFIX dcat:    <http://www.w3.org/ns/dcat#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX skos:    <http://www.w3.org/2004/02/skos/core#>
+PREFIX geo:     <http://www.opengis.net/ont/geosparql#>
+PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?axis ?source ?ramp ?scale ?basis ?min ?max ?stops WHERE {
+  ?a a lado:ColourAxis ; lado:colourSource ?source ;
+     lado:rampName ?ramp ; lado:rampStops ?stops ;
+     lado:domainScale ?scale ; lado:domainBasis ?basis ;
+     lado:domainMin ?min ; lado:domainMax ?max .
+  BIND(REPLACE(STR(?a), "^.*/", "") AS ?axis)
+}
+ORDER BY ?axis

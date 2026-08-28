@@ -99,6 +99,14 @@ lado:colourRamp a owl:DatatypeProperty ;
     rdfs:isDefinedBy <http://archaeology.link/ontology> ;
     rdfs:range xsd:string .
 
+lado:colourSource a owl:ObjectProperty ;
+    rdfs:label "colour source"@en ;
+    rdfs:comment "Die gemessene Eigenschaft, aus der diese Achse ihre Werte nimmt."@de,
+        "The measured property an axis takes its values from. Following it leads from the colour back to the evidence."@en ;
+    rdfs:domain lado:ColourAxis ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range rdf:Property .
+
 lado:dieRepetition a owl:DatatypeProperty ;
     rdfs:label "die repetition"@en ;
     rdfs:comment "nStampsWithDie / nDies. Depot-Indikator."@de,
@@ -106,6 +114,38 @@ lado:dieRepetition a owl:DatatypeProperty ;
     rdfs:domain lado:DatedTimeSpan ;
     rdfs:isDefinedBy <http://archaeology.link/ontology> ;
     rdfs:range xsd:decimal .
+
+lado:domainBasis a owl:DatatypeProperty ;
+    rdfs:label "domain basis"@en ;
+    rdfs:comment "'fixed': gesetzte Konvention, bleibt bei wachsendem Korpus stehen. 'observed': aus diesem Korpus gelesen — kommen Fundstellen hinzu, verschieben sich die Farben auch der unveraenderten."@de,
+        "Whether the domain is a fixed convention or was observed in this corpus. The distinction matters for anyone comparing two snapshots: an observed domain moves when findspots are added, so an unchanged findspot can change colour without its dating having changed at all."@en ;
+    rdfs:domain lado:ColourAxis ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:string .
+
+lado:domainMax a owl:DatatypeProperty ;
+    rdfs:label "domain maximum"@en ;
+    rdfs:comment "Wert, der auf 1 abgebildet wird."@de,
+        "The value mapped to the high end of the ramp."@en ;
+    rdfs:domain lado:ColourAxis ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:decimal .
+
+lado:domainMin a owl:DatatypeProperty ;
+    rdfs:label "domain minimum"@en ;
+    rdfs:comment "Wert, der auf 0 abgebildet wird."@de,
+        "The value mapped to the low end of the ramp. Values below it are clamped rather than dropped."@en ;
+    rdfs:domain lado:ColourAxis ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:decimal .
+
+lado:domainScale a owl:DatatypeProperty ;
+    rdfs:label "domain scale"@en ;
+    rdfs:comment "'linear' oder 'log'."@de,
+        "Whether values are stretched linearly or logarithmically. Logarithmic where the quantity spans orders of magnitude, so that the ramp is not exhausted by a handful of large sites."@en ;
+    rdfs:domain lado:ColourAxis ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:string .
 
 lado:eraConvention a owl:DatatypeProperty ;
     rdfs:label "era convention"@en ;
@@ -138,12 +178,60 @@ lado:fuzzinessDivisor a owl:DatatypeProperty ;
     rdfs:isDefinedBy <http://archaeology.link/ontology> ;
     rdfs:range xsd:integer .
 
+lado:hasColourAxis a owl:ObjectProperty ;
+    rdfs:label "has colour axis"@en ;
+    rdfs:comment "Verbindet die Abbildung mit einer der Farbachsen, nach denen ihre Zeilen eingefaerbt werden koennen."@de,
+        "Relates a figure to a colour axis its rows can be shaded by. A figure carries several, because sharpness, chronology, dispersion and sample size answer different questions and choosing between them belongs to whoever is drawing the map."@en ;
+    rdfs:domain lado:Figure ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range lado:ColourAxis .
+
 lado:hasRow a owl:ObjectProperty ;
     rdfs:label "has row"@en ;
     rdfs:comment "Links a figure to the plot rows it contains."@en ;
     rdfs:domain lado:Figure ;
     rdfs:isDefinedBy <http://archaeology.link/ontology> ;
     rdfs:range lado:PlotRow .
+
+lado:hexMidpointYear a owl:DatatypeProperty ;
+    rdfs:label "colour for midpointYear"@en ;
+    rdfs:comment "VISUAL ONLY. Der Hexwert zu lado:normMidpointYear auf der Skala samian:axis_midpointYear. Aus dem Graphen nachrechenbar."@de,
+        "Presentation only. The colour corresponding to lado:normMidpointYear on the axis samian:axis_midpointYear. Recomputable from that axis's stops and interpolation; carried in the graph so that two maps of the same data cannot disagree about the scale."@en ;
+    rdfs:domain lado:PlotRow ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:string .
+
+lado:hexNStamps a owl:DatatypeProperty ;
+    rdfs:label "colour for nStamps"@en ;
+    rdfs:comment "VISUAL ONLY. Der Hexwert zu lado:normNStamps auf der Skala samian:axis_nStamps. Aus dem Graphen nachrechenbar."@de,
+        "Presentation only. The colour corresponding to lado:normNStamps on the axis samian:axis_nStamps. Recomputable from that axis's stops and interpolation; carried in the graph so that two maps of the same data cannot disagree about the scale."@en ;
+    rdfs:domain lado:PlotRow ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:string .
+
+lado:hexProperty a owl:ObjectProperty ;
+    rdfs:label "hex property"@en ;
+    rdfs:comment "Die Eigenschaft, unter der der Hexwert an der Plotzeile steht."@de,
+        "The property under which this axis's colour appears on a plot row. See normalisedProperty for why it is named rather than assumed."@en ;
+    rdfs:domain lado:ColourAxis ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range rdf:Property .
+
+lado:hexQInterval a owl:DatatypeProperty ;
+    rdfs:label "colour for qInterval"@en ;
+    rdfs:comment "VISUAL ONLY. Der Hexwert zu lado:normQInterval auf der Skala samian:axis_qInterval. Aus dem Graphen nachrechenbar."@de,
+        "Presentation only. The colour corresponding to lado:normQInterval on the axis samian:axis_qInterval. Recomputable from that axis's stops and interpolation; carried in the graph so that two maps of the same data cannot disagree about the scale."@en ;
+    rdfs:domain lado:PlotRow ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:string .
+
+lado:hexSigmaYears a owl:DatatypeProperty ;
+    rdfs:label "colour for sigmaYears"@en ;
+    rdfs:comment "VISUAL ONLY. Der Hexwert zu lado:normSigmaYears auf der Skala samian:axis_sigmaYears. Aus dem Graphen nachrechenbar."@de,
+        "Presentation only. The colour corresponding to lado:normSigmaYears on the axis samian:axis_sigmaYears. Recomputable from that axis's stops and interpolation; carried in the graph so that two maps of the same data cannot disagree about the scale."@en ;
+    rdfs:domain lado:PlotRow ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:string .
 
 lado:identifierScheme a owl:DatatypeProperty ;
     rdfs:label "identifier scheme"@en ;
@@ -277,12 +365,156 @@ lado:nStampsWithDie a owl:DatatypeProperty ;
     rdfs:isDefinedBy <http://archaeology.link/ontology> ;
     rdfs:range xsd:integer .
 
+lado:normMidpointYear a owl:DatatypeProperty ;
+    rdfs:label "normalised midpointYear"@en ;
+    rdfs:comment "VISUAL ONLY. lado:midpointYear auf [0,1] gestreckt, nach der Achse samian:axis_midpointYear. Chronological position. A sequential ramp on purpose: red-green would read as a judgement, and late material is not worse material."@de,
+        "Presentation only. The value of lado:midpointYear stretched onto the unit interval by the axis samian:axis_midpointYear. Chronological position. A sequential ramp on purpose: red-green would read as a judgement, and late material is not worse material."@en ;
+    rdfs:domain lado:PlotRow ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:decimal .
+
+lado:normNStamps a owl:DatatypeProperty ;
+    rdfs:label "normalised nStamps"@en ;
+    rdfs:comment "VISUAL ONLY. lado:nStamps auf [0,1] gestreckt, nach der Achse samian:axis_nStamps. Sample size. Logarithmic, because the counts run from 2 to 170 and a linear domain would put four fifths of the findspots in the darkest eighth of the ramp."@de,
+        "Presentation only. The value of lado:nStamps stretched onto the unit interval by the axis samian:axis_nStamps. Sample size. Logarithmic, because the counts run from 2 to 170 and a linear domain would put four fifths of the findspots in the darkest eighth of the ramp."@en ;
+    rdfs:domain lado:PlotRow ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:decimal .
+
+lado:normQInterval a owl:DatatypeProperty ;
+    rdfs:label "normalised qInterval"@en ;
+    rdfs:comment "VISUAL ONLY. lado:qInterval auf [0,1] gestreckt, nach der Achse samian:axis_qInterval. Dating sharpness on its own 0-1 scale, so the domain is a fixed convention rather than the range this corpus happens to show. Green is sharp. Matches the legend of the box plot."@de,
+        "Presentation only. The value of lado:qInterval stretched onto the unit interval by the axis samian:axis_qInterval. Dating sharpness on its own 0-1 scale, so the domain is a fixed convention rather than the range this corpus happens to show. Green is sharp. Matches the legend of the box plot."@en ;
+    rdfs:domain lado:PlotRow ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:decimal .
+
+lado:normSigmaYears a owl:DatatypeProperty ;
+    rdfs:label "normalised sigmaYears"@en ;
+    rdfs:comment "VISUAL ONLY. lado:sigmaYears auf [0,1] gestreckt, nach der Achse samian:axis_sigmaYears. The dispersion the interval is built from. Reversed, so that small sigma is green and agrees with the qInterval axis."@de,
+        "Presentation only. The value of lado:sigmaYears stretched onto the unit interval by the axis samian:axis_sigmaYears. The dispersion the interval is built from. Reversed, so that small sigma is green and agrees with the qInterval axis."@en ;
+    rdfs:domain lado:PlotRow ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:decimal .
+
+lado:normalisedProperty a owl:ObjectProperty ;
+    rdfs:label "normalised property"@en ;
+    rdfs:comment "Die Eigenschaft, unter der der normierte Wert an der Plotzeile steht."@de,
+        "The property under which this axis's normalised value appears on a plot row. Named in the graph so that a client can discover the axes rather than having the property names compiled into it."@en ;
+    rdfs:domain lado:ColourAxis ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range rdf:Property .
+
 lado:padYears a owl:DatatypeProperty ;
     rdfs:label "pad years"@en ;
     rdfs:comment "Years of empty space added at each end of the time axis."@en ;
     rdfs:domain lado:Figure ;
     rdfs:isDefinedBy <http://archaeology.link/ontology> ;
     rdfs:range xsd:integer .
+
+lado:possiblyAfter a owl:ObjectProperty ;
+    rdfs:label "possibly after"@en ;
+    rdfs:comment "Gilt auf dem modellierten Intervall [eff_start, eff_end]: diese Zeitspanne begins after the other ends, with a gap — aber nicht notwendig auch auf der weiteren Lesart bis zu den Extremwerten des Materials. Die belastbare Variante ist time:intervalAfter, eine Untereigenschaft hiervon."@de,
+        "Holds on the modelled interval: this time-span begins after the other ends, with a gap. Every pair of datings stands in exactly one relation of this family, so the set is complete and can be counted. It does not claim that the relation survives a more generous reading of the bounds — where it does, time:intervalAfter is asserted as well, and that property is declared a subproperty of this one."@en ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range lado:DatedTimeSpan .
+
+lado:possiblyBefore a owl:ObjectProperty ;
+    rdfs:label "possibly before"@en ;
+    rdfs:comment "Gilt auf dem modellierten Intervall [eff_start, eff_end]: diese Zeitspanne ends before the other begins, with a gap — aber nicht notwendig auch auf der weiteren Lesart bis zu den Extremwerten des Materials. Die belastbare Variante ist time:intervalBefore, eine Untereigenschaft hiervon."@de,
+        "Holds on the modelled interval: this time-span ends before the other begins, with a gap. Every pair of datings stands in exactly one relation of this family, so the set is complete and can be counted. It does not claim that the relation survives a more generous reading of the bounds — where it does, time:intervalBefore is asserted as well, and that property is declared a subproperty of this one."@en ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range lado:DatedTimeSpan .
+
+lado:possiblyContains a owl:ObjectProperty ;
+    rdfs:label "possibly contains"@en ;
+    rdfs:comment "Gilt auf dem modellierten Intervall [eff_start, eff_end]: diese Zeitspanne strictly encloses the other — aber nicht notwendig auch auf der weiteren Lesart bis zu den Extremwerten des Materials. Die belastbare Variante ist time:intervalContains, eine Untereigenschaft hiervon."@de,
+        "Holds on the modelled interval: this time-span strictly encloses the other. Every pair of datings stands in exactly one relation of this family, so the set is complete and can be counted. It does not claim that the relation survives a more generous reading of the bounds — where it does, time:intervalContains is asserted as well, and that property is declared a subproperty of this one."@en ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range lado:DatedTimeSpan .
+
+lado:possiblyDuring a owl:ObjectProperty ;
+    rdfs:label "possibly during"@en ;
+    rdfs:comment "Gilt auf dem modellierten Intervall [eff_start, eff_end]: diese Zeitspanne falls strictly inside the other — aber nicht notwendig auch auf der weiteren Lesart bis zu den Extremwerten des Materials. Die belastbare Variante ist time:intervalDuring, eine Untereigenschaft hiervon."@de,
+        "Holds on the modelled interval: this time-span falls strictly inside the other. Every pair of datings stands in exactly one relation of this family, so the set is complete and can be counted. It does not claim that the relation survives a more generous reading of the bounds — where it does, time:intervalDuring is asserted as well, and that property is declared a subproperty of this one."@en ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range lado:DatedTimeSpan .
+
+lado:possiblyEquals a owl:ObjectProperty ;
+    rdfs:label "possibly equals"@en ;
+    rdfs:comment "Gilt auf dem modellierten Intervall [eff_start, eff_end]: diese Zeitspanne has the same bounds as the other — aber nicht notwendig auch auf der weiteren Lesart bis zu den Extremwerten des Materials. Die belastbare Variante ist time:intervalEquals, eine Untereigenschaft hiervon."@de,
+        "Holds on the modelled interval: this time-span has the same bounds as the other. Every pair of datings stands in exactly one relation of this family, so the set is complete and can be counted. It does not claim that the relation survives a more generous reading of the bounds — where it does, time:intervalEquals is asserted as well, and that property is declared a subproperty of this one."@en ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range lado:DatedTimeSpan .
+
+lado:possiblyFinishedBy a owl:ObjectProperty ;
+    rdfs:label "possibly finishedBy"@en ;
+    rdfs:comment "Gilt auf dem modellierten Intervall [eff_start, eff_end]: diese Zeitspanne begins earlier and ends together with the other — aber nicht notwendig auch auf der weiteren Lesart bis zu den Extremwerten des Materials. Die belastbare Variante ist time:intervalFinishedBy, eine Untereigenschaft hiervon."@de,
+        "Holds on the modelled interval: this time-span begins earlier and ends together with the other. Every pair of datings stands in exactly one relation of this family, so the set is complete and can be counted. It does not claim that the relation survives a more generous reading of the bounds — where it does, time:intervalFinishedBy is asserted as well, and that property is declared a subproperty of this one."@en ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range lado:DatedTimeSpan .
+
+lado:possiblyFinishes a owl:ObjectProperty ;
+    rdfs:label "possibly finishes"@en ;
+    rdfs:comment "Gilt auf dem modellierten Intervall [eff_start, eff_end]: diese Zeitspanne begins later and ends together with the other — aber nicht notwendig auch auf der weiteren Lesart bis zu den Extremwerten des Materials. Die belastbare Variante ist time:intervalFinishes, eine Untereigenschaft hiervon."@de,
+        "Holds on the modelled interval: this time-span begins later and ends together with the other. Every pair of datings stands in exactly one relation of this family, so the set is complete and can be counted. It does not claim that the relation survives a more generous reading of the bounds — where it does, time:intervalFinishes is asserted as well, and that property is declared a subproperty of this one."@en ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range lado:DatedTimeSpan .
+
+lado:possiblyMeets a owl:ObjectProperty ;
+    rdfs:label "possibly meets"@en ;
+    rdfs:comment "Gilt auf dem modellierten Intervall [eff_start, eff_end]: diese Zeitspanne ends exactly where the other begins — aber nicht notwendig auch auf der weiteren Lesart bis zu den Extremwerten des Materials. Die belastbare Variante ist time:intervalMeets, eine Untereigenschaft hiervon."@de,
+        "Holds on the modelled interval: this time-span ends exactly where the other begins. Every pair of datings stands in exactly one relation of this family, so the set is complete and can be counted. It does not claim that the relation survives a more generous reading of the bounds — where it does, time:intervalMeets is asserted as well, and that property is declared a subproperty of this one."@en ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range lado:DatedTimeSpan .
+
+lado:possiblyMetBy a owl:ObjectProperty ;
+    rdfs:label "possibly metBy"@en ;
+    rdfs:comment "Gilt auf dem modellierten Intervall [eff_start, eff_end]: diese Zeitspanne begins exactly where the other ends — aber nicht notwendig auch auf der weiteren Lesart bis zu den Extremwerten des Materials. Die belastbare Variante ist time:intervalMetBy, eine Untereigenschaft hiervon."@de,
+        "Holds on the modelled interval: this time-span begins exactly where the other ends. Every pair of datings stands in exactly one relation of this family, so the set is complete and can be counted. It does not claim that the relation survives a more generous reading of the bounds — where it does, time:intervalMetBy is asserted as well, and that property is declared a subproperty of this one."@en ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range lado:DatedTimeSpan .
+
+lado:possiblyOverlappedBy a owl:ObjectProperty ;
+    rdfs:label "possibly overlappedBy"@en ;
+    rdfs:comment "Gilt auf dem modellierten Intervall [eff_start, eff_end]: diese Zeitspanne begins inside the other and outlasts it — aber nicht notwendig auch auf der weiteren Lesart bis zu den Extremwerten des Materials. Die belastbare Variante ist time:intervalOverlappedBy, eine Untereigenschaft hiervon."@de,
+        "Holds on the modelled interval: this time-span begins inside the other and outlasts it. Every pair of datings stands in exactly one relation of this family, so the set is complete and can be counted. It does not claim that the relation survives a more generous reading of the bounds — where it does, time:intervalOverlappedBy is asserted as well, and that property is declared a subproperty of this one."@en ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range lado:DatedTimeSpan .
+
+lado:possiblyOverlaps a owl:ObjectProperty ;
+    rdfs:label "possibly overlaps"@en ;
+    rdfs:comment "Gilt auf dem modellierten Intervall [eff_start, eff_end]: diese Zeitspanne begins first, ends inside the other — aber nicht notwendig auch auf der weiteren Lesart bis zu den Extremwerten des Materials. Die belastbare Variante ist time:intervalOverlaps, eine Untereigenschaft hiervon."@de,
+        "Holds on the modelled interval: this time-span begins first, ends inside the other. Every pair of datings stands in exactly one relation of this family, so the set is complete and can be counted. It does not claim that the relation survives a more generous reading of the bounds — where it does, time:intervalOverlaps is asserted as well, and that property is declared a subproperty of this one."@en ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range lado:DatedTimeSpan .
+
+lado:possiblyStartedBy a owl:ObjectProperty ;
+    rdfs:label "possibly startedBy"@en ;
+    rdfs:comment "Gilt auf dem modellierten Intervall [eff_start, eff_end]: diese Zeitspanne begins together with the other and outlasts it — aber nicht notwendig auch auf der weiteren Lesart bis zu den Extremwerten des Materials. Die belastbare Variante ist time:intervalStartedBy, eine Untereigenschaft hiervon."@de,
+        "Holds on the modelled interval: this time-span begins together with the other and outlasts it. Every pair of datings stands in exactly one relation of this family, so the set is complete and can be counted. It does not claim that the relation survives a more generous reading of the bounds — where it does, time:intervalStartedBy is asserted as well, and that property is declared a subproperty of this one."@en ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range lado:DatedTimeSpan .
+
+lado:possiblyStarts a owl:ObjectProperty ;
+    rdfs:label "possibly starts"@en ;
+    rdfs:comment "Gilt auf dem modellierten Intervall [eff_start, eff_end]: diese Zeitspanne begins together with the other and ends first — aber nicht notwendig auch auf der weiteren Lesart bis zu den Extremwerten des Materials. Die belastbare Variante ist time:intervalStarts, eine Untereigenschaft hiervon."@de,
+        "Holds on the modelled interval: this time-span begins together with the other and ends first. Every pair of datings stands in exactly one relation of this family, so the set is complete and can be counted. It does not claim that the relation survives a more generous reading of the bounds — where it does, time:intervalStarts is asserted as well, and that property is declared a subproperty of this one."@en ;
+    rdfs:domain lado:DatedTimeSpan ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range lado:DatedTimeSpan .
 
 lado:qEnd a owl:DatatypeProperty ;
     rdfs:label "q end"@en ;
@@ -315,6 +547,30 @@ lado:qStart a owl:DatatypeProperty ;
     rdfs:domain lado:DatedTimeSpan ;
     rdfs:isDefinedBy <http://archaeology.link/ontology> ;
     rdfs:range xsd:decimal .
+
+lado:rampInterpolation a owl:DatatypeProperty ;
+    rdfs:label "ramp interpolation"@en ;
+    rdfs:comment "Wie zwischen den Stuetzstellen interpoliert wird. 'linear-rgb': kanalweise linear. Nicht identisch mit D3s Spline, siehe py/ips_colour.py."@de,
+        "How colours between two anchors are obtained. 'linear-rgb' means each channel is interpolated linearly. This is not what D3's spline interpolators do; the two agree at the anchors and differ by a few units between them."@en ;
+    rdfs:domain lado:ColourAxis ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:string .
+
+lado:rampName a owl:DatatypeProperty ;
+    rdfs:label "ramp name"@en ;
+    rdfs:comment "Name der Farbskala. BEWUSST NICHT lado:colourRamp: dort steht der Name einer D3-Funktion, die dieser Export nicht nachbildet. Hier steht eine Skala, die durch rampStops und rampInterpolation vollstaendig festgelegt ist."@de,
+        "The name of the colour scale. Deliberately distinct from colourRamp, which holds the name of a D3 function that this export does not reproduce. A ramp named here is fully specified by its stops and its interpolation, and the resulting colours are reproducible from the graph without any library."@en ;
+    rdfs:domain lado:ColourAxis ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:string .
+
+lado:rampStops a owl:DatatypeProperty ;
+    rdfs:label "ramp stops"@en ;
+    rdfs:comment "Die Stuetzstellen der Skala als Hexwerte, durch Leerzeichen getrennt, von 0 nach 1."@de,
+        "The anchor colours of the scale, as hex values separated by spaces, running from the low end of the domain to the high end."@en ;
+    rdfs:domain lado:ColourAxis ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:range xsd:string .
 
 lado:referenceLength a owl:DatatypeProperty ;
     rdfs:label "reference length"@en ;
@@ -437,13 +693,6 @@ lado:Location a owl:Class ;
     rdfs:isDefinedBy <http://archaeology.link/ontology> ;
     rdfs:subClassOf crm:E53_Place .
 
-lado:PlotRow a owl:Class ;
-    rdfs:label "Plot row"@en ;
-    rdfs:comment "Darstellungsschicht einer Datierung. Traegt ausdruecklich die Groessen, die laut Methodendoku 'visual only' sind."@de,
-        "The presentation layer of a single dating. It deliberately carries the uncertainty whiskers, which the method documentation describes as visual only, keeping them off the time-span where they would read as an archaeological claim."@en ;
-    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
-    rdfs:subClassOf crm:E36_Visual_Item .
-
 lado:DatingModel a owl:Class ;
     rdfs:label "Dating model"@en ;
     rdfs:comment "Parametrisierung, aus der die Intervalle berechnet wurden. Haengt an prov:Plan UND an crm:E29_Design_or_Procedure: sonst waere dies die einzige lokale Klasse, die CIDOC CRM nicht erreicht, und ein rein CRM-basierter Konsument saehe die Methode nicht, aus der die Datierungen stammen."@de,
@@ -452,10 +701,24 @@ lado:DatingModel a owl:Class ;
     rdfs:subClassOf crm:E29_Design_or_Procedure,
         prov:Plan .
 
+lado:ColourAxis a owl:Class ;
+    rdfs:label "Colour axis"@en ;
+    rdfs:comment "Eine Abbildung einer gemessenen Groesse auf eine Farbskala, vollstaendig beschrieben: Stuetzstellen, Interpolation, Normierungsbereich. Damit ist jeder Hexwert im Graphen aus dem Graphen selbst nachrechenbar und nicht nur zu glauben."@de,
+        "A complete specification of how one measured quantity becomes a colour: the ramp stops, the interpolation between them, the domain the values are stretched onto and whether that domain is a fixed convention or was read off this corpus. Colour is presentation rather than evidence, so it is published here on the same terms as the other presentation-only quantities: as something a consumer can check and recompute rather than has to trust."@en ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:subClassOf crm:E36_Visual_Item .
+
 lado:Figure a owl:Class ;
     rdfs:label "Figure"@en ;
     rdfs:comment "Abbildung. Traegt die Konstanten, die nicht zu den Fundplaetzen gehoeren, sondern zur Grafik."@de,
         "A published figure. Carries the constants that belong to the drawing rather than to the archaeology — padding, row height, colour ramp, sort order — so that they are stated once instead of being repeated on every row."@en ;
+    rdfs:isDefinedBy <http://archaeology.link/ontology> ;
+    rdfs:subClassOf crm:E36_Visual_Item .
+
+lado:PlotRow a owl:Class ;
+    rdfs:label "Plot row"@en ;
+    rdfs:comment "Darstellungsschicht einer Datierung. Traegt ausdruecklich die Groessen, die laut Methodendoku 'visual only' sind."@de,
+        "The presentation layer of a single dating. It deliberately carries the uncertainty whiskers, which the method documentation describes as visual only, keeping them off the time-span where they would read as an archaeological claim."@en ;
     rdfs:isDefinedBy <http://archaeology.link/ontology> ;
     rdfs:subClassOf crm:E36_Visual_Item .
 
