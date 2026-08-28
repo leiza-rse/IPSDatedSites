@@ -1,0 +1,49 @@
+---
+layout: default
+title: [[ page.title ]]
+---
+<style>
+  ul.qlist { list-style:none; margin:1.6rem 0 0; padding:0; }
+  ul.qlist li { border-top:1px solid var(--hair); padding:1rem 0; }
+  ul.qlist a.title { font-size:1.08rem; font-weight:600; }
+  ul.qlist p { margin:.35rem 0 .3rem; font-size:.92rem; }
+  .meta { font-size:.78rem; color:var(--muted); }
+  .tag { display:inline-block; border:1px solid var(--hair);
+         border-radius:3px; padding:.05rem .4rem; margin-right:.4rem;
+         font-size:.72rem; color:var(--muted); background:var(--band); }
+</style>
+
+<p>[[ page.intro ]]</p>
+
+<p class="meta">
+  Every query below runs in your browser: the graph is fetched as a static
+  Turtle file and queried with rdflib under Pyodide. There is no endpoint,
+  nothing you type leaves your machine, and an archived copy of this
+  repository stays queryable with no service to keep alive. The first page
+  you open downloads roughly 10&nbsp;MB of Python runtime; after that the
+  browser has it cached.
+</p>
+
+<ul class="qlist">
+[% for q in queries %]  <li>
+    <a class="title" href="[[ q.id ]].html">[[ q.title ]]</a>
+    <p>[[ q.blurb ]]</p>
+    <p class="meta">
+      <span class="tag">[[ q.view_label ]]</span>
+      <span class="tag">[[ q.rows_at_build ]] rows when built</span>
+      <a href="rq/[[ q.id ]].rq">[[ q.id ]].rq</a>
+    </p>
+  </li>
+[% endfor %][% for e in extras %]  <li>
+    <a class="title" href="[[ e.href ]]">[[ e.title ]]</a>
+    <p>[[ e.blurb ]]</p>
+    <p class="meta"><span class="tag">[[ e.tag ]]</span></p>
+  </li>
+[% endfor %]</ul>
+
+<p class="meta" style="margin-top:1.8rem">
+  All of them on one page: <a href="all.html">all.html</a>. The plain
+  <code>.rq</code> files are in <a href="rq/">rq/</a>, and the graph itself
+  is <a href="[[ graph.page_url ]]">[[ graph.url ]]</a>
+  ([[ graph.megabytes ]]&nbsp;MB).
+</p>

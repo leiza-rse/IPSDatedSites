@@ -22,6 +22,9 @@ page:
     <a href="https://www.w3.org/TR/prov-o/">PROV-O</a>. The bundle carries
     the vocabulary and a materialised CRM crosswalk, so it can be loaded
     into a triplestore on its own.
+  # Extra pages listed in the catalogue that are not built from a query
+  # below: they have their own code and their own look.
+  extras_note: "see query_extras"
   nav:
     - {href: "../index.html", label: "Overview"}
     - {href: "../model.html", label: "Model"}
@@ -107,6 +110,17 @@ map:
     }
     ORDER BY ?site ?findspot ?axis
 
+query_extras:
+  - href: "closed-groups.html"
+    title: "Closed groups that are also sharply dated"
+    tag: "table and scatter plot"
+    blurb: >-
+      A figure that is not a figure: the selection criterion runs as a query
+      in the browser and the plot is whatever it returned. Move a threshold
+      and the set of findspots changes in front of you. Built by
+      py/make_talk_figures.py rather than from queries.yaml, because it
+      carries its own plotting code.
+
 prefixes: |
   PREFIX samian:  <http://data.archaeology.link/data/samian/>
   PREFIX lado:    <http://archaeology.link/ontology#>
@@ -123,6 +137,8 @@ prefixes: |
 
 queries:
   - id: dated-findspots
+    view: intervals
+    view_columns: {from: "from", to: "to", label: "findspot"}
     title: "The figure, as a table"
     intro: >-
       Every row of the box plot, in the order the figure draws them. The
@@ -145,6 +161,8 @@ queries:
       ORDER BY ?order
 
   - id: crm-only
+    view: intervals
+    view_columns: {from: "from", to: "to", label: "findspot"}
     title: "The same answer in CIDOC CRM alone"
     intro: >-
       No lado: and no time: term appears below, only CIDOC CRM — and it
@@ -316,6 +334,7 @@ queries:
       LIMIT 40
 
   - id: map-layer
+    view: map
     title: "Everything a map needs, in one query"
     intro: >-
       Coordinates, interval and colour for each findspot. The point sits on

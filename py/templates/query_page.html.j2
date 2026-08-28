@@ -1,0 +1,331 @@
+---
+layout: default
+title: [[ query.title ]]
+---
+[# One page per query. Jinja runs with [% %] / [[ ]] so that {% raw %}
+   reaches Jekyll verbatim and shields the JavaScript from Liquid. #]
+[% if view == "map" %]<link rel="stylesheet"
+      href="https://unpkg.com/leaflet@[[ leaflet_version ]]/dist/leaflet.css"
+      integrity="[[ leaflet_sri_css ]]" crossorigin="">
+[% endif %]<style>
+  .crumb { font-size:.85rem; color:var(--muted); margin:0 0 1rem; }
+  .status { display:flex; align-items:center; gap:.55rem;
+            border:1px solid var(--hair); border-radius:6px;
+            padding:.6rem .85rem; background:var(--band);
+            font-size:.9rem; color:var(--muted); margin:1.2rem 0; }
+  .dot { width:.6rem; height:.6rem; border-radius:50%;
+         background:var(--muted); flex:none; }
+  .dot.busy { background:#b07d00; }
+  .dot.ok   { background:#2e7d32; }
+  .dot.err  { background:#b3392b; }
+  textarea.sparql { width:100%; font-family: ui-monospace, SFMono-Regular,
+                    Menlo, Consolas, monospace; font-size:12.5px;
+                    line-height:1.5; border:1px solid var(--hair);
+                    border-radius:6px; padding:.7rem .8rem;
+                    background:var(--band); color:var(--ink);
+                    resize:vertical; tab-size:2; }
+  textarea.sparql:focus { outline:2px solid #1f5fa8; outline-offset:-1px;
+                          background:#fff; }
+  .query-bar { display:flex; align-items:center; gap:.5rem; margin:.55rem 0 0; }
+  .query-bar button { font:inherit; font-size:.85rem; border-radius:5px;
+                      padding:.32rem .9rem; cursor:pointer;
+                      border:1px solid #1f5fa8; background:#1f5fa8; color:#fff; }
+  .query-bar button:hover:not(:disabled) { background:#17497f; }
+  .query-bar button:disabled { opacity:.45; cursor:default; }
+  .query-bar button.reset { background:#fff; color:var(--muted);
+                            border-color:var(--hair); }
+  .timing { font-size:.8rem; color:var(--muted); }
+  .table-scroll { overflow-x:auto; border:1px solid var(--hair);
+                  border-radius:6px; margin-top:.7rem; }
+  .table-scroll table { margin:0; }
+  .nil { color:var(--muted); }
+  pre.error { background:#fff4f2; border:1px solid #e3b7b0; border-radius:6px;
+              padding:.7rem .8rem; font-size:12px; white-space:pre-wrap; }
+  .note { font-size:.85rem; color:var(--muted); }
+  .viewbox { border:1px solid var(--hair); border-radius:6px;
+             margin-top:1rem; background:var(--band); }
+  .viewbox .head { font-size:.8rem; color:var(--muted);
+                   padding:.45rem .8rem; border-bottom:1px solid var(--hair); }
+  #map { height:min(58vh,460px); border-radius:0 0 5px 5px; }
+  #bars { width:100%; display:block; }
+  .miss { padding:.7rem .8rem; font-size:.85rem; color:#8a5a00; }
+</style>
+
+<p class="crumb"><a href="index.html">&larr; All queries</a></p>
+
+<p>[[ query.intro ]]</p>
+
+<div class="status"><span class="dot" id="dot"></span><span id="status-text">Starting the Python runtime&hellip;</span></div>
+<p class="note" id="graph-note" hidden></p>
+
+<textarea class="sparql" id="src" rows="[[ query.rows ]]" spellcheck="false">[[ query.sparql | e ]]</textarea>
+<div class="query-bar">
+  <button class="run" id="run" disabled>Run</button>
+  <button class="reset" id="reset">Reset</button>
+  <span class="timing" id="timing"></span>
+</div>
+
+[% if view == "map" %]<div class="viewbox">
+  <div class="head">Map &mdash; drawn from the <code>?wkt</code> column of the result</div>
+  <div id="map"></div>
+</div>
+[% elif view == "intervals" %]<div class="viewbox">
+  <div class="head">Intervals &mdash; drawn from the <code>?[[ view_from ]]</code> and <code>?[[ view_to ]]</code> columns</div>
+  <div id="bars-wrap"><svg id="bars" height="40"></svg></div>
+</div>
+[% endif %]
+<div id="out"></div>
+
+<p class="note" style="margin-top:1.6rem">
+  Also available as a plain file:
+  <a href="rq/[[ query.id ]].rq"><code>[[ query.id ]].rq</code></a>.
+  The graph is fetched as a static file and queried in your browser with
+  rdflib under Pyodide &mdash; there is no endpoint, and nothing you type
+  leaves your machine.
+</p>
+
+[% if view == "map" %]<script src="https://unpkg.com/leaflet@[[ leaflet_version ]]/dist/leaflet.js"
+        integrity="[[ leaflet_sri_js ]]" crossorigin=""></script>
+[% endif %]<script src="https://cdn.jsdelivr.net/pyodide/v[[ pyodide_version ]]/full/pyodide.js"></script>
+<script>
+const PREFIXES = [[ prefixes_json ]];
+const QUERY    = [[ query_json ]];
+const GRAPH    = [[ graph_json ]];
+const MAX_ROWS = [[ max_rows ]];
+const RDFLIB   = "[[ rdflib_version ]]";
+const VIEW     = "[[ view ]]";
+const VIEW_FROM = "[[ view_from ]]";
+const VIEW_TO   = "[[ view_to ]]";
+const VIEW_LABEL = "[[ view_label ]]";
+</script>
+{% raw %}
+<script>
+const statusText = document.getElementById('status-text');
+const dot = document.getElementById('dot');
+let pyodide = null, leafletMap = null, markerLayer = null;
+
+function setStatus(t, s) { statusText.textContent = t; dot.className = 'dot ' + (s || ''); }
+
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
+function renderTable(cols, rows, total) {
+  const out = document.getElementById('out');
+  if (!rows.length) {
+    out.innerHTML = '<p class="note">No results. The query is valid but matched nothing.</p>';
+    return;
+  }
+  let h = '<div class="table-scroll"><table><thead><tr>';
+  h += cols.map(c => `<th>${esc(c)}</th>`).join('');
+  h += '</tr></thead><tbody>';
+  for (const r of rows) {
+    h += '<tr>' + cols.map(c => {
+      const v = r[c];
+      if (v === null || v === undefined) return '<td class="nil">&mdash;</td>';
+      const s = String(v);
+      return /^https?:\/\//.test(s)
+        ? `<td><a href="${esc(s)}" target="_blank" rel="noopener">${esc(s)}</a></td>`
+        : `<td>${esc(s)}</td>`;
+    }).join('') + '</tr>';
+  }
+  h += '</tbody></table></div>';
+  h += `<p class="note">${total > rows.length
+    ? `Showing the first ${rows.length} of ${total} rows.`
+    : `${rows.length} row${rows.length === 1 ? '' : 's'}.`}</p>`;
+  out.innerHTML = h;
+}
+
+/* The view is an ADDITION to the table, never a replacement. These queries
+   are meant to be edited, and an edit that drops the column a view needs
+   would otherwise leave a blank panel with no clue why. Say what is
+   missing and leave the table standing. */
+function viewMissing(what) {
+  const box = document.querySelector('.viewbox');
+  if (!box) return;
+  let msg = box.querySelector('.miss');
+  if (!msg) { msg = document.createElement('div'); msg.className = 'miss'; box.appendChild(msg); }
+  msg.textContent = what;
+}
+function viewClearMessage() {
+  const m = document.querySelector('.viewbox .miss');
+  if (m) m.remove();
+}
+
+/* 'POINT(lon lat)', optionally preceded by a CRS IRI. */
+function parsePoint(text) {
+  let s = String(text).trim();
+  if (s.startsWith('<')) s = s.slice(s.indexOf('>') + 1).trim();
+  const m = /POINT\s*\(\s*([-\d.eE]+)[\s,]+([-\d.eE]+)\s*\)/i.exec(s);
+  return m ? [parseFloat(m[1]), parseFloat(m[2])] : null;
+}
+
+function renderMap(cols, rows) {
+  if (!cols.includes('wkt')) {
+    viewMissing('This view needs a ?wkt column; the current query does not select one.');
+    return;
+  }
+  viewClearMessage();
+  if (!leafletMap) {
+    leafletMap = L.map('map', { scrollWheelZoom: false });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(leafletMap);
+  }
+  if (markerLayer) markerLayer.remove();
+  const pts = [];
+  const markers = [];
+  for (const r of rows) {
+    const p = parsePoint(r.wkt);
+    if (!p) continue;
+    pts.push([p[1], p[0]]);
+    const label = r.findspot || r.site || r.label || '';
+    const colour = /^#[0-9a-f]{6}$/i.test(String(r.colour || '')) ? r.colour : '#1f5fa8';
+    markers.push(L.circleMarker([p[1], p[0]], {
+      radius: 6, fillColor: colour, color: '#333', weight: 1, fillOpacity: .85
+    }).bindPopup(`<strong>${esc(r.site || '')}</strong><br>${esc(label)}`));
+  }
+  if (!pts.length) { viewMissing('No row carried a point that could be parsed.'); return; }
+  markerLayer = L.layerGroup(markers).addTo(leafletMap);
+  leafletMap.fitBounds(L.latLngBounds(pts).pad(0.08));
+  setTimeout(() => leafletMap.invalidateSize(), 0);
+}
+
+/* xsd:gYear is '-0039' or '0087'; a numericPosition is a plain decimal.
+   parseFloat handles both, including the leading zeros. */
+function year(v) {
+  const n = parseFloat(String(v));
+  return Number.isFinite(n) ? n : null;
+}
+
+function renderBars(cols, rows) {
+  if (!cols.includes(VIEW_FROM) || !cols.includes(VIEW_TO)) {
+    viewMissing(`This view needs ?${VIEW_FROM} and ?${VIEW_TO}; the current query does not select both.`);
+    return;
+  }
+  viewClearMessage();
+  const items = rows.map(r => ({
+    from: year(r[VIEW_FROM]), to: year(r[VIEW_TO]),
+    label: String(r[VIEW_LABEL] ?? r.findspot ?? r.site ?? '')
+  })).filter(d => d.from !== null && d.to !== null);
+  const svg = document.getElementById('bars');
+  if (!items.length) { viewMissing('No row carried two readable years.'); return; }
+  items.sort((a, b) => a.from - b.from);
+
+  const rowH = 18, padT = 10, padB = 26, padL = 190, padR = 20;
+  const W = svg.parentElement.clientWidth || 800;
+  const H = padT + items.length * rowH + padB;
+  const lo = Math.min(...items.map(d => d.from));
+  const hi = Math.max(...items.map(d => d.to));
+  const span = (hi - lo) || 1;
+  const x = v => padL + ((v - lo) / span) * (W - padL - padR);
+
+  let h = '';
+  // Century gridlines, so the bars sit on a scale rather than in a void.
+  const step = span > 400 ? 100 : span > 150 ? 50 : 25;
+  for (let t = Math.ceil(lo / step) * step; t <= hi; t += step) {
+    h += `<line x1="${x(t)}" x2="${x(t)}" y1="${padT}" y2="${H - padB}" stroke="#ccc" stroke-dasharray="3,3"/>`;
+    h += `<text x="${x(t)}" y="${H - padB + 15}" font-size="10" fill="#666" text-anchor="middle">${t}</text>`;
+  }
+  items.forEach((d, i) => {
+    const y = padT + i * rowH;
+    h += `<text x="${padL - 8}" y="${y + 12}" font-size="11" fill="#333" text-anchor="end">${esc(d.label).slice(0, 40)}</text>`;
+    h += `<rect x="${x(d.from)}" y="${y + 3}" width="${Math.max(2, x(d.to) - x(d.from))}" height="${rowH - 7}" fill="#4a7fb5" fill-opacity=".8" stroke="#2b5580"><title>${esc(d.label)}: ${Math.round(d.from)} to ${Math.round(d.to)}</title></rect>`;
+  });
+  svg.setAttribute('height', H);
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.innerHTML = h;
+}
+
+async function boot() {
+  try {
+    pyodide = await loadPyodide();
+    setStatus('Installing rdflib\u2026', 'busy');
+    await pyodide.loadPackage('micropip');
+    pyodide.globals.set('_rdflib_version', RDFLIB);
+    await pyodide.runPythonAsync(`
+import micropip
+await micropip.install("rdflib==" + _rdflib_version)
+`);
+    setStatus('Loading the graph\u2026', 'busy');
+    pyodide.globals.set('_graph_url', GRAPH.page_url || GRAPH.url);
+    await pyodide.runPythonAsync(`
+from pyodide.http import pyfetch
+from rdflib import Graph
+
+_graphs = {}
+
+async def load(url, key):
+    if key in _graphs:
+        return _graphs[key]
+    resp = await pyfetch(url)
+    if resp.status != 200:
+        raise RuntimeError(f"{url} -> HTTP {resp.status}")
+    text = await resp.string()
+    g = Graph()
+    g.parse(data=text, format="turtle")
+    _graphs[key] = g
+    return g
+
+base = await load(_graph_url, "base")
+n_base = len(base)
+`);
+    const n = pyodide.globals.get('n_base');
+    const note = document.getElementById('graph-note');
+    note.hidden = false;
+    note.innerHTML = `Graph loaded: <strong>${n}</strong> triples from <code>${esc(GRAPH.file)}</code> (${esc(GRAPH.megabytes)} MB). <a href="${esc(GRAPH.page_url || GRAPH.url)}">Download the Turtle file</a>.`;
+    setStatus('Ready \u2014 press Run, or edit the query first.', 'ok');
+    document.getElementById('run').disabled = false;
+    run();
+  } catch (err) {
+    setStatus('Could not start: ' + err.message, 'err');
+    console.error(err);
+  }
+}
+
+async function run() {
+  const btn = document.getElementById('run');
+  const timing = document.getElementById('timing');
+  const out = document.getElementById('out');
+  btn.disabled = true;
+  timing.textContent = 'running\u2026';
+  out.innerHTML = '';
+  const t0 = performance.now();
+  try {
+    pyodide.globals.set('_q_src', PREFIXES + '\n' + document.getElementById('src').value);
+    pyodide.globals.set('_max_rows', MAX_ROWS);
+    const json = await pyodide.runPythonAsync(`
+import json
+g = _graphs["base"]
+res = g.query(_q_src)
+cols = [str(v) for v in res.vars]
+_all = list(res)
+rows = [{c: (None if r[i] is None else str(r[i])) for i, c in enumerate(cols)}
+        for r in _all[:_max_rows]]
+json.dumps({"cols": cols, "rows": rows, "n": len(g), "total": len(_all)})
+`);
+    const data = JSON.parse(json);
+    renderTable(data.cols, data.rows, data.total);
+    if (VIEW === 'map') renderMap(data.cols, data.rows);
+    if (VIEW === 'intervals') renderBars(data.cols, data.rows);
+    timing.textContent = `${((performance.now() - t0) / 1000).toFixed(1)}s over ${data.n} triples`;
+  } catch (err) {
+    out.innerHTML = `<pre class="error">${esc(err.message)}</pre>`;
+    timing.textContent = '';
+  }
+  btn.disabled = false;
+}
+
+document.getElementById('run').addEventListener('click', run);
+document.getElementById('reset').addEventListener('click', () => {
+  document.getElementById('src').value = QUERY;
+  document.getElementById('out').innerHTML = '';
+  document.getElementById('timing').textContent = '';
+});
+
+boot();
+</script>
+{% endraw %}

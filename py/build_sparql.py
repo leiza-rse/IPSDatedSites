@@ -4,7 +4,9 @@ IPS Dated Sites — the query page, from queries.yaml
 
 One source, three products, so that they cannot drift apart:
 
-    docs/query/index.html          the page the repository publishes
+    docs/query/index.html          a catalogue of the queries
+    docs/query/<id>.html           one interactive page per query
+    docs/query/all.html            all of them on one page, as before
     docs/query/rq/*.rq             the same queries as plain files
     docs/sparql.html               a redirect stub, see WHY A STUB below
     qmd/<name>.qmd                 the quarto-live variant, for OER reuse
@@ -68,6 +70,24 @@ QMD_DIR = ROOT / "qmd"
 # delete the talk page's query file on the next run.
 QUERY_DIRNAME = "query"
 RQ_DIRNAME = "rq"
+
+# VIEWS
+# -----
+# A query page shows a table. Some results are better read as something
+# else: a set of points, or a set of intervals on a scale. queries.yaml can
+# therefore give a query a `view`, and the page draws that ABOVE the table.
+#
+# Above, never instead. These queries are meant to be edited, and an edit
+# that drops the column a view needs would otherwise leave a blank panel
+# with no explanation. The view says what is missing; the table stays.
+VIEW_LABELS = {
+    "table": "table",
+    "map": "table and map",
+    "intervals": "table and interval bars",
+}
+
+# Leaflet, pinned exactly as in py/build_map.py. Imported from there rather
+# than repeated, so a version bump happens once.
 
 # WHY A STUB
 # ----------
@@ -152,6 +172,27 @@ def write_rq_files(cfg: dict, docs: Path) -> Path:
     return out_dir
 
 
+def query_view(q: dict) -> tuple[str, str, str, str]:
+    """(view, from-column, to-column, label-column) for one query."""
+    view = q.get("view") or "table"
+    if view not in VIEW_LABELS:
+        sys.exit(f"  !!  query '{q['id']}' asks for an unknown view "
+                 f"'{view}'. Known: {', '.join(sorted(VIEW_LABELS))}.")
+    cols = q.get("view_columns") or {}
+    return (view, cols.get("from", "from"), cols.get("to", "to"),
+            cols.get("label", "findspot"))
+
+
+def blurb(text: str, limit: int = 220) -> str:
+    """The first sentence or so of an intro, for the catalogue."""
+    flat = " ".join(str(text or "").split())
+    if len(flat) <= limit:
+        return flat
+    cut = flat[:limit]
+    stop = cut.rfind(". ")
+    return (cut[:stop + 1] if stop > 60 else cut.rstrip() + "\u2026")
+
+
 def _env():
     """Jinja2 with square delimiters — see JEKYLL in the module header."""
     from jinja2 import Environment, FileSystemLoader
@@ -206,9 +247,47 @@ def build(docs: Path = ROOT / "docs", strict: bool = True) -> list[Path]:
         graph_json=json.dumps(graph_cfg, ensure_ascii=False),
         queries_json=json.dumps({q["id"]: q["sparql"] for q in queries},
                                 ensure_ascii=False))
-    html_path = docs / QUERY_DIRNAME / "index.html"
-    html_path.parent.mkdir(parents=True, exist_ok=True)
-    html_path.write_text(html, encoding="utf-8")
+    query_dir = docs / QUERY_DIRNAME
+    query_dir.mkdir(parents=True, exist_ok=True)
+
+    # The combined page keeps working, at a name of its own.
+    all_path = query_dir / "all.html"
+    all_path.write_text(html, encoding="utf-8")
+    written.append(all_path)
+
+    # One page per query.
+    import build_map
+    page_tpl = env.get_template("query_page.html.j2")
+    catalogue = []
+    for q in queries:
+        view, vfrom, vto, vlabel = query_view(q)
+        page_html = page_tpl.render(
+            query=q, view=view, view_from=vfrom, view_to=vto,
+            view_label=vlabel, graph=graph_cfg,
+            pyodide_version=PYODIDE_VERSION, rdflib_version=RDFLIB_VERSION,
+            leaflet_version=build_map.LEAFLET_VERSION,
+            leaflet_sri_js=build_map.LEAFLET_SRI_JS,
+            leaflet_sri_css=build_map.LEAFLET_SRI_CSS,
+            max_rows=MAX_ROWS,
+            prefixes_json=json.dumps(cfg["prefixes"]),
+            graph_json=json.dumps(graph_cfg, ensure_ascii=False),
+            query_json=json.dumps(q["sparql"], ensure_ascii=False))
+        path = query_dir / f"{q['id']}.html"
+        path.write_text(page_html, encoding="utf-8")
+        written.append(path)
+        catalogue.append({
+            "id": q["id"], "title": q["title"],
+            "blurb": blurb(q.get("intro", "")),
+            "view_label": VIEW_LABELS[view],
+            "rows_at_build": q.get("rows_at_build", "?"),
+        })
+
+    html_path = query_dir / "index.html"
+    html_path.write_text(
+        env.get_template("query_index.html.j2").render(
+            page=page, queries=catalogue, graph=graph_cfg,
+            extras=cfg.get("query_extras", [])),
+        encoding="utf-8")
     written.append(html_path)
 
     stub_path = docs / "sparql.html"

@@ -16,6 +16,13 @@ like a fault in the pages rather than in the server.
 So this handler does the two things Jekyll does that matter here:
 
   * a request for /foo.html with only foo.md on disk renders the Markdown
+  * an .html file that CARRIES FRONT MATTER is treated as a Jekyll page
+    too: the front matter is stripped, {% raw %} blocks are removed, and
+    the layout is applied. Serving those statically was the first version
+    of this module and it was wrong — docs/map.html and every page under
+    docs/query/ begin with a front-matter block, which a static server
+    hands to the browser as visible text, with no layout and no navigation
+    around it.
   * the result is wrapped in docs/_layouts/default.html, with the handful
     of Liquid constructs that layout actually uses substituted
 
@@ -150,6 +157,33 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         if not str(args[1] if len(args) > 1 else "").startswith(("2", "3")):
             sys.stderr.write("  %s\n" % (fmt % args))
 
+    def _jekyll_page(self) -> Path | None:
+        """An .html file on disk that Jekyll would process rather than copy.
+
+        Jekyll's rule, and the one used here: a file is a page if it starts
+        with a front-matter block, and a static asset otherwise. That is why
+        docs/docu/*.html and docs/query/closed-groups.html are served
+        untouched — they are complete documents with their own styling —
+        while the generated pages get the layout.
+        """
+        root = Path(self.directory)
+        path = self.path.split("?", 1)[0].split("#", 1)[0]
+        if path.endswith("/"):
+            path += "index.html"
+        if not path.endswith(".html"):
+            return None
+        target = root / path.lstrip("/")
+        try:
+            target.relative_to(root)
+        except ValueError:
+            return None
+        if not target.exists():
+            return None
+        with target.open("r", encoding="utf-8", errors="replace") as fh:
+            if fh.read(3) != "---":
+                return None
+        return target
+
     def _markdown_source(self) -> Path | None:
         """The .md that would become the requested URL, if there is one."""
         root = Path(self.directory)
@@ -169,10 +203,23 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         return candidate if candidate.exists() else None
 
     def do_GET(self):                          # noqa: N802
+        docs = Path(self.directory)
+        html_page = self._jekyll_page()
+        if html_page is not None:
+            text, fm_title = _strip_front_matter(
+                html_page.read_text(encoding="utf-8"))
+            # {% raw %} exists to stop Liquid eating the JavaScript on the
+            # way to Pages. Jekyll consumes the markers; a static server
+            # does not, and they end up on screen.
+            text = re.sub(r"\{%\s*(end)?raw\s*%\}", "", text)
+            page = _apply_layout(_layout(docs), BANNER + text,
+                                 fm_title or html_page.stem,
+                                 _site_title(docs))
+            return self._send_html(page)
+
         source = self._markdown_source()
         if source is None:
             return super().do_GET()
-        docs = Path(self.directory)
         text, fm_title = _strip_front_matter(
             source.read_text(encoding="utf-8"))
         body, rendered = _render_markdown(text)
@@ -181,6 +228,9 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             _layout(docs),
             (BANNER if rendered else NO_MARKDOWN) + body,
             title, _site_title(docs))
+        return self._send_html(page)
+
+    def _send_html(self, page: str) -> None:
         data = page.encode("utf-8")
         self.send_response(200)
         self.send_header("Content-Type", "text/html; charset=utf-8")
