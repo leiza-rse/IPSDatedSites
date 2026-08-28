@@ -1,0 +1,279 @@
+warning: in the working copy of 'docs/bundle.ttl', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'rdf/IPSDatedSites-bundle.ttl', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'rdf/ips_sites_dating_v1.jsonld', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'rdf/ips_sites_dating_v1.ttl', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'rdf/lado_dating_extension.ttl', LF will be replaced by CRLF the next time Git touches it
+[1mdiff --git a/data/SNAPSHOT.json b/data/SNAPSHOT.json[m
+[1mindex d8c3e37..53d2f0a 100644[m
+[1m--- a/data/SNAPSHOT.json[m
+[1m+++ b/data/SNAPSHOT.json[m
+[36m@@ -1,5 +1,5 @@[m
+ {[m
+[31m-  "retrieved": "2026-08-27",[m
+[32m+[m[32m  "retrieved": "2026-08-28",[m
+   "note": "Samian Research is a live database. This snapshot is what the published figures rest on; cite it as the data state rather than asserting a fixed number of findspots.",[m
+   "sources": {[m
+     "datedsites": {[m
+[36m@@ -16,7 +16,7 @@[m
+       "sha256": "e462ca930bf0ec86c78c18cc49e7219a614f98f0934743b726fb1e270132da8c"[m
+     }[m
+   },[m
+[31m-  "origin": "archive",[m
+[32m+[m[32m  "origin": "live",[m
+   "crosscheck": "agrees on 41 findspots",[m
+   "findspots": 41,[m
+   "model": {[m
+[1mdiff --git a/data/derived/verification.json b/data/derived/verification.json[m
+[1mindex ff61c18..9ecbc72 100644[m
+[1m--- a/data/derived/verification.json[m
+[1m+++ b/data/derived/verification.json[m
+[36m@@ -136,7 +136,7 @@[m
+       "n": 82[m
+     }[m
+   },[m
+[31m-  "source": "C:\\git\\IPSDatedSites\\data\\ips_dated_sites_2026-08-27.csv",[m
+[32m+[m[32m  "source": "C:\\git\\IPSDatedSites\\data\\ips_dated_sites_2026-08-28.csv",[m
+   "summary": {[m
+     "checks": 14,[m
+     "failed": 0,[m
+[1mdiff --git a/data/ips_dated_sites_2026-08-27.csv b/data/ips_dated_sites_2026-08-27.csv[m
+[1mdeleted file mode 100644[m
+[1mindex 7e2cdc2..0000000[m
+[1m--- a/data/ips_dated_sites_2026-08-27.csv[m
+[1m+++ /dev/null[m
+[36m@@ -1,42 +0,0 @@[m
+[31m-the_id,the_site,the_findspot,latinsitename,long,lat,pleiades,count_stamps,avg_datemin,avg_datemax,min_datemin,max_datemin,min_datemax,max_datemax,q_start,q_end,q_interval,n_dies,die_repetition,q_repetition,avg_interval,unc_start_years,unc_end_years,unc_interval_years,unc_start_years_exact,unc_end_years_exact,midpoint_year,n_stamps_die,k_eff,k_no_dierecord,sigma_eff,p_k_min,p_k_max,p_tau,p_w,p_t0,eff_start,eff_end,n_stamps_wide,n_potters_wide,max_potter_span[m
+[31m-1003978,Amiens,Sq. Bocquet pit 1973,Samarobriva Ambianorum,2.299999,49.900001,109321,41,-20,3,-40,-5,-20,40,0.703,0.482,0.497,34,1.206,0.171,-20 to 3,7,15,16,7.0538,14.581562,-8.902,41,0.5011,False,12.215,0.5,1.5,6.0,1.0,20.0,-15.0,-2.8,0,0,55[m
+[31m-1003909,Dangstetten,Military camp,,8.31,47.59,970740488,92,-18,3,-30,-10,-15,50,0.833,0.583,0.579,65,1.415,0.293,-18 to 3,4,11,11,3.665333,10.807545,-7.228,92,0.5,False,8.898,0.5,1.5,6.0,1.0,20.0,-11.7,-2.8,0,0,65[m
+[31m-1002611,Oberaden,Military camp,,7.52,51.62,109229,49,-16,4,-30,-10,-10,40,0.814,0.617,0.597,43,1.14,0.123,-16 to 4,4,10,10,4.116191,9.647265,-5.969,49,0.5003,False,8.625,0.5,1.5,6.0,1.0,20.0,-10.3,-1.7,0,0,55[m
+[31m-1002124,Vindonissa,Keltengraben,,8.233333,47.46667,177661,5,-16,18,-20,-10,10,30,0.811,0.578,0.708,5,1.0,0.0,-16 to 18,4,11,12,4.1833,10.954451,1.0,5,0.9346,False,11.981,0.5,1.5,6.0,1.0,20.0,-10.2,12.2,0,0,45[m
+[31m-1001244,Basel,"Münster, Sch. 3 o",,7.599999,47.566669,177468,5,-14,3,-15,-10,-5,30,0.894,0.467,0.404,5,1.0,0.0,-14 to 3,2,15,15,2.236068,15.247951,-5.5,5,0.9346,False,9.895,0.5,1.5,6.0,1.0,20.0,-14.7,3.7,0,0,45[m
+[31m-1003761,Mainz,Emmeranstraße,Mogontiacum,8.2791,50.0,109169,29,-13,12,-30,-5,-15,50,0.756,0.48,0.538,27,1.074,0.069,-13 to 12,6,15,16,5.592923,14.67631,-0.259,29,0.508,False,12.021,0.5,1.5,6.0,1.0,20.0,-6.4,5.8,0,0,55[m
+[31m-1002124,Vindonissa,Depotfund,,8.233333,47.46667,177661,10,-6,43,-10,-5,10,60,0.924,0.331,0.633,8,1.25,0.2,-6 to 43,2,22,22,1.581139,22.135944,18.75,10,0.6889,False,19.039,0.5,1.5,6.0,1.0,20.0,5.6,31.9,0,0,65[m
+[31m-1003421,Velsen,Velsen I,Flevum,4.633333,52.46667,99058,51,2,42,-20,40,0,70,0.426,0.355,0.506,45,1.133,0.117,2 to 42,17,21,27,17.069064,20.732186,22.059,51,0.5002,False,20.793,0.5,1.5,6.0,1.0,20.0,11.7,32.5,0,0,75[m
+[31m-1001320,La Graufesenque,Fosse Cirratus,Condatomagus,3.083333,44.099998,246410,75,21,49,10,35,40,65,0.764,0.743,0.753,47,1.596,0.373,21 to 49,5,6,8,5.390181,5.946458,35.167,75,0.5,False,9.588,0.5,1.5,6.0,1.0,20.0,30.4,40.0,0,0,40[m
+[31m-1003782,Bregenz,Samian Hoard 1913,Brigantium,9.7471,47.50311,187325,49,25,52,10,40,35,70,0.735,0.696,0.699,27,1.815,0.449,25 to 52,6,7,10,6.165242,7.256536,38.418,49,0.5003,False,9.947,0.5,1.5,6.0,1.0,20.0,33.4,43.4,0,0,40[m
+[31m-1003782,Bregenz,Böckleareal (period I),Brigantium,9.7471,47.50311,187325,15,29,58,10,45,35,80,0.59,0.479,0.535,15,1.0,0.0,29 to 58,11,15,18,10.555973,14.735768,43.5,15,0.5821,False,14.836,0.5,1.5,6.0,1.0,20.0,34.9,52.1,0,0,50[m
+[31m-1001320,La Graufesenque,Fosse Malaval,Condatomagus,3.083333,44.099998,246410,161,34,63,10,55,45,75,0.585,0.71,0.641,72,2.236,0.553,34 to 63,11,7,13,10.711128,6.855173,48.665,161,0.5,False,11.926,0.5,1.5,6.0,1.0,20.0,42.7,54.6,0,0,40[m
+[31m-1000593,Cap Drammont,wreck 6,,6.849999,43.416667,,2,40,75,30,50,70,80,0.493,0.702,0.637,2,1.0,0.0,40 to 75,14,7,16,14.142136,7.071068,57.5,2,1.2165,False,11.547,0.5,1.5,6.0,1.0,20.0,43.5,71.5,0,0,50[m
+[31m-1004149,Narbonne,les ports (La Nautique),Colonia Narbo Martius,3.0,43.18333,246347,82,40,70,20,55,50,85,0.673,0.658,0.679,55,1.491,0.329,40 to 70,8,8,12,7.931125,8.359264,54.665,82,0.5,False,11.236,0.5,1.5,6.0,1.0,20.0,49.0,60.3,0,0,50[m
+[31m-1001764,Cirencester,fort ditch,Korinion/Cironium,-1.983332,51.733329,79549,22,41,68,25,55,50,90,0.665,0.666,0.651,20,1.1,0.091,41 to 68,8,8,12,8.155019,8.115108,54.545,22,0.5256,False,10.607,0.5,1.5,6.0,1.0,20.0,49.0,60.1,0,0,45[m
+[31m-1003782,Bregenz,Böckleareal (destruction layer period II),Brigantium,9.7471,47.50311,187325,11,43,68,20,60,45,85,0.57,0.569,0.523,11,1.0,0.0,43 to 68,11,11,16,11.241158,11.261358,55.455,11,0.6599,False,13.183,0.5,1.5,6.0,1.0,20.0,46.8,64.2,0,0,30[m
+[31m-1000080,Colchester,Pottery Shop I,,0.899999,51.883338,79393,24,44,74,25,60,50,90,0.656,0.608,0.647,19,1.263,0.208,44 to 74,8,10,13,8.42701,9.963702,59.167,24,0.5183,False,11.777,0.5,1.5,6.0,1.0,20.0,53.1,65.3,0,0,45[m
+[31m-1003782,Bregenz,Böckleareal (period II),Brigantium,9.7471,47.50311,187325,7,45,70,25,65,50,90,0.542,0.542,0.5,7,1.0,0.0,45 to 70,12,12,17,12.247449,12.247449,57.5,7,0.8114,False,14.216,0.5,1.5,6.0,1.0,20.0,46.0,69.0,0,0,25[m
+[31m-1000080,Colchester,Pottery Shop II,,0.899999,51.883338,79393,28,47,76,35,60,60,90,0.653,0.652,0.664,25,1.12,0.107,47 to 76,9,9,12,8.521681,8.566191,61.518,28,0.5094,False,11.464,0.5,1.5,6.0,1.0,20.0,55.7,67.4,0,0,40[m
+[31m-1000442,Berlingen,tumulus,,5.3,50.816665,,8,51,78,30,65,65,90,0.544,0.587,0.548,8,1.0,0.0,51 to 78,12,11,16,12.174329,10.669549,64.688,8,0.7636,False,13.693,0.5,1.5,6.0,1.0,20.0,54.2,75.1,0,0,35[m
+[31m-1004241,Cap de Creus,Cala Culip IV,,3.316666,42.316665,,170,52,87,30,80,65,110,0.577,0.759,0.703,52,3.269,0.694,52 to 87,11,6,12,10.988238,5.5048,69.147,170,0.5,False,12.922,0.5,1.5,6.0,1.0,20.0,62.7,75.6,0,0,40[m
+[31m-1001015,Reims,rue de l'Equerre,Durocortorum,4.033333,49.25,108945,16,56,84,40,70,70,100,0.592,0.646,0.622,16,1.0,0.0,56 to 84,10,9,14,10.468206,8.732125,70.0,16,0.5695,False,12.412,0.5,1.5,6.0,1.0,20.0,62.9,77.1,0,0,45[m
+[31m-1002381,Burghöfe,Geschirrdepot,Summuntorium,10.84333,48.659999,118986,7,57,84,40,65,70,95,0.596,0.61,0.582,6,1.167,0.143,57 to 84,10,10,14,10.350983,9.880235,70.357,7,0.8114,False,12.63,0.5,1.5,6.0,1.0,20.0,60.1,80.6,0,0,30[m
+[31m-1003977,Pompeii,Hoard,,14.483329,40.75,433032,19,62,87,60,70,80,100,0.843,0.775,0.786,13,1.462,0.316,62 to 87,3,5,6,3.419928,5.101313,74.605,19,0.5421,False,8.473,0.5,1.5,6.0,1.0,20.0,70.0,79.2,0,0,30[m
+[31m-1003524,Inchtuthil,Gutter,,-3.422952,56.541347,89206,3,63,97,60,65,90,110,0.866,0.561,0.7,3,1.0,0.0,63 to 97,3,12,12,2.886751,11.547005,80.0,3,1.1065,False,11.932,0.5,1.5,6.0,1.0,20.0,66.8,93.2,0,0,45[m
+[31m-1003531,Nijmegen,Barbarossastraat,Ulpia Noviomagus,5.866666,51.833328,98921,7,65,85,65,65,85,85,1.0,1.0,1.0,2,3.5,0.714,65 to 85,0,0,0,0.0,0.0,75.0,7,0.8114,False,5.774,0.5,1.5,6.0,1.0,20.0,70.3,79.7,0,0,20[m
+[31m-1001033,Köln,Hafen,Colonia Claudia Ara Agrippinensium,6.95427,50.93835,108751,26,69,90,65,70,90,100,0.893,0.907,0.871,4,6.5,0.846,69 to 90,2,2,3,2.261722,1.961161,79.519,26,0.5131,False,6.519,0.5,1.5,6.0,1.0,20.0,76.2,82.9,0,0,30[m
+[31m-1004709,Pecio del Guadiaro,Shipwreck,,-5.07193,36.36909,,40,71,100,15,90,50,120,0.482,0.475,0.481,23,1.739,0.425,71 to 100,15,15,21,14.597155,14.884168,85.25,40,0.5013,False,16.836,0.5,1.5,6.0,1.0,20.0,76.8,93.7,0,0,35[m
+[31m-1003470,Chesterholm-Vindolanda,Per.1 Ditch,,-2.359504,54.991588,89313,9,73,102,65,80,90,110,0.718,0.717,0.722,8,1.125,0.111,73 to 102,7,7,9,6.614378,6.666667,87.778,9,0.7231,False,10.089,0.5,1.5,6.0,1.0,20.0,80.5,95.1,0,0,45[m
+[31m-1000136,London,Second Fire,Londinium,-0.09184,51.51279,79574,23,102,129,100,110,120,145,0.835,0.686,0.734,11,2.091,0.522,102 to 129,4,8,8,3.611576,7.531226,115.435,23,0.5216,False,9.594,0.5,1.5,6.0,1.0,20.0,110.4,120.4,0,0,35[m
+[31m-1000737,Saalburg,Erdkastell,,8.566659,50.271522,109297,9,108,145,90,130,135,165,0.413,0.556,0.565,7,1.286,0.222,108 to 145,18,12,21,17.6973,11.726039,126.389,9,0.7231,False,18.157,0.5,1.5,6.0,1.0,20.0,113.3,139.5,0,0,45[m
+[31m-1002513,Castleford,Pottery Shop,,-1.35,53.71667,79553,86,130,158,100,145,135,180,0.693,0.655,0.672,65,1.323,0.244,130 to 158,7,8,11,7.330623,8.452814,143.808,86,0.5,False,11.163,0.5,1.5,6.0,1.0,20.0,138.2,149.4,0,0,45[m
+[31m-1002387,Helsoven,tumulus,,5.266667,50.816667,,5,130,160,110,145,145,175,0.529,0.572,0.568,5,1.0,0.0,130 to 160,13,11,17,12.747549,11.18034,145.0,5,0.9346,False,14.713,0.5,1.5,6.0,1.0,20.0,131.2,158.8,0,0,35[m
+[31m-1003870,Verulamium,Second Fire,,-0.333333,51.75,79739,6,131,161,110,145,145,175,0.56,0.616,0.604,6,1.0,0.0,131 to 161,12,10,15,11.583034,9.703951,145.833,6,0.8679,False,13.688,0.5,1.5,6.0,1.0,20.0,134.0,157.7,0,0,35[m
+[31m-1003896,Alcester,Pit,,-1.866667,52.21667,79288,10,139,177,135,145,170,180,0.814,0.81,0.858,6,1.667,0.4,139 to 177,4,4,6,4.116363,4.21637,157.75,10,0.6889,False,11.493,0.5,1.5,6.0,1.0,20.0,149.8,165.7,0,0,45[m
+[31m-1000535,Rougham,tumulus,,0.69727,52.755577,79661,4,143,175,130,150,165,180,0.649,0.702,0.709,4,1.0,0.0,143 to 175,9,7,11,8.660254,7.071068,158.75,4,1.0134,False,12.205,0.5,1.5,6.0,1.0,20.0,146.4,171.1,0,0,35[m
+[31m-1003365,Budapest,"Aquincum, Hoard",,19.04045,47.49835,197130,4,144,173,130,155,160,180,0.597,0.649,0.626,4,1.0,0.0,144 to 173,10,9,13,10.307764,8.660254,158.125,4,1.0134,False,12.583,0.5,1.5,6.0,1.0,20.0,145.4,170.9,0,0,30[m
+[31m-1001099,Eschenz,shop,,8.866666,47.650001,187573,31,153,191,135,160,160,220,0.606,0.348,0.539,16,1.938,0.484,153 to 191,10,21,23,10.032206,21.133218,172.339,31,0.5057,False,18.487,0.5,1.5,6.0,1.0,20.0,163.0,181.7,0,0,65[m
+[31m-1000853,Wroxeter,gutter,,-2.65,52.666671,79741,16,156,188,130,170,150,210,0.582,0.485,0.57,14,1.143,0.125,156 to 188,11,14,18,10.834936,14.476993,172.031,16,0.5695,False,15.458,0.5,1.5,6.0,1.0,20.0,163.2,180.8,0,0,50[m
+[31m-1000136,London,New Fresh Wharf: quay,Londinium,-0.09184,51.51279,79574,170,163,202,60,240,90,275,0.291,0.235,0.368,131,1.298,0.23,163 to 202,25,29,38,24.713887,28.946222,182.471,170,0.5,False,28.696,0.5,1.5,6.0,1.0,20.0,168.1,196.8,0,0,80[m
+[31m-1003076,Langenhain,store,,8.644794,50.365103,109100,13,195,242,170,220,240,250,0.396,0.848,0.669,5,2.6,0.615,195 to 242,19,3,19,18.536174,3.301126,218.846,13,0.6146,False,17.582,0.5,1.5,6.0,1.0,20.0,208.0,229.7,0,0,70[m
+[1mdiff --git a/docs/bundle.ttl b/docs/bundle.ttl[m
+[1mindex 9a3494e..8534e0d 100644[m
+[1m--- a/docs/bundle.ttl[m
+[1m+++ b/docs/bundle.ttl[m
+[36m@@ -935,7 +935,7 @@[m [msamian:act_dating_1000080_4e9d57 a lado:DatingActivity,[m
+     rdfs:label "Dating of Colchester — Pottery Shop II"@en ;[m
+     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;[m
+     crm:P33_used_specific_technique samian:DatingModel_v1 ;[m
+[31m-    prov:endedAtTime "2026-08-28T07:10:02+00:00"^^xsd:dateTime ;[m
+[32m+[m[32m    prov:endedAtTime "2026-08-28T07:12:30+00:00"^^xsd:dateTime ;[m
+     prov:used samian:DatingModel_v1,[m
+         samian:dataset_sites_dating_v1_2026-08-28 ;[m
+     prov:wasAssociatedWith samian:IPSDatedSitesExporter .[m
+[36m@@ -950,7 +950,7 @@[m [msamian:act_dating_1000080_e4a7d3 a lado:DatingActivity,[m
+     rdfs:label "Dating of Colchester — Pottery Shop I"@en ;[m
+     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;[m
+     crm:P33_used_specific_technique samian:DatingModel_v1 ;[m
+[31m-    prov:endedAtTime "2026-08-28T07:10:02+00:00"^^xsd:dateTime ;[m
+[32m+[m[32m    prov:endedAtTime "2026-08-28T07:12:30+00:00"^^xsd:dateTime ;[m
+     prov:used samian:DatingModel_v1,[m
+         samian:dataset_sites_dating_v1_2026-08-28 ;[m
+     prov:wasAssociatedWith samian:IPSDatedSitesExporter .[m
+[36m@@ -965,7 +965,7 @@[m [msamian:act_dating_1000136_32f514 a lado:DatingActivity,[m
+     rdfs:label "Dating of London — Second Fire"@en ;[m
+     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;[m
+     crm:P33_used_specific_technique samian:DatingModel_v1 ;[m
+[31m-    prov:endedAtTime "2026-08-28T07:10:02+00:00"^^xsd:dateTime ;[m
+[32m+[m[32m    prov:endedAtTime "2026-08-28T07:12:30+00:00"^^xsd:dateTime ;[m
+     prov:used samian:DatingModel_v1,[m
+         samian:dataset_sites_dating_v1_2026-08-28 ;[m
+     prov:wasAssociatedWith samian:IPSDatedSitesExporter .[m
+[36m@@ -980,7 +980,7 @@[m [msamian:act_dating_1000136_83ac45 a lado:DatingActivity,[m
+     rdfs:label "Dating of London — New Fresh Wharf: quay"@en ;[m
+     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;[m
+     crm:P33_used_specific_technique samian:DatingModel_v1 ;[m
+[31m-    prov:endedAtTime "2026-08-28T07:10:02+00:00"^^xsd:dateTime ;[m
+[32m+[m[32m    prov:endedAtTime "2026-08-28T07:12:30+00:00"^^xsd:dateTime ;[m
+     prov:used samian:DatingModel_v1,[m
+         samian:dataset_sites_dating_v1_2026-08-28 ;[m
+     prov:wasAssociatedWith samian:IPSDatedSitesExporter .[m
+[36m@@ -995,7 +995,7 @@[m [msamian:act_dating_1000442_d9517d a lado:DatingActivity,[m
+     rdfs:label "Dating of Berlingen — tumulus"@en ;[m
+     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;[m
+     crm:P33_used_specific_technique samian:DatingModel_v1 ;[m
+[31m-    prov:endedAtTime "2026-08-28T07:10:02+00:00"^^xsd:dateTime ;[m
+[32m+[m[32m    prov:endedAtTime "2026-08-28T07:12:30+00:00"^^xsd:dateTime ;[m
+     prov:used samian:DatingModel_v1,[m
+         samian:dataset_sites_dating_v1_2026-08-28 ;[m
+     prov:wasAssociatedWith samian:IPSDatedSitesExporter .[m
+[36m@@ -1010,7 +1010,7 @@[m [msamian:act_dating_1000535_d9517d a lado:DatingActivity,[m
+     rdfs:label "Dating of Rougham — tumulus"@en ;[m
+     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;[m
+     crm:P33_used_specific_technique samian:DatingModel_v1 ;[m
+[31m-    prov:endedAtTime "2026-08-28T07:10:02+00:00"^^xsd:dateTime ;[m
+[32m+[m[32m    prov:endedAtTime "2026-08-28T07:12:30+00:00"^^xsd:dateTime ;[m
+     prov:used samian:DatingModel_v1,[m
+         samian:dataset_sites_dating_v1_2026-08-28 ;[m
+     prov:wasAssociatedWith samian:IPSDatedSitesExporter .[m
+[36m@@ -1025,7 +1025,7 @@[m [msamian:act_dating_1000593_5ced78 a lado:DatingActivity,[m
+     rdfs:label "Dating of Cap Drammont — wreck 6"@en ;[m
+     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;[m
+     crm:P33_used_specific_technique samian:DatingModel_v1 ;[m
+[31m-    prov:endedAtTime "2026-08-28T07:10:02+00:00"^^xsd:dateTime ;[m
+[32m+[m[32m    prov:endedAtTime "2026-08-28T07:12:30+00:00"^^xsd:dateTime ;[m
+     prov:used samian:DatingModel_v1,[m
+         samian:dataset_sites_dating_v1_2026-08-28 ;[m
+     prov:wasAssociatedWith samian:IPSDatedSitesExporter .[m
+[36m@@ -1040,7 +1040,7 @@[m [msamian:act_dating_1000737_a532a0 a lado:DatingActivity,[m
+     rdfs:label "Dating of Saalburg — Erdkastell"@en ;[m
+     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;[m
+     crm:P33_used_specific_technique samian:DatingModel_v1 ;[m
+[31m-    prov:endedAtTime "2026-08-28T07:10:02+00:00"^^xsd:dateTime ;[m
+[32m+[m[32m    prov:endedAtTime "2026-08-28T07:12:30+00:00"^^xsd:dateTime ;[m
+     prov:used samian:DatingModel_v1,[m
+         samian:dataset_sites_dating_v1_2026-08-28 ;[m
+     prov:wasAssociatedWith samian:IPSDatedSitesExporter .[m
+[36m@@ -1055,7 +1055,7 @@[m [msamian:act_dating_1000853_e9031f a lado:DatingActivity,[m
+     rdfs:label "Dating of Wroxeter — gutter"@en ;[m
+     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;[m
+     crm:P33_used_specific_technique samian:DatingModel_v1 ;[m
+[31m-    prov:endedAtTime "2026-08-28T07:10:02+00:00"^^xsd:dateTime ;[m
+[32m+[m[32m    prov:endedAtTime "2026-08-28T07:12:30+00:00"^^xsd:dateTime ;[m
+     prov:used samian:DatingModel_v1,[m
+         samian:dataset_sites_dating_v1_2026-08-28 ;[m
+     prov:wasAssociatedWith samian:IPSDatedSitesExporter .[m
+[36m@@ -1070,7 +1070,7 @@[m [msamian:act_dating_1001015_ed9581 a lado:DatingActivity,[m
+     rdfs:label "Dating of Reims — rue de l'Equerre"@en ;[m
+     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;[m
+     crm:P33_used_specific_technique samian:DatingModel_v1 ;[m
+[31m-    prov:endedAtTime "2026-08-28T07:10:02+00:00"^^xsd:dateTime ;[m
+[32m+[m[32m    prov:endedAtTime "2026-08-28T07:12:30+00:00"^^xsd:dateTime ;[m
+     prov:used samian:DatingModel_v1,[m
+         samian:dataset_sites_dating_v1_2026-08-28 ;[m
+     prov:wasAssociatedWith samian:IPSDatedSitesExporter .[m
+[36m@@ -1085,7 +1085,7 @@[m [msamian:act_dating_1001033_079251 a lado:DatingActivity,[m
+     rdfs:label "Dating of Köln — Hafen"@en ;[m
+     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;[m
+     crm:P33_used_specific_technique samian:DatingModel_v1 ;[m
+[31m-    prov:endedAtTime "2026-08-28T07:10:02+00:00"^^xsd:dateTime ;[m
+[32m+[m[32m    prov:endedAtTime "2026-08-28T07:12:30+00:00"^^xsd:dateTime ;[m
+     prov:used samian:DatingModel_v1,[m
+         samian:dataset_sites_dating_v1_2026-08-28 ;[m
+     prov:wasAssociatedWith samian:IPSDatedSitesExporter .[m
+[36m@@ -1100,7 +1100,7 @@[m [msamian:act_dating_1001099_8d9001 a lado:DatingActivity,[m
+     rdfs:label "Dating of Eschenz — shop"@en ;[m
+     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;[m
+     crm:P33_used_specific_technique samian:DatingModel_v1 ;[m
+[31m-    prov:endedAtTime "2026-08-28T07:10:02+00:00"^^xsd:dateTime ;[m
+[32m+[m[32m    prov:endedAtTime "2026-08-28T07:12:30+00:00"^^xsd:dateTime ;[m
+     prov:used samian:DatingModel_v1,[m
+         samian:dataset_sites_dating_v1_2026-08-28 ;[m
+     prov:wasAssociatedWith samian:IPSDatedSitesExporter .[m
+[36m@@ -1115,7 +1115,7 @@[m [msamian:act_dating_1001244_54bf01 a lado:DatingActivity,[m
+     rdfs:label "Dating of Basel — Münster, Sch. 3 o"@en ;[m
+     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;[m
+     crm:P33_used_specific_technique samian:DatingModel_v1 ;[m
+[31m-    prov:endedAtTime "2026-08-28T07:10:02+00:00"^^xsd:dateTime ;[m
+[32m+[m[32m    prov:endedAtTime "2026-08-28T07:12:30+00:00"^^xsd:dateTime ;[m
+     prov:used samian:DatingModel_v1,[m
+         samian:dataset_sites_dating_v1_2026-08-28 ;[m
+     prov:wasAssociatedWith samian:IPSDatedSitesExporter .[m
+[36m@@ -1130,7 +1130,7 @@[m [msamian:act_dating_1001320_520e5d a lado:DatingActivity,[m
+     rdfs:label "Dating of La Graufesenque — Fosse Cirratus"@en ;[m
+     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;[m
+     crm:P33_used_specific_technique samian:DatingModel_v1 ;[m
+[31m-    prov:endedAtTime "2026-08-28T07:10:02+00:00"^^xsd:dateTime ;[m
+[32m+[m[32m    prov:endedAtTime "2026-08-28T07:12:30+00:00"^^xsd:dateTime ;[m
+     prov:used samian:DatingModel_v1,[m
+         samian:dataset_sites_dating_v1_2026-08-28 ;[m
+     prov:wasAssociatedWith samian:IPSDatedSitesExporter .[m
+[36m@@ -1145,7 +1145,7 @@[m [msamian:act_dating_1001320_f64b28 a lado:DatingActivity,[m
+     rdfs:label "Dating of La Graufesenque — Fosse Malaval"@en ;[m
+     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;[m
+     crm:P33_used_specific_technique samian:DatingModel_v1 ;[m
+[31m-    prov:endedAtTime "2026-08-28T07:10:02+00:00"^^xsd:dateTime ;[m
+[32m+[m[32m    prov:endedAtTime "2026-08-28T07:12:30+00:00"^^xsd:dateTime ;[m
+     prov:used samian:DatingModel_v1,[m
+         samian:dataset_sites_dating_v1_2026-08-28 ;[m
+     prov:wasAssociatedWith samian:IPSDatedSitesExporter .[m
+[36m@@ -1160,7 +1160,7 @@[m [msamian:act_dating_1001764_d7e65e a lado:DatingActivity,[m
+     rdfs:label "Dating of Cirencester — fort ditch"@en ;[m
+     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;[m
+     crm:P33_used_specific_technique samian:DatingModel_v1 ;[m
+[31m-    prov:endedAtTime "2026-08-28T07:10:02+00:00"^^xsd:dateTime ;[m
+[32m+[m[32m    prov:endedAtTime "2026-08-28T07:12:30+00:00"^^xsd:dateTime ;[m
+     prov:used samian:DatingModel_v1,[m
+         samian:dataset_sites_dating_v1_2026-08-28 ;[m
+     prov:wasAssociatedWith samian:IPSDatedSitesExporter .[m
+[36m@@ -1175,7 +1175,7 @@[m [msamian:act_dating_1002124_2c219b a lado:DatingActivity,[m
+     rdfs:label "Dating of Vindonissa — Keltengraben"@en ;[m
+     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;[m
+     crm:P33_used_specific_technique samian:DatingModel_v1 ;[m
+[31m-    prov:endedAtTime "2026-08-28T07:10:02+00:00"^^xsd:dateTime ;[m
+[32m+[m[32m    prov:endedAtTime "2026-08-28T07:12:30+00:00"^^xsd:dateTime ;[m
+     prov:used samian:DatingModel_v1,[m
+         samian:dataset_sites_dating_v1_2026-08-28 ;[m
+     prov:wasAssociatedWith samian:IPSDatedSitesExporter .[m
+[36m@@ -1190,7 +1190,7 @@[m [msamian:act_dating_1002124_bd7039 a lado:DatingActivity,[m
+     rdfs:label "Dating of Vindonissa — Depotfund"@en ;[m
+     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;[m
+     crm:P33_used_specific_technique samian:DatingModel_v1 ;[m
+[31m-    prov:endedAtTime "2026-08-28T07:10:02+00:00"^^xsd:dateTime ;[m
+[32m+[m[32m    prov:endedAtTime "2026-08-28T07:12:30+00:00"^^xsd:dateTime ;[m
+     prov:used samian:DatingModel_v1,[m
+         samian:dataset_sites_dating_v1_2026-08-28 ;[m
+     prov:wasAssociatedWith samian:IPSDatedSitesExporter .[m
+[36m@@ -1205,7 +1205,7 @@[m [msamian:act_dating_1002381_297861 a lado:DatingActivity,[m
+     rdfs:label "Dating of Burghöfe — Geschirrdepot"@en ;[m
+     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;[m
+     crm:P33_used_specific_technique samian:DatingModel_v1 ;[m
+[31m-    prov:endedAtTime "2026-08-28T07:10:02+00:00"^^xsd:dateTime ;[m
+[32m+[m[32m    prov:endedAtTime "2026-08-28T07:12:30+00:00"^^xsd:dateTime ;[m
+     prov:used samian:DatingModel_v1,[m
+         samian:dataset_sites_dating_v1_2026-08-28 ;[m
+     prov:wasAssociatedWith samian:IPSDatedSitesExporter .[m
+[36m@@ -1220,7 +1220,7 @@[m [msamian:act_dating_1002387_d9517d a lado:DatingActivity,[m
+     rdfs:label "Dating of Helsoven — tumulus"@en ;[m
+     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;[m
+     crm:P33_used_specific_technique samian:DatingModel_v1 ;[m
+[31m-    prov:endedAtTime "2026-08-28T07:10:02+00:00"^^xsd:dateTime ;[m
+[32m+[m[32m    prov:endedAtTime "2026-08-28T07:12:30+00:00"^^xsd:dateTime ;[m
+     prov:used samian:DatingModel_v1,[m
+         samian:dataset_sites_dating_v1_2026-08-28 ;[m
+     prov:wasAssociatedWith samian:IPSDatedSitesExporter .[m
+[36m@@ -1235,7 +1235,7 @@[m [msamian:act_dating_1002513_2a2274 a lado:DatingActivity,[m
+     rdfs:label "Dating of Castleford — Pottery Shop"@en ;[m
+     crm:P14_carried_out_by samian:IPSDatedSitesExporter ;[m
+     crm:P33_used_specific_technique samian:DatingModel_v1 ;[m
+[31m-    prov:endedAtTime "2026-08-28T07:10:02+00:00"^^xsd:dateTime ;[m
+[32m+[m[32m    prov:endedAtTime "2026-08-28T07:12:30+00:00"^^xsd:dateTime ;[m
+     prov:used samian:DatingModel_v1,[m
+         samian:dataset_sites_dating_v1_2026-08-28 ;[m
+     prov:wasAssociatedWith samian:IPSDatedSitesExporter .[
