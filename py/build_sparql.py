@@ -84,6 +84,20 @@ VIEW_LABELS = {
     "table": "table",
     "map": "table and map",
     "intervals": "table and interval bars",
+    "scatter": "table and scatter plot",
+    "barchart": "table and bar chart",
+}
+
+# The columns each view reads, and what it falls back on. Declared here
+# rather than in the template so that a query asking for a view it cannot
+# feed fails at build time with the query's name attached, instead of
+# leaving a blank panel in a browser.
+VIEW_COLUMNS = {
+    "table": {},
+    "map": {},
+    "intervals": {"from": "from", "to": "to", "label": "findspot"},
+    "scatter": {"x": "x", "y": "y", "label": "findspot"},
+    "barchart": {"category": "category", "value": "value"},
 }
 
 # Leaflet, pinned exactly as in py/build_map.py. Imported from there rather
@@ -172,15 +186,21 @@ def write_rq_files(cfg: dict, docs: Path) -> Path:
     return out_dir
 
 
-def query_view(q: dict) -> tuple[str, str, str, str]:
-    """(view, from-column, to-column, label-column) for one query."""
+def query_view(q: dict) -> tuple[str, dict]:
+    """(view, {role: column}) for one query, defaults filled in."""
     view = q.get("view") or "table"
     if view not in VIEW_LABELS:
         sys.exit(f"  !!  query '{q['id']}' asks for an unknown view "
                  f"'{view}'. Known: {', '.join(sorted(VIEW_LABELS))}.")
-    cols = q.get("view_columns") or {}
-    return (view, cols.get("from", "from"), cols.get("to", "to"),
-            cols.get("label", "findspot"))
+    cols = dict(VIEW_COLUMNS[view])
+    given = q.get("view_columns") or {}
+    unknown = set(given) - set(cols)
+    if unknown and cols:
+        sys.exit(f"  !!  query '{q['id']}' names view column(s) "
+                 f"{sorted(unknown)} that the '{view}' view does not use. "
+                 f"It reads {sorted(cols)}.")
+    cols.update(given)
+    return view, cols
 
 
 def blurb(text: str, limit: int = 220) -> str:
@@ -260,10 +280,10 @@ def build(docs: Path = ROOT / "docs", strict: bool = True) -> list[Path]:
     page_tpl = env.get_template("query_page.html.j2")
     catalogue = []
     for q in queries:
-        view, vfrom, vto, vlabel = query_view(q)
+        view, view_cols = query_view(q)
         page_html = page_tpl.render(
-            query=q, view=view, view_from=vfrom, view_to=vto,
-            view_label=vlabel, graph=graph_cfg,
+            query=q, view=view, view_cols=view_cols,
+            view_cols_json=json.dumps(view_cols), graph=graph_cfg,
             pyodide_version=PYODIDE_VERSION, rdflib_version=RDFLIB_VERSION,
             leaflet_version=build_map.LEAFLET_VERSION,
             leaflet_sri_js=build_map.LEAFLET_SRI_JS,

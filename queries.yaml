@@ -205,6 +205,8 @@ queries:
       ORDER BY ?numeric
 
   - id: two-quality-axes
+    view: scatter
+    view_columns: {x: "qInterval", y: "qRepetition", label: "findspot"}
     title: "Sharply dated, but not a depot"
     intro: >-
       Findspots that are tightly dated (qInterval above 0.55) while showing
@@ -327,6 +329,8 @@ queries:
       ORDER BY ?from
 
   - id: terminus-positions
+    view: barchart
+    view_columns: {category: "event", value: "inside"}
     title: "Every dating against every fixed point"
     intro: >-
       The whole 41 by 5 grid, counted. Each dating ends before an
@@ -358,6 +362,8 @@ queries:
       ORDER BY ?year
 
   - id: allen-strength
+    view: barchart
+    view_columns: {category: "reading", value: "pairs"}
     title: "How much of the order survives a closer look"
     intro: >-
       The one number the two queries below do not show between them. Every
@@ -385,6 +391,8 @@ queries:
       ORDER BY DESC(?assertions)
 
   - id: allen-possible
+    view: barchart
+    view_columns: {category: "relation", value: "assertions"}
     title: "What came before what — the complete matrix"
     intro: >-
       Every pair of datings stands in exactly one of Allen's thirteen
@@ -407,6 +415,8 @@ queries:
       ORDER BY DESC(?assertions)
 
   - id: allen-time-only
+    view: barchart
+    view_columns: {category: "relation", value: "assertions"}
     title: "The same question in OWL-Time alone"
     intro: >-
       No <code>lado:</code> predicate appears below — only OWL-Time's own

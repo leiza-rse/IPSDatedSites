@@ -97,10 +97,8 @@ const QUERY    = "SELECT ?event ?terminus ?site ?findspot ?from ?to ?margin ?wit
 const GRAPH    = {"file": "rdf/IPSDatedSites-bundle.ttl", "url": "bundle.ttl", "publish": true, "page_url": "../bundle.ttl", "megabytes": "0.3"};
 const MAX_ROWS = 500;
 const RDFLIB   = "7.1.1";
-const VIEW     = "intervals";
-const VIEW_FROM = "from";
-const VIEW_TO   = "to";
-const VIEW_LABEL = "findspot";
+const VIEW      = "intervals";
+const VIEW_COLS = {"from": "from", "to": "to", "label": "findspot"};
 </script>
 {% raw %}
 <script>
@@ -206,14 +204,14 @@ function year(v) {
 }
 
 function renderBars(cols, rows) {
-  if (!cols.includes(VIEW_FROM) || !cols.includes(VIEW_TO)) {
-    viewMissing(`This view needs ?${VIEW_FROM} and ?${VIEW_TO}; the current query does not select both.`);
+  if (!cols.includes(VIEW_COLS.from) || !cols.includes(VIEW_COLS.to)) {
+    viewMissing(`This view needs ?${VIEW_COLS.from} and ?${VIEW_COLS.to}; the current query does not select both.`);
     return;
   }
   viewClearMessage();
   const items = rows.map(r => ({
-    from: year(r[VIEW_FROM]), to: year(r[VIEW_TO]),
-    label: String(r[VIEW_LABEL] ?? r.findspot ?? r.site ?? '')
+    from: year(r[VIEW_COLS.from]), to: year(r[VIEW_COLS.to]),
+    label: String(r[VIEW_COLS.label] ?? r.findspot ?? r.site ?? '')
   })).filter(d => d.from !== null && d.to !== null);
   const svg = document.getElementById('bars');
   if (!items.length) { viewMissing('No row carried two readable years.'); return; }
@@ -238,6 +236,106 @@ function renderBars(cols, rows) {
     const y = padT + i * rowH;
     h += `<text x="${padL - 8}" y="${y + 12}" font-size="11" fill="#333" text-anchor="end">${esc(d.label).slice(0, 40)}</text>`;
     h += `<rect x="${x(d.from)}" y="${y + 3}" width="${Math.max(2, x(d.to) - x(d.from))}" height="${rowH - 7}" fill="#4a7fb5" fill-opacity=".8" stroke="#2b5580"><title>${esc(d.label)}: ${Math.round(d.from)} to ${Math.round(d.to)}</title></rect>`;
+  });
+  svg.setAttribute('height', H);
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.innerHTML = h;
+}
+
+/* Two numeric columns as points. The pair of quality measures is the case
+   this exists for: q(interval) and q(repetition) are deliberately kept
+   apart in the model — combining them by geometric mean was tried and
+   rejected, because it penalised well-dated single-occurrence sites — and
+   whether they agree is a question about the shape of a cloud, not
+   something a reader can get from fourteen rows of numbers. */
+function renderScatter(cols, rows) {
+  const cx = VIEW_COLS.x, cy = VIEW_COLS.y;
+  if (!cols.includes(cx) || !cols.includes(cy)) {
+    viewMissing(`This view needs ?${cx} and ?${cy}; the current query does not select both.`);
+    return;
+  }
+  viewClearMessage();
+  const pts = rows.map(r => ({
+    x: parseFloat(r[cx]), y: parseFloat(r[cy]),
+    label: String(r[VIEW_COLS.label] ?? r.findspot ?? r.site ?? '')
+  })).filter(d => Number.isFinite(d.x) && Number.isFinite(d.y));
+  const svg = document.getElementById('bars');
+  if (!pts.length) { viewMissing('No row carried two readable numbers.'); return; }
+
+  const padL = 58, padR = 20, padT = 14, padB = 40;
+  const W = svg.parentElement.clientWidth || 800, H = 340;
+  const ex = extent(pts.map(d => d.x)), ey = extent(pts.map(d => d.y));
+  const sx = v => padL + (v - ex[0]) / (ex[1] - ex[0]) * (W - padL - padR);
+  const sy = v => H - padB - (v - ey[0]) / (ey[1] - ey[0]) * (H - padT - padB);
+
+  let h = axisFrame(padL, padR, padT, padB, W, H, ex, ey, cx, cy, sx, sy);
+  for (const d of pts) {
+    h += `<circle cx="${sx(d.x).toFixed(1)}" cy="${sy(d.y).toFixed(1)}" r="4.5" `
+      +  `fill="#4a7fb5" fill-opacity=".75" stroke="#2b5580">`
+      +  `<title>${esc(d.label)}: ${cx} ${d.x}, ${cy} ${d.y}</title></circle>`;
+  }
+  svg.setAttribute('height', H);
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.innerHTML = h;
+}
+
+function extent(vs) {
+  let lo = Math.min(...vs), hi = Math.max(...vs);
+  if (lo === hi) { lo -= 0.5; hi += 0.5; }
+  const pad = (hi - lo) * 0.06;
+  return [lo - pad, hi + pad];
+}
+
+function axisFrame(padL, padR, padT, padB, W, H, ex, ey, cx, cy, sx, sy) {
+  let h = '';
+  for (let i = 0; i <= 4; i++) {
+    const vx = ex[0] + (ex[1] - ex[0]) * i / 4;
+    const vy = ey[0] + (ey[1] - ey[0]) * i / 4;
+    h += `<line x1="${sx(vx)}" x2="${sx(vx)}" y1="${padT}" y2="${H - padB}" stroke="#e2e2e2"/>`;
+    h += `<line x1="${padL}" x2="${W - padR}" y1="${sy(vy)}" y2="${sy(vy)}" stroke="#e2e2e2"/>`;
+    h += `<text x="${sx(vx)}" y="${H - padB + 14}" font-size="10" fill="#666" text-anchor="middle">${round2(vx)}</text>`;
+    h += `<text x="${padL - 6}" y="${sy(vy) + 3}" font-size="10" fill="#666" text-anchor="end">${round2(vy)}</text>`;
+  }
+  h += `<text x="${(padL + W - padR) / 2}" y="${H - 6}" font-size="11" fill="#333" text-anchor="middle">${esc(cx)}</text>`;
+  h += `<text transform="translate(13,${(padT + H - padB) / 2}) rotate(-90)" font-size="11" fill="#333" text-anchor="middle">${esc(cy)}</text>`;
+  return h;
+}
+
+function round2(v) {
+  return Math.abs(v) >= 100 ? Math.round(v) : Math.round(v * 100) / 100;
+}
+
+/* A category and a count. Bars are horizontal on purpose: the categories
+   here are relation names like "OverlappedBy", and vertical bars would
+   either truncate them or turn them on their side. */
+function renderBarChart(cols, rows) {
+  const cc = VIEW_COLS.category, cv = VIEW_COLS.value;
+  if (!cols.includes(cc) || !cols.includes(cv)) {
+    viewMissing(`This view needs ?${cc} and ?${cv}; the current query does not select both.`);
+    return;
+  }
+  viewClearMessage();
+  const items = rows.map(r => ({
+    label: String(r[cc] ?? ''), value: parseFloat(r[cv])
+  })).filter(d => Number.isFinite(d.value));
+  const svg = document.getElementById('bars');
+  if (!items.length) { viewMissing(`No row carried a number in ?${cv}.`); return; }
+  items.sort((a, b) => b.value - a.value);
+
+  const rowH = 26, padT = 10, padB = 8, padR = 60;
+  // Room for the longest label, within reason.
+  const padL = Math.min(300, 14 + 7.2 * Math.max(...items.map(d => d.label.length)));
+  const W = svg.parentElement.clientWidth || 800;
+  const H = padT + items.length * rowH + padB;
+  const max = Math.max(...items.map(d => d.value)) || 1;
+  const w = v => (v / max) * (W - padL - padR);
+
+  let h = '';
+  items.forEach((d, i) => {
+    const y = padT + i * rowH;
+    h += `<text x="${padL - 8}" y="${y + rowH / 2 + 4}" font-size="11" fill="#333" text-anchor="end">${esc(d.label).slice(0, 40)}</text>`;
+    h += `<rect x="${padL}" y="${y + 4}" width="${Math.max(1, w(d.value)).toFixed(1)}" height="${rowH - 10}" fill="#4a7fb5" fill-opacity=".85" stroke="#2b5580"><title>${esc(d.label)}: ${d.value}</title></rect>`;
+    h += `<text x="${padL + w(d.value) + 6}" y="${y + rowH / 2 + 4}" font-size="11" fill="#555">${d.value}</text>`;
   });
   svg.setAttribute('height', H);
   svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
@@ -315,6 +413,8 @@ json.dumps({"cols": cols, "rows": rows, "n": len(g), "total": len(_all)})
     renderTable(data.cols, data.rows, data.total);
     if (VIEW === 'map') renderMap(data.cols, data.rows);
     if (VIEW === 'intervals') renderBars(data.cols, data.rows);
+    if (VIEW === 'scatter') renderScatter(data.cols, data.rows);
+    if (VIEW === 'barchart') renderBarChart(data.cols, data.rows);
     timing.textContent = `${((performance.now() - t0) / 1000).toFixed(1)}s over ${data.n} triples`;
   } catch (err) {
     out.innerHTML = `<pre class="error">${esc(err.message)}</pre>`;
