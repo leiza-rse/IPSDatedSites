@@ -87,27 +87,32 @@ EDITORIAL_INCLUSIONS = [
     ("Bregenz", "B\u00f6ckleareal (period I)"),
     ("Bregenz", "B\u00f6ckleareal (period II)"),
     ("Bregenz", "B\u00f6ckleareal (destruction layer period II)"),
-    # Added in revision 31, 2026-08-27. Until a live fetch brings it in,
-    # check (e) reports three of four and says so, which is the point of
-    # the check: an inclusion clause that matches nothing looks exactly
-    # like a findspot that was never admitted.
+    # Added in revision 31, 2026-08-27; arrived with the live fetch of
+    # 2026-08-28 and carries 49 stamps. Allard Mees confirmed on the same
+    # day that the record has isdate = Theta and sitecharacter = Sigma and
+    # was therefore in the base set all along — an earlier note here
+    # supposed otherwise, and that was wrong.
     ("Bregenz", "Samian Hoard 1913"),
 ]
 
-EXPECTED_ROWS = 40        # 2026-08-25: 37 plus the three Boeckleareal
-                          # findspots at Bregenz, admitted by name once
-                          # Allard confirmed them as checked. The rest of
-                          # Bregenz remains unreviewed and stays out.
+EXPECTED_ROWS = 41        # 2026-08-28: 37 plus four Bregenz findspots —
+                          # the three Boeckleareal contexts admitted on
+                          # 2026-08-25 and the Samian Hoard 1913 added by
+                          # revision 31, which arrived with the live fetch
+                          # of this date.
+                          #
                           # A live database, so this is a landmark rather
                           # than a contract: check (a) warns, never fails.
+                          # The number records what the committed corpus
+                          # HOLDS, not what the query would now return, so
+                          # it is raised in the same commit as the refetched
+                          # data and never before.
                           #
-                          # Revision 31 admits a fourth Bregenz context and
-                          # will make this 41 — but the number records what
-                          # the committed corpus HOLDS, not what the query
-                          # would now return. Raise it in the same commit
-                          # as the refetched data, not before, or the check
-                          # warns about a discrepancy the repository does
-                          # not yet contain.
+                          # It will move again. Further Bregenz findspots
+                          # carry the markers and are awaiting review; as
+                          # they are cleared they join the corpus, and at
+                          # that point the inclusion clause can go
+                          # altogether. See notes/open-questions.md.
 
 # Allard Mees: a scatter of about +/- 5 years counts as sharply dated for
 # samian ware, about +/- 25 years as chronologically unusable. These two
@@ -287,16 +292,19 @@ def check_editorial_inclusions(report: Report, rows) -> None:
         report.add(Check(
             "e", "editorial inclusions arrive", "warn",
             f"None of the {len(EDITORIAL_INCLUSIONS)} findspots admitted by "
-            "name is in the output. Three possibilities, in order of "
+            "name is in the output. Two possibilities, in order of "
             "likelihood: the export predates the inclusion clause of "
             "2026-08-25 and was produced by a query that still excluded the "
-            "site wholesale; a spelling in the database no longer matches the "
-            "clause, which matches on exact strings; or the records do not "
-            "carry the isdate/sitecharacter markers and were never in the "
-            "base set at all — in which case no WHERE clause will bring them "
-            "back and they need marking instead. A warning rather than a "
-            "failure because the corpus is live, but not silence, because "
-            "silence is how these findspots were lost the first time.",
+            "site wholesale; or a spelling in the database no longer matches "
+            "the clause, which matches on exact strings. A warning rather "
+            "than a failure because the corpus is live, but not silence, "
+            "because silence is how these findspots were lost the first "
+            "time.\n"
+            "This message used to offer a third possibility — that the "
+            "records lack the isdate/sitecharacter markers and were never in "
+            "the base set. That is ruled out: Allard Mees confirmed on "
+            "2026-08-28 that all four carry both markers. If they are "
+            "missing here, the query is at fault, not the database.",
             {"expected": [f"{a} / {b}" for a, b in EDITORIAL_INCLUSIONS]},
         ))
     elif missing:

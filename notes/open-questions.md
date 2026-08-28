@@ -110,6 +110,22 @@ exclusion has accordingly been removed from the query, and the retrieval is
 pinned in `data/SNAPSHOT.json` instead. Deliberate exclusions remain
 possible as a parameter of `py/ips_model.py`.
 
+**The rest of Bregenz.** Four contexts are in the corpus; further Bregenz
+findspots carry `isdate` and `sitecharacter` and are awaiting review. Until
+that review, they are neither admitted nor rejected — they are simply not
+looked at yet, which is the ordinary state of a live excavation record and
+not a defect.
+
+Two things follow. The named inclusion clause is temporary by design: once
+the review is done and the markers stand, the query can select on the
+markers alone and the clause can go. And a correction to the record — an
+earlier note in this repository supposed that `Samian Hoard 1913` was
+missing the markers and therefore outside the base set. Allard Mees
+confirmed on 2026-08-28 that it carries both, and the live fetch of the
+same day brought it in with 49 stamps. The supposition was wrong; what was
+right was the conclusion drawn from it, that findspots merely awaiting
+review need no clause at all once they are marked.
+
 **Die attribution.** Not a risk: the stamp type is a compulsory field on
 data entry in Samian Research, so findspots without one are not expected to
 occur. The `k_no_dierecord` watchdog therefore stays as a check on that
