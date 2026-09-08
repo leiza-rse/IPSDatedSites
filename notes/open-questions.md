@@ -157,7 +157,7 @@ independently of the ceramics. That absence also makes residuality very
 hard to assess for the period; in the first century it appears not to play
 a significant role.
 
-The size of the effect may be stated plainly. The median interval is 12.9 years before AD 100 against 22.7 years from AD 100, a ratio of about one to 1.8, on 29 and 12 findspots respectively (Pearson r = +0.386 between interval width and midpoint year). Allard confirmed on 25 August 2026 that naming the ratio is welcome: the imprecision of second- and third-century dating relative to the first is an unstudied area, and any quantification of it is worth having. These figures come from check (l) of the run that produced this page, so they cannot fall behind the corpus.
+The size of the effect may be stated plainly. The median interval is 12.3 years before AD 100 against 21.4 years from AD 100, a ratio of about one to 1.7, on 31 and 14 findspots respectively (Pearson r = +0.378 between interval width and midpoint year). Allard confirmed on 25 August 2026 that naming the ratio is welcome: the imprecision of second- and third-century dating relative to the first is an unstudied area, and any quantification of it is worth having. These figures come from check (l) of the run that produced this page, so they cannot fall behind the corpus.
 
 ## Defects in the published discovery-site data (2019 release)
 

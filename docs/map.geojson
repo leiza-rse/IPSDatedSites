@@ -13,7 +13,7 @@
      {
       "colours": {
        "midpointYear": "#56c566",
-       "nStamps": "#545b6d",
+       "nStamps": "#3e4b6c",
        "qInterval": "#3aa858",
        "sigmaYears": "#86cb66"
       },
@@ -22,7 +22,7 @@
       "to": 165.7,
       "values": {
        "midpointYear": 0.73174,
-       "nStamps": 0.36227,
+       "nStamps": 0.26537,
        "qInterval": 0.858,
        "sigmaYears": 0.2495
       }
@@ -31,7 +31,7 @@
     "from": 149.8,
     "median": {
      "midpointYear": 0.73174,
-     "nStamps": 0.36227,
+     "nStamps": 0.26537,
      "qInterval": 0.858,
      "sigmaYears": 0.2495
     },
@@ -54,7 +54,7 @@
      {
       "colours": {
        "midpointYear": "#440154",
-       "nStamps": "#969076",
+       "nStamps": "#707173",
        "qInterval": "#fffebd",
        "sigmaYears": "#9ad469"
       },
@@ -63,7 +63,7 @@
       "to": -2.8,
       "values": {
        "midpointYear": 0.0,
-       "nStamps": 0.67987,
+       "nStamps": 0.49801,
        "qInterval": 0.497,
        "sigmaYears": 0.281
       }
@@ -72,7 +72,7 @@
     "from": -15.0,
     "median": {
      "midpointYear": 0.0,
-     "nStamps": 0.67987,
+     "nStamps": 0.49801,
      "qInterval": 0.497,
      "sigmaYears": 0.281
     },
@@ -95,7 +95,7 @@
      {
       "colours": {
        "midpointYear": "#440659",
-       "nStamps": "#2d426d",
+       "nStamps": "#1b396f",
        "qInterval": "#fee18d",
        "sigmaYears": "#57b65f"
       },
@@ -104,7 +104,7 @@
       "to": 3.7,
       "values": {
        "midpointYear": 0.01494,
-       "nStamps": 0.20625,
+       "nStamps": 0.15108,
        "qInterval": 0.404,
        "sigmaYears": 0.17978
       }
@@ -113,7 +113,7 @@
     "from": -14.7,
     "median": {
      "midpointYear": 0.01494,
-     "nStamps": 0.20625,
+     "nStamps": 0.15108,
      "qInterval": 0.404,
      "sigmaYears": 0.17978
     },
@@ -136,16 +136,16 @@
      {
       "colours": {
        "midpointYear": "#32658d",
-       "nStamps": "#49536c",
+       "nStamps": "#34466d",
        "qInterval": "#edf7a6",
        "sigmaYears": "#bde379"
       },
-      "findspot": "tumulus",
+      "findspot": "Tumulus",
       "from": 54.2,
       "to": 75.1,
       "values": {
        "midpointYear": 0.32312,
-       "nStamps": 0.31204,
+       "nStamps": 0.22857,
        "qInterval": 0.548,
        "sigmaYears": 0.34548
       }
@@ -154,7 +154,7 @@
     "from": 54.2,
     "median": {
      "midpointYear": 0.32312,
-     "nStamps": 0.31204,
+     "nStamps": 0.22857,
      "qInterval": 0.548,
      "sigmaYears": 0.34548
     },
@@ -177,7 +177,7 @@
      {
       "colours": {
        "midpointYear": "#375a8c",
-       "nStamps": "#595e6d",
+       "nStamps": "#424e6c",
        "qInterval": "#f6fbb3",
        "sigmaYears": "#b2de72"
       },
@@ -186,7 +186,7 @@
       "to": 64.2,
       "values": {
        "midpointYear": 0.28258,
-       "nStamps": 0.38372,
+       "nStamps": 0.28108,
        "qInterval": 0.523,
        "sigmaYears": 0.32323
       }
@@ -194,7 +194,7 @@
      {
       "colours": {
        "midpointYear": "#3d4c88",
-       "nStamps": "#676a71",
+       "nStamps": "#4d566d",
        "qInterval": "#f2f9ad",
        "sigmaYears": "#d7ee89"
       },
@@ -203,7 +203,7 @@
       "to": 52.1,
       "values": {
        "midpointYear": 0.23009,
-       "nStamps": 0.45354,
+       "nStamps": 0.33222,
        "qInterval": 0.535,
        "sigmaYears": 0.39534
       }
@@ -211,7 +211,7 @@
      {
       "colours": {
        "midpointYear": "#365d8c",
-       "nStamps": "#424e6c",
+       "nStamps": "#2d426d",
        "qInterval": "#ffffbf",
        "sigmaYears": "#c9e881"
       },
@@ -220,7 +220,7 @@
       "to": 69.0,
       "values": {
        "midpointYear": 0.29156,
-       "nStamps": 0.28199,
+       "nStamps": 0.20656,
        "qInterval": 0.5,
        "sigmaYears": 0.36829
       }
@@ -228,7 +228,7 @@
      {
       "colours": {
        "midpointYear": "#3f4686",
-       "nStamps": "#9f9775",
+       "nStamps": "#767674",
        "qInterval": "#a7d96a",
        "sigmaYears": "#58b660"
       },
@@ -237,7 +237,7 @@
       "to": 43.4,
       "values": {
        "midpointYear": 0.20777,
-       "nStamps": 0.71999,
+       "nStamps": 0.5274,
        "qInterval": 0.699,
        "sigmaYears": 0.18205
       }
@@ -246,7 +246,7 @@
     "from": 33.4,
     "median": {
      "midpointYear": 0.25633,
-     "nStamps": 0.41863,
+     "nStamps": 0.30665,
      "qInterval": 0.529,
      "sigmaYears": 0.34576
     },
@@ -269,7 +269,7 @@
      {
       "colours": {
        "midpointYear": "#57c566",
-       "nStamps": "#1c3a6f",
+       "nStamps": "#10336d",
        "qInterval": "#cce982",
        "sigmaYears": "#a4d86a"
       },
@@ -278,7 +278,7 @@
       "to": 170.9,
       "values": {
        "midpointYear": 0.73339,
-       "nStamps": 0.15602,
+       "nStamps": 0.11429,
        "qInterval": 0.626,
        "sigmaYears": 0.29705
       }
@@ -287,7 +287,7 @@
     "from": 145.4,
     "median": {
      "midpointYear": 0.73339,
-     "nStamps": 0.15602,
+     "nStamps": 0.11429,
      "qInterval": 0.626,
      "sigmaYears": 0.29705
     },
@@ -310,7 +310,7 @@
      {
       "colours": {
        "midpointYear": "#2f6b8d",
-       "nStamps": "#424e6c",
+       "nStamps": "#2d426d",
        "qInterval": "#e0f294",
        "sigmaYears": "#a5d96a"
       },
@@ -319,7 +319,7 @@
       "to": 80.6,
       "values": {
        "midpointYear": 0.34801,
-       "nStamps": 0.28199,
+       "nStamps": 0.20656,
        "qInterval": 0.582,
        "sigmaYears": 0.2991
       }
@@ -328,7 +328,7 @@
     "from": 60.1,
     "median": {
      "midpointYear": 0.34801,
-     "nStamps": 0.28199,
+     "nStamps": 0.20656,
      "qInterval": 0.582,
      "sigmaYears": 0.2991
     },
@@ -355,7 +355,7 @@
        "qInterval": "#c6e77f",
        "sigmaYears": "#87cc67"
       },
-      "findspot": "wreck 6",
+      "findspot": "Wreck 6",
       "from": 43.5,
       "to": 71.5,
       "values": {
@@ -392,7 +392,7 @@
      {
       "colours": {
        "midpointYear": "#306a8d",
-       "nStamps": "#fee838",
+       "nStamps": "#a19975",
        "qInterval": "#a4d86a",
        "sigmaYears": "#acdc6e"
       },
@@ -401,7 +401,7 @@
       "to": 75.6,
       "values": {
        "midpointYear": 0.3427,
-       "nStamps": 1.0,
+       "nStamps": 0.73251,
        "qInterval": 0.703,
        "sigmaYears": 0.31184
       }
@@ -410,7 +410,7 @@
     "from": 62.7,
     "median": {
      "midpointYear": 0.3427,
-     "nStamps": 1.0,
+     "nStamps": 0.73251,
      "qInterval": 0.703,
      "sigmaYears": 0.31184
     },
@@ -433,7 +433,7 @@
      {
       "colours": {
        "midpointYear": "#3cb875",
-       "nStamps": "#bcae6b",
+       "nStamps": "#898578",
        "qInterval": "#b4df73",
        "sigmaYears": "#7cc765"
       },
@@ -442,7 +442,7 @@
       "to": 149.4,
       "values": {
        "midpointYear": 0.67052,
-       "nStamps": 0.84661,
+       "nStamps": 0.62015,
        "qInterval": 0.672,
        "sigmaYears": 0.2351
       }
@@ -451,7 +451,7 @@
     "from": 138.2,
     "median": {
      "midpointYear": 0.67052,
-     "nStamps": 0.84661,
+     "nStamps": 0.62015,
      "qInterval": 0.672,
      "sigmaYears": 0.2351
     },
@@ -474,7 +474,7 @@
      {
       "colours": {
        "midpointYear": "#287e8d",
-       "nStamps": "#4f576d",
+       "nStamps": "#3a496c",
        "qInterval": "#98d368",
        "sigmaYears": "#5db961"
       },
@@ -483,7 +483,7 @@
       "to": 95.1,
       "values": {
        "midpointYear": 0.4245,
-       "nStamps": 0.33855,
+       "nStamps": 0.248,
        "qInterval": 0.722,
        "sigmaYears": 0.18825
       }
@@ -492,7 +492,7 @@
     "from": 80.5,
     "median": {
      "midpointYear": 0.4245,
-     "nStamps": 0.33855,
+     "nStamps": 0.248,
      "qInterval": 0.722,
      "sigmaYears": 0.18825
     },
@@ -515,16 +515,16 @@
      {
       "colours": {
        "midpointYear": "#38598c",
-       "nStamps": "#787875",
+       "nStamps": "#5b606e",
        "qInterval": "#bfe47a",
        "sigmaYears": "#6dc064"
       },
-      "findspot": "fort ditch",
+      "findspot": "Fort ditch",
       "from": 49.0,
       "to": 60.1,
       "values": {
        "midpointYear": 0.27858,
-       "nStamps": 0.53974,
+       "nStamps": 0.39537,
        "qInterval": 0.651,
        "sigmaYears": 0.21085
       }
@@ -533,7 +533,7 @@
     "from": 49.0,
     "median": {
      "midpointYear": 0.27858,
-     "nStamps": 0.53974,
+     "nStamps": 0.39537,
      "qInterval": 0.651,
      "sigmaYears": 0.21085
     },
@@ -556,7 +556,7 @@
      {
       "colours": {
        "midpointYear": "#355f8c",
-       "nStamps": "#7c7b75",
+       "nStamps": "#5e636f",
        "qInterval": "#c1e57b",
        "sigmaYears": "#8ece67"
       },
@@ -565,7 +565,7 @@
       "to": 65.3,
       "values": {
        "midpointYear": 0.29888,
-       "nStamps": 0.55933,
+       "nStamps": 0.40972,
        "qInterval": 0.647,
        "sigmaYears": 0.26189
       }
@@ -573,7 +573,7 @@
      {
       "colours": {
        "midpointYear": "#34618c",
-       "nStamps": "#848177",
+       "nStamps": "#636770",
        "qInterval": "#b8e176",
        "sigmaYears": "#85cb66"
       },
@@ -582,7 +582,7 @@
       "to": 67.4,
       "values": {
        "midpointYear": 0.3092,
-       "nStamps": 0.59403,
+       "nStamps": 0.43513,
        "qInterval": 0.664,
        "sigmaYears": 0.24823
       }
@@ -591,7 +591,7 @@
     "from": 53.1,
     "median": {
      "midpointYear": 0.30404,
-     "nStamps": 0.57668,
+     "nStamps": 0.42242,
      "qInterval": 0.6555,
      "sigmaYears": 0.25506
     },
@@ -614,7 +614,7 @@
      {
       "colours": {
        "midpointYear": "#440456",
-       "nStamps": "#c0b16a",
+       "nStamps": "#8b8778",
        "qInterval": "#e1f296",
        "sigmaYears": "#36a557"
       },
@@ -623,7 +623,7 @@
       "to": -2.8,
       "values": {
        "midpointYear": 0.00735,
-       "nStamps": 0.86179,
+       "nStamps": 0.63127,
        "qInterval": 0.579,
        "sigmaYears": 0.13629
       }
@@ -632,7 +632,7 @@
     "from": -11.7,
     "median": {
      "midpointYear": 0.00735,
-     "nStamps": 0.86179,
+     "nStamps": 0.63127,
      "qInterval": 0.579,
      "sigmaYears": 0.13629
     },
@@ -655,16 +655,16 @@
      {
       "colours": {
        "midpointYear": "#7bd050",
-       "nStamps": "#888578",
+       "nStamps": "#666971",
        "qInterval": "#f0f9ab",
        "sigmaYears": "#feeea3"
       },
-      "findspot": "shop",
+      "findspot": "Shop",
       "from": 163.0,
       "to": 181.7,
       "values": {
        "midpointYear": 0.7958,
-       "nStamps": 0.61694,
+       "nStamps": 0.45191,
        "qInterval": 0.539,
        "sigmaYears": 0.55462
       }
@@ -673,13 +673,54 @@
     "from": 163.0,
     "median": {
      "midpointYear": 0.7958,
-     "nStamps": 0.61694,
+     "nStamps": 0.45191,
      "qInterval": 0.539,
      "sigmaYears": 0.55462
     },
     "n_findspots": 1,
     "site": "Eschenz",
     "to": 181.7
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     7.17,
+     51.75
+    ],
+    "type": "Point"
+   },
+   "properties": {
+    "findspots": [
+     {
+      "colours": {
+       "midpointYear": "#451364",
+       "nStamps": "#fee838",
+       "qInterval": "#fffdbc",
+       "sigmaYears": "#99d369"
+      },
+      "findspot": "Military settlement",
+      "from": -3.6,
+      "to": 8.6,
+      "values": {
+       "midpointYear": 0.05001,
+       "nStamps": 1.0,
+       "qInterval": 0.495,
+       "sigmaYears": 0.27916
+      }
+     }
+    ],
+    "from": -3.6,
+    "median": {
+     "midpointYear": 0.05001,
+     "nStamps": 1.0,
+     "qInterval": 0.495,
+     "sigmaYears": 0.27916
+    },
+    "n_findspots": 1,
+    "site": "Haltern",
+    "to": 8.6
    },
    "type": "Feature"
   },
@@ -696,16 +737,16 @@
      {
       "colours": {
        "midpointYear": "#3eb974",
-       "nStamps": "#2d426d",
+       "nStamps": "#1b396f",
        "qInterval": "#e5f49c",
        "sigmaYears": "#d4ed88"
       },
-      "findspot": "tumulus",
+      "findspot": "Tumulus",
       "from": 131.2,
       "to": 158.8,
       "values": {
        "midpointYear": 0.67576,
-       "nStamps": 0.20625,
+       "nStamps": 0.15108,
        "qInterval": 0.568,
        "sigmaYears": 0.38997
       }
@@ -714,7 +755,7 @@
     "from": 131.2,
     "median": {
      "midpointYear": 0.67576,
-     "nStamps": 0.20625,
+     "nStamps": 0.15108,
      "qInterval": 0.568,
      "sigmaYears": 0.38997
     },
@@ -737,7 +778,7 @@
      {
       "colours": {
        "midpointYear": "#2b768e",
-       "nStamps": "#0d3067",
+       "nStamps": "#0a2c60",
        "qInterval": "#a6d96a",
        "sigmaYears": "#92d068"
       },
@@ -746,7 +787,7 @@
       "to": 93.2,
       "values": {
        "midpointYear": 0.39035,
-       "nStamps": 0.09127,
+       "nStamps": 0.06685,
        "qInterval": 0.7,
        "sigmaYears": 0.26865
       }
@@ -755,7 +796,7 @@
     "from": 66.8,
     "median": {
      "midpointYear": 0.39035,
-     "nStamps": 0.09127,
+     "nStamps": 0.06685,
      "qInterval": 0.7,
      "sigmaYears": 0.26865
     },
@@ -778,7 +819,7 @@
      {
       "colours": {
        "midpointYear": "#2b758e",
-       "nStamps": "#807e76",
+       "nStamps": "#61656f",
        "qInterval": "#30a356",
        "sigmaYears": "#08783f"
       },
@@ -787,7 +828,7 @@
       "to": 82.9,
       "values": {
        "midpointYear": 0.38824,
-       "nStamps": 0.57735,
+       "nStamps": 0.42291,
        "qInterval": 0.871,
        "sigmaYears": 0.0325
       }
@@ -796,7 +837,7 @@
     "from": 76.2,
     "median": {
      "midpointYear": 0.38824,
-     "nStamps": 0.57735,
+     "nStamps": 0.42291,
      "qInterval": 0.871,
      "sigmaYears": 0.0325
     },
@@ -819,7 +860,7 @@
      {
       "colours": {
        "midpointYear": "#404184",
-       "nStamps": "#b5a86e",
+       "nStamps": "#848177",
        "qInterval": "#84ca66",
        "sigmaYears": "#4cb15d"
       },
@@ -828,7 +869,7 @@
       "to": 40.0,
       "values": {
        "midpointYear": 0.1935,
-       "nStamps": 0.81581,
+       "nStamps": 0.59759,
        "qInterval": 0.753,
        "sigmaYears": 0.16639
       }
@@ -836,7 +877,7 @@
      {
       "colours": {
        "midpointYear": "#3b538b",
-       "nStamps": "#f8e33d",
+       "nStamps": "#9f9775",
        "qInterval": "#c4e67d",
        "sigmaYears": "#92d068"
       },
@@ -845,7 +886,7 @@
       "to": 54.6,
       "values": {
        "midpointYear": 0.25277,
-       "nStamps": 0.98776,
+       "nStamps": 0.72354,
        "qInterval": 0.641,
        "sigmaYears": 0.26839
       }
@@ -854,7 +895,7 @@
     "from": 30.4,
     "median": {
      "midpointYear": 0.22314,
-     "nStamps": 0.90179,
+     "nStamps": 0.66056,
      "qInterval": 0.697,
      "sigmaYears": 0.21739
     },
@@ -877,16 +918,16 @@
      {
       "colours": {
        "midpointYear": "#fde725",
-       "nStamps": "#60646f",
+       "nStamps": "#48526c",
        "qInterval": "#b6e074",
        "sigmaYears": "#fffab7"
       },
-      "findspot": "store",
+      "findspot": "Store",
       "from": 208.0,
       "to": 229.7,
       "values": {
        "midpointYear": 1.0,
-       "nStamps": 0.42133,
+       "nStamps": 0.30863,
        "qInterval": 0.669,
        "sigmaYears": 0.51514
       }
@@ -895,7 +936,7 @@
     "from": 208.0,
     "median": {
      "midpointYear": 1.0,
-     "nStamps": 0.42133,
+     "nStamps": 0.30863,
      "qInterval": 0.669,
      "sigmaYears": 0.51514
     },
@@ -918,7 +959,7 @@
      {
       "colours": {
        "midpointYear": "#97d73e",
-       "nStamps": "#fee838",
+       "nStamps": "#a19975",
        "qInterval": "#fed07e",
        "sigmaYears": "#a50026"
       },
@@ -927,7 +968,7 @@
       "to": 196.8,
       "values": {
        "midpointYear": 0.84028,
-       "nStamps": 1.0,
+       "nStamps": 0.73251,
        "qInterval": 0.368,
        "sigmaYears": 1.0
       }
@@ -935,7 +976,7 @@
      {
       "colours": {
        "midpointYear": "#249c88",
-       "nStamps": "#7a7975",
+       "nStamps": "#5d616e",
        "qInterval": "#90cf68",
        "sigmaYears": "#4db15d"
       },
@@ -944,7 +985,7 @@
       "to": 120.4,
       "values": {
        "midpointYear": 0.54594,
-       "nStamps": 0.54975,
+       "nStamps": 0.4027,
        "qInterval": 0.734,
        "sigmaYears": 0.16665
       }
@@ -953,7 +994,7 @@
     "from": 110.4,
     "median": {
      "midpointYear": 0.69311,
-     "nStamps": 0.77487,
+     "nStamps": 0.56761,
      "qInterval": 0.551,
      "sigmaYears": 0.58332
     },
@@ -976,7 +1017,7 @@
      {
       "colours": {
        "midpointYear": "#450e60",
-       "nStamps": "#858277",
+       "nStamps": "#646870",
        "qInterval": "#f1f9ab",
        "sigmaYears": "#94d168"
       },
@@ -985,7 +1026,7 @@
       "to": 5.8,
       "values": {
        "midpointYear": 0.03795,
-       "nStamps": 0.60193,
+       "nStamps": 0.44092,
        "qInterval": 0.538,
        "sigmaYears": 0.27253
       }
@@ -994,7 +1035,7 @@
     "from": -6.4,
     "median": {
      "midpointYear": 0.03795,
-     "nStamps": 0.60193,
+     "nStamps": 0.44092,
      "qInterval": 0.538,
      "sigmaYears": 0.27253
     },
@@ -1017,16 +1058,16 @@
      {
       "colours": {
        "midpointYear": "#38598c",
-       "nStamps": "#baac6c",
+       "nStamps": "#878477",
        "qInterval": "#b1de71",
        "sigmaYears": "#7fc866"
       },
-      "findspot": "les ports (La Nautique)",
+      "findspot": "Les ports (La Nautique)",
       "from": 49.0,
       "to": 60.3,
       "values": {
        "midpointYear": 0.27911,
-       "nStamps": 0.83589,
+       "nStamps": 0.6123,
        "qInterval": 0.679,
        "sigmaYears": 0.23829
       }
@@ -1035,7 +1076,7 @@
     "from": 49.0,
     "median": {
      "midpointYear": 0.27911,
-     "nStamps": 0.83589,
+     "nStamps": 0.6123,
      "qInterval": 0.679,
      "sigmaYears": 0.23829
     },
@@ -1058,7 +1099,7 @@
      {
       "colours": {
        "midpointYear": "#2d708e",
-       "nStamps": "#424e6c",
+       "nStamps": "#2d426d",
        "qInterval": "#006837",
        "sigmaYears": "#006837"
       },
@@ -1067,7 +1108,7 @@
       "to": 79.7,
       "values": {
        "midpointYear": 0.3684,
-       "nStamps": 0.28199,
+       "nStamps": 0.20656,
        "qInterval": 1.0,
        "sigmaYears": 0.0
       }
@@ -1076,7 +1117,7 @@
     "from": 70.3,
     "median": {
      "midpointYear": 0.3684,
-     "nStamps": 0.28199,
+     "nStamps": 0.20656,
      "qInterval": 1.0,
      "sigmaYears": 0.0
     },
@@ -1099,7 +1140,7 @@
      {
       "colours": {
        "midpointYear": "#440658",
-       "nStamps": "#9f9775",
+       "nStamps": "#767674",
        "qInterval": "#daef8d",
        "sigmaYears": "#2da155"
       },
@@ -1108,7 +1149,7 @@
       "to": -1.7,
       "values": {
        "midpointYear": 0.01288,
-       "nStamps": 0.71999,
+       "nStamps": 0.5274,
        "qInterval": 0.597,
        "sigmaYears": 0.12438
       }
@@ -1117,13 +1158,54 @@
     "from": -10.3,
     "median": {
      "midpointYear": 0.01288,
-     "nStamps": 0.71999,
+     "nStamps": 0.5274,
      "qInterval": 0.597,
      "sigmaYears": 0.12438
     },
     "n_findspots": 1,
     "site": "Oberaden",
     "to": -1.7
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     8.439999,
+     47.299999
+    ],
+    "type": "Point"
+   },
+   "properties": {
+    "findspots": [
+     {
+      "colours": {
+       "midpointYear": "#34618c",
+       "nStamps": "#8e8a77",
+       "qInterval": "#e3f398",
+       "sigmaYears": "#9ed669"
+      },
+      "findspot": "Keramiklager",
+      "from": 55.0,
+      "to": 67.3,
+      "values": {
+       "midpointYear": 0.30759,
+       "nStamps": 0.64502,
+       "qInterval": 0.575,
+       "sigmaYears": 0.28763
+      }
+     }
+    ],
+    "from": 55.0,
+    "median": {
+     "midpointYear": 0.30759,
+     "nStamps": 0.64502,
+     "qInterval": 0.575,
+     "sigmaYears": 0.28763
+    },
+    "n_findspots": 1,
+    "site": "Oberwinterthur",
+    "to": 67.3
    },
    "type": "Feature"
   },
@@ -1140,7 +1222,7 @@
      {
       "colours": {
        "midpointYear": "#297c8d",
-       "nStamps": "#958f76",
+       "nStamps": "#6f7073",
        "qInterval": "#fff9b5",
        "sigmaYears": "#f8fcb6"
       },
@@ -1149,7 +1231,7 @@
       "to": 93.7,
       "values": {
        "midpointYear": 0.4134,
-       "nStamps": 0.67431,
+       "nStamps": 0.49394,
        "qInterval": 0.481,
        "sigmaYears": 0.48259
       }
@@ -1158,7 +1240,7 @@
     "from": 76.8,
     "median": {
      "midpointYear": 0.4134,
-     "nStamps": 0.67431,
+     "nStamps": 0.49394,
      "qInterval": 0.481,
      "sigmaYears": 0.48259
     },
@@ -1181,7 +1263,7 @@
      {
       "colours": {
        "midpointYear": "#2d708e",
-       "nStamps": "#717273",
+       "nStamps": "#565c6d",
        "qInterval": "#6fc164",
        "sigmaYears": "#279f53"
       },
@@ -1190,7 +1272,7 @@
       "to": 79.2,
       "values": {
        "midpointYear": 0.36666,
-       "nStamps": 0.50675,
+       "nStamps": 0.3712,
        "qInterval": 0.786,
        "sigmaYears": 0.11775
       }
@@ -1199,13 +1281,54 @@
     "from": 70.0,
     "median": {
      "midpointYear": 0.36666,
-     "nStamps": 0.50675,
+     "nStamps": 0.3712,
      "qInterval": 0.786,
      "sigmaYears": 0.11775
     },
     "n_findspots": 1,
     "site": "Pompeii",
     "to": 79.2
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     1.1,
+     51.349998
+    ],
+    "type": "Point"
+   },
+   "properties": {
+    "findspots": [
+     {
+      "colours": {
+       "midpointYear": "#91d542",
+       "nStamps": "#a79e73",
+       "qInterval": "#99d369",
+       "sigmaYears": "#bae277"
+      },
+      "findspot": "Shipwreck",
+      "from": 173.5,
+      "to": 187.0,
+      "values": {
+       "midpointYear": 0.83048,
+       "nStamps": 0.75848,
+       "qInterval": 0.72,
+       "sigmaYears": 0.33994
+      }
+     }
+    ],
+    "from": 173.5,
+    "median": {
+     "midpointYear": 0.83048,
+     "nStamps": 0.75848,
+     "qInterval": 0.72,
+     "sigmaYears": 0.33994
+    },
+    "n_findspots": 1,
+    "site": "Pudding Pan Rock",
+    "to": 187.0
    },
    "type": "Feature"
   },
@@ -1222,16 +1345,16 @@
      {
       "colours": {
        "midpointYear": "#2f6b8d",
-       "nStamps": "#6a6c71",
+       "nStamps": "#50586d",
        "qInterval": "#ceea84",
        "sigmaYears": "#9fd669"
       },
-      "findspot": "rue de l'Equerre",
+      "findspot": "Rue de l'Equerre",
       "from": 62.9,
       "to": 77.1,
       "values": {
        "midpointYear": 0.34644,
-       "nStamps": 0.46806,
+       "nStamps": 0.34286,
        "qInterval": 0.622,
        "sigmaYears": 0.28959
       }
@@ -1240,7 +1363,7 @@
     "from": 62.9,
     "median": {
      "midpointYear": 0.34644,
-     "nStamps": 0.46806,
+     "nStamps": 0.34286,
      "qInterval": 0.622,
      "sigmaYears": 0.28959
     },
@@ -1263,16 +1386,16 @@
      {
       "colours": {
        "midpointYear": "#58c665",
-       "nStamps": "#1c3a6f",
+       "nStamps": "#10336d",
        "qInterval": "#a0d669",
        "sigmaYears": "#9ad469"
       },
-      "findspot": "tumulus",
+      "findspot": "Tumulus",
       "from": 146.4,
       "to": 171.1,
       "values": {
        "midpointYear": 0.73613,
-       "nStamps": 0.15602,
+       "nStamps": 0.11429,
        "qInterval": 0.709,
        "sigmaYears": 0.28056
       }
@@ -1281,7 +1404,7 @@
     "from": 146.4,
     "median": {
      "midpointYear": 0.73613,
-     "nStamps": 0.15602,
+     "nStamps": 0.11429,
      "qInterval": 0.709,
      "sigmaYears": 0.28056
     },
@@ -1304,7 +1427,7 @@
      {
       "colours": {
        "midpointYear": "#26a783",
-       "nStamps": "#4f576d",
+       "nStamps": "#3a496c",
        "qInterval": "#e6f59d",
        "sigmaYears": "#fff3aa"
       },
@@ -1313,7 +1436,7 @@
       "to": 139.5,
       "values": {
        "midpointYear": 0.59404,
-       "nStamps": 0.33855,
+       "nStamps": 0.248,
        "qInterval": 0.565,
        "sigmaYears": 0.54022
       }
@@ -1322,13 +1445,54 @@
     "from": 113.3,
     "median": {
      "midpointYear": 0.59404,
-     "nStamps": 0.33855,
+     "nStamps": 0.248,
      "qInterval": 0.565,
      "sigmaYears": 0.54022
     },
     "n_findspots": 1,
     "site": "Saalburg",
     "to": 139.5
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     18.420326,
+     47.089804
+    ],
+    "type": "Point"
+   },
+   "properties": {
+    "findspots": [
+     {
+      "colours": {
+       "midpointYear": "#70cd57",
+       "nStamps": "#243e6e",
+       "qInterval": "#9ed569",
+       "sigmaYears": "#98d368"
+      },
+      "findspot": "Depot",
+      "from": 157.8,
+      "to": 178.9,
+      "values": {
+       "midpointYear": 0.77821,
+       "nStamps": 0.18114,
+       "qInterval": 0.713,
+       "sigmaYears": 0.27794
+      }
+     }
+    ],
+    "from": 157.8,
+    "median": {
+     "midpointYear": 0.77821,
+     "nStamps": 0.18114,
+     "qInterval": 0.713,
+     "sigmaYears": 0.27794
+    },
+    "n_findspots": 1,
+    "site": "Tác",
+    "to": 178.9
    },
    "type": "Feature"
   },
@@ -1345,7 +1509,7 @@
      {
       "colours": {
        "midpointYear": "#46307c",
-       "nStamps": "#a09875",
+       "nStamps": "#777774",
        "qInterval": "#fdfebc",
        "sigmaYears": "#fdc474"
       },
@@ -1354,7 +1518,7 @@
       "to": 32.5,
       "values": {
        "midpointYear": 0.13594,
-       "nStamps": 0.729,
+       "nStamps": 0.534,
        "qInterval": 0.506,
        "sigmaYears": 0.65522
       }
@@ -1363,7 +1527,7 @@
     "from": 11.7,
     "median": {
      "midpointYear": 0.13594,
-     "nStamps": 0.729,
+     "nStamps": 0.534,
      "qInterval": 0.506,
      "sigmaYears": 0.65522
     },
@@ -1386,7 +1550,7 @@
      {
       "colours": {
        "midpointYear": "#40ba73",
-       "nStamps": "#3a496c",
+       "nStamps": "#243e6e",
        "qInterval": "#d7ee8a",
        "sigmaYears": "#bde379"
       },
@@ -1395,7 +1559,7 @@
       "to": 157.7,
       "values": {
        "midpointYear": 0.67941,
-       "nStamps": 0.24729,
+       "nStamps": 0.18114,
        "qInterval": 0.604,
        "sigmaYears": 0.34526
       }
@@ -1404,7 +1568,7 @@
     "from": 134.0,
     "median": {
      "midpointYear": 0.67941,
-     "nStamps": 0.24729,
+     "nStamps": 0.18114,
      "qInterval": 0.604,
      "sigmaYears": 0.34526
     },
@@ -1427,7 +1591,7 @@
      {
       "colours": {
        "midpointYear": "#472c7a",
-       "nStamps": "#545b6d",
+       "nStamps": "#3e4b6c",
        "qInterval": "#c8e880",
        "sigmaYears": "#fee796"
       },
@@ -1436,7 +1600,7 @@
       "to": 31.9,
       "values": {
        "midpointYear": 0.12141,
-       "nStamps": 0.36227,
+       "nStamps": 0.26537,
        "qInterval": 0.633,
        "sigmaYears": 0.5787
       }
@@ -1444,7 +1608,7 @@
      {
       "colours": {
        "midpointYear": "#451062",
-       "nStamps": "#2d426d",
+       "nStamps": "#1b396f",
        "qInterval": "#a1d769",
        "sigmaYears": "#93d168"
       },
@@ -1453,7 +1617,7 @@
       "to": 12.2,
       "values": {
        "midpointYear": 0.04348,
-       "nStamps": 0.20625,
+       "nStamps": 0.15108,
        "qInterval": 0.708,
        "sigmaYears": 0.27079
       }
@@ -1462,7 +1626,7 @@
     "from": -10.2,
     "median": {
      "midpointYear": 0.08245,
-     "nStamps": 0.28426,
+     "nStamps": 0.20822,
      "qInterval": 0.6705,
      "sigmaYears": 0.42474
     },
@@ -1485,16 +1649,16 @@
      {
       "colours": {
        "midpointYear": "#7ad050",
-       "nStamps": "#6a6c71",
+       "nStamps": "#50586d",
        "qInterval": "#e4f49b",
        "sigmaYears": "#e2f397"
       },
-      "findspot": "gutter",
+      "findspot": "Gutter",
       "from": 163.2,
       "to": 180.8,
       "values": {
        "midpointYear": 0.79444,
-       "nStamps": 0.46806,
+       "nStamps": 0.34286,
        "qInterval": 0.57,
        "sigmaYears": 0.42248
       }
@@ -1503,7 +1667,7 @@
     "from": 163.2,
     "median": {
      "midpointYear": 0.79444,
-     "nStamps": 0.46806,
+     "nStamps": 0.34286,
      "qInterval": 0.57,
      "sigmaYears": 0.42248
     },

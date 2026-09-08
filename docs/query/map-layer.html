@@ -94,7 +94,7 @@ ORDER BY ?from</textarea>
 <script>
 const PREFIXES = "PREFIX samian:  <http://data.archaeology.link/data/samian/>\nPREFIX lado:    <http://archaeology.link/ontology#>\nPREFIX crm:     <http://www.cidoc-crm.org/cidoc-crm/>\nPREFIX crmdig:  <http://www.ics.forth.gr/isl/CRMdig/>\nPREFIX time:    <http://www.w3.org/2006/time#>\nPREFIX prov:    <http://www.w3.org/ns/prov#>\nPREFIX dcat:    <http://www.w3.org/ns/dcat#>\nPREFIX dcterms: <http://purl.org/dc/terms/>\nPREFIX skos:    <http://www.w3.org/2004/02/skos/core#>\nPREFIX geo:     <http://www.opengis.net/ont/geosparql#>\nPREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd:     <http://www.w3.org/2001/XMLSchema#>\n";
 const QUERY    = "SELECT ?site ?findspot ?wkt ?from ?to ?norm ?colour WHERE {\n  ?fs a lado:Findspot ; rdfs:label ?findspot ;\n      crm:P89_falls_within ?p ; crm:P4_has_time-span ?ts .\n  ?p rdfs:label ?site ; geo:hasGeometry/geo:asWKT ?wkt .\n  ?ts time:hasBeginning/time:inTimePosition/time:numericPosition ?from ;\n      time:hasEnd/time:inTimePosition/time:numericPosition ?to .\n  ?row lado:renders ?ts ;\n       lado:normQInterval ?norm ; lado:hexQInterval ?colour .\n}\nORDER BY ?from";
-const GRAPH    = {"file": "rdf/IPSDatedSites-bundle.ttl", "url": "bundle.ttl", "publish": true, "page_url": "../bundle.ttl", "megabytes": "0.3"};
+const GRAPH    = {"file": "rdf/IPSDatedSites-bundle.ttl", "url": "bundle.ttl", "publish": true, "page_url": "../bundle.ttl", "megabytes": "0.4"};
 const MAX_ROWS = 500;
 const RDFLIB   = "7.1.1";
 const VIEW      = "map";
