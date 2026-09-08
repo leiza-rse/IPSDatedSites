@@ -185,20 +185,30 @@ CALIBRATION_REFERENCES = [
      "coin-dated, 15 to 8 BC", False),
     ("Oberaden", "Military camp", -7,
      "dendrochronology, ending 7 BC", False),
-    # AD 28, not AD 30: corrected by Allard Mees on 2026-08-25, the earlier
-    # value having been his own slip. Contested because activity continued
-    # on the site until about AD 40 and admixture from it cannot be ruled
-    # out, which would make the terminus an upper bound on the camp rather
-    # than on the assemblage. py/calibrate_tau.py shows that excluding it
-    # leaves tau_min unchanged, so nothing published depends on the
-    # decision.
-    ("Velsen", "Velsen I", 28,
-     "military base in operation, abandoned about AD 28", True),
+    # AD 9, coin-dated and independent of ceramic typology; confirmed as a
+    # calibration reference by Allard Mees on 2026-09-07, replacing Velsen
+    # I (below). A large Terra Sigillata assemblage besides — the biggest
+    # findspot in the corpus by stamp count — gives the reference weight
+    # Velsen never had.
+    ("Haltern", "Military settlement", 9,
+     "coin-dated, ending about AD 9", False),
     ("Pompeii", "Hoard", 79,
      "eruption of Vesuvius", False),
     ("Inchtuthil", "Gutter", 87,
      "historically dated abandonment", False),
 ]
+
+# Velsen I (terminus AD 28, corrected from AD 30 by Allard Mees on
+# 2026-08-25) is no longer a CALIBRATION_REFERENCES entry: on 2026-09-07
+# Allard withdrew it from calibration against hard-dated findspots
+# entirely, not merely from the criterion — the end date and the
+# assignment of the material to building phases are not settled. It
+# remains an ordinary corpus member with its own avg_datemin/avg_datemax
+# like any other findspot; only its role as an independent reference is
+# gone, superseded by Haltern above. The `contested` flag that used to
+# carry this distinction is retired with it — every remaining reference is
+# uncontested, which is the point of the swap, not a simplification worth
+# preserving machinery for.
 
 # Label for the event behind each terminus, keyed by discovery site. Kept
 # apart from CALIBRATION_REFERENCES so that adding a label cannot disturb
@@ -206,7 +216,7 @@ CALIBRATION_REFERENCES = [
 TERMINUS_EVENTS = {
     "Dangstetten": "Abandonment of the legionary camp",
     "Oberaden": "Abandonment of the legionary camp",
-    "Velsen": "Abandonment of the naval base",
+    "Haltern": "Abandonment of the military settlement",
     "Pompeii": "Eruption of Vesuvius",
     "Inchtuthil": "Abandonment of the legionary fortress",
 }

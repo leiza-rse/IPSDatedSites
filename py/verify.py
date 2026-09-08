@@ -95,11 +95,17 @@ EDITORIAL_INCLUSIONS = [
     ("Bregenz", "Samian Hoard 1913"),
 ]
 
-EXPECTED_ROWS = 41        # 2026-08-28: 37 plus four Bregenz findspots —
-                          # the three Boeckleareal contexts admitted on
-                          # 2026-08-25 and the Samian Hoard 1913 added by
-                          # revision 31, which arrived with the live fetch
-                          # of this date.
+EXPECTED_ROWS = 45        # 2026-09-08: 41 plus Haltern, Dangstetten,
+                          # Oberaden, Velsen I (added to CALIBRATION_
+                          # REFERENCES / the corpus itself, not just
+                          # referenced by it), Pudding Pan Rock and Tác.
+                          # Several pre-existing findspot labels were also
+                          # recapitalised in the same live pull (Eschenz —
+                          # shop -> Shop, Wroxeter — gutter -> Gutter,
+                          # Langenhain — store -> Store, and others) —
+                          # harmless for row count, but see the hardcoded
+                          # label lists in make_calibration_panels.py and
+                          # make_talk_figures.py, both updated to match.
                           #
                           # A live database, so this is a landmark rather
                           # than a contract: check (a) warns, never fails.

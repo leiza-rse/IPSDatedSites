@@ -3,7 +3,7 @@ IPS Dated Sites — calibrating tau, and showing what it rests on
 ===============================================================
 
     python py/calibrate_tau.py
-    python py/calibrate_tau.py --drop Velsen
+    python py/calibrate_tau.py --drop Haltern
 
 tau is defined as the smallest value at which every reference findspot's
 independent terminus still falls inside the interval the model computes from

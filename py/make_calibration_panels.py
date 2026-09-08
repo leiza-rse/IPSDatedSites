@@ -9,7 +9,7 @@ chronological midpoint within its figure. Drawn in the same idiom, but kept
 apart because they answer different questions:
 
   * the five ceramic-independent reference ensembles against which tau was
-    calibrated — Dangstetten, Oberaden, Velsen I, Pompeii, Inchtuthil. Each
+    calibrated — Dangstetten, Oberaden, Haltern, Pompeii, Inchtuthil. Each
     carries its terminus as a vertical line, so the reader can see for
     himself whether the modelled interval contains it. That is the whole
     calibration argument, made visible rather than asserted.
@@ -96,13 +96,13 @@ PAPER = "#fbfaf7"
 # make the effect of n on k legible without any further explanation.
 COMPARISON = [
     ("Nijmegen", "Barbarossastraat"),
-    ("Wroxeter", "gutter"),
-    ("Eschenz", "shop"),
+    ("Wroxeter", "Gutter"),
+    ("Eschenz", "Shop"),
     ("London", "New Fresh Wharf: quay"),
-    ("Langenhain", "store"),
+    ("Langenhain", "Store"),
 ]
 
-PROPOSED = {("Wroxeter", "gutter")}
+PROPOSED = {("Wroxeter", "Gutter")}
 
 
 def calibration_title() -> str:

@@ -453,7 +453,7 @@ def build(graph_path: Path, out: Path) -> list[Path]:
         return stem
 
     pompeii = findspot_by_label(g, "Pompeii", "Hoard")
-    langenhain = findspot_by_label(g, "Langenhain", "store")
+    langenhain = findspot_by_label(g, "Langenhain", "Store")
 
     figures = [
         ("talk-process", CUT_PROCESS, pompeii, True),
