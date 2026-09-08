@@ -49,7 +49,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "py"))
 
-from ips_rdf_export import CALIBRATION_REFERENCES  # noqa: E402
+from ips_rdf_export import CALIBRATION_REFERENCES, rounding_only_miss  # noqa: E402
 
 STEP = 0.01
 TAU_CEILING = 60.0
@@ -81,6 +81,29 @@ def contains_all(refs, rows, tau: float) -> bool:
         if not lo <= terminus <= hi:
             return False
     return True
+
+
+def published_status(refs, rows, tau: float):
+    """Where the published tau stands, at full precision and with rounding.
+
+    tau_min() and contains_all() stay strict on purpose — they answer "what
+    does exact containment require", which is a fact worth keeping separate
+    from "is the published value acceptable". This answers the second
+    question, distinguishing a genuine miss from one that only exists at the
+    tenth-year decimal eff_start/eff_end carry and nothing else in the
+    corpus does. See rounding_only_miss() in py/ips_rdf_export.py for the
+    2026-09-08 decision this implements.
+    """
+    misses, borderline = [], []
+    for site, findspot, terminus, _why, _c in refs:
+        lo, hi, _k = interval(rows[(site, findspot)], tau)
+        if lo <= terminus <= hi:
+            continue
+        if rounding_only_miss(lo, hi, terminus):
+            borderline.append(site)
+        else:
+            misses.append(site)
+    return misses, borderline
 
 
 def tau_min(refs, rows) -> float | None:
@@ -154,17 +177,33 @@ def main() -> int:
     print()
 
     floor = tau_min(refs, rows)
-    print(f"  Smallest tau satisfying the criterion : {floor}")
+    print(f"  Smallest tau satisfying the criterion : {floor}  (full precision)")
     print(f"  Published tau (p_tau on every row)    : {published}")
-    if floor is None:
-        print("  !!  No tau up to the ceiling contains every terminus.")
+
+    misses, borderline = published_status(refs, rows, published)
+    if misses:
+        print("  !!  At the published tau, these references fall outside "
+              "their modelled interval even once rounded to the year: "
+              + ", ".join(misses))
         return 1
-    if published < floor:
+    if borderline:
+        print("  --  At the published tau, these references are outside "
+              "at full precision but inside once rounded to the year — "
+              "accepted per the 2026-09-08 decision, see "
+              "rounding_only_miss() in ips_rdf_export.py: "
+              + ", ".join(borderline))
+    if floor is None:
+        print("  --  No tau up to the ceiling satisfies the criterion at "
+              "full precision; the published value is accepted on the "
+              "rounded reading above instead. Headroom is not meaningful "
+              "here and is not reported.")
+    elif published < floor:
         print("  !!  The published tau is BELOW the calibrated floor: the "
               "model contradicts evidence it cannot see.")
         return 1
-    print(f"  Headroom                              : "
-          f"{round(published - floor, 2)}")
+    else:
+        print(f"  Headroom                              : "
+              f"{round(published - floor, 2)}")
     print()
 
     # ---- what the number actually rests on -------------------------------
@@ -174,8 +213,10 @@ def main() -> int:
         if len(sub) < 2:
             continue
         alt = tau_min(sub, rows)
-        verdict = ("binding" if alt is not None and alt < floor
-                   else "not binding")
+        if floor is None:
+            verdict = "the blocker" if alt is not None else "still blocked"
+        else:
+            verdict = "binding" if alt is not None and alt < floor else "not binding"
         print(f"    without {site:<14} tau_min = {alt!s:<7} {verdict}")
     print()
 
@@ -185,9 +226,10 @@ def main() -> int:
         row = rows[(site, findspot)]
         lo, hi, k = interval(row, published)
         margin = min(terminus - lo, hi - terminus)
+        note = "  (rounding only)" if site in borderline else ""
         print(f"    {site:<14} n={row['count_stamps']:>4}  k={k:.4f}  "
               f"[{lo:8.1f} .. {hi:8.1f}]  terminus {terminus:>4}  "
-              f"margin {margin:6.1f} a   {why}")
+              f"margin {margin:6.1f} a   {why}{note}")
 
     return 0
 

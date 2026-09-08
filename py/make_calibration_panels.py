@@ -73,7 +73,7 @@ from matplotlib.ticker import FuncFormatter, MaxNLocator
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "py"))
 
-from ips_rdf_export import CALIBRATION_REFERENCES  # noqa: E402
+from ips_rdf_export import CALIBRATION_REFERENCES, rounding_only_miss  # noqa: E402
 import ips_render  # noqa: E402
 
 CMAP = plt.get_cmap("RdYlGn")
@@ -221,17 +221,30 @@ def draw_panel(ax, r: dict, era: str) -> None:
     # the independent terminus, for the five references
     if terminus is not None:
         inside = eff_start <= terminus <= eff_end
+        borderline = (not inside) and rounding_only_miss(eff_start, eff_end, terminus)
         contested = r.get("_contested", False)
         # A contested terminus is drawn thinner and paler: still shown,
         # because the reader should see the case, but visibly not carrying
-        # the same weight as one the calibration criterion rests on.
+        # the same weight as one the calibration criterion rests on. A
+        # borderline one (inside only once rounded to the year, see
+        # rounding_only_miss) gets its own dash-dot style — visibly not the
+        # clean "outside" of a real miss, and visibly not a plain "inside"
+        # either.
+        if contested:
+            ls = "-" if inside else (0, (3, 2))
+        elif borderline:
+            ls = (0, (5, 1, 1, 1))
+        else:
+            ls = "-" if inside else (0, (3, 2))
         ax.axvline(terminus, color=SLIP, lw=1.0 if contested else 1.6,
-                   alpha=0.55 if contested else 1.0, zorder=4,
-                   ls="-" if inside else (0, (3, 2)))
+                   alpha=0.55 if contested else 1.0, zorder=4, ls=ls)
         # In the clear band between the box and the axis: above the box it
         # collides with the header at the early findspots, below it with the
         # tick labels.
-        ax.text(terminus, 0.13, ips_render.year_label(terminus, era),
+        label = ips_render.year_label(terminus, era)
+        if borderline:
+            label += "  (rounding only)"
+        ax.text(terminus, 0.13, label,
                 ha="center", va="bottom", fontsize=7.4, color=SLIP,
                 fontweight="bold", zorder=5)
 
@@ -254,6 +267,8 @@ def draw_panel(ax, r: dict, era: str) -> None:
         why = r["_why"]
         if r.get("_contested"):
             why += "  ·  excluded from the calibration"
+        elif terminus is not None and rounding_only_miss(eff_start, eff_end, terminus):
+            why += "  ·  borderline, rounding only — see notes"
         ax.text(1.0, 1.30, why, transform=ax.transAxes, ha="right",
                 va="top", fontsize=7.4, color=SLIP, style="italic",
                 alpha=0.7 if r.get("_contested") else 1.0)
@@ -288,7 +303,10 @@ def render(rows: list[dict], out_dir: Path, era: str, stem: str,
     # reference adds a fourth line, which at the old fixed reserve landed on
     # the last panel's tick labels.
     n_legend = 1 + (2 if any(r["_terminus"] is not None for r in rows) else 0) \
-                 + (1 if any(r.get("_contested") for r in rows) else 0)
+                 + (1 if any(r.get("_contested") for r in rows) else 0) \
+                 + (1 if any(r["_terminus"] is not None
+                             and rounding_only_miss(num(r["eff_start"]), num(r["eff_end"]), r["_terminus"])
+                             for r in rows) else 0)
     TOP_IN = 0.80
     BOTTOM_IN = 0.55 + 0.18 * n_legend
     gs = fig.add_gridspec(n, 1, hspace=1.05, left=0.055, right=0.975,
@@ -315,6 +333,14 @@ def render(rows: list[dict], out_dir: Path, era: str, stem: str,
                        label="contested terminus, shown but excluded from "
                              "the calibration criterion"),
         ]
+        if any(r["_terminus"] is not None
+               and rounding_only_miss(num(r["eff_start"]), num(r["eff_end"]), r["_terminus"])
+               for r in rows):
+            handles += [
+                Line2D([], [], color=SLIP, lw=1.6, ls=(0, (5, 1, 1, 1)),
+                       label="outside at full precision, inside once "
+                             "rounded to the year — counted as contained"),
+            ]
     handles.append(
         Line2D([], [], color="#555555", lw=0.9, alpha=0.5,
                label="full range of contributing potter dates"))
@@ -378,16 +404,27 @@ def main() -> int:
               f"{ips_render.year_label(max(num(r['midpoint_year']) for r in sheet), args.era)}")
 
     # The calibration claim, restated as a number so that a silent failure
-    # cannot hide behind a figure that still looks plausible.
+    # cannot hide behind a figure that still looks plausible. A rounding-only
+    # miss (see rounding_only_miss) counts as contained, per the 2026-09-08
+    # decision recorded there — but is reported separately rather than
+    # folded silently into the plain "inside" count.
     binding = [r for r in references if not r.get("_contested")]
-    inside = sum(1 for r in binding
-                 if num(r["eff_start"]) <= r["_terminus"] <= num(r["eff_end"]))
+    exact_inside = [r for r in binding
+                    if num(r["eff_start"]) <= r["_terminus"] <= num(r["eff_end"])]
+    borderline = [r for r in binding if r not in exact_inside
+                  and rounding_only_miss(num(r["eff_start"]), num(r["eff_end"]), r["_terminus"])]
+    inside = len(exact_inside) + len(borderline)
     print(f"  Terminus inside   : {inside} of {len(binding)}"
           f"  ({len(references) - len(binding)} contested, not counted)")
-    if inside < len(binding):
+    if borderline:
+        names = ", ".join(f"{r['the_site']} ({r['the_findspot']})" for r in borderline)
+        print(f"      of which {len(borderline)} rounding-only borderline: {names}")
+    genuinely_outside = len(binding) - inside
+    if genuinely_outside:
         print("  !!  A reference terminus falls outside its modelled "
-              "interval. tau was calibrated as the smallest value at which "
-              "none does — this needs looking at before publication.")
+              "interval even once rounded to the year. tau was calibrated "
+              "as the smallest value at which none does — this needs "
+              "looking at before publication.")
 
     print()
     for path in written:

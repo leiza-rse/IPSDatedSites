@@ -682,53 +682,84 @@ footer .fi{max-width:1080px; margin:0 auto}
   inside the interval the model computes from its stamps alone. Under the original
   four-reference calibration — Dangstetten, Oberaden, Pompeii, Inchtuthil — that value
   was 6, arrived at with 1.22 of headroom above the floor of 4.78. Since Haltern joined
-  the reference set on 2026-09-07, no \(\tau\) up to the tested ceiling of 20 satisfies
-  the criterion for all five: see the warning below. The published value has not been
-  changed while this is unresolved.</p>
+  the reference set on 2026-09-07, no \(\tau\) up to the tested ceiling of 60 satisfies
+  the criterion for all five <em>at full precision</em>. Rounded to the whole year — as
+  every other headline figure in this model already is — it does. \(\tau = 6\) remains
+  published; see the note below for how that was decided.</p>
 
   <h3>What the number actually rests on</h3>
 
   <p>A criterion of this shape invites a question that is rarely asked of published
-  calibrations: <em>which</em> of the references sets the value, or — now — blocks it
-  from being set at all? Removing each in turn and recomputing the floor answers it.</p>
+  calibrations: <em>which</em> of the references sets the value, or — at full precision —
+  blocks it from being set at all? Removing each in turn and recomputing the floor
+  answers it.</p>
 
   <table>
-    <thead><tr><th>Reference removed</th><th class="num">Smallest admissible \(\tau\)</th><th>Verdict</th></tr></thead>
+    <thead><tr><th>Reference removed</th><th class="num">Smallest admissible \(\tau\), full precision</th><th>Verdict</th></tr></thead>
     <tbody>
-      <tr><td>none</td><td class="num">none ≤ 20</td><td>—</td></tr>
-      <tr><td>Dangstetten</td><td class="num">none ≤ 20</td><td>still blocked by Haltern</td></tr>
-      <tr><td>Oberaden</td><td class="num">none ≤ 20</td><td>still blocked by Haltern</td></tr>
-      <tr><td>Haltern</td><td class="num">4.78</td><td><strong>the blocker</strong></td></tr>
-      <tr><td>Pompeii</td><td class="num">none ≤ 20</td><td>still blocked by Haltern</td></tr>
-      <tr><td>Inchtuthil</td><td class="num">none ≤ 20</td><td>still blocked by Haltern</td></tr>
+      <tr><td>none</td><td class="num">none ≤ 60</td><td>—</td></tr>
+      <tr><td>Dangstetten</td><td class="num">none ≤ 60</td><td>still blocked by Haltern</td></tr>
+      <tr><td>Oberaden</td><td class="num">none ≤ 60</td><td>still blocked by Haltern</td></tr>
+      <tr><td>Haltern</td><td class="num">4.78</td><td><strong>the blocker, at full precision</strong></td></tr>
+      <tr><td>Pompeii</td><td class="num">none ≤ 60</td><td>still blocked by Haltern</td></tr>
+      <tr><td>Inchtuthil</td><td class="num">none ≤ 60</td><td>still blocked by Haltern</td></tr>
     </tbody>
   </table>
 
-  <p>Haltern is not merely the tightest constraint, the way Pompeii used to be — it is
-  the only one whose removal changes the answer from unsatisfiable to satisfiable at
-  all, and it restores exactly the earlier floor of 4.78. With Haltern in the set, the
-  other four references are irrelevant to the question of whether <em>a</em> \(\tau\)
-  exists: none does. Pompeii's own margin at \(\tau = 6\) is still 0.2 years, Inchtuthil's
-  still 6.2 — those numbers have not moved, because they come from the same corrected
-  arithmetic the fix in <code>py/ips_model.py</code> put right everywhere at once.</p>
+  <p>At full precision, Haltern is not merely the tightest constraint, the way Pompeii
+  used to be — it is the only one whose removal changes the answer from unsatisfiable to
+  satisfiable at all, and it restores exactly the earlier floor of 4.78. Pompeii's own
+  margin at \(\tau = 6\) is still 0.2 years, Inchtuthil's still 6.2 — those numbers have
+  not moved, because they come from the same corrected arithmetic the fix in
+  <code>py/ips_model.py</code> put right everywhere at once.</p>
 
-  <div class="warn">
-    <strong>Haltern does not currently satisfy the criterion, at any \(\tau\).</strong>
-    Its own stamp count is 861 — by far the largest findspot in the corpus, roughly
-    2.5 times Cap de Creus, the next largest — and that size pins its coverage factor
-    \(k\) at very close to \(k_{\min}\) for every \(\tau\) from 1 to 20: with \(n = 861\),
-    \(n/\tau\) stays large enough that \(k\) barely moves across the whole tested range.
-    The interval this produces, AD &minus;4 to AD 9 at \(\tau = 6\)
-    (<code>eff_start</code>&nbsp;&minus;3.6, <code>eff_end</code>&nbsp;8.6), falls 0.4
-    years short of the AD 9 terminus. Widening \(\tau\) further does not help: it moves
-    \(k\) only fractionally at this size of assemblage. Confirmed on a fresh clone
-    against Allard's live export of 2026-09-08, both by <code>py/calibrate_tau.py</code>
-    (<code>Smallest tau satisfying the criterion: None</code>) and independently by
-    <code>py/make_calibration_panels.py</code> (<code>Terminus inside: 4 of 5</code>).
-    Not a coding defect — the earlier <code>ips_model.py</code> bug this replaced would,
-    if anything, have hidden this rather than caused it. It is a genuine near-miss
-    between the ceramic and the historical dating of one findspot, flagged rather than
-    resolved, pending Allard Mees's judgement on how to read it.
+  <div class="note">
+    <strong>Resolved, 2026-09-08: \(\tau = 6\) stays; Haltern is labelled borderline,
+    rounding only.</strong> Haltern's own interval, AD &minus;4 to AD 9 at \(\tau = 6\)
+    (<code>eff_start</code>&nbsp;&minus;3.6, <code>eff_end</code>&nbsp;8.6 unrounded),
+    falls 0.4 years short of its AD 9 terminus at full precision — but 8.6 rounds to 9,
+    exactly the terminus, and every other headline figure in the model
+    (<code>avg_datemin</code>, the termini themselves) is already whole years. Two
+    alternatives were considered and rejected with Allard Mees before settling on this:
+    <ul style="margin:.4rem 0 0">
+      <li><b>Loosening \(k_{\min}\)/\(k_{\max}\)</b> (e.g. to 0.6/1.6) does widen Haltern's
+      interval enough, but by far more than needed — 0.535/1.535 would already suffice —
+      and it drives \(\tau_{\min}\) down to about 0.01: any \(\tau\) then satisfies the
+      criterion, which stops it from discriminating anything. It also widens every one of
+      the corpus's 45 intervals by roughly 15% on average at \(\tau = 6\), not only the
+      five references. Archaeologically, as Allard Mees put it, a model in which a single
+      stamp could count as "reliable" is not one you would want as a general foundation.</li>
+      <li><b>Rounding consistently and re-deriving \(\tau\)</b> is the more principled
+      version of the fix actually adopted below, but taken to its conclusion it drops
+      \(\tau_{\min}\) to about 1 — the same objection as above, from the other direction,
+      and a visible, publication-relevant change for the sake of one findspot's last
+      decimal.</li>
+    </ul>
+    So \(\tau\) stays at 6, unrounded, exactly as calibrated against the original four.
+    Only the containment <em>check</em> now also asks the rounded question, and only for
+    telling a genuine miss apart from one that is an artefact of comparing a whole-year
+    terminus against a tenth-year interval boundary — see
+    <code>rounding_only_miss()</code> in <code>py/ips_rdf_export.py</code>, used by both
+    <code>py/calibrate_tau.py</code> and <code>py/make_calibration_panels.py</code> so the
+    two cannot disagree about what "contained" means. The calibration figure above marks
+    Haltern's line with its own dash-dot style and the words "rounding only" rather than
+    drawing it as a plain miss or a plain pass.
+  </div>
+
+  <div class="note">
+    <strong>The archaeological case, independent of the arithmetic.</strong> Pompeii and
+    Haltern are both catastrophe assemblages — a volcanic eruption, a military defeat —
+    and in both, <code>eff_end</code> lands close to the historical date for exactly that
+    reason: supply stops abruptly rather than tailing off. For Haltern specifically,
+    Allard Mees notes that the camp's Terra Sigillata is unlikely to have travelled to the
+    battle (none was recovered at the presumed site of the engagement, Kalkriese), and
+    that the camp was evidently cleared quickly once the defeat became known in the
+    summer or autumn of AD 9, or looted afterwards — several scenarios, as usual in
+    archaeology, all consistent with an end date close to the historical one without
+    needing more than a few months' latitude on either side. Comparing "8.6 or 9" to a
+    tenth of a year is already more precision than the underlying evidence supports; that
+    the model rounds at all is closer to a requirement than a convenience, given how
+    uncertain the inputs are.
   </div>
 
   <div class="note">
@@ -1069,13 +1100,15 @@ footer .fi{max-width:1080px; margin:0 auto}
     <code>datedcontext = 'yes'</code> alone became sufficient and the clause was
     retired; see the note in <a href="#selection">§3</a>.</li>
 
-    <li><strong>Haltern does not currently satisfy the calibration criterion.</strong>
-    Added as a reference on 2026-09-07, its own modelled interval falls 0.4 years short
-    of its AD 9 terminus at every \(\tau\) tested, because its stamp count (861, the
-    largest in the corpus) pins \(k\) close to \(k_{\min}\) regardless of \(\tau\).
-    Flagged by both <code>py/calibrate_tau.py</code> and
-    <code>py/make_calibration_panels.py</code> rather than silently absorbed or
-    silently reverted. <a href="#constants">§7a</a></li>
+    <li><strong>Haltern satisfies the calibration criterion only once rounded to the
+    year.</strong> Added as a reference on 2026-09-07, its own modelled interval falls
+    0.4 years short of its AD 9 terminus at full precision, because its stamp count (861,
+    the largest in the corpus) pins \(k\) close to \(k_{\min}\) regardless of \(\tau\).
+    Resolved with Allard Mees on 2026-09-08: \(\tau = 6\) stays as published, and the
+    containment check now also asks the rounded question — see
+    <code>rounding_only_miss()</code> and the note in <a href="#constants">§7a</a> for
+    why the alternatives (loosening \(k_{\min}\)/\(k_{\max}\), or re-deriving \(\tau\)
+    under rounding) were rejected.</li>
 
     <li><strong>Fabricated fallbacks.</strong> <code>COALESCE(..., 0.5)</code> on the quality
     measures and <code>COALESCE(..., 0)</code> on the uncertainties turn "undefined" into

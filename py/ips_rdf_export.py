@@ -221,6 +221,34 @@ TERMINUS_EVENTS = {
     "Inchtuthil": "Abandonment of the legionary fortress",
 }
 
+
+def rounding_only_miss(eff_start: float, eff_end: float, terminus: float) -> bool:
+    """True if a terminus sits outside the exact interval but inside it once
+    both are rounded to the nearest whole year.
+
+    Shared by py/calibrate_tau.py and py/make_calibration_panels.py, which
+    both test containment against CALIBRATION_REFERENCES and must agree on
+    what "contained" means; defined once here rather than twice.
+
+    Every other headline figure in the model — avg_datemin, avg_datemax,
+    the termini themselves — is already whole years; eff_start/eff_end carry
+    a tenth-year decimal that nothing else in the corpus does. A miss that
+    only exists at that decimal is a labelling question, not a dating one.
+    Decided with Allard Mees on 2026-09-08, for Haltern specifically, after
+    checking the alternatives: loosening k_min/k_max moves the containment
+    criterion so far that tau stops discriminating anything (tau_min drops
+    to about 0.01 at the k_min/k_max he first proposed) — and, in his words,
+    archaeology would not call a single stamp "reliable" either. Rounding
+    consistently across all five references would itself imply a much
+    smaller tau, around 1, which is the same problem approached from the
+    other direction. So tau stays at 6, as published, and a miss that is
+    only ever a rounding artefact is labelled as exactly that rather than
+    folded silently into "contained" or left standing as "outside".
+    """
+    return not (eff_start <= terminus <= eff_end) \
+        and round(eff_start) <= terminus <= round(eff_end)
+
+
 FIGURE_CONSTANTS = {
     "padYears": (60, XSD.integer),            # Z. 373
     "extremeStubYears": (10, XSD.integer),    # Z. 472
