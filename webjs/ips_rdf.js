@@ -18,8 +18,8 @@ const GEN = {
    "Military camp"
   ],
   [
-   "Velsen",
-   "Velsen I"
+   "Haltern",
+   "Military settlement"
   ],
   [
    "Pompeii",

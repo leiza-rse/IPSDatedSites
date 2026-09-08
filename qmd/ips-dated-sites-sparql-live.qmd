@@ -95,7 +95,7 @@ PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#>"""
 ```
 
-Now fetch the graph. It is about 0.3 MB and holds the findspot
+Now fetch the graph. It is about 0.4 MB and holds the findspot
 datings, the full vocabulary, and the rdf:type triples materialised over
 `rdfs:subClassOf` — which is why the CIDOC CRM queries below resolve without a
 reasoner.
