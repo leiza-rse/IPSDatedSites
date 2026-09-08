@@ -286,8 +286,8 @@ footer .fi{max-width:1080px; margin:0 auto}
 
   <p>Rows are grouped by <code>(site, findspot)</code>. A site with several excavated
   contexts therefore produces several rows — London, Colchester, Vindonissa and
-  La Graufesenque two each, Bregenz three at the snapshot of 25 August and four once the
-  context added in revision 31 arrives. This is deliberate: a single
+  La Graufesenque two each, Bregenz four (three Böckleareal contexts plus the Samian
+  Hoard of 1913, all admitted since 27 August 2026). This is deliberate: a single
   site may contain contexts of very
   different date and very different reliability, and collapsing them would average away
   precisely the information the method depends on.</p>
@@ -326,25 +326,24 @@ footer .fi{max-width:1080px; margin:0 auto}
   <p class="sub">Which stamps enter the calculation.</p>
 
 <pre><span class="c">-- applied to every stamp occurrence before aggregation</span>
-<span class="k">WHERE</span> di.isdate = 'Θ' <span class="k">AND</span> di.sitecharacter = 'Σ' <span class="k">AND</span> findspot <span class="k">IS NOT NULL</span>
+<span class="k">WHERE</span> di.datedcontext = 'yes' <span class="k">AND</span> findspot <span class="k">IS NOT NULL</span>
   <span class="k">AND</span> (p.datemin, p.datemax) <span class="k">NOT IN</span> (      <span class="c">-- eleven placeholder datings</span>
         (-30,150), (0,100), (0,120), (0,130), (0,150),
         (0,180), (0,270), (100,200), (150,270),
         (160,260), (165,270) )
-  <span class="k">AND</span> ( di.site <span class="k">NOT ILIKE</span> '%Bregenz%'      <span class="c">-- named inclusion, see below</span>
-        <span class="k">OR</span> btrim(di.findspot) <span class="k">IN</span> ('Böckleareal (period I)',
-                                  'Böckleareal (period II)',
-                                  'Böckleareal (destruction layer period II)',
-                                  'Samian Hoard 1913') )
 <span class="k">GROUP BY</span> vds.id, di.site, di.findspot, …
 <span class="k">HAVING</span> <span class="k">COUNT</span>(di.number) &gt;= :min_stamps</pre>
 
   <div class="note">
-    <strong>The statement is pure ASCII.</strong> Θ, Σ and the umlaut are written as
-    <code>U&amp;</code>-escapes — <code>U&amp;'\0398'</code>,
-    <code>U&amp;'\03A3'</code>, <code>U&amp;'B\00F6ckleareal …'</code> — so that the
-    query does not depend on what encoding a connection happens to assume. They are
-    spelled out here for legibility only.
+    <strong>One flag replaces two, as of 2026-09-08.</strong> Until early September 2026
+    the filter read <code>di.isdate = 'Θ' AND di.sitecharacter = 'Σ'</code> — two
+    editorial markers on the source record, checked in combination. A single
+    <code>datedcontext = 'yes'</code> flag now carries the same judgement. The change
+    was not cosmetic: Allard Mees pointed out that Haltern had never qualified under the
+    old pair, because <code>sitecharacter = 'Σ'</code> presupposes something like a
+    depot, which Haltern's military settlement is not. <code>datedcontext</code> asks
+    the question the model actually needs answered — is this findspot dated? — directly,
+    rather than through a proxy that happened to exclude a real one.
   </div>
 
   <div class="note">
@@ -358,27 +357,29 @@ footer .fi{max-width:1080px; margin:0 auto}
   </div>
 
   <div class="open">
-    <p style="margin:0">Two things about it stay open. The list is a judgement about
+    <p style="margin:0">One thing about it stays open. The list is a judgement about
     which spans are placeholders, and that judgement lives in the statement rather than
-    in the database, where a flag on the potter record would belong; the same is true
-    of the Bregenz clause below. And the exclusion is not neutral either way — it
-    removes the affected potters at every findspot at which they occur, not at selected
-    ones. Both must be recorded as provenance in any RDF export rather than applied
-    silently.</p>
+    in the database, where a flag on the potter record would belong. And the exclusion
+    is not neutral either way — it removes the affected potters at every findspot at
+    which they occur, not at selected ones. It must be recorded as provenance in any RDF
+    export rather than applied silently.</p>
   </div>
 
   <div class="note">
-    <strong>Bregenz is admitted by name.</strong> The blanket exclusion of the site was
-    replaced on 25 August 2026 by a clause admitting the checked contexts and no others:
-    first the three Böckleareal complexes, and since revision 31 of 27 August the Samian
-    Hoard of 1913 as well. The remaining records of the site are unreviewed and stay out,
-    so the number of rows Bregenz contributes is a statement about what has been checked,
-    not about what has been excavated. It is an editorial stopgap, not a permanent form:
-    the right fix is to mark checked and unchecked findspots in the database and let the
-    ordinary filter decide, rather than to carry a place name in the SQL. Check (e) in
-    <code>py/verify.py</code> reports how many of the admitted contexts actually arrived,
-    because a clause that matches nothing is indistinguishable in the output from a
-    findspot that was never admitted.
+    <strong>The Bregenz clause is gone from the query, not from the watchlist.</strong>
+    Between 25 August and 8 September 2026 the statement carried a second clause
+    admitting only the checked Bregenz contexts by name — first the three Böckleareal
+    complexes, then the Samian Hoard of 1913 — because
+    <code>isdate</code>/<code>sitecharacter</code> alone could not yet be trusted for
+    that site. It was a deliberate stopgap, documented as one at the time. Once
+    <code>datedcontext = 'yes'</code> became the sole filter and the database-side
+    marking caught up, the clause no longer changed the result — it named exactly the
+    rows <code>datedcontext</code> already carried — so it was removed rather than left
+    as inert, easily-forgotten SQL. Check (e) in <code>py/verify.py</code> still watches
+    the same four findspots by name, though: not as a filter any more, but as a
+    watchdog, so that if one of them ever silently drops out of the output again — a
+    spelling change, a withdrawn record — the run says so rather than quietly shipping a
+    smaller corpus.
   </div>
 
   <p>One further asymmetry is worth noting. The die-based measures in
@@ -651,15 +652,14 @@ footer .fi{max-width:1080px; margin:0 auto}
   stamps is then enough to claim a narrow date.</p>
 
   <p>It was fixed empirically. Five findspots in the corpus are dated by evidence
-  that does not depend on samian ware at all — though only four of them carry the
-  criterion:</p>
+  that does not depend on samian ware at all:</p>
 
   <table>
     <thead><tr><th>Findspot</th><th>Independent evidence</th></tr></thead>
     <tbody>
       <tr><td>Dangstetten, Military camp</td><td>coin-dated, 15 to 8 BC</td></tr>
       <tr><td>Oberaden, Military camp</td><td>dendrochronology, ending 7 BC</td></tr>
-      <tr><td>Velsen, Velsen I</td><td>military base in operation, abandoned about AD 28 — <em>contested, see below</em></td></tr>
+      <tr><td>Haltern, Military settlement</td><td>coin-dated, ending about AD 9 — the largest findspot in the corpus by stamp count; <em>replaces Velsen I, see below</em></td></tr>
       <tr><td>Pompeii, Hoard</td><td>eruption of Vesuvius, AD 79</td></tr>
       <tr><td>Inchtuthil, Gutter</td><td>historically dated abandonment</td></tr>
     </tbody>
@@ -671,58 +671,77 @@ footer .fi{max-width:1080px; margin:0 auto}
     terminus as a vertical line." style="width:100%; height:auto">
     <figcaption>The calibration set. Each panel shows what the model computes from
     the stamps alone — box, whiskers, full range of contributing potter dates — with
-    the independent terminus drawn across it. The criterion is simply that the line
-    falls inside the box in all five cases; the figure is generated by
-    <code>py/make_calibration_panels.py</code>, which recomputes that and fails
-    loudly if it stops holding.</figcaption>
+    the independent terminus drawn across it. The criterion is that the line falls
+    inside the box in every case; as the figure shows, that currently holds for four
+    of the five (Haltern's line falls just outside — see below). Generated by
+    <code>py/make_calibration_panels.py</code>, which recomputes the containment
+    itself and reports the count rather than asserting it.</figcaption>
   </figure>
 
-  <p>\(\tau\) is the <em>smallest</em> value at which every one of these termini still
-  falls inside the interval the model computes from the stamps alone. Smaller, and the
-  model starts contradicting evidence it cannot see; larger, and it is being more
-  cautious than the data require. That value is 6, down from the 20 used until the
-  calibration.</p>
+  <p>\(\tau\) is the <em>smallest</em> value at which every reference's terminus falls
+  inside the interval the model computes from its stamps alone. Under the original
+  four-reference calibration — Dangstetten, Oberaden, Pompeii, Inchtuthil — that value
+  was 6, arrived at with 1.22 of headroom above the floor of 4.78. Since Haltern joined
+  the reference set on 2026-09-07, no \(\tau\) up to the tested ceiling of 20 satisfies
+  the criterion for all five: see the warning below. The published value has not been
+  changed while this is unresolved.</p>
 
   <h3>What the number actually rests on</h3>
 
   <p>A criterion of this shape invites a question that is rarely asked of published
-  calibrations: <em>which</em> of the references sets the value? Removing each in turn
-  and recomputing the floor answers it.</p>
+  calibrations: <em>which</em> of the references sets the value, or — now — blocks it
+  from being set at all? Removing each in turn and recomputing the floor answers it.</p>
 
   <table>
     <thead><tr><th>Reference removed</th><th class="num">Smallest admissible \(\tau\)</th><th>Verdict</th></tr></thead>
     <tbody>
-      <tr><td>none</td><td class="num">4.78</td><td>—</td></tr>
-      <tr><td>Dangstetten</td><td class="num">4.78</td><td>not binding</td></tr>
-      <tr><td>Oberaden</td><td class="num">4.78</td><td>not binding</td></tr>
-      <tr><td>Velsen I</td><td class="num">4.78</td><td>not binding</td></tr>
-      <tr><td>Pompeii</td><td class="num">1.23</td><td><strong>binding</strong></td></tr>
-      <tr><td>Inchtuthil</td><td class="num">4.78</td><td>not binding</td></tr>
+      <tr><td>none</td><td class="num">none ≤ 20</td><td>—</td></tr>
+      <tr><td>Dangstetten</td><td class="num">none ≤ 20</td><td>still blocked by Haltern</td></tr>
+      <tr><td>Oberaden</td><td class="num">none ≤ 20</td><td>still blocked by Haltern</td></tr>
+      <tr><td>Haltern</td><td class="num">4.78</td><td><strong>the blocker</strong></td></tr>
+      <tr><td>Pompeii</td><td class="num">none ≤ 20</td><td>still blocked by Haltern</td></tr>
+      <tr><td>Inchtuthil</td><td class="num">none ≤ 20</td><td>still blocked by Haltern</td></tr>
     </tbody>
   </table>
 
-  <p>Only Pompeii binds. The remaining four are contained comfortably by any \(\tau\)
-  the others already require, and contribute nothing to the number. Stated plainly:
-  arithmetically this is a one-ensemble calibration, and the four non-binding
-  references are what makes the published \(\tau = 6\) a value with 1.22 of headroom
-  above the floor rather than a value sitting on it.</p>
-
-  <p>The margins at \(\tau = 6\) show the same thing from the other side. Pompeii's
-  terminus falls 0.2 years inside its interval; Inchtuthil's, computed from three
-  stamps, 6.2 years inside.</p>
+  <p>Haltern is not merely the tightest constraint, the way Pompeii used to be — it is
+  the only one whose removal changes the answer from unsatisfiable to satisfiable at
+  all, and it restores exactly the earlier floor of 4.78. With Haltern in the set, the
+  other four references are irrelevant to the question of whether <em>a</em> \(\tau\)
+  exists: none does. Pompeii's own margin at \(\tau = 6\) is still 0.2 years, Inchtuthil's
+  still 6.2 — those numbers have not moved, because they come from the same corrected
+  arithmetic the fix in <code>py/ips_model.py</code> put right everywhere at once.</p>
 
   <div class="warn">
-    <strong>Velsen I is shown but excluded.</strong> Its terminus was corrected from
-    AD 30 to AD 28 on 25 August 2026. More importantly, its independence is not clean:
-    the military base was in operation until about AD 28, but activity continued on the
-    site until about AD 40, and admixture from that later material cannot be ruled out.
-    A terminus that may bound the camp rather than the assemblage should not fix a
-    published parameter. It is therefore drawn in the figure — the reader should see
-    the case — but kept out of the criterion. Because it does not bind, the exclusion
-    changes nothing: the floor stays at 4.78 and \(\tau\) stays at 6. Its modelled
-    interval, AD 12 to AD 32, does not reach the later activity, which is consistent
-    with an assemblage not visibly pulled later — though not evidence that no
-    admixture occurred.
+    <strong>Haltern does not currently satisfy the criterion, at any \(\tau\).</strong>
+    Its own stamp count is 861 — by far the largest findspot in the corpus, roughly
+    2.5 times Cap de Creus, the next largest — and that size pins its coverage factor
+    \(k\) at very close to \(k_{\min}\) for every \(\tau\) from 1 to 20: with \(n = 861\),
+    \(n/\tau\) stays large enough that \(k\) barely moves across the whole tested range.
+    The interval this produces, AD &minus;4 to AD 9 at \(\tau = 6\)
+    (<code>eff_start</code>&nbsp;&minus;3.6, <code>eff_end</code>&nbsp;8.6), falls 0.4
+    years short of the AD 9 terminus. Widening \(\tau\) further does not help: it moves
+    \(k\) only fractionally at this size of assemblage. Confirmed on a fresh clone
+    against Allard's live export of 2026-09-08, both by <code>py/calibrate_tau.py</code>
+    (<code>Smallest tau satisfying the criterion: None</code>) and independently by
+    <code>py/make_calibration_panels.py</code> (<code>Terminus inside: 4 of 5</code>).
+    Not a coding defect — the earlier <code>ips_model.py</code> bug this replaced would,
+    if anything, have hidden this rather than caused it. It is a genuine near-miss
+    between the ceramic and the historical dating of one findspot, flagged rather than
+    resolved, pending Allard Mees's judgement on how to read it.
+  </div>
+
+  <div class="note">
+    <strong>Velsen I is no longer a reference.</strong> It served as the fifth
+    ceramic-independent ensemble from revision 27 until 2026-09-07 — terminus AD 28,
+    corrected from AD 30 on 25 August 2026 — but always <code>contested</code>: activity
+    continued on the site until about AD 40, so a terminus that might bound the camp
+    rather than the assemblage was drawn in the figure without being allowed to fix a
+    published parameter. Allard Mees withdrew it from calibration entirely on
+    2026-09-07, in favour of Haltern, because the same concern applies with no remaining
+    upside — Velsen never bound \(\tau\) even while included. It remains an ordinary
+    corpus member with its own <code>avg_datemin</code>/<code>avg_datemax</code>; only
+    its role as a reference is gone.
   </div>
 
   <div class="note">
@@ -1044,9 +1063,19 @@ footer .fi{max-width:1080px; margin:0 auto}
 
   <ol>
     <li><strong>The excluded datings.</strong> Eleven placeholder
-    <code>(datemin, datemax)</code> pairs, and Bregenz admitted by name: two editorial
-    judgements carried in the statement rather than flagged in the data, and neither is
-    neutral. <a href="#selection">§3</a></li>
+    <code>(datemin, datemax)</code> pairs: an editorial judgement carried in the
+    statement rather than flagged in the data, and not neutral. The Bregenz contexts
+    were admitted by a similar named clause until 2026-09-08, when
+    <code>datedcontext = 'yes'</code> alone became sufficient and the clause was
+    retired; see the note in <a href="#selection">§3</a>.</li>
+
+    <li><strong>Haltern does not currently satisfy the calibration criterion.</strong>
+    Added as a reference on 2026-09-07, its own modelled interval falls 0.4 years short
+    of its AD 9 terminus at every \(\tau\) tested, because its stamp count (861, the
+    largest in the corpus) pins \(k\) close to \(k_{\min}\) regardless of \(\tau\).
+    Flagged by both <code>py/calibrate_tau.py</code> and
+    <code>py/make_calibration_panels.py</code> rather than silently absorbed or
+    silently reverted. <a href="#constants">§7a</a></li>
 
     <li><strong>Fabricated fallbacks.</strong> <code>COALESCE(..., 0.5)</code> on the quality
     measures and <code>COALESCE(..., 0)</code> on the uncertainties turn "undefined" into
@@ -1059,10 +1088,10 @@ footer .fi{max-width:1080px; margin:0 auto}
 
     <li><strong>Later material is dated less sharply, and this is real.</strong>
     Intervals widen with the calendar: the median box width is about twelve years
-    before AD 100 and about twenty-three years after it, a ratio of roughly one to two
-    between the first century and the second and third. The cause is archaeological,
-    not a defect of the model — see the note below — and no epoch correction is
-    applied. One was tried in v27b and made the drift worse.</li>
+    before AD 100 and about twenty-one years after it, a ratio of roughly one to
+    one-and-three-quarters between the first century and the second and third. The
+    cause is archaeological, not a defect of the model — see the note below — and no
+    epoch correction is applied. One was tried in v27b and made the drift worse.</li>
 
     <li><strong>Uniformity assumption.</strong> Each potter's range is treated as uniform.
     If production is better modelled as rising and falling, the \(w^2/12\) term would

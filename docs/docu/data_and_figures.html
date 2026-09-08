@@ -148,7 +148,7 @@ no VPN. That is what makes the datings reproducible by someone outside the proje
     <div class="means">
       One record per dated stamp: findspot, potter, die, and the potter's date range.
       These are the same rows <code>sql/v_ips_dated_stamps.sql</code> delivers, and the
-      model is computed <b>from</b> them. Currently 1391 records.
+      model is computed <b>from</b> them. Currently 1615 records.
     </div>
   </div>
 </div>
@@ -160,7 +160,7 @@ no VPN. That is what makes the datings reproducible by someone outside the proje
       One row per findspot, everything already aggregated: the interval, both quality
       axes, σ, k and the model parameters. This is the model's <b>result</b>, computed in
       the database, and it is what <code>py/ips_model.py</code> is measured against.
-      Currently 40 rows and 41 columns.
+      Currently 45 rows and 41 columns.
     </div>
   </div>
 </div>
@@ -184,7 +184,7 @@ no VPN. That is what makes the datings reproducible by someone outside the proje
 <code>COLUMNS</code> list and a <code>DATA</code> list of positional rows — not a list
 of objects. Column names are upper case; everything else in the project uses lower case.</p>
 
-<pre>{ <span class="k">"records"</span>: 1391,
+<pre>{ <span class="k">"records"</span>: 1615,
   <span class="k">"success"</span>: true,
   <span class="k">"data"</span>: {
     <span class="k">"COLUMNS"</span>: [<span class="s">"THE_ID"</span>, <span class="s">"THE_SITE"</span>, <span class="s">"THE_FINDSPOT"</span>, …, <span class="s">"DATEMIN"</span>, <span class="s">"DATEMAX"</span>],
@@ -224,7 +224,7 @@ curl -s -o data/source/datedsitesstatistics.csv \
 
 paths, origin, notes = ips_rest.resolve(Path(<span class="s">"data/source"</span>))
 rows = ips_rest.load_datedsites_json(paths[<span class="s">"datedsites"</span>])
-print(origin, len(rows))        <span class="c"># -> live 1391</span></pre>
+print(origin, len(rows))        <span class="c"># -> live 1615</span></pre>
 
 <div class="note">
   <strong>Live first, archive as fallback.</strong> <code>resolve()</code> tries the
@@ -319,10 +319,13 @@ rows as the interactive plot, so a figure cannot disagree with the table beside 
        alt="Five panels, one per reference ensemble, each with a vertical terminus line">
   <figcaption>
     <strong>v3 · calibration.</strong> The five ceramic-independent reference ensembles —
-    Dangstetten, Oberaden, Velsen I, Pompeii, Inchtuthil — one panel each, with the
+    Dangstetten, Oberaden, Haltern, Pompeii, Inchtuthil — one panel each, with the
     independent terminus drawn as a vertical line across the modelled interval. This is
     the whole calibration argument for τ, made visible rather than asserted: the reader
-    can see for himself whether the line falls inside the box. Each panel carries its own
+    can see for himself whether the line falls inside the box. As of this snapshot four
+    of the five do; Haltern's does not, by 0.4 years, at every τ tested — see
+    <a href="variance_quality_from_sql.html#constants">§7a</a> for why, and for what is
+    still open about it. Each panel carries its own
     axis, because a shared one would compress Dangstetten's nine-year interval into
     something narrower than the line drawn for it.
     <span class="files">

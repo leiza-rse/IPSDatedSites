@@ -212,33 +212,35 @@ counts back in. One output row is one findspot.</p>
 <div class="unit">
   <div class="name">WHERE <em>— which stamps count</em></div>
   <div class="body">
-<pre><span class="k">WHERE</span> di.isdate = <span class="s">'Θ'</span>                 <span class="c">-- occurrence usable for dating</span>
-  <span class="k">AND</span> di.sitecharacter = <span class="s">'Σ'</span>         <span class="c">-- settlement-type site</span>
+<pre><span class="k">WHERE</span> di.datedcontext = <span class="s">'yes'</span>       <span class="c">-- occurrence usable for dating</span>
   <span class="k">AND</span> findspot <span class="k">IS NOT NULL</span>          <span class="c">-- context resolvable</span>
   <span class="k">AND</span> (p.datemin, p.datemax) <span class="k">NOT IN</span> (   <span class="c">-- eleven placeholder datings</span>
         (-30,150), (0,100), (0,120), (0,130), (0,150),
         (0,180), (0,270), (100,200), (150,270),
-        (160,260), (165,270) )
-  <span class="k">AND</span> ( di.site <span class="k">NOT ILIKE</span> <span class="s">'%Bregenz%'</span>
-        <span class="k">OR</span> btrim(di.findspot) <span class="k">IN</span> (<span class="s">'Böckleareal (period I)'</span>,
-                                  <span class="s">'Böckleareal (period II)'</span>,
-                                  <span class="s">'Böckleareal (destruction layer period II)'</span>,
-                                  <span class="s">'Samian Hoard 1913'</span>) )</pre>
+        (160,260), (165,270) )</pre>
     <div class="means">
-      Stamps pass only if the occurrence is flagged as datable, the site is of
-      settlement character and the context is named. The pair list excludes eleven
-      <b>placeholder datings</b> — spans such as 0–100 or 160–260 that stand for
-      "date not established" rather than for a production period. It matches complete
-      <code>(datemin, datemax)</code> pairs: until revision 30a the filter read
-      <code>p.datemax NOT IN (260,120,150)</code> and excluded on the end date alone.
-      The last clause admits the four checked contexts at Bregenz — the three
-      Böckleareal complexes and, since revision 31, the Samian Hoard of 1913 — and no
-      other record of that site. Θ, Σ and the umlaut are <code>U&amp;</code>-escapes in
-      the statement itself; they are spelled out here for legibility.
+      Stamps pass only if the occurrence is flagged as datable and the context is
+      named. Until early September 2026 the first line read
+      <code>di.isdate = 'Θ' AND di.sitecharacter = 'Σ'</code> — two editorial markers
+      checked together — replaced by the single <code>datedcontext = 'yes'</code> flag
+      once it was noticed that <code>sitecharacter = 'Σ'</code> presupposes something
+      depot-like and had therefore been excluding Haltern, a military settlement with
+      no depot character but a large, independently dated assemblage. The pair list
+      excludes eleven <b>placeholder datings</b> — spans such as 0–100 or 160–260 that
+      stand for "date not established" rather than for a production period. It matches
+      complete <code>(datemin, datemax)</code> pairs: until revision 30a the filter
+      read <code>p.datemax NOT IN (260,120,150)</code> and excluded on the end date
+      alone.
       <b>Note:</b> the left join to <code>tblpotter</code> still behaves as an inner
       join, but now by <code>NULL</code> propagation: where the join fails, both dates
       are <code>NULL</code>, the row comparison against the pair list evaluates to
       <code>NULL</code> rather than to true, and the stamp is dropped.
+      <b>Also removed, 2026-09-08:</b> a clause admitting only four named Bregenz
+      contexts, carried between 25 August and 8 September while
+      <code>datedcontext</code> alone could not yet be trusted for that site. It
+      matched exactly what <code>datedcontext = 'yes'</code> already carried by the
+      time it was retired, so dropping it changed no row — only the SQL's honesty about
+      why those rows are there.
     </div>
   </div>
 </div>
