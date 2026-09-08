@@ -50,6 +50,7 @@ sql/generated/
 # rebuild without a content change leaves git status clean.
 
 README-PATCH.md
+PATCH-README.md
 
 # --- The build report ---
 # docs/run-report.* is a record of ONE run on ONE machine, not a derived

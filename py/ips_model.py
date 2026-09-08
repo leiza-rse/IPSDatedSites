@@ -163,6 +163,33 @@ def load_stamps(path: Path) -> list[dict]:
 # --------------------------------------------------------------------------
 # The model
 # --------------------------------------------------------------------------
+def _stamp_weight(s: dict) -> int:
+    """How many physical stamps this row stands for.
+
+    v_ips_dated_stamps is already collapsed one row per (site, findspot,
+    pottername, die, datemin, datemax): stamp_number is COUNT(di.number)
+    for that group, i.e. how many physical finds share the same die. A
+    die repeated 28 times at Haltern is one row here with stamp_number=28,
+    not 28 rows. Anything that sums or averages over "the stamps of this
+    findspot" has to weight by this, or it is silently working over
+    distinct dies instead of physical stamps — which is what the database
+    does in every AVG/VAR_SAMP, because it aggregates tbldistribution
+    directly and never collapses by die.
+    """
+    w = s["stamp_number"]
+    return int(w) if w is not None else 1
+
+
+def _expand(stamps: list[dict]) -> list[dict]:
+    """Repeat each row by its stamp_number, so a plain unweighted mean or
+    variance over the result matches AVG()/VAR_SAMP() over physical stamps.
+    """
+    out = []
+    for s in stamps:
+        out.extend([s] * _stamp_weight(s))
+    return out
+
+
 def die_counts(stamps: list[dict]):
     """The die statistics. Descriptive only — since revision 30a these do
     NOT enter the geometry.
@@ -171,6 +198,12 @@ def die_counts(stamps: list[dict]):
     A POTTER, so the same die code under two potters counts twice. Counting
     globally distinct dies gives 47 instead of 131 at London / New Fresh
     Wharf, which is how this was found.
+
+    A second detail, found later the same way: stamps_with_die has to sum
+    stamp_number, not count rows — one row can BE several physical stamps
+    sharing a die (28 at Haltern for die 1098.8). Counting rows here is
+    the same bug as in count_stamps below, just easier to miss because
+    die_repetition still came out looking like a plausible number.
     """
     per_potter: dict[str, set] = {}
     stamps_with_die = 0
@@ -178,7 +211,7 @@ def die_counts(stamps: list[dict]):
         if s["die"] is None:
             continue
         per_potter.setdefault(s["pottername"], set()).add(s["die"])
-        stamps_with_die += 1
+        stamps_with_die += _stamp_weight(s)
 
     if not per_potter:
         # No die attribution anywhere at this findspot. Reported, because it
@@ -208,15 +241,29 @@ def k_factor(n_stamps: int, p: dict) -> float:
 
 
 def dating(stamps: list[dict], p: dict) -> dict:
-    """One findspot, from its stamps."""
-    dmin = [s["datemin"] for s in stamps]
-    dmax = [s["datemax"] for s in stamps]
+    """One findspot, from its stamps.
+
+    ``stamps`` is one row per distinct (pottername, die, datemin, datemax)
+    at this findspot — v_ips_dated_stamps has already collapsed repeats of
+    the same die into one row with stamp_number = how many there were. The
+    database never does that collapse: every AVG()/VAR_SAMP() in the SQL
+    runs over tbldistribution directly, one row per physical stamp. So the
+    geometry here has to run over the REPETITION-WEIGHTED rows (``weighted``
+    below), not over ``stamps`` itself — using ``stamps`` unweighted quietly
+    computes "the mean die", not "the mean stamp", and is invisible until a
+    findspot has an unevenly repeated die (Haltern: one die repeated 28
+    times moves avg_datemin by half a year and avg_datemax by more than
+    three).
+    """
+    weighted = _expand(stamps)
+    dmin = [s["datemin"] for s in weighted]
+    dmax = [s["datemax"] for s in weighted]
 
     avg_min, avg_max = frac(dmin), frac(dmax)
     n_dies, n_stamps_die, no_dierecord = die_counts(stamps)
 
     # COUNT(di.number): the stamps of this findspot, which is what k reads.
-    count_stamps = sum(1 for s in stamps if s["stamp_number"] is not None)
+    count_stamps = len(weighted)
     k_used = k_factor(count_stamps, p)
 
     # sigma: the inner fuzziness of each potter's own range, plus the
